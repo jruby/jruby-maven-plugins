@@ -5,11 +5,11 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
   </parent>
-  <groupId>de.saumya.mojo</groupId>
+  <groupId>${project.parent.groupId}</groupId>
   <artifactId>jruby-maven-plugin</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>${project.parent.version}</version>
   <packaging>maven-plugin</packaging>
   <name>JRuby Maven Mojo</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
