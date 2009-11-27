@@ -16,7 +16,7 @@ public class RakeMojo extends AbstractJRubyMojo {
     /**
      * rakefile to be used for the rake command.
      * 
-     * @parameter default-value="${jruby.rakefile}"
+     * @parameter default-value="${jruby.rake.file}"
      */
     private final File   rakefile        = null;
 
@@ -48,7 +48,7 @@ public class RakeMojo extends AbstractJRubyMojo {
         this.outputDirectory.mkdirs();
         ensureGem("rake");
 
-        final StringBuilder args = new StringBuilder("-S rake");
+        final StringBuilder args = new StringBuilder("-S rake ");
         if (this.script != null) {
             final File scriptFile = new File(this.outputDirectory,
                     "rake_script.rb");
@@ -60,10 +60,10 @@ public class RakeMojo extends AbstractJRubyMojo {
             catch (final IOException io) {
                 throw new MojoExecutionException("error writing temporary script");
             }
-            args.append("-f").append(scriptFile.getAbsolutePath());
+            args.append("-f ").append(scriptFile.getAbsolutePath());
         }
         else if (this.rakefile != null) {
-            args.append("-f").append(this.rakefile);
+            args.append("-f ").append(this.rakefile);
         }
         if (this.args != null) {
             args.append(" ").append(this.args);

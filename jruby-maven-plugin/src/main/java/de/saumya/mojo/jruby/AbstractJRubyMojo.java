@@ -80,7 +80,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readOnly true
      */
-    private MavenProject               mavenProject;
+    protected MavenProject             mavenProject;
 
     /**
      * The project's artifacts.
@@ -139,7 +139,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     /**
      * directory to leave some flags for already installed gems.
      * 
-     * @parameter default-value="${project.build.directory}/gems"
+     * @parameter expression="${jruby.gem.flags}"
+     *            default-value="${project.build.directory}/gems"
      */
     private File                       gemFlagsDirectory;
 
@@ -156,7 +157,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * classrealm for internal use.
      * 
      * @parameter expression="${dummyExpression}"
-     * @required
      * @readonly
      */
     private ClassRealm                 classRealm;
@@ -246,7 +246,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     public void execute(final String args) throws MojoExecutionException {
-        execute(args.split("\\s+"), this.artifacts);
+        execute(args.trim().split("\\s+"), this.artifacts);
     }
 
     public void execute(final String[] args) throws MojoExecutionException {

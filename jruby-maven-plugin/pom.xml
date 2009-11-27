@@ -7,9 +7,9 @@
     <groupId>de.saumya.mojo</groupId>
     <version>0.2.0-SNAPSHOT</version>
   </parent>
-  <groupId>${project.parent.groupId}</groupId>
+  <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-maven-plugin</artifactId>
-  <version>${project.parent.version}</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
   <name>JRuby Maven Mojo</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
@@ -18,7 +18,8 @@
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
         <configuration>
-          <goalPrefix>jruby</goalPrefix>
+	  <encoding>UTF-8</encoding>
+          <goalPrefix>ruby</goalPrefix>
         </configuration>
       </plugin>
       <plugin>
@@ -32,6 +33,33 @@
 	    </goals>
 	  </execution>
 	</executions>
+      </plugin> 
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>shitty-maven-plugin</artifactId>
+	<version>1.0-alpha-4-SNAPSHOT</version>
+        <executions>
+	  <execution>
+	    <id>it-clean</id>
+	    <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+	    </goals>
+	  </execution>
+          <execution>
+            <goals>
+              <goal>clean</goal>
+              <goal>install</goal>
+              <goal>test</goal>
+            </goals>    
+            <configuration>
+	      <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
+	      <version>0.2.0-SNAPSHOT</version>
+              <parallel>true</parallel>
+              <threadCount>2</threadCount>
+	    </configuration>
+          </execution>
+        </executions>	
       </plugin>
     </plugins>
   </build>

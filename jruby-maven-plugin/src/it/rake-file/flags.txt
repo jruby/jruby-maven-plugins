@@ -1,0 +1,2 @@
+-Djruby.rake.args=-T 
+-Djruby.rake.file=file

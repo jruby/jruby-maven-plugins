@@ -1,0 +1,1 @@
+-Djruby.script=puts('hello_world')

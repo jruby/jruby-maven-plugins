@@ -27,14 +27,15 @@ public class JRubyMojo extends AbstractJRubyMojo {
     @Override
     public void execute() throws MojoExecutionException {
         final StringBuilder args = new StringBuilder();
-        if (this.script != null) {
+        if (this.script != null && this.script.length() > 0) {
             args.append("-e ").append(this.script);
         }
         if (this.args != null) {
             args.append(" ").append(this.args);
         }
         if (args.length() > 0) {
-            execute(this.args.toString());
+            System.out.println("asd: " + args);
+            execute(args.toString());
         }
         else {
             getLog().warn("no arguments given. use -Djruby.args=... or -Djruby.script=...");

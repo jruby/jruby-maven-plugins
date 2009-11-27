@@ -1,0 +1,1 @@
+-Djruby.spec.file=spec/success_spec.rb
