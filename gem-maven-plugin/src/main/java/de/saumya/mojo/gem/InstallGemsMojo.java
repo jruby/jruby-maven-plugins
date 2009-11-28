@@ -7,7 +7,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 /**
  * goal to run gem install
  * 
- * @goal install
+ * @goal install-gems
  */
 public class InstallGemsMojo extends AbstractJRubyMojo {
     /**

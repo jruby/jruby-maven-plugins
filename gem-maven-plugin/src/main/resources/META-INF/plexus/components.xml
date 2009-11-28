@@ -1,0 +1,23 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+      <role-hint>gem</role-hint>
+      <implementation>
+        org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping
+      </implementation>
+      <configuration>
+        <phases>
+          <process-resources>
+            org.apache.maven.plugins:maven-resources-plugin:resources
+          </process-resources>
+          <compile>
+            org.apache.maven.plugins:maven-compiler-plugin:compile
+          </compile>
+          <package>org.apache.maven.plugins:maven-jar-plugin:jar,de.saumya.mojo:gem-maven-plugin:build</package>
+	  <install>de.saumya.mojo:gem-maven-plugin:install</install>
+        </phases>
+      </configuration>
+    </component>
+  </components>
+</component-set>

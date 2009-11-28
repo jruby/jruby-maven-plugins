@@ -8,7 +8,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * Goal to run rspecs.
  * 
  * @goal spec
- * @phase integration-test
+ * @phase test
  * @requiresDependencyResolution test
  */
 public class SpecMojo extends AbstractJRubyMojo {

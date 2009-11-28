@@ -107,7 +107,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    private ArtifactResolver           resolver;
+    protected ArtifactResolver         resolver;
 
     /**
      * local repository for internal use.
@@ -151,7 +151,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    private File                       outputDirectory;
+    protected File                     outputDirectory;
 
     /**
      * classrealm for internal use.

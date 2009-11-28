@@ -5,11 +5,11 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.3.0</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-maven-plugin</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.3.0</version>
   <packaging>maven-plugin</packaging>
   <name>JRuby Maven Mojo</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
@@ -54,7 +54,7 @@
             </goals>    
             <configuration>
 	      <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
-	      <version>0.3.0-SNAPSHOT</version>
+	      <version>0.3.0</version>
               <parallel>true</parallel>
               <threadCount>2</threadCount>
 	    </configuration>
