@@ -132,9 +132,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * this version is used to resolve the jruby-complete dependency from the
      * local/remote maven repository. defaults to "1.4.0".
      * 
-     * @parameter defajult-value="${jruby.version}"
+     * @parameter default-value="${jruby.version}"
      */
-    private String                     jrubyVersion;
+    protected String                   jrubyVersion;
 
     /**
      * directory to leave some flags for already installed gems.
