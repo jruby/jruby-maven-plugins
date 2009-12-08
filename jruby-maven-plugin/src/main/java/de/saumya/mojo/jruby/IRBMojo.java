@@ -14,7 +14,7 @@ public class IRBMojo extends AbstractJRubyMojo {
      * @parameter expression="false"
      * @readonly
      */
-    protected boolean shouldFork;
+    protected boolean fork;
 
     /**
      * arguments for the irb command.
@@ -25,7 +25,7 @@ public class IRBMojo extends AbstractJRubyMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        super.shouldFork = this.shouldFork;
+        super.fork = this.fork;
         final StringBuilder args = new StringBuilder("-S irb");
         if (this.args != null) {
             args.append(" ").append(this.args);

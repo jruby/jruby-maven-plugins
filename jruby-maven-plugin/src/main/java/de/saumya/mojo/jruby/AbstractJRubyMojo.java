@@ -36,7 +36,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * 
      * @parameter expression="${jruby.fork}" default-value="true"
      */
-    protected boolean                  shouldFork;
+    protected boolean                  fork;
 
     /**
      * the launch directory for the JRuby execution.
@@ -57,14 +57,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * 
      * @parameter default-value="${jruby.gem.home}"
      */
-    protected File                     jrubyGemHome;
+    protected File                     gemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby.
      * 
      * @parameter default-value="${jruby.gem.path}"
      */
-    protected File                     jrubyGemPath;
+    protected File                     gemPath;
 
     /**
      * The amount of memory to use when forking JRuby.
@@ -256,15 +256,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private void execute(final String[] args, final Set<Artifact> artifacts)
             throws MojoExecutionException {
         try {
-            getLog().info("jruby fork      : " + this.shouldFork);
+            getLog().info("jruby fork      : " + this.fork);
             getLog().info("launch directory: " + launchDirectory());
-            final Launcher launcher = (this.shouldFork
-                    ? new AntLauncher(getLog(),
-                            this.jrubyHome,
-                            this.jrubyGemHome,
-                            this.jrubyGemPath,
-                            this.jrubyLaunchMemory)
-                    : new EmbeddedLauncher(getLog(), this.classRealm));
+            final Launcher launcher = (this.fork ? new AntLauncher(getLog(),
+                    this.jrubyHome,
+                    this.gemHome,
+                    this.gemPath,
+                    this.jrubyLaunchMemory) : new EmbeddedLauncher(getLog(),
+                    this.classRealm));
             launcher.execute(launchDirectory(),
                              args,
                              artifacts,
