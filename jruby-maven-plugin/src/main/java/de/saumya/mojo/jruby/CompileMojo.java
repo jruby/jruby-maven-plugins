@@ -8,17 +8,21 @@ import org.apache.maven.plugin.MojoExecutionException;
  * executes the compiles ruby classes to java bytecode (jrubyc).
  * 
  * @goal compile
+ * @phase compile
  * @requiresDependencyResolution compile
  */
 public class CompileMojo extends AbstractJRubyMojo {
 
     /**
+     * directory where to find the ruby files
      * 
      * @parameter default-value="src/main/ruby"
      */
     protected File rubyDirectory;
 
     /**
+     * where the compiled class files are written. default is the same as for
+     * java classes.
      * 
      * @parameter default-value="${project.build.outputDirectory}"
      */
