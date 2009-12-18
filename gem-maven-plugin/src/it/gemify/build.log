@@ -1,0 +1,87 @@
+OUT: -------------------------------------------------------------------------------
+OUT: TEST BUILD: /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/pom.xml
+OUT: Goals: package de.saumya.mojo:gem-maven-plugin:gemify
+OUT: -------------------------------------------------------------------------------
+OUT: [INFO] Error stacktraces are turned on.
+OUT: [INFO] Scanning for projects...
+OUT: [INFO]                                                                         
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] Building gemify 1.0-SNAPSHOT
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] 
+OUT: [INFO] --- maven-resources-plugin:2.4.1:resources (default-resources) @ gemify ---
+OUT: [WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+OUT: [INFO] skip non existing resourceDirectory /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/src/main/resources
+OUT: [INFO] 
+OUT: [INFO] --- maven-compiler-plugin:2.0.2:compile (default-compile) @ gemify ---
+OUT: [INFO] Compiling 1 source file to /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/classes
+OUT: [INFO] 
+OUT: [INFO] --- maven-resources-plugin:2.4.1:testResources (default-testResources) @ gemify ---
+OUT: [WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+OUT: [INFO] skip non existing resourceDirectory /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/src/test/resources
+OUT: [INFO] 
+OUT: [INFO] --- maven-compiler-plugin:2.0.2:testCompile (default-testCompile) @ gemify ---
+OUT: [INFO] Compiling 1 source file to /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/test-classes
+OUT: [INFO] 
+OUT: [INFO] --- maven-surefire-plugin:2.4.3:test (default-test) @ gemify ---
+OUT: [INFO] Surefire report directory: /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/surefire-reports
+OUT: -------------------------------------------------------
+OUT:  T E S T S
+OUT: -------------------------------------------------------
+OUT: Running com.example.AppTest
+OUT: Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.067 sec
+OUT: Results :
+OUT: Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+OUT: [INFO] 
+OUT: [INFO] --- maven-jar-plugin:2.2:jar (default-jar) @ gemify ---
+OUT: [INFO] Building jar: /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/gemify-1.0-SNAPSHOT.jar
+OUT: [INFO] 
+OUT: [INFO] --- gem-maven-plugin:0.6.0-SNAPSHOT:gemify (default-cli) @ gemify ---
+OUT: [INFO] build gem for /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/gemify-1.0-SNAPSHOT.jar
+OUT: [INFO] jruby fork      : true
+OUT: [INFO] launch directory: /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/gemify/com.example.gemify
+OUT: [INFO] jruby version   : 1.4.0
+OUT: [INFO] java classpath  : /home/kristian/.m2/repository/org/jruby/jruby-complete/1.4.0/jruby-complete-1.4.0.jar:/home/kristian/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar:/home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/classes
+OUT: [WARNING] JRuby limited openssl loaded. gem install jruby-openssl for full support.
+OUT: [WARNING] http://jruby.kenai.com/pages/JRuby_Builtin_OpenSSL
+OUT: [WARNING] WARNING:  no author specified
+OUT: [WARNING] WARNING:  no description specified
+OUT: [WARNING] WARNING:  no email specified
+OUT: [WARNING] WARNING:  no rubyforge_project specified
+OUT: [INFO]   Successfully built RubyGem
+OUT: [INFO]   Name: com.example.gemify
+OUT: [INFO]   Version: 1.0
+OUT: [INFO]   File: com.example.gemify-1.0-java.gem
+OUT: [INFO] build gem for /home/kristian/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar
+OUT: [INFO] jruby fork      : true
+OUT: [INFO] launch directory: /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/gemify/junit.junit
+OUT: [INFO] jruby version   : 1.4.0
+OUT: [INFO] java classpath  : /home/kristian/.m2/repository/org/jruby/jruby-complete/1.4.0/jruby-complete-1.4.0.jar:/home/kristian/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar:/home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/classes
+OUT: [WARNING] JRuby limited openssl loaded. gem install jruby-openssl for full support.
+OUT: [WARNING] http://jruby.kenai.com/pages/JRuby_Builtin_OpenSSL
+OUT: [WARNING] WARNING:  no author specified
+OUT: [WARNING] WARNING:  no email specified
+OUT: [WARNING] WARNING:  no rubyforge_project specified
+OUT: [INFO]   Successfully built RubyGem
+OUT: [INFO]   Name: junit.junit
+OUT: [INFO]   Version: 3.8.1
+OUT: [INFO]   File: junit.junit-3.8.1-java.gem
+OUT: [INFO] jruby fork      : true
+OUT: [INFO] launch directory: /home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify
+OUT: [INFO] jruby version   : 1.4.0
+OUT: [INFO] java classpath  : /home/kristian/.m2/repository/org/jruby/jruby-complete/1.4.0/jruby-complete-1.4.0.jar:/home/kristian/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar:/home/kristian/projects/jruby-maven-plugins/gem-maven-plugin/src/it/gemify/target/classes
+OUT: [WARNING] JRuby limited openssl loaded. gem install jruby-openssl for full support.
+OUT: [WARNING] http://jruby.kenai.com/pages/JRuby_Builtin_OpenSSL
+OUT: [INFO] Successfully installed com.example.gemify-1.0-java
+OUT: [INFO] Successfully installed junit.junit-3.8.1-java
+OUT: [INFO] 2 gems installed
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] BUILD SUCCESS
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] Total time: 39.686s
+OUT: [INFO] Finished at: Sat Dec 19 03:19:23 IST 2009
+OUT: [INFO] Final Memory: 10M/121M
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: -------------------------------------------------------------------------------
+OUT: SUCCESS
+OUT: -------------------------------------------------------------------------------

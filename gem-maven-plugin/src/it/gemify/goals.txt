@@ -1,0 +1,1 @@
+package de.saumya.mojo:gem-maven-plugin:gemify

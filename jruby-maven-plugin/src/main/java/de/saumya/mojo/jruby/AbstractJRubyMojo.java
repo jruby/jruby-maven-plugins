@@ -89,7 +89,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    private Set<Artifact>              artifacts;
+    protected Set<Artifact>            artifacts;
 
     /**
      * artifact factory for internal use.
@@ -116,7 +116,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    private ArtifactRepository         localRepository;
+    protected ArtifactRepository       localRepository;
 
     /**
      * list of remote repositories for internal use.
@@ -125,7 +125,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    private List<Repository>           remoteRepositories;
+    protected List<Repository>         remoteRepositories;
 
     /**
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
