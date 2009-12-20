@@ -3,67 +3,161 @@ package de.saumya.mojo.gem;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.StringUtils;
+
+import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
 /**
  * goal to convert that artifact into a gem.
  * 
  * @goal gemify
- * @phase package
  */
-public class GemifyMojo extends BuildMojo {
-    // /**
-    // * arguments for the gem command of JRuby.
-    // *
-    // * @parameter default-value="${jruby.gem.args}"
-    // */
-    // protected String args = null;
+public class GemifyMojo extends AbstractJRubyMojo {
+
+    /**
+     * @parameter default-value="${artifactId}"
+     */
+    String                            artifactId;
+
+    /**
+     * @parameter default-value="${groupId}"
+     */
+    String                            groupId;
+
+    /**
+     * @parameter default-value="${version}"
+     */
+    String                            version;
 
     /**
      * @parameter default-value="${project.build.directory}/gemify"
      */
-    File                gemify;
+    File                              gemify;
 
     /**
      * @parameter default-value="${project.build.directory}"
      */
-    File                buildDirectory;
+    File                              buildDirectory;
 
     /**
      * @component
      */
-    MavenProjectBuilder builder;
+    MavenProjectBuilder               builder;
 
-    private File        launchDir;
+    /**
+     * @component
+     */
+    ArtifactMetadataSource            metadata;
 
+    /**
+     * @parameter default-value="${skipGemInstall}"
+     */
+    public boolean                    skipGemInstall = false;
+
+    private File                      launchDir;
+
+    private final Map<String, String> relocationMap  = new HashMap<String, String>();
+
+    @SuppressWarnings("unchecked")
     @Override
     public void execute() throws MojoExecutionException {
-        final StringBuilder gems = new StringBuilder();
+        if (this.artifactId != null || this.groupId != null
+                || this.version != null) {
+            if (this.artifactId != null && this.groupId != null
+                    && this.version != null) {
+                final Artifact artifact = this.artifactFactory.createArtifactWithClassifier(this.groupId,
+                                                                                            this.artifactId,
+                                                                                            this.version,
+                                                                                            "jar",
+                                                                                            null);
+                try {
+                    this.resolver.resolve(artifact,
+                                          this.remoteRepositories,
+                                          this.localRepository);
+                }
+                catch (final ArtifactResolutionException e) {
+                    throw new MojoExecutionException("can not resolve "
+                            + artifact.toString());
+                }
+                catch (final ArtifactNotFoundException e) {
+                    throw new MojoExecutionException("can not resolve "
+                            + artifact.toString());
+                }
+                try {
+                    final MavenProject project = projectFromArtifact(artifact);
+                    project.setArtifact(artifact);
+                    final Set artifacts = project.createArtifacts(this.artifactFactory,
+                                                                  null,
+                                                                  null);
+                    final ArtifactResolutionResult arr = this.resolver.resolveTransitively(artifacts,
+                                                                                           artifact,
+                                                                                           this.remoteRepositories,
+                                                                                           this.localRepository,
+                                                                                           this.metadata);
+                    gemify(project, arr.getArtifacts());
+                }
+                catch (final ProjectBuildingException e) {
+                    throw new MojoExecutionException("error building project object model",
+                            e);
+                }
+                catch (final InvalidDependencyVersionException e) {
+                    throw new MojoExecutionException("can not resolve "
+                            + artifact.toString(), e);
+                }
+                catch (final ArtifactResolutionException e) {
+                    throw new MojoExecutionException("can not resolve "
+                            + artifact.toString(), e);
+                }
+                catch (final ArtifactNotFoundException e) {
+                    throw new MojoExecutionException("can not resolve "
+                            + artifact.toString(), e);
+                }
+            }
+            else {
+                throw new MojoExecutionException("not all three artifactId, groupId and version are given");
+            }
+        }
+        else {
+            gemify(this.mavenProject, this.artifacts);
+        }
+    }
+
+    private void gemify(MavenProject project, final Set<Artifact> artifacts)
+            throws MojoExecutionException {
+        final Map<String, MavenProject> gems = new HashMap<String, MavenProject>();
         try {
-            final String gem = build(this.mavenProject,
-                                     this.mavenProject.getArtifact().getFile());
-            gems.append(gem).append(' ');
+            final String gem = build(project, project.getArtifact().getFile());
+            gems.put(gem, project);
         }
         catch (final IOException e) {
             throw new MojoExecutionException("error gemifing pom", e);
         }
-        for (final Artifact artifact : this.artifacts) {
+        for (final Artifact artifact : artifacts) {
             // only jar-files get gemified !!!
             if ("jar".equals(artifact.getType()) && !artifact.hasClassifier()) {
                 try {
-                    final MavenProject project = this.builder.buildFromRepository(artifact,
-                                                                                  this.remoteRepositories,
-                                                                                  this.localRepository);
+                    project = projectFromArtifact(artifact);
                     final String gem = build(project, artifact.getFile());
-                    gems.append(gem).append(" ");
+                    gems.put(gem, project);
                 }
                 catch (final ProjectBuildingException e) {
                     getLog().error("skipping: " + artifact.getFile().getName(),
@@ -76,50 +170,209 @@ public class GemifyMojo extends BuildMojo {
             }
         }
         this.launchDir = this.launchDirectory;
-        execute("-S gem install -l " + gems);
+        if (this.skipGemInstall) {
+            getLog().info("skip installing gems");
+        }
+        else {
+            execute("-S gem install -l " + orderInResolvedManner(gems));
+        }
+    }
+
+    private MavenProject projectFromArtifact(final Artifact artifact)
+            throws ProjectBuildingException {
+
+        final MavenProject project = this.builder.buildFromRepository(artifact,
+                                                                      this.remoteRepositories,
+                                                                      this.localRepository);
+        // System.out.println("\n\n ------------> " + artifact + "\n\n");
+        if (project.getDistributionManagement() != null
+                && project.getDistributionManagement().getRelocation() != null) {
+            final Relocation reloc = project.getDistributionManagement()
+                    .getRelocation();
+            final String key = artifact.getGroupId() + ":"
+                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
+                    + artifact.getVersion();
+            artifact.setArtifactId(reloc.getArtifactId());
+            artifact.setGroupId(reloc.getGroupId());
+            if (reloc.getVersion() != null) {
+                artifact.setVersion(reloc.getVersion());
+            }
+            this.relocationMap.put(key, artifact.getGroupId() + ":"
+                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
+                    + artifact.getVersion());
+            return projectFromArtifact(artifact);
+        }
+        else {
+            return project;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private String orderInResolvedManner(final Map<String, MavenProject> gems)
+            throws MojoExecutionException {
+        final List<String> result = new ArrayList<String>();
+        final Set<String> resolved = new HashSet<String>();
+        int done = -1;
+        while (result.size() != gems.size() && done != result.size()) {
+            done = result.size();
+            // System.out.println("\n" + result.size() + " ++++++ " +
+            // gems.size()
+            // + " results " + result + " ++++resolved " + resolved
+            // + "\n ++++gems " + gems.keySet() + "\n"
+            // + this.relocationMap);
+            for (final Map.Entry<String, MavenProject> gem : gems.entrySet()) {
+                // System.out.println("\n\tgem "
+                // + gem
+                // + " "
+                // + resolved.contains(gem.getValue()
+                // .getArtifact()
+                // .toString()));
+                if (!resolved.contains(gem.getValue().getArtifact().toString())) {
+                    if (gem.getValue().getDependencies().isEmpty()) {
+                        // System.out.println("\tresolved " + gem.getKey());
+                        result.add(gem.getKey());
+                        addResolved(resolved, gem.getValue());
+                    }
+                    else {
+                        // System.out.println("\ttry "
+                        // + gem.getValue().getArtifact()
+                        // + gem.getValue().getDependencies());
+                        boolean isResolved = true;
+                        for (final Dependency dependency : (List<Dependency>) gem.getValue()
+                                .getDependencies()) {
+                            if (!dependency.isOptional()
+                                    && (Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
+                                final String id = dependency.getGroupId() + ":"
+                                        + dependency.getArtifactId() + ":"
+                                        + dependency.getType() + ":"
+                                        + dependency.getVersion();
+                                // System.out.println(id);
+                                if (!resolved.contains(id)) {
+
+                                    final Artifact artifact = this.artifactFactory.createArtifactWithClassifier(dependency.getGroupId(),
+                                                                                                                dependency.getArtifactId(),
+                                                                                                                dependency.getVersion(),
+                                                                                                                dependency.getType(),
+                                                                                                                dependency.getClassifier());
+                                    try {
+                                        this.resolver.resolve(artifact,
+                                                              this.remoteRepositories,
+                                                              this.localRepository);
+                                    }
+                                    catch (final ArtifactResolutionException e) {
+                                        throw new MojoExecutionException("can not resolve "
+                                                + artifact.toString());
+                                    }
+                                    catch (final ArtifactNotFoundException e) {
+                                        throw new MojoExecutionException("can not resolve "
+                                                + artifact.toString());
+                                    }
+                                    try {
+                                        projectFromArtifact(artifact);
+                                    }
+                                    catch (final ProjectBuildingException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                    }
+                                    // System.out.println(this.relocationMap);
+                                    isResolved = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (isResolved) {
+                            // System.out.println("\tresolved (with deps) "
+                            // + gem.getKey());
+                            result.add(gem.getKey());
+                            addResolved(resolved, gem.getValue());
+                        }
+                    }
+                }
+            }
+        }
+        // System.out.println("----" + result);
+        final StringBuilder str = new StringBuilder();
+        boolean first = true;
+        for (final String gem : result) {
+            if (first) {
+                first = false;
+                str.append(gem);
+            }
+            else {
+                str.append(' ').append(gem);
+            }
+        }
+        return str.toString();
+    }
+
+    private void addResolved(final Set<String> resolved,
+            final MavenProject project) {
+        resolved.add(project.getArtifact().toString());
+        if (project.getDistributionManagement() != null
+                && project.getDistributionManagement().getRelocation() != null) {
+            final Relocation dependency = project.getDistributionManagement()
+                    .getRelocation();
+            resolved.add(dependency.getGroupId() + ":"
+                    + dependency.getArtifactId() + ":"
+                    + project.getArtifact().getType() + ":"
+                    + dependency.getVersion());
+        }
     }
 
     @SuppressWarnings("unchecked")
     private String build(final MavenProject project, final File jarfile)
             throws MojoExecutionException, IOException {
 
-        getLog().info("build gem for " + jarfile);
-        // final Map<String, String> dependencies = new HashMap<String,
-        // String>();
-        // final Map<String, String> developmentDependencies = new
-        // HashMap<String, String>();
-        // depsFromArtifacts(dependencies, Artifact.SCOPE_COMPILE
-        // + Artifact.SCOPE_RUNTIME);
-        // depsFromArtifacts(developmentDependencies, Artifact.SCOPE_PROVIDED
-        // + Artifact.SCOPE_TEST);
-
+        getLog().info("building gem for " + jarfile + " . . .");
         final String gemName = project.getGroupId() + "."
                 + project.getArtifactId();
         final File gemDir = new File(this.gemify, gemName);
-        final File lib = new File(gemDir, "lib");
-        lib.mkdirs();
         final File gemSpec = new File(gemDir, gemName + ".gemspec");
         final GemspecWriter gemSpecWriter = new GemspecWriter(gemSpec,
                 project,
                 false);
 
         gemSpecWriter.appendJarfile(jarfile, jarfile.getName());
-        gemSpecWriter.appendPath(lib.getName());
+        final File lib = new File(gemDir, "lib");
+        lib.mkdirs();
+        // need relative filename here
+        final File rubyFile = new File(lib.getName(), project.getArtifactId()
+                + ".rb");
+        gemSpecWriter.appendFile(rubyFile);
 
-        // for (final Artifact artifact : (Set<Artifact>)
-        // project.getDependencyArtifacts()) {
-        for (final Dependency artifact : (List<Dependency>) project.getDependencies()) {
-            if ("jar".equals(artifact.getType())
-                    && artifact.getClassifier() == null) {
-                if ((Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(artifact.getScope())) {
-                    gemSpecWriter.appendDependency(artifact.getGroupId() + "."
-                            + artifact.getArtifactId(), artifact.getVersion());
+        for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
+            if (!dependency.isOptional() && "jar".equals(dependency.getType())
+                    && dependency.getClassifier() == null) {
+                // it will adjust the artifact as well (in case of relocation)
+                Artifact arti = null;
+                try {
+                    arti = this.artifactFactory.createArtifactWithClassifier(dependency.getGroupId(),
+                                                                             dependency.getArtifactId(),
+                                                                             dependency.getVersion(),
+                                                                             dependency.getScope(),
+                                                                             dependency.getClassifier());
+                    projectFromArtifact(arti);
+                    dependency.setGroupId(arti.getGroupId());
+                    dependency.setArtifactId(arti.getArtifactId());
+                    dependency.setVersion(arti.getVersion());
                 }
-                else if ((Artifact.SCOPE_PROVIDED + Artifact.SCOPE_TEST).contains(artifact.getScope())) {
-                    gemSpecWriter.appendDevelopmentDependency(artifact.getGroupId()
+                catch (final ProjectBuildingException e) {
+                    throw new MojoExecutionException("error building project for "
+                            + arti,
+                            e);
+                }
+
+                if ((Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
+                    gemSpecWriter.appendDependency(dependency.getGroupId()
+                                                           + "."
+                                                           + dependency.getArtifactId(),
+                                                   dependency.getVersion());
+                }
+                else if ((Artifact.SCOPE_PROVIDED + Artifact.SCOPE_TEST).contains(dependency.getScope())) {
+                    gemSpecWriter.appendDevelopmentDependency(dependency.getGroupId()
                                                                       + "."
-                                                                      + artifact.getArtifactId(),
-                                                              artifact.getVersion());
+                                                                      + dependency.getArtifactId(),
+                                                              dependency.getVersion());
                 }
                 else {
                     // TODO put things into "requirements"
@@ -133,8 +386,8 @@ public class GemifyMojo extends BuildMojo {
 
         FileWriter writer = null;
         try {
-            writer = new FileWriter(new File(lib, project.getArtifactId()
-                    + ".rb"));
+            // need absolute filename here
+            writer = new FileWriter(new File(lib, rubyFile.getName()));
 
             writer.append("module ")
                     .append(titleizedClassname(project.getArtifactId()))
