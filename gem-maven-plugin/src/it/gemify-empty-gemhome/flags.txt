@@ -1,0 +1,5 @@
+-DartifactId=avalon-framework-impl
+-DgroupId=avalon-framework
+-Dversion=4.3
+-Djruby.gem.home=target
+-Djruby.gem.path=target

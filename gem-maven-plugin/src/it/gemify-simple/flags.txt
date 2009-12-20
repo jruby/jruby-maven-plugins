@@ -1,0 +1,3 @@
+-DartifactId=guice
+-DgroupId=com.google.code.guice
+-Dversion=1.0
