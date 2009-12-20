@@ -13,7 +13,9 @@ import org.codehaus.plexus.util.FileUtils;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
 /**
- * goal to run gem build
+ * goal to build a gem from the given project. must be of type "gem". it takes
+ * the metainfo from the pom alongs with extra configuration of the plugin to
+ * build the gem.
  * 
  * @goal build
  * @requiresProject true
@@ -74,14 +76,18 @@ public class BuildMojo extends AbstractJRubyMojo {
     private final File            gemFile                 = null;
 
     public void execute() throws MojoExecutionException {
-        build(this.dependencies,
-              this.developmentDependencies,
-              this.gemfilesets,
-              null,
-              this.mavenProject.getArtifactId() + "_ext.jar");
+        if (this.mavenProject.getArtifact().getType().equals("gem")) {
+            build(this.dependencies,
+                  this.developmentDependencies,
+                  this.gemfilesets,
+                  null,
+                  this.mavenProject.getArtifactId() + "_ext.jar");
+        }
+        else {
+            getLog().warn("building gem is configured but it is not a gem artifact. skip gem building");
+        }
     }
 
-    @SuppressWarnings("unchecked")
     protected void build(final Map<String, String> dependencies,
             final Map<String, String> developmentDependencies,
             final List<Fileset> filesets, final String path,
