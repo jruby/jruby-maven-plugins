@@ -98,7 +98,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    private ArtifactFactory            artifactFactory;
+    protected ArtifactFactory          artifactFactory;
 
     /**
      * artifact resolver for internal use.
