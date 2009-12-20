@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -105,14 +106,24 @@ class GemspecWriter {
 
     private void appendAuthor(final String name, final String email)
             throws IOException {
-        if (this.firstAuthor) {
-            this.writer.append("  s.authors = ['").append(name).append("']\n");
-            this.writer.append("  s.email = ['").append(email).append("']\n");
-            this.firstAuthor = false;
-        }
-        else {
-            this.writer.append("  s.authors << '").append(name).append("'\n");
-            this.writer.append("  s.email << '").append(email).append("'\n");
+        if (name != null && email != null) {
+            if (this.firstAuthor) {
+                this.writer.append("  s.authors = ['")
+                        .append(name)
+                        .append("']\n");
+                this.writer.append("  s.email = ['")
+                        .append(email)
+                        .append("']\n");
+                this.firstAuthor = false;
+            }
+            else {
+                this.writer.append("  s.authors << '")
+                        .append(name)
+                        .append("'\n");
+                this.writer.append("  s.email << '")
+                        .append(email)
+                        .append("'\n");
+            }
         }
     }
 
@@ -122,7 +133,7 @@ class GemspecWriter {
             this.writer.append("  s.")
                     .append(key)
                     .append(" = '")
-                    .append(value)
+                    .append(value.replaceAll("'", "\""))
                     .append("'\n");
         }
     }
@@ -207,7 +218,13 @@ class GemspecWriter {
 
     private void appendLicense(final String url, final String name)
             throws IOException {
-        final URL u = new URL(url);
+        URL u;
+        try {
+            u = new URL(url);
+        }
+        catch (final MalformedURLException e) {
+            u = new URL("file:." + url);
+        }
         this.licenses.add(u);
         final URLConnection con = u.openConnection();
         if (this.latestModified < con.getLastModified()) {
@@ -229,7 +246,13 @@ class GemspecWriter {
         InputStream reader = null;
         for (final URL url : this.licenses) {
             try {
-                reader = new BufferedInputStream(url.openStream());
+                try {
+                    reader = new BufferedInputStream(url.openStream());
+                }
+                catch (final IOException e) {
+                    // TODO log it but otherwise ignore
+                    break;
+                }
                 final File licenseFile = new File(target, url.getFile());
                 licenseFile.getParentFile().mkdirs();
                 writer = new BufferedOutputStream(new FileOutputStream(licenseFile));
