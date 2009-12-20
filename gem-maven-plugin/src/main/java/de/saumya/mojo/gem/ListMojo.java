@@ -5,7 +5,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
 /**
- * goal to run gem.
+ * goal to run "gem list".
  * 
  * @goal list
  */

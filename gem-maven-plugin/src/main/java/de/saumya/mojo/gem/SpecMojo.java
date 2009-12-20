@@ -5,11 +5,11 @@ import org.apache.maven.plugin.MojoExecutionException;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
 /**
- * goal to run gem with the given arguments.
+ * goal to run "gem spec".
  * 
- * @goal gem
+ * @goal spec
  */
-public class GemMojo extends AbstractJRubyMojo {
+public class SpecMojo extends AbstractJRubyMojo {
     /**
      * arguments for the gem command of JRuby.
      * 
@@ -19,7 +19,7 @@ public class GemMojo extends AbstractJRubyMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        String commandString = "-S gem";
+        String commandString = "-S gem spec";
         if (this.args != null) {
             commandString += " " + this.args;
         }
