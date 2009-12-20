@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.saumya.mojo</groupId>
+  <artifactId>gem-demo</artifactId>
+  <version>0.0.0</version>
+  <packaging>pom</packaging>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>saumya</id>
+      <name>Saumyas Plugins</name>
+      <url>http://mojo.saumya.de</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+	<version>0.6.0-SNAPSHOT</version>
+	<configuration>
+          <gemHome>${project.build.directory}/rubygems</gemHome>
+          <gemPath>${gemHome}</gemPath>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
+ 
+</project>
+
