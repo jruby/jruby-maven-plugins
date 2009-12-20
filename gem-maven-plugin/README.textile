@@ -1,0 +1,19 @@
+h1. maven gem plugin
+
+p. beside there main **gem:gem** there are some wrappers like **gem:list**, **gem:spec**. the **gem:build**, **gem:gemify** are experimatal goal which might lead to replacement of the default **package** and **install** goal for gem artifacts.
+
+h2. demo of gemify a jar pom
+
+p. in the demo directory of the source is minimal pom.xml which allows the usage of the plugin with automatic installation (of the plugin) and short goals. just go into that directory and execute the following commands. the gem_home and gem_path are set to be the demo directory itself.
+
+@mvn de.saumya.mojo:gem-maven-plugin:gemify -DartifactId=avalon-framework-impl -DgroupId=org.apache.avalon.framework -Dversion=4.3.1@
+
+@mvn de.saumya.mojo:gem-maven-plugin:gemify -DartifactId=avalon-framework-impl -DgroupId=avalon-framework -Dversion=4.3@
+
+@mvn de.saumya.mojo:gem-maven-plugin:gemify -DartifactId=guice -DgroupId=com.google.code.guice -Dversion=1.0@
+
+p. this **gem:gemify** goal can handle all kinds of pom.xml with inherited *dependencies*, *version* and *groupId* from parent pom or shared dependencies via external *pom* artifact. or sometimes you find version set via properties, either from the pom itself or the parent pom. of course all the repositories which are configured in the pom or setting.xml do work either *legacy* or *default* layout. all the proxy settings are obeyed as well. in the end the whole plugin is just a little plugin with in the maven infrastructure.
+
+p. the relocation of the pom gets processed before determine the "gem-name", i.e. all the deprecated location will not be used by the gems.
+
+p. it is tested against maven-2.2.1 and maven-3.0-alpha-5
