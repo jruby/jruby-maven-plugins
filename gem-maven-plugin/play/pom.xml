@@ -27,7 +27,7 @@
       <plugin>
 	<groupId>de.saumya.mojo</groupId>
 	<artifactId>gem-maven-plugin</artifactId>
-	<version>0.7.0-SNAPSHOT</version>
+	<version>0.7.0</version>
         <extensions>true</extensions>
 	<configuration>
 	  <gemHome>${project.parent.basedir}/target/rubygems</gemHome>
