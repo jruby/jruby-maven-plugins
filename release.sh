@@ -6,6 +6,9 @@ if [ "x" = "x"$2 ] ; then
     exit 1
 fi
 
+# first run the complete tests
+mvn clean install
+
 find -name "pom.xml" | xargs sed -i s/${SNAPSHOT}-SNAPSHOT/${VERSION}/
 find -name "pom.xml" | xargs git add
 git ci -m "release of version ${VERSION}" || exit
