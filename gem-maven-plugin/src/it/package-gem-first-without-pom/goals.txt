@@ -1,0 +1,1 @@
+de.saumya.mojo:gem-maven-plugin:package
