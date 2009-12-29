@@ -13,6 +13,13 @@
   <packaging>maven-plugin</packaging>
   <name>JRuby Maven Mojo</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>3.0-alpha-5</version>
+    </dependency> 
+  </dependencies>
   <build>
     <plugins>
       <plugin>

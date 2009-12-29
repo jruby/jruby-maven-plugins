@@ -13,7 +13,7 @@ public class ListMojo extends AbstractJRubyMojo {
     /**
      * arguments for the gem command of JRuby.
      * 
-     * @parameter default-value="${jruby.gem.args}"
+     * @parameter default-value="${gem.list}"
      */
     protected String args = null;
 

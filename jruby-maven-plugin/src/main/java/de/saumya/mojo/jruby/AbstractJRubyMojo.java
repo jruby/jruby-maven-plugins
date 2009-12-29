@@ -2,21 +2,28 @@ package de.saumya.mojo.jruby;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.model.Repository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.classworlds.ClassRealm;
 
 /**
@@ -80,7 +87,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readOnly true
      */
-    protected MavenProject             mavenProject;
+    protected MavenProject             project;
 
     /**
      * The project's artifacts.
@@ -125,7 +132,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    protected List<Repository>         remoteRepositories;
+    protected List<ArtifactRepository> remoteRepositories;
 
     /**
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
@@ -161,6 +168,38 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      */
     private ClassRealm                 classRealm;
 
+    /**
+     * The project compile classpath.
+     * 
+     * @parameter default-value="${project.compileClasspathElements}"
+     * @required
+     * @readonly
+     */
+    private List                       compileClasspathElements;
+    /**
+     * The project compile classpath.
+     * 
+     * @parameter default-value="${project.testClasspathElements}"
+     * @required
+     * @readonly
+     */
+    private List                       testClasspathElements;
+
+    // /**
+    // * @parameter expression="${plugin}"
+    // */
+    // private PluginDescriptor plugin;
+
+    /**
+     * @component
+     */
+    protected ArtifactMetadataSource   metadata;
+
+    /**
+     * @component
+     */
+    protected MavenProjectBuilder      builder;
+
     private Artifact resolveJRUBYCompleteArtifact(final String version)
             throws DependencyResolutionRequiredException {
         final Artifact artifact = this.artifactFactory.createArtifactWithClassifier("org.jruby",
@@ -169,6 +208,11 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                                                                                     "jar",
                                                                                     null);
         try {
+            // final ArtifactResolutionRequest request = new
+            // ArtifactResolutionRequest();
+            // request.setArtifact(artifact);
+            // request.setLocalRepository(this.localRepository);
+            // request.setRemoteRepostories(this.remoteRepositories);
             this.resolver.resolve(artifact,
                                   this.remoteRepositories,
                                   this.localRepository);
@@ -187,7 +231,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private Artifact resolveJRUBYCompleteArtifact()
             throws DependencyResolutionRequiredException,
             MojoExecutionException {
-        for (final Object o : this.mavenProject.getDependencyArtifacts()) {
+        for (final Object o : this.project.getDependencyArtifacts()) {
             final Artifact artifact = (Artifact) o;
             if (artifact.getArtifactId().equals("jruby-complete")
                     && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
@@ -255,9 +299,31 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     private void execute(final String[] args, final Set<Artifact> artifacts)
             throws MojoExecutionException {
+        // System.out.println("\n\n\n");
+        // System.out.println(this.compileClasspathElements);
+        // System.out.println("\n\n\n");
+        // System.out.println(this.testClasspathElements);
+        // System.out.println("\n\n\n");
+        final Set<Artifact> artis = new HashSet<Artifact>();
+        resolveTransitively(artis, this.project.getArtifact());
+
+        final Iterator<Artifact> iterator = artis.iterator();
+        while (iterator.hasNext()) {
+            final Artifact artifact = iterator.next();
+            // System.out.println(artifact + " -> "
+            // + artifact.getArtifactHandler().isAddedToClasspath() + " "
+            // + artifact.getArtifactHandler().isIncludesDependencies());
+            if (artifact.getArtifactHandler().getPackaging().equals("gem")) {
+                // TODO maybe better remove them add the end
+                iterator.remove();
+            }
+            // resolveTransitively(artifacts, artifact);
+        }
+        // System.out.println(artis);
         try {
             getLog().info("jruby fork      : " + this.fork);
             getLog().info("launch directory: " + launchDirectory());
+            getLog().info("jruby args      : " + Arrays.toString(args));
             final Launcher launcher = (this.fork ? new AntLauncher(getLog(),
                     this.jrubyHome,
                     this.gemHome,
@@ -266,12 +332,67 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                     this.classRealm));
             launcher.execute(launchDirectory(),
                              args,
-                             artifacts,
+                             artis,
                              resolveJRUBYCompleteArtifact(),
                              this.outputDirectory);
         }
         catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("error creating launcher", e);
         }
+    }
+
+    private void resolveTransitively(final Set<Artifact> artifacts,
+            final Artifact artifact) {
+        // System.out.println(artifact + " resolve:");
+        // if (artifact.getArtifactHandler().isIncludesDependencies()) {
+        try {
+            final MavenProject mavenProject = this.builder.buildFromRepository(artifact,
+                                                                               this.remoteRepositories,
+                                                                               this.localRepository);
+            final Set<Artifact> moreArtifacts = mavenProject.createArtifacts(this.artifactFactory,
+                                                                             null,
+                                                                             null);
+            final ArtifactResolutionResult arr = this.resolver.resolveTransitively(moreArtifacts,
+                                                                                   artifact,
+                                                                                   this.remoteRepositories,
+                                                                                   this.localRepository,
+                                                                                   this.metadata);
+            // System.out.println(artifact + " " + arr);
+            for (final Object artiObject : arr.getArtifacts()) {
+                // allow older api to work
+                final Artifact arti = (Artifact) artiObject;
+                // System.out.println(arti
+                // + " "
+                // + "java".equals(arti.getArtifactHandler()
+                // .isIncludesDependencies()) + " "
+                // + arti.getArtifactHandler().getExtension() + " "
+                // + arti.getArtifactHandler().getPackaging() + " "
+                // + arti.getArtifactHandler().getClassifier());
+                if (!artifacts.contains(arti)
+                // TODO do not handle gem only artifacts for now
+                        && !(!arti.hasClassifier() && "gem".equals(arti.getArtifactHandler()
+                                .getPackaging()))) {
+                    resolveTransitively(artifacts, arti);
+                }
+                artifacts.add(arti);
+            }
+        }
+        catch (final ArtifactResolutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (final ArtifactNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (final InvalidDependencyVersionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (final ProjectBuildingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        // }
     }
 }

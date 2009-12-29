@@ -1,6 +1,15 @@
 <component-set>
   <components>
     <component>
+      <role>
+	org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
+      </role>
+      <role-hint>gem</role-hint>
+      <implementation>
+	de.saumya.mojo.gem.GemRepositoryLayout
+      </implementation>
+    </component>
+    <component>
       <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
       <role-hint>gem</role-hint>
       <implementation>
@@ -8,15 +17,87 @@
       </implementation>
       <configuration>
         <phases>
+	  <initialize>
+	    de.saumya.mojo:gem-maven-plugin:initialize
+	  </initialize>
           <process-resources>
             org.apache.maven.plugins:maven-resources-plugin:resources
           </process-resources>
           <compile>
             org.apache.maven.plugins:maven-compiler-plugin:compile
           </compile>
-          <package>org.apache.maven.plugins:maven-jar-plugin:jar,de.saumya.mojo:gem-maven-plugin:build</package>
-	  <install>de.saumya.mojo:gem-maven-plugin:install</install>
+          <package>
+	    de.saumya.mojo:gem-maven-plugin:package
+	  </package>
+	  <install>
+            org.apache.maven.plugins:maven-install-plugin:install
+	  </install>
+	  <deploy>
+            org.apache.maven.plugins:maven-deploy-plugin:deploy
+          </deploy>
         </phases>
+      </configuration>
+    </component>
+    <component>
+      <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+      <role-hint>gem</role-hint>
+      <implementation>
+        org.apache.maven.artifact.handler.DefaultArtifactHandler
+      </implementation>
+      <configuration>
+        <classifier></classifier>
+        <extension>gem</extension>
+        <type>gem</type>
+        <packaging>gem</packaging>
+        <language>ruby</language>
+        <addedToClasspath>false</addedToClasspath>
+        <includesDependencies>true</includesDependencies>
+      </configuration>
+    </component>
+    <component>
+      <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+      <role-hint>java-gem</role-hint>
+      <implementation>
+        org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping
+      </implementation>
+      <configuration>
+        <phases>
+	  <initialize>
+	    de.saumya.mojo:gem-maven-plugin:initialize
+	  </initialize>
+          <process-resources>
+            org.apache.maven.plugins:maven-resources-plugin:resources
+          </process-resources>
+          <compile>
+            org.apache.maven.plugins:maven-compiler-plugin:compile
+          </compile>
+          <package>
+	    org.apache.maven.plugins:maven-jar-plugin:jar,
+	    de.saumya.mojo:gem-maven-plugin:package
+	  </package>
+	  <install>
+            org.apache.maven.plugins:maven-install-plugin:install
+	  </install>
+	  <deploy>
+            org.apache.maven.plugins:maven-deploy-plugin:deploy
+          </deploy>
+        </phases>
+      </configuration>
+    </component>
+    <component>
+      <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+      <role-hint>java-gem</role-hint>
+      <implementation>
+        org.apache.maven.artifact.handler.DefaultArtifactHandler
+      </implementation>
+      <configuration>
+        <classifier>java</classifier>
+        <extension>gem</extension>
+        <type>gem</type>
+        <packaging>gem</packaging>
+        <language>ruby</language>
+        <addedToClasspath>false</addedToClasspath>
+        <includesDependencies>true</includesDependencies>
       </configuration>
     </component>
   </components>

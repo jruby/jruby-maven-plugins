@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
@@ -19,7 +18,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.StringUtils;
@@ -59,16 +57,6 @@ public class GemifyMojo extends AbstractJRubyMojo {
     File                              buildDirectory;
 
     /**
-     * @component
-     */
-    MavenProjectBuilder               builder;
-
-    /**
-     * @component
-     */
-    ArtifactMetadataSource            metadata;
-
-    /**
      * @parameter default-value="${skipGemInstall}"
      */
     public boolean                    skipGemInstall = false;
@@ -90,6 +78,11 @@ public class GemifyMojo extends AbstractJRubyMojo {
                                                                                             "jar",
                                                                                             null);
                 try {
+                    // final ArtifactResolutionRequest request = new
+                    // ArtifactResolutionRequest();
+                    // request.setArtifact(artifact);
+                    // request.setLocalRepository(this.localRepository);
+                    // request.setRemoteRepostories(this.remoteRepositories);
                     this.resolver.resolve(artifact,
                                           this.remoteRepositories,
                                           this.localRepository);
@@ -115,13 +108,13 @@ public class GemifyMojo extends AbstractJRubyMojo {
                                                                                            this.metadata);
                     gemify(project, arr.getArtifacts());
                 }
-                catch (final ProjectBuildingException e) {
-                    throw new MojoExecutionException("error building project object model",
-                            e);
-                }
                 catch (final InvalidDependencyVersionException e) {
                     throw new MojoExecutionException("can not resolve "
                             + artifact.toString(), e);
+                }
+                catch (final ProjectBuildingException e) {
+                    throw new MojoExecutionException("error building project object model",
+                            e);
                 }
                 catch (final ArtifactResolutionException e) {
                     throw new MojoExecutionException("can not resolve "
@@ -137,7 +130,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
             }
         }
         else {
-            gemify(this.mavenProject, this.artifacts);
+            gemify(this.project, this.artifacts);
         }
     }
 
@@ -238,7 +231,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                         // + gem.getValue().getArtifact()
                         // + gem.getValue().getDependencies());
                         boolean isResolved = true;
-                        for (final Dependency dependency : (List<Dependency>) gem.getValue()
+                        for (final Dependency dependency : gem.getValue()
                                 .getDependencies()) {
                             if (!dependency.isOptional()
                                     && (Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
@@ -330,17 +323,17 @@ public class GemifyMojo extends AbstractJRubyMojo {
         final File gemSpec = new File(gemDir, gemName + ".gemspec");
         final GemspecWriter gemSpecWriter = new GemspecWriter(gemSpec,
                 project,
-                false);
+                new GemArtifact(project));
 
         gemSpecWriter.appendJarfile(jarfile, jarfile.getName());
         final File lib = new File(gemDir, "lib");
         lib.mkdirs();
         // need relative filename here
-        final File rubyFile = new File(lib.getName(), project.getArtifactId()
-                + ".rb");
+        final File rubyFile = new File(lib.getName(), project.getGroupId()
+                + "." + project.getArtifactId() + ".rb");
         gemSpecWriter.appendFile(rubyFile);
 
-        for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
+        for (final Dependency dependency : project.getDependencies()) {
             if (!dependency.isOptional() && "jar".equals(dependency.getType())
                     && dependency.getClassifier() == null) {
                 // it will adjust the artifact as well (in case of relocation)

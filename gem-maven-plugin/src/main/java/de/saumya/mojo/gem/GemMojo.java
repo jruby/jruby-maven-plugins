@@ -13,7 +13,7 @@ public class GemMojo extends AbstractJRubyMojo {
     /**
      * arguments for the gem command of JRuby.
      * 
-     * @parameter default-value="${jruby.gem.args}"
+     * @parameter default-value="${gem.args}"
      */
     protected String args = null;
 

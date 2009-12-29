@@ -26,6 +26,7 @@ import org.apache.maven.model.License;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 
+
 class GemspecWriter {
 
     final Writer            writer;
@@ -41,7 +42,7 @@ class GemspecWriter {
 
     @SuppressWarnings("unchecked")
     GemspecWriter(final File gemspec, final MavenProject project,
-            final boolean artifactIdOnlyName) throws IOException {
+            final GemArtifact artifact) throws IOException {
         this.latestModified = project.getFile() == null ? 0 : project.getFile()
                 .lastModified();
         this.gemspec = gemspec;
@@ -49,25 +50,23 @@ class GemspecWriter {
         this.writer = new FileWriter(gemspec);
 
         append("Gem::Specification.new do |s|");
-        append("name", (artifactIdOnlyName ? "" : project.getGroupId() + ".")
-                + project.getArtifactId());
+        append("name", artifact.getGemName());
         append("version", gemVersion(project.getVersion()));
         append();
         append("summary", project.getName());
         append("description", project.getDescription());
-        append("platform", "java");
         append("homepage", project.getUrl());
         append();
 
-        for (final Developer developer : (List<Developer>) project.getDevelopers()) {
+        for (final Developer developer : project.getDevelopers()) {
             appendAuthor(developer.getName(), developer.getEmail());
         }
-        for (final Contributor contributor : (List<Contributor>) project.getContributors()) {
+        for (final Contributor contributor : project.getContributors()) {
             appendAuthor(contributor.getName(), contributor.getEmail());
         }
         append();
 
-        for (final License license : (List<License>) project.getLicenses()) {
+        for (final License license : project.getLicenses()) {
             appendLicense(license.getUrl(), license.getName());
         }
     }
@@ -177,6 +176,7 @@ class GemspecWriter {
 
     void appendJarfile(final File jar, final String jarfileName)
             throws IOException {
+        append("platform", "java");
         final File f = new File("lib", jarfileName);
         this.jarFiles.put(f.toString(), jar);
         appendFile(f);
@@ -231,7 +231,9 @@ class GemspecWriter {
             this.latestModified = con.getLastModified();
         }
         appendFile(new File(u.getFile().substring(1))); // omit the first slash
-        append("  s.licenses << '" + name + "'");
+        if (name != null) {
+            append("  s.licenses << '" + name + "'");
+        }
     }
 
     void copy(final File target) throws IOException {

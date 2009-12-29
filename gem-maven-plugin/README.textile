@@ -17,3 +17,57 @@ p. this **gem:gemify** goal can handle all kinds of pom.xml with inherited *depe
 p. the relocation of the pom gets processed before determine the "gem-name", i.e. all the deprecated location will not be used by the gems.
 
 p. it is tested against maven-2.2.1 and maven-3.0-alpha-5
+
+h2. next generation plugin (work in progress)
+
+most of the goal take arguments via the commandline like
+
+bc. -Dgem.XYZ=
+
+where the XYZ is the goal. but all these goals take as a shortcut an extra -Dargs= argument. in some situation you want to distinguise the arguments for the different goals then take the long argument
+
+**All** goals take the arguments from -Dgem.args=
+
+**Some** goals have goal specific arguments as well.
+
+h3. gem wrapper
+
+h4. implemented
+
+* gem:gem - gem command with -Dgem.args=
+* gem:list - gem list command with -Dgem.list=
+* gem:spec - gem spec command with -Dgem.spec=
+* gem:install - gem install command with -Dgem.install=
+
+h4. to be implemented
+
+* gem:environment - gem environment command with -Dgem.environment=
+* gem:uninstall - gem uninstall command with -Dgem.uninstall=
+* gem:build - gem build command with -Dgem.build=
+
+h3. gemcutter wrapper (to be implemented)
+
+* gem:push - deploys gem onto gemcutter with -Dgem.push= and -Dgem.push=
+* gem:owner - owners of gemcutter  -Dgem.owner=
+
+h3. gem with pom first
+
+these goals need a pom !
+
+* gem:initialize - downloads all gems from gemcutter and install it in the local maven repository and install it on the local rubygems repository (this needs maven3 which can work with custom repository layout)
+* gem:package - use the pom to build a gem-artifact
+* gem:install - installs locally the packed gem in rubygems (if pom is present and no args for gem:install are given)
+* gem:gemify - builds and/or install gem for the given jar-artifact (including all dependent jars). artifact either comes from the pom or via the commandline properties (aritfactId,groupId,version)
+
+h3. gem as artifact - gemspec first
+
+these goals must not have a pom !
+
+h4. implemented
+
+* gem:package - takes a gemspec and builds the gem. use -Dgemspec=
+
+h4. to be implemented
+
+* gem:install-as-artifact - generate a pom out of the gemspec and install the gem artifact in the local maven repository. use -Dgem.install=
+* gem:deploy-as-artifact - generate a pom out of the gemspec and deploy the gem artifact on a remote maven repository. use -Dgem.deploy=

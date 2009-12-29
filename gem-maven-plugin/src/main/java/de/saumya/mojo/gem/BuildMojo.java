@@ -19,7 +19,9 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  * 
  * @goal build
  * @requiresProject true
+ * @deprecated use package goal
  */
+@Deprecated
 public class BuildMojo extends AbstractJRubyMojo {
     /**
      * 
@@ -76,12 +78,12 @@ public class BuildMojo extends AbstractJRubyMojo {
     private final File            gemFile                 = null;
 
     public void execute() throws MojoExecutionException {
-        if (this.mavenProject.getArtifact().getType().equals("gem")) {
+        if (this.project.getArtifact().getType().equals("gem")) {
             build(this.dependencies,
                   this.developmentDependencies,
                   this.gemfilesets,
                   null,
-                  this.mavenProject.getArtifactId() + "_ext.jar");
+                  this.project.getArtifactId() + "_ext.jar");
         }
         else {
             getLog().warn("building gem is configured but it is not a gem artifact. skip gem building");
@@ -94,7 +96,9 @@ public class BuildMojo extends AbstractJRubyMojo {
             final String jarName) throws MojoExecutionException {
         GemspecWriter writer = null;
         try {
-            writer = new GemspecWriter(this.gemSpec, this.mavenProject, true);
+            writer = new GemspecWriter(this.gemSpec,
+                    this.project,
+                    new GemArtifact(this.project));
             if (path != null) {
                 writer.appendPath(path);
             }
@@ -122,7 +126,9 @@ public class BuildMojo extends AbstractJRubyMojo {
                                                        entry.getValue());
                 }
             }
-            writer.appendJarfile(this.jarfile, jarName);
+            if (this.jarfile.exists()) {
+                writer.appendJarfile(this.jarfile, jarName);
+            }
         }
         catch (final IOException e) {
             throw new MojoExecutionException("error writing out the gemspec file",
@@ -138,7 +144,7 @@ public class BuildMojo extends AbstractJRubyMojo {
                 }
             }
         }
-        if (writer.isUptodate()) {
+        if (writer.isUptodate() && this.gemFile.exists()) {
             getLog().info("gem up to date");
             return;
         }

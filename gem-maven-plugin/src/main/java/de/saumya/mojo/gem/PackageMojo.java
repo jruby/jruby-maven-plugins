@@ -1,0 +1,248 @@
+package de.saumya.mojo.gem;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Relocation;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingException;
+import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.StringUtils;
+
+import de.saumya.mojo.jruby.AbstractJRubyMojo;
+
+/**
+ * goal to convert that artifact into a gem.
+ * 
+ * @goal package
+ */
+public class PackageMojo extends AbstractJRubyMojo {
+
+    /**
+     * @parameter expression="${project.build.directory}"
+     */
+    File                              buildDirectory;
+
+    /**
+     * @parameter default-value="${gemspec}"
+     */
+    File                              gemSpec;
+
+    /**
+     * @component role-hint="gem"
+     */
+    private ArtifactRepositoryLayout  gemLayout;
+
+    private File                      launchDir;
+
+    private final Map<String, String> relocationMap = new HashMap<String, String>();
+
+    @Override
+    public void execute() throws MojoExecutionException {
+        final MavenProject project = this.project;
+        final GemArtifact artifact = new GemArtifact(project);
+        try {
+            if (this.gemSpec != null) {
+                this.launchDir = this.project.getBasedir();
+                if (this.launchDir == null) {
+                    this.launchDir = new File(System.getProperty("user.dir"));
+                }
+
+                execute("-S gem build " + this.gemSpec.getAbsolutePath());
+
+                final File gem = new File(this.launchDir, artifact.getGemFile());
+                if (project.getFile() != null) {
+                    // only when the pom exist there will be an artifact
+                    FileUtils.copyFile(gem, artifact.getFile());
+                    gem.deleteOnExit();
+                }
+            }
+            else {
+                build(project, artifact);
+            }
+        }
+        catch (final IOException e) {
+            throw new MojoExecutionException("error gemifing pom", e);
+        }
+    }
+
+    private MavenProject projectFromArtifact(final Artifact artifact)
+            throws ProjectBuildingException {
+
+        final MavenProject project = this.builder.buildFromRepository(artifact,
+                                                                      this.remoteRepositories,
+                                                                      this.localRepository);
+        if (project.getDistributionManagement() != null
+                && project.getDistributionManagement().getRelocation() != null) {
+            final Relocation reloc = project.getDistributionManagement()
+                    .getRelocation();
+            final String key = artifact.getGroupId() + ":"
+                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
+                    + artifact.getVersion();
+            artifact.setArtifactId(reloc.getArtifactId());
+            artifact.setGroupId(reloc.getGroupId());
+            if (reloc.getVersion() != null) {
+                artifact.setVersion(reloc.getVersion());
+            }
+            this.relocationMap.put(key, artifact.getGroupId() + ":"
+                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
+                    + artifact.getVersion());
+            return projectFromArtifact(artifact);
+        }
+        else {
+            return project;
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void build(final MavenProject project, final GemArtifact artifact)
+            throws MojoExecutionException, IOException {
+
+        getLog().info("building gem for " + artifact + " . . ."
+                + artifact.hasJarFile());
+        final File gemDir = new File(this.buildDirectory, artifact.getGemName());
+        final File gemSpec = new File(gemDir, artifact.getGemName()
+                + ".gemspec");
+        final GemspecWriter gemSpecWriter = new GemspecWriter(gemSpec,
+                project,
+                artifact);
+
+        final File rubyFile;
+        if (artifact.hasJarFile()) {
+            gemSpecWriter.appendJarfile(artifact.getJarFile(),
+                                        artifact.getJarFile().getName());
+            final File lib = new File(gemDir, "lib");
+            lib.mkdirs();
+            // need relative filename here
+            rubyFile = new File(lib.getName(), artifact.getGemName() + ".rb");
+            gemSpecWriter.appendFile(rubyFile);
+        }
+        else {
+            rubyFile = null;
+        }
+        // TODO make it the maven way (src/main/ruby + src/test/ruby) or the
+        // ruby way (lib + spec + test)
+        if (FileUtils.fileExists("lib")) {
+            gemSpecWriter.appendPath("lib");
+        }
+        if (FileUtils.fileExists("spec")) {
+            gemSpecWriter.appendPath("spec");
+        }
+        if (FileUtils.fileExists("test")) {
+            gemSpecWriter.appendPath("test");
+        }
+
+        for (final Dependency dependency : project.getDependencies()) {
+            if (!dependency.isOptional()
+                    && dependency.getType().contains("gem")) {
+                // it will adjust the artifact as well (in case of relocation)
+                Artifact arti = null;
+                try {
+                    arti = this.artifactFactory.createArtifactWithClassifier(dependency.getGroupId(),
+                                                                             dependency.getArtifactId(),
+                                                                             dependency.getVersion(),
+                                                                             dependency.getScope(),
+                                                                             dependency.getClassifier());
+                    projectFromArtifact(arti);
+                    dependency.setGroupId(arti.getGroupId());
+                    dependency.setArtifactId(arti.getArtifactId());
+                    dependency.setVersion(arti.getVersion());
+                }
+                catch (final ProjectBuildingException e) {
+                    throw new MojoExecutionException("error building project for "
+                            + arti,
+                            e);
+                }
+
+                final String prefix = dependency.getGroupId()
+                        .equals("rubygems") ? "" : dependency.getGroupId()
+                        + ".";
+                if ((Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
+                    gemSpecWriter.appendDependency(prefix
+                                                           + dependency.getArtifactId(),
+                                                   dependency.getVersion());
+                }
+                else if ((Artifact.SCOPE_PROVIDED + Artifact.SCOPE_TEST).contains(dependency.getScope())) {
+                    gemSpecWriter.appendDevelopmentDependency(prefix
+                                                                      + dependency.getArtifactId(),
+                                                              dependency.getVersion());
+                }
+                else {
+                    // TODO put things into "requirements"
+                }
+            }
+        }
+
+        gemSpecWriter.close();
+
+        gemSpecWriter.copy(gemDir);
+
+        if (artifact.hasJarFile() && !rubyFile.exists()) {
+            FileWriter writer = null;
+            try {
+                // need absolute filename here
+                writer = new FileWriter(new File(gemDir, rubyFile.getPath()));
+
+                writer.append("module ")
+                        .append(titleizedClassname(project.getArtifactId()))
+                        .append("\n");
+                writer.append("  VERSION = '")
+                        .append(artifact.getGemVersion())
+                        .append("'\n");
+                writer.append("  MAVEN_VERSION = '")
+                        .append(project.getVersion())
+                        .append("'\n");
+                writer.append("end\n");
+                writer.append("begin\n");
+                writer.append("  require 'java'\n");
+                writer.append("  require File.dirname(__FILE__) + '/")
+                        .append(artifact.getJarFile().getName())
+                        .append("'\n");
+                writer.append("rescue LoadError\n");
+                writer.append("  puts 'JAR-based gems require JRuby to load. Please visit www.jruby.org.'\n");
+                writer.append("  raise\n");
+                writer.append("end\n");
+            }
+            catch (final IOException e) {
+                throw new MojoExecutionException("error writing ruby file", e);
+            }
+            finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    }
+                    catch (final IOException ignore) {
+                    }
+                }
+            }
+        }
+        this.launchDir = gemDir;
+        execute("-S gem build " + gemSpec.getAbsolutePath());
+
+        FileUtils.copyFile(new File(gemDir, this.gemLayout.pathOf(artifact)
+                                   .replace(artifact.getVersion(),
+                                            artifact.getGemVersion())),
+                           artifact.getFile());
+    }
+
+    private String titleizedClassname(final String artifactId) {
+        final StringBuilder name = new StringBuilder();// artifact.getGroupId()).append(".");
+        for (final String part : artifactId.split("-")) {
+            name.append(StringUtils.capitalise(part));
+        }
+        return name.toString();
+    }
+
+    @Override
+    protected File launchDirectory() {
+        return this.launchDir.getAbsoluteFile();
+    }
+
+}

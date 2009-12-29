@@ -60,9 +60,9 @@ public class SpecMojo extends AbstractJRubyMojo {
     protected String  args      = null;
 
     private String relativeFile(final File file) {
-        if (this.mavenProject.getBasedir() != null) {
+        if (this.project.getBasedir() != null) {
             return file.getAbsolutePath()
-                    .substring(this.mavenProject.getBasedir()
+                    .substring(this.project.getBasedir()
                             .getAbsolutePath()
                             .length());
         }
