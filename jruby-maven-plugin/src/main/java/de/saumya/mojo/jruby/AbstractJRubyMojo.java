@@ -23,7 +23,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.classworlds.ClassRealm;
 
 /**
@@ -357,23 +356,10 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                                                                                    this.remoteRepositories,
                                                                                    this.localRepository,
                                                                                    this.metadata);
-            // System.out.println(artifact + " " + arr);
+            System.out.println(artifact + " " + arr);
             for (final Object artiObject : arr.getArtifacts()) {
                 // allow older api to work
                 final Artifact arti = (Artifact) artiObject;
-                // System.out.println(arti
-                // + " "
-                // + "java".equals(arti.getArtifactHandler()
-                // .isIncludesDependencies()) + " "
-                // + arti.getArtifactHandler().getExtension() + " "
-                // + arti.getArtifactHandler().getPackaging() + " "
-                // + arti.getArtifactHandler().getClassifier());
-                if (!artifacts.contains(arti)
-                // TODO do not handle gem only artifacts for now
-                        && !(!arti.hasClassifier() && "gem".equals(arti.getArtifactHandler()
-                                .getPackaging()))) {
-                    resolveTransitively(artifacts, arti);
-                }
                 artifacts.add(arti);
             }
         }
@@ -385,14 +371,36 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        catch (final InvalidDependencyVersionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        // catch (final InvalidDependencyVersionException e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
         catch (final ProjectBuildingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        // }
     }
 }
+
+// System.out.println(arti
+// + " "
+// + "java".equals(arti.getArtifactHandler()
+// .isIncludesDependencies()) + " "
+// + arti.getArtifactHandler().getExtension() + " "
+// + arti.getArtifactHandler().getPackaging() + " "
+// + arti.getArtifactHandler().getClassifier());
+// if (!"provided".equals(artifact.getScope())) {
+// if (!artifacts.contains(arti)
+// // TODO do not handle gem only artifacts for now
+// && !(!arti.hasClassifier() && "gem".equals(arti.getArtifactHandler()
+// .getPackaging()))) {
+// resolveTransitively(artifacts, arti);
+// }
+// artifacts.add(arti);
+// }
+// }
+// }
+// }
+// }
+// }
+// }
