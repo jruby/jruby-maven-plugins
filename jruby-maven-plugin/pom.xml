@@ -5,7 +5,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.7.2</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-maven-plugin</artifactId>
@@ -60,7 +60,7 @@
             </goals>    
             <configuration>
 	      <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
-	      <version>0.7.2</version>
+	      <version>0.8.0-SNAPSHOT</version>
               <parallel>true</parallel>
               <threadCount>2</threadCount>
 	    </configuration>
