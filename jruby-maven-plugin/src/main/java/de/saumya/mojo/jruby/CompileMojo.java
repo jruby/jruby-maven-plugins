@@ -18,7 +18,7 @@ public class CompileMojo extends AbstractJRubyMojo {
      * 
      * @parameter default-value="src/main/ruby"
      */
-    protected File rubyDirectory;
+    protected File    rubyDirectory;
 
     /**
      * where the compiled class files are written. default is the same as for
@@ -26,7 +26,12 @@ public class CompileMojo extends AbstractJRubyMojo {
      * 
      * @parameter default-value="${project.build.outputDirectory}"
      */
-    protected File outputDirectory;
+    protected File    outputDirectory;
+
+    /**
+     * @parameter expression="${jruby.failure.ignore}" default-value="false"
+     */
+    protected boolean ignoreFailures;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -41,9 +46,10 @@ public class CompileMojo extends AbstractJRubyMojo {
                 .append(this.outputDirectory.getAbsolutePath())
                 .append("','")
                 .append(this.rubyDirectory.getAbsolutePath())
-                .append("']);");
+                .append("']);raise('compilation-error(s)')if(status!=0&&!")
+                .append(this.ignoreFailures)
+                .append(")");
         getLog().debug("script: " + script);
         execute(script.toString());
     }
-
 }
