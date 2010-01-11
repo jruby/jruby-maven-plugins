@@ -21,7 +21,7 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
-	<version>0.8.0-SNAPSHOT</version>
+	<version>0.7.2</version>
 	<configuration>
           <gemHome>${project.build.directory}/rubygems</gemHome>
           <gemPath>${gemHome}</gemPath>
