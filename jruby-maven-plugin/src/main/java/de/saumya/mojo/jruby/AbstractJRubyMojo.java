@@ -23,6 +23,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.classworlds.ClassRealm;
 
 /**
@@ -371,10 +372,10 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        // catch (final InvalidDependencyVersionException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
+        catch (final InvalidDependencyVersionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         catch (final ProjectBuildingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
