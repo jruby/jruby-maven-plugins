@@ -29,12 +29,15 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
         path.append(GROUP_SEPARATOR);
 
         final String extension = artifact.getArtifactHandler().getExtension();
-        if ("pom".equals(extension)) {
+        if ("pom".equals(extension) || "gem".equals(extension)) {
             // just download the gem instead of the none existing pom
             path.append("gem");
         }
         else {
-            path.append(extension);
+            // hack to generate some http error which let the download stop
+            // without it wagon will download the html with "page not found" and
+            // stores it as jar file
+            return "ixtlan/0.0.0/ixtlan-0.0.0.gem";
         }
 
         return path.toString();
@@ -66,47 +69,7 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
         return path.toString();
     }
 
-    // /**
-    // * Extract base version from metadata
-    // *
-    // * @param metadata
-    // * @return base version from the artifact
-    // */
-    // private String getBaseVersion(final ArtifactMetadata metadata) {
-    // String version = null;
-    // if (metadata.getBaseVersion() != null) {
-    // version = metadata.getBaseVersion();
-    // }
-    // else {
-    // // artifact base version is not accessible from
-    // // ArtifactRepositoryMetadata
-    // if (metadata instanceof ArtifactRepositoryMetadata) {
-    // try {
-    // final Field f = metadata.getClass()
-    // .getDeclaredField("artifact");
-    // final boolean accessible = f.isAccessible();
-    // try {
-    // f.setAccessible(true);
-    // final Artifact artifact = (Artifact) f.get(metadata);
-    // version = artifact.getBaseVersion();
-    // }
-    // finally {
-    // f.setAccessible(accessible);
-    // }
-    // }
-    // catch (final Exception e) {
-    // throw new RuntimeException(e);
-    // }
-    // }
-    // }
-    // return version;
-    // }
-
     public String pathOfRemoteRepositoryMetadata(final ArtifactMetadata metadata) {
         return pathOfRepositoryMetadata(metadata, metadata.getRemoteFilename());
     }
-
-    // private String formatAsDirectory(final String directory) {
-    // return directory.replace(GROUP_SEPARATOR, PATH_SEPARATOR);
-    // }
 }

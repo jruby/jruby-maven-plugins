@@ -277,7 +277,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         if (gems.length() > 0) {
 
             execute(("-S maybe_install_gems" + gems.toString()).split("\\s+"),
-                    NO_ARTIFACTS);
+                    NO_ARTIFACTS,
+                    null);
 
             for (final String gem : gemNames) {
                 try {
@@ -297,15 +298,16 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     public void execute(final String args) throws MojoExecutionException {
-        execute(args.trim().split("\\s+"), this.artifacts);
+        execute(args.trim().split("\\s+"), this.artifacts, this.outputFile);
     }
 
     public void execute(final String[] args) throws MojoExecutionException {
-        execute(args, this.artifacts);
+        execute(args, this.artifacts, this.outputFile);
     }
 
-    private void execute(final String[] args, final Set<Artifact> artifacts)
-            throws MojoExecutionException {
+    private void execute(final String[] args, final Set<Artifact> artifacts,
+            final File outputFile) throws MojoExecutionException {
+
         // System.out.println("\n\n\n");
         // System.out.println(this.compileClasspathElements);
         // System.out.println("\n\n\n");
@@ -331,18 +333,23 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             getLog().info("jruby fork      : " + this.fork);
             getLog().info("launch directory: " + launchDirectory());
             getLog().info("jruby args      : " + Arrays.toString(args));
-            final Launcher launcher = (this.fork ? new AntLauncher(getLog(),
-                    this.jrubyHome,
-                    this.gemHome,
-                    this.gemPath,
-                    this.jrubyLaunchMemory) : new EmbeddedLauncher(getLog(),
-                    this.classRealm));
+            final Launcher launcher;
+            if (this.fork) {
+                launcher = new AntLauncher(getLog(),
+                        this.jrubyHome,
+                        this.gemHome,
+                        this.gemPath,
+                        this.jrubyLaunchMemory);
+            }
+            else {
+                launcher = new EmbeddedLauncher(getLog(), this.classRealm);
+            }
             launcher.execute(launchDirectory(),
                              args,
                              artis,
                              resolveJRUBYCompleteArtifact(),
                              this.outputDirectory,
-                             this.outputFile);
+                             outputFile);
         }
         catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("error creating launcher", e);
