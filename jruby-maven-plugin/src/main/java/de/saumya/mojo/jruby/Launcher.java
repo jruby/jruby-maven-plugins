@@ -11,7 +11,7 @@ interface Launcher {
 
     public abstract void execute(final File launchDirectory,
             final String[] args, final Set<Artifact> artifacts,
-            final Artifact jrubyArtifact, File classesDirectory)
+            final Artifact jrubyArtifact, File classesDirectory, File outputFile)
             throws MojoExecutionException,
             DependencyResolutionRequiredException;
 

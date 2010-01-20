@@ -41,17 +41,19 @@ class AntLauncher extends AbstractLauncher {
 
     public void execute(final File launchDirectory, final String[] args,
             final Set<Artifact> artifacts, final Artifact jrubyArtifact,
-            final File classesDirectory) throws MojoExecutionException,
+            final File classesDirectory, final File outputFile)
+            throws MojoExecutionException,
             DependencyResolutionRequiredException {
         final Project project = getProject(launchDirectory,
                                            artifacts,
                                            jrubyArtifact,
                                            classesDirectory);
-        execute(launchDirectory, args, project);
+        execute(launchDirectory, args, project, outputFile);
     }
 
     protected void execute(final File launchDirectory, final String[] args,
-            final Project project) throws MojoExecutionException {
+            final Project project, final File outputFile)
+            throws MojoExecutionException {
         final Java java = new Java();
         java.setProject(project);
         java.setClassname("org.jruby.Main");
@@ -99,6 +101,9 @@ class AntLauncher extends AbstractLauncher {
         java.createJvmarg().setValue("-cp");
         java.createJvmarg().setPath(p);
 
+        if (outputFile != null) {
+            java.setOutput(outputFile);
+        }
         java.execute();
     }
 

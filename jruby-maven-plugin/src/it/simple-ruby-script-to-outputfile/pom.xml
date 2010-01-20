@@ -14,9 +14,9 @@
         <artifactId>jruby-maven-plugin</artifactId>
 	<version>0.8.0-SNAPSHOT</version>
         <configuration>
-          <script>
-            puts "hello world"
-          </script>
+          <file>${basedir}/src/main/ruby/hello.rb</file>
+          <args>kristian</args>
+          <outputFile>log</outputFile>
         </configuration>
       </plugin>
     </plugins>

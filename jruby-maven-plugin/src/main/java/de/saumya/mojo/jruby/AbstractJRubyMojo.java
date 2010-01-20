@@ -152,6 +152,13 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private File                       gemFlagsDirectory;
 
     /**
+     * output file where the stdout will be redirected to
+     * 
+     * @parameter
+     */
+    protected File                     outputFile;
+
+    /**
      * output directory for internal use.
      * 
      * @parameter default-value="${project.build.outputDirectory}"
@@ -334,7 +341,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                              args,
                              artis,
                              resolveJRUBYCompleteArtifact(),
-                             this.outputDirectory);
+                             this.outputDirectory,
+                             this.outputFile);
         }
         catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("error creating launcher", e);

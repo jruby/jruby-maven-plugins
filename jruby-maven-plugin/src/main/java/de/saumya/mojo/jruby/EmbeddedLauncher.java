@@ -4,6 +4,8 @@
 package de.saumya.mojo.jruby;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -29,14 +31,20 @@ class EmbeddedLauncher extends AbstractLauncher {
 
     public void execute(final File launchDirectory, final String[] args,
             final Set<Artifact> artifacts, final Artifact jrubyArtifact,
-            final File classesDirectory) throws MojoExecutionException,
+            final File classesDirectory, final File outputFile)
+            throws MojoExecutionException,
             DependencyResolutionRequiredException {
         final ClassRealm jrubyClassRealm = cloneClassRealm(jrubyArtifact,
                                                            artifacts,
                                                            classesDirectory);
         final String currentDir = System.getProperty("user.dir");
         System.setProperty("user.dir", launchDirectory.getAbsolutePath());
+        final PrintStream output = System.out;
         try {
+            if (outputFile != null) {
+                final PrintStream writer = new PrintStream(outputFile);
+                System.setOut(writer);
+            }
             Thread.currentThread()
                     .setContextClassLoader(jrubyClassRealm.getClassLoader());
             final Class<?> clazz = jrubyClassRealm.loadClass("org.jruby.Main");
@@ -64,7 +72,12 @@ class EmbeddedLauncher extends AbstractLauncher {
         catch (final InvocationTargetException e) {
             throw new JRubyMainException(e);
         }
+        catch (final IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         finally {
+            System.setOut(output);
             if (currentDir != null) {
                 System.setProperty("user.dir", currentDir);
             }
