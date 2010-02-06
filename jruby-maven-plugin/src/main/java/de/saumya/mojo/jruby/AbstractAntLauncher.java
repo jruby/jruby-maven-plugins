@@ -21,16 +21,16 @@ import org.codehaus.plexus.util.StringUtils;
 
 abstract class AbstractAntLauncher {
 
-    void execute(final Log log, final File launchDirectory, final File jrubyHome,
-            final File jrubyGemHome, final File jrubyGemPath,
-            final List<String> args,
+    void execute(final Log log, final File launchDirectory,
+            final File jrubyHome, final File jrubyGemHome,
+            final File jrubyGemPath, final List<String> args,
             final Set<Artifact> artifacts, final Artifact jrubyArtifact)
             throws MojoExecutionException,
             DependencyResolutionRequiredException {
         final Project project = getProject(launchDirectory,
-                                     log,
-                                     artifacts,
-                                     jrubyArtifact);
+                                           log,
+                                           artifacts,
+                                           jrubyArtifact);
         execute(log,
                 launchDirectory,
                 jrubyHome,
@@ -42,8 +42,7 @@ abstract class AbstractAntLauncher {
 
     abstract protected void execute(Log log, File launchDirector,
             File jrubyHome, File jrubyGemHome, File jrubyGemPath,
-            List<String> args, Project project)
-            throws MojoExecutionException;
+            List<String> args, Project project) throws MojoExecutionException;
 
     protected Project getProject(final File launchDirectory, final Log log,
             final Set<Artifact> artifacts, final Artifact jrubyArtifact)
@@ -64,7 +63,8 @@ abstract class AbstractAntLauncher {
     }
 
     protected void addReference(final Project project, final String reference,
-            final Collection<Artifact> artifacts) throws MojoExecutionException,
+            final Collection<Artifact> artifacts)
+            throws MojoExecutionException,
             DependencyResolutionRequiredException {
         final List<File> list = new ArrayList<File>(artifacts.size());
 

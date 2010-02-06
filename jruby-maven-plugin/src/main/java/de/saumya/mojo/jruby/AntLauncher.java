@@ -103,6 +103,8 @@ class AntLauncher extends AbstractLauncher {
 
         if (outputFile != null) {
             java.setOutput(outputFile);
+            java.setError(new File(outputFile.getParentFile(),
+                    outputFile.getName() + ".errors"));
         }
         java.execute();
     }

@@ -175,22 +175,22 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      */
     private ClassRealm                 classRealm;
 
-    /**
-     * The project compile classpath.
-     * 
-     * @parameter default-value="${project.compileClasspathElements}"
-     * @required
-     * @readonly
-     */
-    private List                       compileClasspathElements;
-    /**
-     * The project compile classpath.
-     * 
-     * @parameter default-value="${project.testClasspathElements}"
-     * @required
-     * @readonly
-     */
-    private List                       testClasspathElements;
+    // /**
+    // * The project compile classpath.
+    // *
+    // * @parameter default-value="${project.compileClasspathElements}"
+    // * @required
+    // * @readonly
+    // */
+    // private List compileClasspathElements;
+    // /**
+    // * The project compile classpath.
+    // *
+    // * @parameter default-value="${project.testClasspathElements}"
+    // * @required
+    // * @readonly
+    // */
+    // private List testClasspathElements;
 
     // /**
     // * @parameter expression="${plugin}"
@@ -297,38 +297,34 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         ensureGems(new String[] { gemName });
     }
 
-    public void execute(final String args) throws MojoExecutionException {
+    protected void execute(final String args) throws MojoExecutionException {
         execute(args.trim().split("\\s+"), this.artifacts, this.outputFile);
     }
 
-    public void execute(final String[] args) throws MojoExecutionException {
+    protected void execute(final String[] args) throws MojoExecutionException {
         execute(args, this.artifacts, this.outputFile);
+    }
+
+    protected void execute(final String[] args, final File outputFile)
+            throws MojoExecutionException {
+        execute(args, this.artifacts, outputFile);
     }
 
     private void execute(final String[] args, final Set<Artifact> artifacts,
             final File outputFile) throws MojoExecutionException {
 
-        // System.out.println("\n\n\n");
-        // System.out.println(this.compileClasspathElements);
-        // System.out.println("\n\n\n");
-        // System.out.println(this.testClasspathElements);
-        // System.out.println("\n\n\n");
         final Set<Artifact> artis = new HashSet<Artifact>();
         resolveTransitively(artis, this.project.getArtifact());
 
         final Iterator<Artifact> iterator = artis.iterator();
         while (iterator.hasNext()) {
             final Artifact artifact = iterator.next();
-            // System.out.println(artifact + " -> "
-            // + artifact.getArtifactHandler().isAddedToClasspath() + " "
-            // + artifact.getArtifactHandler().isIncludesDependencies());
             if (artifact.getArtifactHandler().getPackaging().equals("gem")) {
-                // TODO maybe better remove them add the end
+                // TODO maybe better remove them at the end
                 iterator.remove();
             }
-            // resolveTransitively(artifacts, artifact);
         }
-        // System.out.println(artis);
+
         try {
             getLog().info("jruby fork      : " + this.fork);
             getLog().info("launch directory: " + launchDirectory());
@@ -372,7 +368,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                                                                                    this.remoteRepositories,
                                                                                    this.localRepository,
                                                                                    this.metadata);
-            System.out.println(artifact + " " + arr);
+            // System.out.println(artifact + " " + arr);
             for (final Object artiObject : arr.getArtifacts()) {
                 // allow older api to work
                 final Artifact arti = (Artifact) artiObject;
@@ -396,27 +392,11 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             e.printStackTrace();
         }
     }
-}
 
-// System.out.println(arti
-// + " "
-// + "java".equals(arti.getArtifactHandler()
-// .isIncludesDependencies()) + " "
-// + arti.getArtifactHandler().getExtension() + " "
-// + arti.getArtifactHandler().getPackaging() + " "
-// + arti.getArtifactHandler().getClassifier());
-// if (!"provided".equals(artifact.getScope())) {
-// if (!artifacts.contains(arti)
-// // TODO do not handle gem only artifacts for now
-// && !(!arti.hasClassifier() && "gem".equals(arti.getArtifactHandler()
-// .getPackaging()))) {
-// resolveTransitively(artifacts, arti);
-// }
-// artifacts.add(arti);
-// }
-// }
-// }
-// }
-// }
-// }
-// }
+    protected String embeddedRubyFile(final String rubyFile) {
+        return Thread.currentThread()
+                .getContextClassLoader()
+                .getResource(rubyFile)
+                .toExternalForm();
+    }
+}
