@@ -231,7 +231,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                         // + gem.getValue().getArtifact()
                         // + gem.getValue().getDependencies());
                         boolean isResolved = true;
-                        for (final Dependency dependency : gem.getValue()
+                        for (final Dependency dependency : (List<Dependency>) gem.getValue()
                                 .getDependencies()) {
                             if (!dependency.isOptional()
                                     && (Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
@@ -333,7 +333,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                 + "." + project.getArtifactId() + ".rb");
         gemSpecWriter.appendFile(rubyFile);
 
-        for (final Dependency dependency : project.getDependencies()) {
+        for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
             if (!dependency.isOptional() && "jar".equals(dependency.getType())
                     && dependency.getClassifier() == null) {
                 // it will adjust the artifact as well (in case of relocation)

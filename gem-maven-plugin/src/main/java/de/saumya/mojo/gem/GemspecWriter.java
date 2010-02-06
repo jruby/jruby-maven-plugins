@@ -26,7 +26,6 @@ import org.apache.maven.model.License;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 
-
 class GemspecWriter {
 
     final Writer            writer;
@@ -58,15 +57,15 @@ class GemspecWriter {
         append("homepage", project.getUrl());
         append();
 
-        for (final Developer developer : project.getDevelopers()) {
+        for (final Developer developer : (List<Developer>) project.getDevelopers()) {
             appendAuthor(developer.getName(), developer.getEmail());
         }
-        for (final Contributor contributor : project.getContributors()) {
+        for (final Contributor contributor : (List<Contributor>) project.getContributors()) {
             appendAuthor(contributor.getName(), contributor.getEmail());
         }
         append();
 
-        for (final License license : project.getLicenses()) {
+        for (final License license : (List<License>) project.getLicenses()) {
             appendLicense(license.getUrl(), license.getName());
         }
     }
@@ -141,7 +140,7 @@ class GemspecWriter {
             throws IOException {
         this.writer.append("  s.add_dependency '")
                 .append(name)
-                .append("', '")
+                .append("', '~>")
                 .append(gemVersion(version))
                 .append("'\n");
     }
@@ -150,7 +149,7 @@ class GemspecWriter {
             throws IOException {
         this.writer.append("  s.add_development_dependency '")
                 .append(name)
-                .append("', '")
+                .append("', '~>")
                 .append(gemVersion(version))
                 .append("'\n");
     }

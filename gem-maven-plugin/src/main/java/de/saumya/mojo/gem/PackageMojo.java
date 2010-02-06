@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
@@ -101,7 +102,7 @@ public class PackageMojo extends AbstractJRubyMojo {
         }
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings( { "unchecked" })
     private void build(final MavenProject project, final GemArtifact artifact)
             throws MojoExecutionException, IOException {
 
@@ -139,7 +140,7 @@ public class PackageMojo extends AbstractJRubyMojo {
             gemSpecWriter.appendPath("test");
         }
 
-        for (final Dependency dependency : project.getDependencies()) {
+        for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
             if (!dependency.isOptional()
                     && dependency.getType().contains("gem")) {
                 // it will adjust the artifact as well (in case of relocation)

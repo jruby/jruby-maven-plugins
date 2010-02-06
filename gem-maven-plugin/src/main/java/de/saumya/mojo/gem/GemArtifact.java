@@ -19,7 +19,7 @@ import org.apache.maven.project.MavenProject;
 
 public class GemArtifact implements Artifact {
 
-    // helper to make mven2 behave like maven3
+    // helper to make maven2 behave like maven3
     static class GemArtifactHandler implements ArtifactHandler {
 
         private final ArtifactHandler handler;
@@ -335,6 +335,11 @@ public class GemArtifact implements Artifact {
     @Override
     public String toString() {
         return this.artifact.toString();
+    }
+
+    @Override
+    public ArtifactMetadata getMetadata(final Class<?> metadataClass) {
+        return null;
     }
 
 }

@@ -51,7 +51,7 @@
         <packaging>gem</packaging>
         <language>ruby</language>
         <addedToClasspath>false</addedToClasspath>
-        <includesDependencies>true</includesDependencies>
+        <includesDependencies>false</includesDependencies>
       </configuration>
     </component>
     <component>
@@ -97,7 +97,22 @@
         <packaging>gem</packaging>
         <language>ruby</language>
         <addedToClasspath>false</addedToClasspath>
-        <includesDependencies>true</includesDependencies>
+        <includesDependencies>false</includesDependencies>
+      </configuration>
+    </component>
+    <component>
+      <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+      <role-hint>jar-gem</role-hint>
+      <implementation>
+        org.apache.maven.artifact.handler.DefaultArtifactHandler
+      </implementation>
+      <configuration>
+        <extension>jar</extension>
+        <type>jar-gem</type>
+        <packaging>jar</packaging>
+        <language>java</language>
+        <addedToClasspath>true</addedToClasspath>
+        <includesDependencies>false</includesDependencies>
       </configuration>
     </component>
   </components>

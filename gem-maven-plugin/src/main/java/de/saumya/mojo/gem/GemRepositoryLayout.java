@@ -51,6 +51,7 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
 
     private String pathOfRepositoryMetadata(final ArtifactMetadata metadata,
             final String filename) {
+        System.out.println("metadata -------------- " + filename);
         final StringBuffer path = new StringBuffer();
 
         path.append(metadata.getGroupId()).append(GROUP_SEPARATOR);
