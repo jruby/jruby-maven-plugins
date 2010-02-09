@@ -21,6 +21,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
+import org.apache.maven.repository.legacy.UpdateCheckManager;
 
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
@@ -32,6 +33,11 @@ public class InitializeMojo extends AbstractJRubyMojo {
 
     private static final int               ONE_DAY_IN_MILLIS = 86400000;
     private final List<ArtifactRepository> gemRepositories   = new ArrayList<ArtifactRepository>();
+
+    /**
+     * @component
+     */
+    UpdateCheckManager                     updateCheckManager;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -102,7 +108,7 @@ public class InitializeMojo extends AbstractJRubyMojo {
                     "-e",
                     "ARGV[0] = '" + artifact.getFile().getAbsolutePath()
                             + "'\nrequire('" + embeddedRubyFile("spec2pom.rb")
-                            + "')" }, pom);
+                            + "')" }, pom, false);
             pom.setLastModified(artifact.getFile().lastModified());
         }
     }
@@ -116,11 +122,7 @@ public class InitializeMojo extends AbstractJRubyMojo {
             final Map<String, Artifact> visitedArtifacts,
             final boolean includeTest) throws MojoExecutionException {
         getLog().info("collect artifact for " + artifact);
-        if (artifact != this.project.getArtifact()) {
-            // createMissingPom(artifact);
-
-            resolve(artifact);
-        }
+        resolve(artifact);
         try {
             final MavenProject project = artifact != this.project.getArtifact()
                     ? this.builder.buildFromRepository(artifact,
@@ -128,10 +130,59 @@ public class InitializeMojo extends AbstractJRubyMojo {
                                                        this.localRepository)
                     : this.project;
 
+            project.setDependencyArtifacts(project.createArtifacts(this.artifactFactory,
+                                                                   artifact.getScope(),
+                                                                   null));
             createMetadata(project);
-            // this.metadata.retrieve(artifact,
-            // this.localRepository,
-            // this.remoteRepositories);
+
+            project.setRemoteArtifactRepositories(this.remoteRepositories);
+
+            final ArtifactResolutionResult resultt = this.resolver.resolveTransitively(project.getDependencyArtifacts(),
+                                                                                       project.getArtifact(),
+                                                                                       this.localRepository,
+                                                                                       this.remoteRepositories,
+                                                                                       this.metadata,
+                                                                                       null);
+            project.setArtifacts(resultt.getArtifacts());
+            for (final Artifact dependencyArtifact : (Set<Artifact>) project.getDependencyArtifacts()) {
+                if ("gem".equals(dependencyArtifact.getType())) {
+                    if (!visitedArtifacts.containsKey(key(dependencyArtifact))) {
+                        collectArtifacts(dependencyArtifact,
+                                         visitedArtifacts,
+                                         false);
+                    }
+                }
+            }
+
+            // for (final Dependency dep : (List<Dependency>)
+            // project.getDependencies()) {
+            // if ("gem".equals(dep.getType())) {
+            // final Artifact dependencyArtifact =
+            // this.artifactFactory.createDependencyArtifact(dep.getGroupId(),
+            // dep.getArtifactId(),
+            // VersionRange.createFromVersionSpec(dep.getVersion()),
+            // dep.getType(),
+            // dep.getClassifier(),
+            // dep.getScope());
+            // if ((Artifact.SCOPE_COMPILE + "+" +
+            // Artifact.SCOPE_RUNTIME).contains(dependencyArtifact.getScope())
+            // && !visitedArtifacts.containsKey(key(dependencyArtifact))) {
+            // if (dependencyArtifact.getVersion() != null) {
+            // collectArtifacts(dependencyArtifact,
+            // visitedArtifacts,
+            // false);
+            // }
+            // else {
+            //
+            // }
+            // }
+            // }
+            // }
+            visitedArtifacts.put(key(artifact), artifact);
+
+            if (true) {
+                return;
+            }
 
             project.setDependencyArtifacts(project.createArtifacts(this.artifactFactory,
                                                                    artifact.getScope(),
@@ -235,7 +286,8 @@ public class InitializeMojo extends AbstractJRubyMojo {
         getLog().info("process metadata for " + project.getArtifact() + " "
                 + project.getDependencies());
         for (final Dependency dep : (List<Dependency>) project.getDependencies()) {
-            if ("gem".equals(dep.getType())) {
+            if ("gem".equals(dep.getType())
+                    && (Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dep.getScope())) {
                 final Artifact dependencyArtifact = this.artifactFactory.createDependencyArtifact(dep.getGroupId(),
                                                                                                   dep.getArtifactId(),
                                                                                                   VersionRange.createFromVersionSpec(dep.getVersion()),
@@ -245,9 +297,10 @@ public class InitializeMojo extends AbstractJRubyMojo {
                 final ArtifactRepositoryMetadata repositoryMetadata = new ArtifactRepositoryMetadata(dependencyArtifact);
 
                 // TODO do not assume to have only ONE gem repository
+                final ArtifactRepository repository = this.gemRepositories.get(0);
                 final File metadataFile = new File(this.localRepository.getBasedir(),
                         this.localRepository.pathOfLocalRepositoryMetadata(repositoryMetadata,
-                                                                           this.gemRepositories.get(0)));
+                                                                           repository));
 
                 // update them only once a day
                 if (System.currentTimeMillis() - metadataFile.lastModified() > ONE_DAY_IN_MILLIS) {
@@ -261,34 +314,39 @@ public class InitializeMojo extends AbstractJRubyMojo {
                                             + "'\nrequire('"
                                             + embeddedRubyFile("metadata.rb")
                                             + "')" },
-                            metadataFile);
+                            metadataFile,
+                            false);
+
+                    this.updateCheckManager.touch(repositoryMetadata,
+                                                  repository,
+                                                  metadataFile);
                 }
             }
         }
     }
 
     private void resolve(final Artifact artifact) throws MojoExecutionException {
-        if (this.project.getArtifact() != artifact
-                && artifact.getFile() == null || !artifact.getFile().exists()) {
-            getLog().info("resolve " + artifact);
+        if (artifact != null && this.project.getArtifact() != artifact) {
+            if (artifact.getFile() == null || !artifact.getFile().exists()) {
+                getLog().info("resolve " + artifact);
 
-            // final ArtifactResolutionRequest request = new
-            // ArtifactResolutionRequest().setArtifact(artifact)
-            // .setLocalRepository(this.localRepository)
-            // .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
-
-            try {
-                this.resolver.resolve(artifact,
-                                      this.project.getRemoteArtifactRepositories(),
-                                      this.localRepository);
+                // final ArtifactResolutionRequest request = new
+                // ArtifactResolutionReqquest().setArtifact(artifact)
+                // .setLocalRepository(this.localRepository)
+                // .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+                try {
+                    this.resolver.resolve(artifact,
+                                          this.remoteRepositories,
+                                          this.localRepository);
+                }
+                catch (final ArtifactResolutionException e) {
+                    throw new MojoExecutionException("resolve error", e);
+                }
+                catch (final ArtifactNotFoundException e) {
+                    throw new MojoExecutionException("resolve error", e);
+                }
             }
-            catch (final ArtifactResolutionException e) {
-                throw new MojoExecutionException("resolve error", e);
-            }
-            catch (final ArtifactNotFoundException e) {
-                throw new MojoExecutionException("resolve error", e);
-            }
+            createMissingPom(artifact);
         }
-        createMissingPom(artifact);
     }
 }
