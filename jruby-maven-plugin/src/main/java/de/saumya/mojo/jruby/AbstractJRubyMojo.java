@@ -289,7 +289,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
             execute(("-S maybe_install_gems" + gems.toString()).split("\\s+"),
                     NO_ARTIFACTS,
-                    null);
+                    null,
+                    true);
 
             for (final String gem : gemNames) {
                 try {
@@ -309,33 +310,43 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     protected void execute(final String args) throws MojoExecutionException {
-        execute(args.trim().split("\\s+"), this.artifacts, this.outputFile);
+        execute(args.trim().split("\\s+"),
+                this.artifacts,
+                this.outputFile,
+                true);
     }
 
     protected void execute(final String[] args) throws MojoExecutionException {
-        execute(args, this.artifacts, this.outputFile);
+        execute(args, this.artifacts, this.outputFile, true);
     }
 
     protected void execute(final String[] args, final File outputFile)
             throws MojoExecutionException {
-        execute(args, this.artifacts, outputFile);
+        execute(args, this.artifacts, outputFile, true);
+    }
+
+    protected void execute(final String[] args, final File outputFile,
+            final boolean resolveArtifacts) throws MojoExecutionException {
+        execute(args, this.artifacts, outputFile, false);
     }
 
     private void execute(final String[] args, final Set<Artifact> artifacts,
-            final File outputFile) throws MojoExecutionException {
+            final File outputFile, final boolean resolveArtifacts)
+            throws MojoExecutionException {
 
         final Set<Artifact> artis = new HashSet<Artifact>();
-        resolveTransitively(artis, this.project.getArtifact());
+        if (resolveArtifacts) {
+            resolveTransitively(artis, this.project.getArtifact());
 
-        final Iterator<Artifact> iterator = artis.iterator();
-        while (iterator.hasNext()) {
-            final Artifact artifact = iterator.next();
-            if (artifact.getArtifactHandler().getPackaging().equals("gem")) {
-                // TODO maybe better remove them at the end
-                iterator.remove();
+            final Iterator<Artifact> iterator = artis.iterator();
+            while (iterator.hasNext()) {
+                final Artifact artifact = iterator.next();
+                if (artifact.getArtifactHandler().getPackaging().equals("gem")) {
+                    // TODO maybe better remove them at the end
+                    iterator.remove();
+                }
             }
         }
-
         try {
             if (this.verbose) {
                 getLog().info("jruby fork      : " + this.fork);
