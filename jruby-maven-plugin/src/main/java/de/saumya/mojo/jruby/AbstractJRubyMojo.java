@@ -46,6 +46,13 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected boolean                  fork;
 
     /**
+     * verbose jruby relatred output
+     * 
+     * @parameter expression="${jruby.verbose}" default-value="false"
+     */
+    protected boolean                  verbose;
+
+    /**
      * the launch directory for the JRuby execution.
      * 
      * @parameter expression="${project.basedir}"
@@ -231,7 +238,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             throw new DependencyResolutionRequiredException(artifact);
         }
 
-        getLog().info("jruby version   : " + version);
+        if (this.verbose) {
+            getLog().info("jruby version   : " + version);
+        }
         return artifact;
     }
 
@@ -246,7 +255,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                 if (this.jrubyVersion != null) {
                     getLog().warn("the configured jruby-version gets ignored in preference to the jruby dependency");
                 }
-                getLog().info("jruby version   : " + artifact.getVersion());
+                if (this.verbose) {
+                    getLog().info("jruby version   : " + artifact.getVersion());
+                }
                 return artifact;
             }
         }
@@ -326,16 +337,19 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
 
         try {
-            getLog().info("jruby fork      : " + this.fork);
-            getLog().info("launch directory: " + launchDirectory());
-            getLog().info("jruby args      : " + Arrays.toString(args));
+            if (this.verbose) {
+                getLog().info("jruby fork      : " + this.fork);
+                getLog().info("launch directory: " + launchDirectory());
+                getLog().info("jruby args      : " + Arrays.toString(args));
+            }
             final Launcher launcher;
             if (this.fork) {
                 launcher = new AntLauncher(getLog(),
                         this.jrubyHome,
                         this.gemHome,
                         this.gemPath,
-                        this.jrubyLaunchMemory);
+                        this.jrubyLaunchMemory,
+                        this.verbose);
             }
             else {
                 launcher = new EmbeddedLauncher(getLog(), this.classRealm);

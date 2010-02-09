@@ -22,21 +22,25 @@ import org.codehaus.plexus.util.StringUtils;
 
 class AntLauncher extends AbstractLauncher {
 
-    private final File   jrubyHome;
+    private final File    jrubyHome;
 
-    private final File   jrubyGemHome;
+    private final File    jrubyGemHome;
 
-    private final File   jrubyGemPath;
+    private final File    jrubyGemPath;
 
-    private final String jrubyLaunchMemory;
+    private final String  jrubyLaunchMemory;
+
+    private final boolean verbose;
 
     AntLauncher(final Log log, final File jrubyHome, final File jrubyGemHome,
-            final File jrubyGemPath, final String jrubyLaunchMemory) {
+            final File jrubyGemPath, final String jrubyLaunchMemory,
+            final boolean verbose) {
         super(log);
         this.jrubyGemHome = jrubyGemHome;
         this.jrubyGemPath = jrubyGemPath;
         this.jrubyHome = jrubyHome;
         this.jrubyLaunchMemory = jrubyLaunchMemory;
+        this.verbose = verbose;
     }
 
     public void execute(final File launchDirectory, final String[] args,
@@ -93,7 +97,9 @@ class AntLauncher extends AbstractLauncher {
             v.setValue(this.jrubyGemPath.getAbsolutePath());
             java.addEnv(v);
         }
-        getLog().info("java classpath  : " + p.toString());
+        if (this.verbose) {
+            getLog().info("java classpath  : " + p.toString());
+        }
 
         for (final String arg : args) {
             java.createArg().setValue(arg);
