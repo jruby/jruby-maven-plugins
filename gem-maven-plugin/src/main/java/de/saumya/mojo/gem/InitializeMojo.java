@@ -31,6 +31,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
+import org.codehaus.plexus.util.FileUtils;
 
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
@@ -207,10 +208,6 @@ public class InitializeMojo extends AbstractJRubyMojo {
         collectArtifacts(this.project.getArtifact(), collectedArtifacts, true);
         collectedArtifacts.remove(key(this.project.getArtifact()));
 
-        // System.out.println(collectedArtifacts.values());
-        // System.out.println(this.project.getDependencyArtifacts());
-        // System.out.println(this.project.getArtifacts());
-
         for (final Artifact artifact : collectedArtifacts.values()) {
             if (artifact.getType().contains("gem")) {
                 final String prefix = artifact.getGroupId().equals("rubygems")
@@ -246,17 +243,31 @@ public class InitializeMojo extends AbstractJRubyMojo {
         final File pom = new File(artifact.getFile()
                 .getPath()
                 .replaceFirst("(-java)?.gem$", ".pom"));
-        if (artifact.getGroupId().equals("rubygems")
-                && (pom.lastModified() != artifact.getFile().lastModified() || pom.length() == artifact.getFile()
-                        .length())) {
-            getLog().info("creating pom for " + artifact);
+        if (artifact.getGroupId().equals("rubygems")) {
 
-            execute(new String[] {
-                    "-e",
-                    "ARGV[0] = '" + artifact.getFile().getAbsolutePath()
-                            + "'\nrequire('" + embeddedRubyFile("spec2pom.rb")
-                            + "')" }, pom, false);
-            pom.setLastModified(artifact.getFile().lastModified());
+            boolean isPom = false;
+            if (pom.lastModified() == artifact.getFile().lastModified()) {
+                try {
+                    isPom = FileUtils.fileRead(pom).startsWith("<?xml");
+                }
+                catch (final IOException e) {
+                    // well just create a new pom now
+                }
+            }
+            if (!isPom) {
+                getLog().info("creating pom for " + artifact);
+
+                execute(new String[] {
+                                "-e",
+                                "ARGV[0] = '"
+                                        + artifact.getFile().getAbsolutePath()
+                                        + "'\nrequire('"
+                                        + embeddedRubyFile("spec2pom.rb")
+                                        + "')" },
+                        pom,
+                        false);
+                pom.setLastModified(artifact.getFile().lastModified());
+            }
         }
     }
 
@@ -311,117 +322,8 @@ public class InitializeMojo extends AbstractJRubyMojo {
                 }
             }
 
-            // for (final Dependency dep : (List<Dependency>)
-            // project.getDependencies()) {
-            // if ("gem".equals(dep.getType())) {
-            // final Artifact dependencyArtifact =
-            // this.artifactFactory.createDependencyArtifact(dep.getGroupId(),
-            // dep.getArtifactId(),
-            // VersionRange.createFromVersionSpec(dep.getVersion()),
-            // dep.getType(),
-            // dep.getClassifier(),
-            // dep.getScope());
-            // if ((Artifact.SCOPE_COMPILE + "+" +
-            // Artifact.SCOPE_RUNTIME).contains(dependencyArtifact.getScope())
-            // && !visitedArtifacts.containsKey(key(dependencyArtifact))) {
-            // if (dependencyArtifact.getVersion() != null) {
-            // collectArtifacts(dependencyArtifact,
-            // visitedArtifacts,
-            // false);
-            // }
-            // else {
-            //
-            // }
-            // }
-            // }
-            // }
             visitedArtifacts.put(key(artifact), artifact);
 
-            // if (true) {
-            // return;
-            // }
-            //
-            // project.setDependencyArtifacts(project.createArtifacts(this.artifactFactory,
-            // artifact.getScope(),
-            // null));
-            //
-            // // final ArtifactResolutionRequest request = new
-            // // ArtifactResolutionRequest().setArtifact(project.getArtifact())
-            // // .setArtifactDependencies(project.getDependencyArtifacts())
-            // // .setLocalRepository(this.localRepository)
-            // //
-            // .setRemoteRepositories(project.getRemoteArtifactRepositories())
-            // // .setManagedVersionMap(project.getManagedVersionMap());
-            // // request.setResolveTransitively(true);
-            // final List<Artifact> filtered = new ArrayList<Artifact>();
-            // final ArtifactFilter filter = new ArtifactFilter() {
-            //
-            // @Override
-            // public boolean include(final Artifact artifact) {
-            // if (Artifact.SCOPE_TEST.equals(artifact.getScope())) {
-            // filtered.add(artifact);
-            // }
-            // // System.out.println(artifact
-            // // + " "
-            // // + artifact.getScope()
-            // // + " "
-            // // + (includeTest
-            // // && Artifact.SCOPE_TEST.equals(artifact.getScope()) ||
-            // // !Artifact.SCOPE_TEST.equals(artifact.getScope())));
-            // return (includeTest &&
-            // Artifact.SCOPE_TEST.equals(artifact.getScope()))
-            // || !Artifact.SCOPE_TEST.equals(artifact.getScope());
-            // }
-            // };
-            //
-            // // System.out.println(artifact + " --> " +
-            // project.getArtifacts());
-            // if (artifact.getScope() == null
-            // || (includeTest &&
-            // Artifact.SCOPE_TEST.equals(artifact.getScope()))
-            // || !Artifact.SCOPE_TEST.equals(artifact.getScope())) {
-            // final ArtifactResolutionResult result =
-            // this.resolver.resolveTransitively(project.getDependencyArtifacts(),
-            // project.getArtifact(),
-            // this.localRepository,
-            // project.getRemoteArtifactRepositories(),
-            // this.metadata,
-            // filter);
-            // project.setArtifacts(result.getArtifacts());
-            // // System.out.println(artifact + " --> " +
-            // // project.getArtifacts());
-            // for (final Artifact depArtifact : project.getArtifacts()) {
-            // if ((Artifact.SCOPE_COMPILE + "+" +
-            // Artifact.SCOPE_RUNTIME).contains(depArtifact.getScope())
-            // && !visitedArtifacts.containsKey(key(depArtifact))) {
-            // collectArtifacts(depArtifact, visitedArtifacts, false);
-            // }
-            // else {
-            // if (depArtifact.getFile() != null
-            // && depArtifact.getFile().exists()) {
-            // createMissingPom(depArtifact);
-            // }
-            // }
-            // }
-            // for (final Artifact depArtifact :
-            // project.getDependencyArtifacts()) {
-            // if (depArtifact.getFile() != null
-            // && depArtifact.getFile().exists()) {
-            // createMissingPom(depArtifact);
-            // }
-            // }
-            // for (final Artifact depArtifact : filtered) {
-            // resolve(depArtifact);
-            // }
-            //
-            // getLog().info("visited " + artifact + " "
-            // + result.getArtifacts()
-            // + project.getDependencyArtifacts());
-            // visitedArtifacts.put(key(artifact), artifact);
-            // }
-            // else {
-            // getLog().info("skipped visit of " + artifact);
-            // }
         }
         catch (final InvalidDependencyVersionException e) {
             throw new MojoExecutionException("resolve error", e);
@@ -471,11 +373,18 @@ public class InitializeMojo extends AbstractJRubyMojo {
             getLog().info("creating metadata for " + dependencyArtifact);
 
             metadataFile.getParentFile().mkdirs();
-            execute(new String[] {
-                    "-e",
-                    "ARGV[0] = '" + dependencyArtifact.getArtifactId()
-                            + "'\nrequire('" + embeddedRubyFile("metadata.rb")
-                            + "')" }, metadataFile, false);
+            final String script = "ARGV[0] = '"
+                    + dependencyArtifact.getArtifactId() + "'\nrequire('"
+                    + embeddedRubyFile("metadata.rb") + "')";
+            try {
+                execute(new String[] { "-e", script }, metadataFile, false);
+            }
+            catch (final MojoExecutionException e) {
+                metadataFile.delete();
+                // retry due to often timeout errors
+                // TODO make the retry on timeout errors only !!!
+                execute(new String[] { "-e", script }, metadataFile, false);
+            }
 
             this.updateCheckManager.touch(repositoryMetadata,
                                           repository,
