@@ -28,6 +28,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  * goal to convert that artifact into a gem.
  * 
  * @goal gemify
+ * @requiresDependencyResolution test
  */
 public class GemifyMojo extends AbstractJRubyMojo {
 

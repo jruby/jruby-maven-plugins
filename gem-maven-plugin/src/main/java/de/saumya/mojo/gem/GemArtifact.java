@@ -337,7 +337,7 @@ public class GemArtifact implements Artifact {
         return this.artifact.toString();
     }
 
-    @Override
+    // @Override
     public ArtifactMetadata getMetadata(final Class<?> metadataClass) {
         return null;
     }

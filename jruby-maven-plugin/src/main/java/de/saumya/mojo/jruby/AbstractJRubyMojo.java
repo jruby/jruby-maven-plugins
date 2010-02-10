@@ -29,7 +29,6 @@ import org.codehaus.classworlds.ClassRealm;
 /**
  * Base for all JRuby mojos.
  * 
- * @requiresDependencyResolution compile
  * @requiresProject false
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {

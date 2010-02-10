@@ -6,6 +6,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * maven wrpper around IRB.
  * 
  * @goal irb
+ * @requiresDependencyResolution test
  */
 public class IRBMojo extends AbstractJRubyMojo {
 

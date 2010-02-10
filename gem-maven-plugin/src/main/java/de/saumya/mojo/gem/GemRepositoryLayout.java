@@ -3,13 +3,18 @@ package de.saumya.mojo.gem;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 
 public class GemRepositoryLayout implements ArtifactRepositoryLayout {
 
-    private static final char PATH_SEPARATOR     = '/';
-    private static final char GROUP_SEPARATOR    = '.';
-    private static final char ARTIFACT_SEPARATOR = '-';
+    private static final char                     PATH_SEPARATOR     = '/';
+    private static final char                     GROUP_SEPARATOR    = '.';
+    private static final char                     ARTIFACT_SEPARATOR = '-';
+
+    private static final ArtifactRepositoryPolicy DISABLED_POLICY    = new ArtifactRepositoryPolicy(false,
+                                                                             ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER,
+                                                                             ArtifactRepositoryPolicy.CHECKSUM_POLICY_IGNORE);
 
     public String getId() {
         return "gem";
@@ -99,4 +104,14 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
     public String pathOfRemoteRepositoryMetadata(final ArtifactMetadata metadata) {
         return pathOfRepositoryMetadata(metadata, metadata.getRemoteFilename());
     }
+
+    // public ArtifactRepository newMavenArtifactRepository(final String id,
+    // final String url, final ArtifactRepositoryPolicy snapshots,
+    // final ArtifactRepositoryPolicy releases) {
+    // return new MavenArtifactRepository(id,
+    // url,
+    // this,
+    // DISABLED_POLICY,
+    // DISABLED_POLICY);
+    // }
 }
