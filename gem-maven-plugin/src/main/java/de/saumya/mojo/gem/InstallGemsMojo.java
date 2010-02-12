@@ -8,7 +8,9 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  * goal to run gem install
  * 
  * @goal install-gems
+ * @deprecated use InstallMojo instead
  */
+@Deprecated
 public class InstallGemsMojo extends AbstractJRubyMojo {
     /**
      * list of comma separated gem names.

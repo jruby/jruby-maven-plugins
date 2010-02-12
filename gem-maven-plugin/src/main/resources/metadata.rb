@@ -14,7 +14,8 @@ dep = Gem::Dependency.new(name, Gem::Requirement.default)
 
 fetcher = Gem::SpecFetcher.fetcher
 
-tuples = fetcher.find_matching dep, true, false, nil
+tuples = fetcher.find_matching(dep, true, false, false)
+tuples = tuples + fetcher.find_matching(dep, false, false, true)
 
 warn name
 warn tuples.inspect

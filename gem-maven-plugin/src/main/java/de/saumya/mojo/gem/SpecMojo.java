@@ -23,7 +23,6 @@ public class SpecMojo extends AbstractJRubyMojo {
         if (this.args != null) {
             commandString += " " + this.args;
         }
-        // TODO skip classes directory !!!
-        execute(commandString);
+        execute(commandString, false);
     }
 }

@@ -1,0 +1,75 @@
+h1. rails3 maven plugin
+
+p. this plugin allows to manage a rails application from maven (i.e. also from a maven shell). you have a goal *rails3:rails* which generates you an empty rails application with pom and then you can use *rails3:rake*, *rails3:generate* and *rails3:server* to manage common tasks with rails. finally there is an internal goal *rail3:war* which helps packing the rails application inside a war file.
+
+p. *note*: the prefix *rails3* is to distinguise another plugin for rails 2.3.x with *rails* as prefix
+
+h2. commandline/configuration arguments
+
+p. in general you can use @-Dargs=....@ to pass in any arguments to any rails goal. but in case you want to execute more then one goal you have specialized argumets for each goal in the form @-Dxyz.args=.....@ where @xyz@ is the goal the arguments belong to. furthermore some goals have special arguments like the @tasks@ with the @rails:rake@ goal or @app_path@ of @rails3:rails@ or @generator@ of @rails3:generate@. see also the documentation of the respective goal for more details.
+
+p. when configuring the plugin within the pom.xml you can use the same either a short argument name for all the goals or longer argument names for each goal different. the goal specific arguments have the form @xyzArgs@ where @xyz@ is the goal name.
+
+h2. the plugin needs maven3
+
+p. this plugin uses gem-maven-plugin to manage gem artifacts which needs maven3: http://maven.apache.org/downloads.html
+
+h2. rails3:rails
+
+h3. use outside of rails application
+
+@mvn rails:rails -Dapp_path=yet_another_blog@
+
+p. will generate a new application in *yet_another_blog* using the mysql database. with
+
+@mvn rails3:rails@
+
+p. you get the usual help messages.
+
+p. *limitations*: the edge and dev rails version might not work to be handled correctly, but when managed with bundler it should work.
+
+h3. use inside of rails application
+
+p. an overview over the different possible commands
+
+@mvn rails3:rails@
+
+p. and use the following for execute one of them
+
+@mvn rails3:rails -Dargs=help@
+
+h2. rails3:rake
+
+p. find out about the possible tasks with
+
+@mvn rails3:rake -Drails.args="-T"@
+
+p. or call a task like
+
+@mvn rails3:rake -Dtask=db:create -Drails.args="--trace"@
+
+h2. rails3:server
+
+p. run the development server with
+
+@mvn rails3:server@
+
+p. or with extra arguments
+
+@mvn rails3:run -Drails.args="-e production"@
+
+h2. rails3:generate
+
+p. to get some overview of the installed generators execute
+
+@mvn rails3:generate@
+
+p. or call a specific generator, i.e. model
+
+@mvn rails3:generate -Dgenerator=model -Drails.args="UserAccount name:string"@
+
+h2. rails3:console + rails3:dbconsole
+
+p. two goals to run a console within the rails environment
+
+p. *note*: not really working yet :-(

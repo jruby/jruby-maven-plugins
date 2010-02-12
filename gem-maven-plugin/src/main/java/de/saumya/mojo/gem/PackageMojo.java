@@ -57,7 +57,7 @@ public class PackageMojo extends AbstractJRubyMojo {
                     this.launchDir = new File(System.getProperty("user.dir"));
                 }
 
-                execute("-S gem build " + this.gemSpec.getAbsolutePath());
+                execute("-S gem build " + this.gemSpec.getAbsolutePath(), false);
 
                 final File gem = new File(this.launchDir, artifact.getGemFile());
                 if (project.getFile() != null) {

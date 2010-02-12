@@ -275,6 +275,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
     }
 
+    @Deprecated
     protected void ensureGems(final String[] gemNames)
             throws MojoExecutionException {
         final StringBuilder gems = new StringBuilder();
@@ -308,11 +309,16 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         ensureGems(new String[] { gemName });
     }
 
-    protected void execute(final String args) throws MojoExecutionException {
+    protected void execute(final String args, final boolean resolveArtifacts)
+            throws MojoExecutionException {
         execute(args.trim().split("\\s+"),
                 this.artifacts,
                 this.outputFile,
-                true);
+                resolveArtifacts);
+    }
+
+    protected void execute(final String args) throws MojoExecutionException {
+        execute(args, true);
     }
 
     protected void execute(final String[] args) throws MojoExecutionException {
@@ -417,10 +423,10 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
     }
 
-    protected String embeddedRubyFile(final String rubyFile) {
+    protected String fileFromClassloader(final String file) {
         return Thread.currentThread()
                 .getContextClassLoader()
-                .getResource(rubyFile)
+                .getResource(file)
                 .toExternalForm();
     }
 }

@@ -14,8 +14,8 @@ puts <<-POM
   <artifactId>#{spec.name}</artifactId>
   <version>#{spec.version}</version>
   <packaging>gem</packaging>
-  <name>#{spec.summary}</name>
-  <description>#{spec.description}</description>
+  <name><![CDATA[#{spec.summary}]]></name>
+  <description><![CDATA[#{spec.description}]]></description>
   <url>#{spec.homepage}</url>
   <dependencies>
 POM
@@ -33,9 +33,9 @@ spec.dependencies.each do |dep|
             "compile"
           end
   spec_tuples = fetcher.find_matching dep, true, false, nil
-  if spec_tuples.empty?
-    warn "#{dep} is empty: #{spec_tuples.inspect}" 
-  else
+ # if spec_tuples.empty?
+#    warn "#{dep} is empty: #{spec_tuples.inspect}" 
+ # else
     # TODO make version ranges when applicable
     req = dep.version_requirements.requirements[0]
     gem_version = req[1].to_s
@@ -56,12 +56,12 @@ spec.dependencies.each do |dep|
       version = "#{spec_tuples.first[0][1]}"
       #version = "[#{gem_version},#{gem_version.sub(/[.]*$/, '').to_i + 1}.0.0)"
     else
-      puts "npt implemented comparator: #{req.inspect}"
+      puts "not implemented comparator: #{req.inspect}"
       version = "[0.0.0,]"
     end
     warn "#{version} #{req.inspect}"
 #    version = spec_tuples.last[0][1]
-    is_java = spec_tuples.last[0][2] == 'java'
+    is_java = spec_tuples.last[0][2] == 'java' unless spec_tuples.empty? 
     puts <<-POM
     <dependency>
       <groupId>rubygems</groupId>
@@ -78,7 +78,7 @@ POM
       <scope>#{scope}</scope>
     </dependency>
 POM
-  end
+#  end
 end
 
 puts <<-POM

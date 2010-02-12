@@ -34,7 +34,7 @@ public class InstallMojo extends AbstractJRubyMojo {
             if (this.args != null) {
                 commandString += " " + this.args;
             }
-            execute(commandString);
+            execute(commandString, false);
         }
 
     }
