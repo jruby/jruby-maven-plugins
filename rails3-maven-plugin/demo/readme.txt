@@ -2,14 +2,16 @@
 
 # http://maven.apache.org/download.html
 
-# get the pom.xml (once the plugin is part of the maven central repository this pom becomes obsolete)
+# get the pom.xml (once the plugin is part of the maven central repository 
+# this pom becomes obsolete). the pom.xml also downloads a snapshot of the
+# activerecord-jdbc-adapter.gem from my personal repository
 
 wget http://github.com/mkristian/jruby-maven-plugins/raw/master/rails3-maven-plugin/demo/pom.xml
 
 # generate the rails application
 mvn rails3:rails -Dapp_path=myapp
 
-# go into the application
+# go into the application directory
 cd myapp
 
 # scaffold a resource
