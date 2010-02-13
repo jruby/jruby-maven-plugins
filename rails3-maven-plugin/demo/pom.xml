@@ -21,6 +21,14 @@
   </pluginRepositories>
   <repositories>
     <repository>
+      <id>saumya</id>
+      <releases>
+	<enabled>true</enabled>
+      </releases>
+      <name>Saumyas Plugins</name>
+      <url>http://mojo.saumya.de</url>
+    </repository>
+    <repository>
       <id>gemcutter</id>
       <releases>
 	<updatePolicy>never</updatePolicy>
@@ -33,6 +41,15 @@
       <layout>gem</layout>
     </repository>
   </repositories>
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>activerecord-jdbc-adapter</artifactId>
+      <version>0.9.3</version>
+      <type>gem</type>
+      <classifier>java</classifier>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>
