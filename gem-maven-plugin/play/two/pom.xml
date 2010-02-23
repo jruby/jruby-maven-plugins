@@ -14,7 +14,7 @@
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>extlib</artifactId>
-      <version>0.9.14</version>
+      <version>0.10.0-SNAPSHOT4</version>
       <type>gem</type>
     </dependency>
     <dependency>

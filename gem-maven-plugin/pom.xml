@@ -5,7 +5,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.9.1</version>
+    <version>0.10.0-SNAPSHOT</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-maven-plugin</artifactId>
@@ -111,7 +111,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>shitty-maven-plugin</artifactId>
-	<version>1.0-alpha-4-SNAPSHOT</version>
+	<version>1.0-alpha-3</version>
         <executions>
 	  <execution>
 	    <id>it-clean</id>
@@ -128,7 +128,7 @@
             </goals>    
             <configuration>
 	      <!-- WORK AROUND: use same version as plugin otherwise test plugin will not work -->
-	      <version>0.9.1</version>
+	      <version>0.10.0-SNAPSHOT</version>
               <parallel>true</parallel>
               <threadCount>2</threadCount>
 	    </configuration>
