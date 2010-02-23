@@ -12,7 +12,7 @@
   <url>http://example.com/</url>
   <prerequisites>
     <!--
-	it needs maven 3 but does not evn reach the check without maven3
+	it needs maven 3 but does not even reach the check without maven3
     -->
     <maven>3.0</maven>
   </prerequisites>
@@ -57,6 +57,16 @@
       <version>3.6.3.054</version>
       <type>gem</type>
     </dependency>
+    <dependency>
+      <groupId>org.jruby.rack</groupId>
+      <artifactId>jruby-rack</artifactId>
+      <version>0.9.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-complete</artifactId>
+      <version>1.4.0</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -96,16 +106,30 @@
       </plugin>
       <plugin>
 	<artifactId>maven-compiler-plugin</artifactId>
-	<version>2.1</version>
+	<version>2.0.2</version>
 	<configuration>
 	  <source>1.6</source>
 	  <target>1.6</target>
 	</configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.0.2</version>
+        <configuration>
+        </configuration>
+      </plugin>
+      <plugin>
+	<groupId>org.mortbay.jetty</groupId>
+	<artifactId>jetty-maven-plugin</artifactId>
+	<version>7.0.1.v20091125</version>
+	<configuration>
+	</configuration>
+      </plugin>
     </plugins>
   </build>
   <properties>
-    <jruby.plugins.version>0.9.0</jruby.plugins.version>
+    <jruby.plugins.version>0.9.1</jruby.plugins.version>
     <!-- 
 	 GEM_HOME, GEM_PATH used by 
 	 rails3-maven-plugin, jruby-maven-plugin and gem-maven-plugin 
