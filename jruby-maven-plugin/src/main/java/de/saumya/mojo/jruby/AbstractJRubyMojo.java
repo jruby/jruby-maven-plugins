@@ -220,6 +220,11 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                                                                                     version,
                                                                                     "jar",
                                                                                     null);
+        return resolveJRUBYCompleteArtifact(artifact);
+    }
+
+    private Artifact resolveJRUBYCompleteArtifact(final Artifact artifact)
+            throws DependencyResolutionRequiredException {
         try {
             // final ArtifactResolutionRequest request = new
             // ArtifactResolutionRequest();
@@ -238,7 +243,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
 
         if (this.verbose) {
-            getLog().info("jruby version   : " + version);
+            getLog().info("jruby version   : " + artifact.getVersion());
         }
         return artifact;
     }
@@ -254,10 +259,16 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                 if (this.jrubyVersion != null) {
                     getLog().warn("the configured jruby-version gets ignored in preference to the jruby dependency");
                 }
-                if (this.verbose) {
-                    getLog().info("jruby version   : " + artifact.getVersion());
+                if (artifact.getFile() != null && artifact.getFile().exists()) {
+                    if (this.verbose) {
+                        getLog().info("jruby version   : "
+                                + artifact.getVersion());
+                    }
+                    return artifact;
                 }
-                return artifact;
+                else {
+                    return resolveJRUBYCompleteArtifact(artifact);
+                }
             }
         }
         return resolveJRUBYCompleteArtifact(this.jrubyVersion == null
@@ -382,6 +393,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void resolveTransitively(final Set<Artifact> artifacts,
             final Artifact artifact) {
         // System.out.println(artifact + " resolve:");
