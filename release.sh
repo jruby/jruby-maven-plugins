@@ -14,13 +14,13 @@ find -name "pom.xml" | xargs git add
 git ci -m "release of version ${VERSION}" || exit
 git tag v${VERSION}
 
-mvn3 clean deploy -Dmaven.skip.test=true
+mvn3 clean deploy -Dmaven.test.skip=true
 
 find -name "pom.xml" | xargs sed -i s/${VERSION}/${NEXT}-SNAPSHOT/
 
 find -name "pom.xml" | xargs git add
 git ci -m "next snapshot version ${NEXT}"
 
-mvn3 install -Dmaven.skip.test=true
+mvn3 install -Dmaven.test.skip=true
 
 git push --tags origin master
