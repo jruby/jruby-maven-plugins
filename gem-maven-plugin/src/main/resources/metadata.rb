@@ -14,6 +14,9 @@ dep = Gem::Dependency.new(name, Gem::Requirement.default)
 
 fetcher = Gem::SpecFetcher.fetcher
 
+# TODO make a flag to distinguish prereleases and/or releases -
+# and match it with the repository flag about SNAPSHOT and RELEASE
+
 tuples = fetcher.find_matching(dep, true, false, false)
 tuples = tuples + fetcher.find_matching(dep, false, false, true)
 
