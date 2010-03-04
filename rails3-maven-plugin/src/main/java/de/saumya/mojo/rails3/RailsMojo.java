@@ -2,6 +2,8 @@ package de.saumya.mojo.rails3;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.FileUtils;
@@ -62,16 +64,29 @@ public class RailsMojo extends AbstractRailsMojo {
                 throw new MojoExecutionException("failed to filter " + script,
                         e);
             }
+
+            final String database;
+            final Pattern pattern = Pattern.compile(".*-d\\s+([a-z0-9]+).*");
+            final Matcher matcher = pattern.matcher(commandString);
+            if (matcher.matches()) {
+                database = matcher.group(1);
+            }
+            else {
+                database = "sqlite3";
+            }
             // rectify the Gemfile to allow both ruby + jruby to work
-            // TODO make this to work NOT ONLY with sqlite3
             final File gemfile = new File(app, "Gemfile");
             try {
                 FileUtils.fileWrite(gemfile.getAbsolutePath(),
                                     FileUtils.fileRead(gemfile)
-                                            .replace("\ngem \"sqlite3-ruby\", :require => \"sqlite3\"\n",
-                                                     "\ngem \"sqlite3-ruby\", :require => \"sqlite3\" unless defined?(JRUBY_VERSION)\n"
-                                                             + "gem \"activerecord-jdbc-adapter\", :require =>'jdbc_adapter' if defined?(JRUBY_VERSION)\n"
-                                                             + "gem \"jdbc-sqlite3\", :require => 'jdbc/sqlite3' if defined?(JRUBY_VERSION)\n"));
+                                            .replaceFirst("\ngem (\"[^r][a-z0-9-]+\".*)\n",
+                                                          "\ngem $1 unless defined?(JRUBY_VERSION)\n"
+                                                                  + "gem \"activerecord-jdbc-adapter\", :require =>'jdbc_adapter' if defined?(JRUBY_VERSION)\n"
+                                                                  + "gem \"jdbc-"
+                                                                  + database
+                                                                  + "\", :require => 'jdbc/"
+                                                                  + database
+                                                                  + "' if defined?(JRUBY_VERSION)\n"));
             }
             catch (final IOException e) {
                 throw new MojoExecutionException("failed to filter " + script,
