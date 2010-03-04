@@ -13,6 +13,7 @@ public class InitializeMojo extends AbstractGemMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        // TODO honor offline mode
         execute(Arrays.asList(new Artifact[] { this.project.getArtifact() }));
     }
 

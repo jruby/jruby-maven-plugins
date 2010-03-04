@@ -39,6 +39,17 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  */
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
+    /**
+     * @param expression
+     *            ="${settings.offline}"
+     */
+    private boolean                  offline;
+
+    /**
+     * @parameter default-value="${plugin.artifacts}"
+     */
+    private java.util.List<Artifact> pluginArtifacts;
+
     public class UpdateCheckManager {
 
         public static final String  LAST_UPDATE_TAG = ".lastUpdated";
@@ -184,11 +195,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     private final UpdateCheckManager       updateCheckManager = new UpdateCheckManager();
 
-    /**
-     * @parameter default-value="${plugin.artifacts}"
-     */
-    private java.util.List<Artifact>       pluginArtifacts;
-
     @Override
     public void execute() throws MojoExecutionException {
         execute(this.pluginArtifacts);
@@ -254,7 +260,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     abstract protected void executeWithGems() throws MojoExecutionException;
 
-    private void createMissingPom(final Artifact artifact)
+    private boolean createMissingPom(final Artifact artifact)
             throws MojoExecutionException {
         final File pom = new File(artifact.getFile()
                 .getPath()
@@ -271,20 +277,34 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 }
             }
             if (!isPom) {
-                getLog().debug("<gems> creating pom for " + artifact);
+                if (this.offline) {
+                    getLog().debug("<gems> offline mode - skip creating pom for "
+                            + artifact);
+                }
+                else {
+                    getLog().debug("<gems> creating pom for " + artifact);
+                    // use temporary file until complete file is written out to
+                    // disk
+                    final File tmp = new File(artifact.getFile()
+                            .getParentFile(), artifact.getFile().getName()
+                            + ".tmp");
+                    execute(new String[] {
+                                    "-e",
+                                    "ARGV[0] = '"
+                                            + tmp.getAbsolutePath()
+                                            + "'\nrequire('"
+                                            + fileFromClassloader("spec2pom.rb")
+                                            + "')" },
+                            pom,
+                            false);
 
-                execute(new String[] {
-                                "-e",
-                                "ARGV[0] = '"
-                                        + artifact.getFile().getAbsolutePath()
-                                        + "'\nrequire('"
-                                        + fileFromClassloader("spec2pom.rb")
-                                        + "')" },
-                        pom,
-                        false);
-                pom.setLastModified(artifact.getFile().lastModified());
+                    tmp.renameTo(artifact.getFile());
+                    pom.setLastModified(artifact.getFile().lastModified());
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     private String key(final Artifact artifact) {
@@ -325,6 +345,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 }
                 catch (final AbstractArtifactResolutionException e) {
                     retry = createMetadata(e.getArtifact());
+                    if (!retry) {
+                        getLog().error("error resolving "
+                                               + project.getArtifact(),
+                                       e);
+                    }
                 }
             }
             project.setArtifacts(result.getArtifacts());
@@ -386,26 +411,59 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
         // update them only once a day
         if (System.currentTimeMillis() - metadataFile.lastModified() > ONE_DAY_IN_MILLIS) {
-            getLog().debug("<gems> creating metadata for " + dependencyArtifact);
-
-            metadataFile.getParentFile().mkdirs();
-            final String script = "ARGV[0] = '"
-                    + dependencyArtifact.getArtifactId() + "'\nrequire('"
-                    + fileFromClassloader("metadata.rb") + "')";
-            try {
-                execute(new String[] { "-e", script }, metadataFile, false);
+            if (this.offline) {
+                getLog().debug("<gems> offline mode - skip updating metadata for "
+                        + dependencyArtifact);
+                return false;
             }
-            catch (final MojoExecutionException e) {
-                metadataFile.delete();
-                // retry due to often timeout errors
-                // TODO make the retry on timeout errors only !!!
-                execute(new String[] { "-e", script }, metadataFile, false);
-            }
+            else {
+                getLog().debug("<gems> "
+                        + (metadataFile.exists() ? "updating" : "creating")
+                        + " metadata for " + dependencyArtifact);
 
-            this.updateCheckManager.touch(repositoryMetadata,
-                                          repository,
-                                          metadataFile);
-            return true;
+                metadataFile.getParentFile().mkdirs();
+                // use temporary file until new file is completely written
+                final File tmp = new File(metadataFile.getParentFile(),
+                        metadataFile.getName() + ".tmp");
+                final String script = "ARGV[0] = '"
+                        + dependencyArtifact.getArtifactId() + "'\nrequire('"
+                        + fileFromClassloader("metadata.rb") + "')";
+
+                try {
+                    execute(new String[] { "-e", script }, tmp, false);
+                    tmp.renameTo(metadataFile);
+                    // TODO is that needed ?
+                    metadataFile.setLastModified(System.currentTimeMillis());
+                }
+                catch (final MojoExecutionException e) {
+                    // retry due to often timeout errors
+                    // TODO make the retry on timeout errors only !!!
+                    try {
+                        execute(new String[] { "-e", script }, tmp, false);
+                        tmp.renameTo(metadataFile);
+                        // TODO is that needed ?
+                        metadataFile.setLastModified(System.currentTimeMillis());
+                    }
+                    catch (final MojoExecutionException ee) {
+                        // TODO maybe it is possible to obey fail-fast and
+                        // fail-at-end from the command line switches
+                        if (metadataFile.exists()) {
+                            getLog().warn("failed to update metadata for "
+                                                  + this.artifacts
+                                                  + ", use old one",
+                                          ee);
+                        }
+                        else {
+                            throw ee;
+                        }
+                    }
+                }
+                tmp.delete();
+                this.updateCheckManager.touch(repositoryMetadata,
+                                              repository,
+                                              metadataFile);
+                return true;
+            }
         }
         else {
             return false;
@@ -416,8 +474,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         if (artifact != null && this.project.getArtifact() != artifact) {
             if (artifact.getFile() == null || !artifact.getFile().exists()) {
 
-                // TODO never saw this in the log files again - might not be
-                // needed anymore ?
                 getLog().debug("<gems> resolve " + artifact);
 
                 // final ArtifactResolutionRequest request = new
