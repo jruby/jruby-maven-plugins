@@ -40,8 +40,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
-     * @param expression
-     *            ="${settings.offline}"
+     * @parameter expression ="${settings.offline}"
      */
     private boolean                  offline;
 
