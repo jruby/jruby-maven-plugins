@@ -53,27 +53,6 @@
     </repository>
   </distributionManagement>
 
-<!--
-  <repositories>
-    <repository>
-      <id>central</id>
-      <name>Maven Repository Switchboard</name>
-      <layout>default</layout>
-      <url>http://repo1.maven.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>saumya</id>
-      <name>Saumya's Plugins</name>
-      <url>http://mojo.saumya.de</url>
-      <layout>default</layout>
-    </pluginRepository>
-  </pluginRepositories>
--->
   <build>
     <extensions>
       <extension>
@@ -120,4 +99,34 @@
     <module>gem-maven-plugin</module>
     <module>rails3-maven-plugin</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>integration-tests</id>
+      <build>
+	<defaultGoal>install</defaultGoal>
+	<plugins>
+	  <plugin>
+	    <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>shitty-maven-plugin</artifactId>
+	    <executions>
+	      <execution>
+		<goals>
+		  <goal>clean</goal>
+		  <goal>install</goal>
+		  <goal>test</goal>
+		</goals>
+	      </execution>
+            </executions>
+            <configuration>
+	      <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
+	      <version>0.10.0-SNAPSHOT</version>
+              <parallel>true</parallel>
+              <threadCount>2</threadCount>
+	    </configuration>
+	  </plugin>
+	</plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

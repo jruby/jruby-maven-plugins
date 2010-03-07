@@ -7,7 +7,6 @@
     <groupId>de.saumya.mojo</groupId>
     <version>0.10.0-SNAPSHOT</version>
   </parent>
-  <!--groupId>de.saumya.mojo</groupId-->
   <artifactId>rails3-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Rails3 Maven Mojo</name>
@@ -55,45 +54,8 @@
       <type>gem</type>
       <scope>test</scope>
     </dependency>
-      
-<!--
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact</artifactId>
-      <version>${maven.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>2.2.1</version>
-    </dependency> 
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact</artifactId>
-      <version>2.2.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>${maven.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-compat</artifactId>
-      <version>${maven.version}</version>
-    </dependency>
-   <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>file-management</artifactId>
-      <version>1.2.1</version>
-    </dependency> 
--->
   </dependencies>
   <properties>
-    <maven.version>3.0-alpha-6</maven.version>
-    <jruby.gem.home>${project.build.directory}/rubygems</jruby.gem.home>
-    <jruby.gem.path>${project.build.directory}/rubygems</jruby.gem.path>
     <jruby.fork>true</jruby.fork>
   </properties>
   <build>
@@ -162,35 +124,7 @@
           </execution>
 
          </executions>
-       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>shitty-maven-plugin</artifactId>
-	<version>1.0-alpha-3</version>
-        <executions>
-	  <execution>
-	    <id>it-clean</id>
-	    <phase>clean</phase>
-            <goals>
-              <goal>clean</goal>
-	    </goals>
-	  </execution>
-          <execution>
-            <goals>
-              <goal>clean</goal>
-              <goal>install</goal>
-              <goal>test</goal>
-            </goals>    
-            <configuration>
-	      <!-- WORK AROUND: use same version as plugin otherwise test plugin will not work -->
-	      <version>${project.parent.version}</version>
-              <parallel>true</parallel>
-              <threadCount>2</threadCount>
-	    </configuration>
-          </execution>
-        </executions>	
       </plugin>
-
       <plugin>
         <artifactId>maven-jar-plugin</artifactId> 
 	<version>2.3</version>

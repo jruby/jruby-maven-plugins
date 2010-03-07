@@ -40,33 +40,6 @@
 	  </execution>
 	</executions>
       </plugin> 
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>shitty-maven-plugin</artifactId>
-	<version>1.0-alpha-3</version>
-        <executions>
-	  <execution>
-	    <id>it-clean</id>
-	    <phase>clean</phase>
-            <goals>
-              <goal>clean</goal>
-	    </goals>
-	  </execution>
-          <execution>
-            <goals>
-              <goal>clean</goal>
-              <goal>install</goal>
-              <goal>test</goal>
-            </goals>    
-            <configuration>
-	      <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
-	      <version>0.10.0-SNAPSHOT</version>
-              <parallel>true</parallel>
-              <threadCount>2</threadCount>
-	    </configuration>
-          </execution>
-        </executions>	
-      </plugin>
     </plugins>
   </build>
 </project>
