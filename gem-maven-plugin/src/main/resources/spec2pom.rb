@@ -32,37 +32,41 @@ spec.dependencies.each do |dep|
             warn "unknown scope: #{dep.type}"
             "compile"
           end
-  spec_tuples = fetcher.find_matching dep, true, false, nil
- # if spec_tuples.empty?
-#    warn "#{dep} is empty: #{spec_tuples.inspect}" 
- # else
-    # TODO make version ranges when applicable
-    req = dep.version_requirements.requirements[0]
+  left_version = nil
+  right_version = nil
+  version = nil
+  (0..(dep.version_requirements.requirements.size - 1)).each do |index|
+    req = dep.version_requirements.requirements[index]
     gem_version = req[1].to_s
-    gem_version = gem_version + ".0" if gem_version =~ /^[0-9]+\.[0-9]+$/
-    gem_version = gem_version + ".0.0" if gem_version =~ /^[0-9]+$/
+    gem_final_version = gem_version
+    gem_final_version = gem_final_version + ".0" if gem_final_version =~ /^[0-9]+\.[0-9]+$/
+    gem_final_version = gem_final_version + ".0.0" if gem_final_version =~ /^[0-9]+$/
     case req[0]
     when "="
-      version = gem_version
+      version = gem_final_version
     when ">="
-      version = "[#{gem_version},]"
+      left_version = "[#{gem_final_version}"
     when ">"
-      version = "(#{gem_version},)"
-     when "<="
-      version = "[,#{gem_version}]"
+      left_version = "(#{gem_final_version}"
+    when "<="
+      right_version = "#{gem_final_version}]"
     when "<"
-      version = "(,#{gem_version})"
+      right_version = "#{gem_final_version})"
     when "~>"
-      version = "#{spec_tuples.first[0][1]}"
-      #version = "[#{gem_version},#{gem_version.sub(/[.]*$/, '').to_i + 1}.0.0)"
+      pre_version = gem_version.sub(/[.][0-9]+$/, '')
+      version = "[#{gem_version},#{pre_version.sub(/[0-9]+$/, '')}#{pre_version.sub(/.*[.]/, '').to_i + 1}.0)"
     else
       puts "not implemented comparator: #{req.inspect}"
-      version = "[0.0.0,]"
     end
-    warn "#{version} #{req.inspect}"
-#    version = spec_tuples.last[0][1]
-    is_java = spec_tuples.last[0][2] == 'java' unless spec_tuples.empty? 
-    puts <<-POM
+  end
+  warn "having left_version or right_version and version which does not makes sense" if (right_version || left_version) && version
+  version = (left_version || "[") + "," + (right_version || ")") if right_version || left_version
+  version = "[0.0.0,)" if version.nil?
+
+  spec_tuples = fetcher.find_matching dep, true, false, nil
+  is_java = spec_tuples.last[0][2] == 'java' unless spec_tuples.empty?
+  require 'net/http'
+  puts <<-POM
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>#{dep.name}</artifactId>
