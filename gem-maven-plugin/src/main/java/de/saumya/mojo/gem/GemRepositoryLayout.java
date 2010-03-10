@@ -24,7 +24,12 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
         final StringBuffer path = new StringBuffer();
 
         if (!"rubygems".equals(artifact.getGroupId())) {
-            path.append(artifact.getGroupId()).append(GROUP_SEPARATOR);
+            // allow only rubygems groupIds from the repository
+
+            // hack to generate some http error which let the download stop.
+            // without it wagon will download the html with "page not found" and
+            // stores it as artifact file
+            return "ixtlan/0.0.0/ixtlan-0.0.0.gem";
         }
         path.append(artifact.getArtifactId())
                 .append(ARTIFACT_SEPARATOR)
