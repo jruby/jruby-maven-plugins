@@ -284,13 +284,15 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     getLog().debug("<gems> creating pom for " + artifact);
                     // use temporary file until complete file is written out to
                     // disk
-                    final File tmp = new File(artifact.getFile()
-                            .getParentFile(), artifact.getFile().getName()
-                            + ".tmp");
+                    final File tmp = new File(pom.getParentFile(),
+                            pom.getName() + ".tmp");
+                    // TODO use embedded ruby best via a component to reuse the
+                    // state of the spec fetcher
                     execute(new String[] {
                                     "-e",
                                     "ARGV[0] = '"
-                                            + tmp.getAbsolutePath()
+                                            + artifact.getFile()
+                                                    .getAbsolutePath()
                                             + "'\nrequire('"
                                             + fileFromClassloader("spec2pom.rb")
                                             + "')" },
