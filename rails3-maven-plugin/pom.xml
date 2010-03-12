@@ -5,7 +5,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>0.10.0</version>
   </parent>
   <artifactId>rails3-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
       <artifactId>gem-maven-plugin</artifactId>
-      <version>0.10.0-SNAPSHOT</version>
+      <version>0.10.0</version>
     </dependency>
     <!-- use bundler version which works with builtin rubygems version -->
     <dependency>
@@ -96,7 +96,7 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
-	<version>0.10.0-SNAPSHOT</version>
+	<version>0.10.0</version>
 	<extensions>true</extensions>
 	<executions>
 	  <execution>

@@ -139,7 +139,7 @@
     </plugins>
   </build>
   <properties>
-    <jruby.plugins.version>0.10.0-SNAPSHOT</jruby.plugins.version>
+    <jruby.plugins.version>0.10.0</jruby.plugins.version>
     <!-- 
 	 needed to usethe right GEM_HOME, GEM_PATH used by
 	 rails3-maven-plugin, jruby-maven-plugin and gem-maven-plugin 
