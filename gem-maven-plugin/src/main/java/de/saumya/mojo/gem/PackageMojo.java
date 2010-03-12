@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -36,11 +35,6 @@ public class PackageMojo extends AbstractJRubyMojo {
      * @parameter default-value="${gemspec}"
      */
     File                              gemSpec;
-
-    /**
-     * @component role-hint="gem"
-     */
-    private ArtifactRepositoryLayout  gemLayout;
 
     private File                      launchDir;
 
@@ -228,9 +222,16 @@ public class PackageMojo extends AbstractJRubyMojo {
         this.launchDir = gemDir;
         execute("-S gem build " + gemSpec.getAbsolutePath());
 
-        FileUtils.copyFile(new File(gemDir, this.gemLayout.pathOf(artifact)
-                                   .replace(artifact.getVersion(),
-                                            artifact.getGemVersion())),
+        // TODO share this with GemArtifactRepositoryLayout
+        final StringBuilder gemFilename = new StringBuilder("rubygems".equals(artifact.getGroupId())
+                ? ""
+                : artifact.getGroupId() + ".").append(artifact.getArtifactId())
+                .append("-")
+                .append(artifact.getGemVersion())
+                .append(artifact.getClassifier() == null ? "" : "-java")
+                .append(".gem");
+
+        FileUtils.copyFile(new File(gemDir, gemFilename.toString()),
                            artifact.getFile());
     }
 
