@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.saumya.mojo</groupId>
+  <artifactId>generate</artifactId>
+  <version>0.0.0</version>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>saumya</id>
+      <name>Saumyas Plugins</name>
+      <url>http://mojo.saumya.de</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>rails3-maven-plugin</artifactId>
+	<version>0.10.0-SNAPSHOT</version>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
+
