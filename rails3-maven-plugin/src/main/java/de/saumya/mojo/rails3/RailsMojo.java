@@ -54,7 +54,7 @@ public class RailsMojo extends AbstractRailsMojo {
         if (this.appPath != null) {
             final File app = new File(this.project.getBasedir(), this.appPath);
             // rectify the prolog of the script to use ruby instead of jruby
-            final File script = new File(new File(app, "script"), "rails");
+            final File script = new File(app, "script/rails");
             try {
                 FileUtils.fileWrite(script.getAbsolutePath(),
                                     FileUtils.fileRead(script).replace("jruby",
@@ -92,16 +92,41 @@ public class RailsMojo extends AbstractRailsMojo {
                 throw new MojoExecutionException("failed to filter " + script,
                         e);
             }
+
+            // write a database specific pom
+            final File pom = new File(app, "pom.xml");
+            copyFromClassloader(pom);
             try {
-                // TODO obey force, skip and pretend flags !!
-                // TODO some screen logging maybe !?
-                FileUtils.copyURLToFile(Thread.currentThread()
-                        .getContextClassLoader()
-                        .getResource("pom.xml"), new File(app, "pom.xml"));
+                final String pomContent = FileUtils.fileRead(pom);
+                FileUtils.fileWrite(pom.getAbsolutePath(),
+                                    pomContent.replaceFirst("__DATABASE__",
+                                                            database));
             }
             catch (final IOException e) {
-                throw new MojoExecutionException("error copying pom.xml", e);
+                throw new MojoExecutionException("failed to filter "
+                        + pom.getName(), e);
             }
+
+            // write out a new index.html
+            copyFromClassloader(new File(app, "public/index.html"));
+
+            // create web.xml
+            copyFromClassloader(new File(app, "src/main/webapp/WEB-INF/web.xml"));
+        }
+    }
+
+    private void copyFromClassloader(final File pom)
+            throws MojoExecutionException {
+        try {
+            // TODO obey force, skip and pretend flags !!
+            // TODO some screen logging maybe !?\
+            FileUtils.copyURLToFile(Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResource(pom.getName()), pom);
+        }
+        catch (final IOException e) {
+            throw new MojoExecutionException("error copying " + pom.getName(),
+                    e);
         }
     }
 }
