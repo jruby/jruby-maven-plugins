@@ -22,6 +22,14 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  <developers>
+    <developer>
+      <id>mkristian</id>
+      <name>Kristian Meier</name>
+      <email>m.kristian@web.de</email>
+      <timezone>IST</timezone>
+    </developer>
+  </developers>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
