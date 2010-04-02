@@ -55,21 +55,40 @@
   </dependencies>
 
   <distributionManagement>
+<!--
     <repository>
       <id>ssh-repository</id>
       <url>scpexe://mojo.saumya.de/home/mojo/public</url>
     </repository>
+-->    
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <name>Nexus Release Repository</name>
+      <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>    
+    <snapshotRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <build>
+<!--
     <extensions>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
          <artifactId>wagon-ssh-external</artifactId>
-         <version>1.0-alpha-5</version>
+         <version>1.0-beta-6</version>
       </extension>
     </extensions>
-    <plugins>
+-->
+    <plugins>  
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.0</version>
+      </plugin>
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
         <version>2.5.1</version>
@@ -85,6 +104,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+	<version>2.1</version>
         <configuration>
           <encoding>UTF-8</encoding>
           <source>1.6</source>
@@ -94,21 +114,86 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.4.1</version>
+        <version>2.4.2</version>
         <configuration>
           <encoding>UTF-8</encoding>
         </configuration>
-      </plugin>
+      </plugin>  
     </plugins>
   </build>
 
   <modules>
     <module>jruby-maven-plugin</module>
     <module>gem-maven-plugin</module>
+    <module>rails-maven-archetype</module>
+    <module>rails2-maven-plugin</module>
     <module>rails3-maven-plugin</module>
   </modules>
 
   <profiles>
+    <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+	    <version>2.1.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+	    <version>2.5</version>
+            <configuration>
+              <updateReleaseInfo>true</updateReleaseInfo>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>integration-tests</id>
       <build>
