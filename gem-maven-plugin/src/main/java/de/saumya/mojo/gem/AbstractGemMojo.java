@@ -18,6 +18,8 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.metadata.ArtifactRepositoryMetadata;
 import org.apache.maven.artifact.repository.metadata.RepositoryMetadata;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
@@ -196,6 +198,12 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        if (this.project.getBasedir() == null) {
+            this.gemHome = new File(this.gemHome.getAbsolutePath()
+                    .replace("${project.basedir}", ""));
+            this.gemPath = new File(this.gemPath.getAbsolutePath()
+                    .replace("${project.basedir}", ""));
+        }
         execute(this.pluginArtifacts);
         executeWithGems();
     }
@@ -212,8 +220,21 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         if (this.gemRepositories.size() == 0) {
-            getLog().warn("gem plugin configured but no gem repository found");
-            return;
+            final ArtifactRepositoryPolicy releases = new ArtifactRepositoryPolicy();
+            releases.setChecksumPolicy("ignore");
+            releases.setUpdatePolicy("never");
+            final ArtifactRepositoryPolicy snapshots = new ArtifactRepositoryPolicy();
+            snapshots.setEnabled(false);
+
+            final DefaultArtifactRepository rubygemsRepo = new DefaultArtifactRepository("rubygems",
+                    "http://rubygems.org/gems",
+                    new GemRepositoryLayout(),
+                    snapshots,
+                    releases);
+            getLog().info("gem plugin configured but no gem repository found - fall back to "
+                    + rubygemsRepo.getUrl());
+            this.remoteRepositories.add(rubygemsRepo);
+            this.gemRepositories.add(rubygemsRepo);
         }
         final File gemsDir = new File(this.gemPath, "gems");
 
