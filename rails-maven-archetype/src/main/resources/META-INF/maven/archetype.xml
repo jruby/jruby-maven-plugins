@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><archetype>
+  <id>rails2_archetype</id>
+  <resources>
+    <resource>src/main/webapp/WEB-INF/web.xml</resource>
+    <resource>.gitignore</resource>
+    <resource>lib/tasks/jdbc.rake</resource>
+    <resource>Gemfile.maven</resource>
+    <resource>README.maven</resource>
+    <resource>config/initializers/jdbc.rb</resource>
+    <resource>public/maven.html</resource>
+  </resources>
+</archetype>
