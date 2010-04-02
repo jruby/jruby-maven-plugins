@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project 
+    xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>${groupId}</groupId>
+  <artifactId>${artifactId}</artifactId>
+  <packaging>war</packaging>
+  <version>${version}</version>
+  <name>rails skeleton ${artifactId}</name>
+ 
+  <repositories>
+#literal()
+    <!-- 
+	 the source for the gem artifacts
+    -->
+#end
+    <repository>
+      <id>gemcutter</id>
+      <releases>
+	<updatePolicy>never</updatePolicy>
+	<checksumPolicy>ignore</checksumPolicy>
+      </releases>
+      <snapshots>
+	<enabled>false</enabled>
+      </snapshots>
+      <url>http://www.gemcutter.org/gems</url>
+      <layout>gem</layout>
+    </repository>
+#literal()
+    <!-- 
+	 needed for jruby-rack artifact
+    -->
+#end
+    <repository>
+      <id>saumya</id>
+      <name>Saumya's Plugins</name>
+      <url>http://mojo.saumya.de</url>
+      <layout>default</layout>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>saumya</id>
+      <name>Saumya's Plugins</name>
+      <url>http://mojo.saumya.de</url>
+      <layout>default</layout>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <dependencies>
+#literal()
+    <!-- 
+	 this is a version which works properly with having
+	 rails gems in WEB-INF/gems
+    -->
+#end
+    <dependency>
+      <groupId>org.jruby.rack</groupId>
+      <artifactId>jruby-rack</artifactId>
+      <version>0.9.7-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-complete</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+#literal()
+    <!-- 
+	 gem dependencies
+    -->
+#end
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>activerecord-jdbc-adapter</artifactId>
+      <version>0.9.3</version>
+      <type>gem</type>
+      <classifier>java</classifier>
+    </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>jdbc-${database}</artifactId>
+#literal()
+      <!-- 
+	   for the stability of the build it is better to stick to 
+	   working version 
+      -->
+#end
+      <version>[0.0.0,)</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rails</artifactId>
+      <version>${railsVersion}</version>
+      <type>gem</type>
+    </dependency>
+  </dependencies>
+  <properties>
+    <jruby.plugins.version>0.11.0-SNAPSHOT</jruby.plugins.version>
+    <jruby.fork>true</jruby.fork>
+#literal()
+    <!-- 
+	 this is needed for the maven-war-plugin configuration
+    -->
+#end
+    <jruby.gem.home>${project.build.directory}/wargems</jruby.gem.home>
+    <jruby.gem.path>${project.build.directory}/wargems</jruby.gem.path>
+  </properties>
+  <build>
+    <plugins>
+#literal()
+      <!--
+	  this plugin gives you basic jruby related goals. overview:
+	  $ mvn ruby:help
+      -->
+#end
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>jruby-maven-plugin</artifactId>
+	<version>${jruby.plugins.version}</version>
+      </plugin>
+#literal()
+      <!--
+	  this plugin gives you basic rubygems related goals and manages 
+	  the gems for maven. overview:
+	  $ mvn gem:help
+      -->
+#end
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+	<version>${jruby.plugins.version}</version>
+	<extensions>true</extensions>
+	<executions>
+	  <execution>
+	    <goals>
+	      <goal>initialize</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+#literal()
+      <!--
+	  this plugin has some rails specific goals. overview:
+	  $ mvn rails2:help
+      -->
+#end
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>rails2-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+	<version>2.0.2</version>
+        <configuration>
+	  <webResources>
+	    <resource>
+	      <directory>public</directory>
+	    </resource>
+	    <resource>
+	      <directory>.</directory>
+	      <targetPath>WEB-INF</targetPath>
+	      <includes>
+		<include>app/**</include>
+		<include>config/**</include>
+		<include>lib/**</include>
+		<include>vendor/**</include>
+#if( $database == "sqlite3")
+#literal()
+		<!--
+		    this might be not a good idea for prodcution but for 
+		    testing this should be OK and I will not work when
+		    running the application from a packed war file
+		-->
+		<include>db/*sqlite3</include>
+#end
+#end
+	      </includes>
+	    </resource>
+#literal()
+	    <!-- 
+		 if you freeze your rails and unpack your gems you need to 
+		 comment/remove the next section to avoid ending up with 
+		 two sets of gems inside the war file
+	    -->
+#end
+	    <resource>
+	      <directory>${jruby.gem.path}</directory>
+	      <targetPath>WEB-INF/gems</targetPath>
+	    </resource>
+	  </webResources>
+        </configuration>	
+      </plugin>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+	<version>7.0.1.v20091125</version>
+      </plugin>
+    </plugins>
+  </build>
+      
+</project>

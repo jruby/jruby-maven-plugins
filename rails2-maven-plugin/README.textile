@@ -1,0 +1,186 @@
+h1. maven plugin for rails
+
+h2. this is the last release for rails 2.3.x
+
+p. the maven plugin for rails3 will be part of the jruby-maven-plugins. this plugin is tidly coupled the jruby-maven-plugin and/or gem-maven-plugin that it makes more sense to keep things together - only install and deploy one time and rails3 is significant different to sseparate it from the current plugin.
+
+h2. overview
+
+p. this plugin mimicks partially what you can do with rake tasks which are part of rails as well copies some behaviour from the warbler gem. the meaning is to allow to handle rails totally from within maven, i.e. checkout the code and @mvn package@ will build the war file or @mvn rails:server@ starts the inbuild webserver with rails or @mvn spec@ will run the rspecs or @mvn jetty:run-exploded@ will build the war and runs it inside jetty, etc.
+
+p. so people who familiar with maven should find it straight forward (I hope so) to use it. projects based on maven might find it helpful to use it. etc.
+
+h3. references
+
+* "maven":http://maven.apache.org
+* "warbler":http://warbler.kenai.com/pages/Home
+* "rails":http://www.rubyonrails.org/
+
+h3. alternative rspec maven plugin
+
+"rspec-maven-plugin":http://github.com/dcrec1/rspec-maven-plugin
+
+h2. main implementation ideas
+
+* freeze rails
+* handle all gems by rails
+* unpack all gems dependencies
+* have two *config* files for the war file: pom.xml and web.xml
+* have a maven like directory tree and place the rails application in **src/main/rails**
+* allow (almost) all goals to run without pom.xml, i.e. can be used in every rails installation (with certain version restrictions - I guess)
+
+h3. minimal pom.xml
+
+p. **remark** the jetty plugin is only needed to run the war file with an embedded servlet engine (jetty) from within maven.
+
+bc. <project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>my.group.id</groupId>
+  <artifactId>rails-demo</artifactId>
+  <packaging>war</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.jruby.rack</groupId>
+      <artifactId>jruby-rack</artifactId>
+      <version>0.9.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-complete</artifactId>
+      <version>1.3.1</version>
+    </dependency>
+  </dependencies> 
+  <pluginRepositories>
+    <pluginRepository>
+      <id>saumya</id>
+      <name>Saumya's Plugins</name>
+      <url>http://mojo.saumya.de</url>
+      <layout>default</layout>
+    </pluginRepository>
+  </pluginRepositories>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>rails-maven-plugin</artifactId>
+        <version>0.1.0</version>
+        <!-- needed for sqlite3 or file based databases -->
+        <configuration>
+          <includeDirs>db</includeDirs>
+          <excludeDirs>db/migrate</excludeDirs>
+        </configuration>
+        <executions>
+           <execution>
+            <id>rail-war</id>
+            <goals>
+              <goal>rails-freeze-gems</goal>
+              <goal>gems-unpack-dependencies</goal>
+              <goal>war</goal>
+            </goals>
+           </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+
+p. the rails-maven-plugin makes sure that rails installation is frozen and the gem dependencies are unpacked prior to pack a war file.
+
+h3. minimal web.xml
+
+bc. <!DOCTYPE web-app PUBLIC
+"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+"http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+  <context-param>
+    <param-name>public.root</param-name>
+    <param-value>/</param-value>
+  </context-param>
+  <context-param>
+    <param-name>rails.env</param-name>
+    <param-value>production</param-value>
+  </context-param>
+  <context-param>
+    <param-name>jruby.max.runtimes</param-name>
+    <param-value>1</param-value>
+  </context-param>
+  <context-param>
+    <param-name>jruby.min.runtimes</param-name>
+    <param-value>1</param-value>
+  </context-param>
+  <filter>
+    <filter-name>RackFilter</filter-name>
+    <filter-class>org.jruby.rack.RackFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>RackFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <listener>
+    <listener-class>org.jruby.rack.rails.RailsServletContextListener</listener-class>
+  </listener>
+<!-- 
+  <resource-ref>
+    <res-ref-name><%= jndi %></res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+-->
+</web-app>
+
+h3. sample application
+
+p. a sample application can be found under the integration tests of maven **src/it/demo**. this example uses datamapper as ORM so there are little more gem as for usual rails application.
+
+h2. goals 
+
+p. beside the **war** goal all other goal run on a standalone rails application as well with maven project
+
+p. the standalone goal needs to call the goal full qualified, with a pom.xml the prefix **rails** works
+
+h3. console goal (script/console)
+
+bc. mvn de.saumya.mojo:rails-maven-plugin:0.1.0:console -Dargs=
+
+bc. mvn rails:console -Dargs=
+
+h3. generate goal (script/generate)
+
+bc. mvn de.saumya.mojo:rails-maven-plugin:0.1.0:generate -Dargs=
+
+bc. mvn rails:generate -Dargs=
+
+h3. spec goal (rake spec)
+
+bc. mvn de.saumya.mojo:rails-maven-plugin:0.1.0:spec -Dargs=
+
+bc. mvn rails:spec -Dargs=
+
+h3. rails_freeze_gems goal (rake rails:freeze:gems)
+
+bc. mvn de.saumya.mojo:rails-maven-plugin:0.1.0:rails_freeze_gems -Dargs=
+
+bc. mvn rails:rails_freeze_gems -Dargs=
+
+h3. gem_unpack_dependencies goal (rake gems:unpack:dependencies)
+
+bc. mvn de.saumya.mojo:rails-maven-plugin:0.1.0:gem_unpack_dependencies -Dargs=
+
+bc. mvn rails:gem_unpack_dependencies -Dargs=
+
+h2. TODOs
+
+p. make the parameters consistent. decide which ones can be changed via the commandline and which one can be set only through the pom.xml.
+
+p. maybe more goals of rake tasks

@@ -1,0 +1,60 @@
+  [4;36;1mSQL (0.0ms)[0m   [0;1mSELECT count(*) AS count_all FROM users [0m
+
+
+Processing UsersController#create (for 0.0.0.0 at 2010-03-29 10:57:34) [POST]
+  Parameters: {"user"=>{}}
+  [4;35;1mUser Create (1.0ms)[0m   [0mINSERT INTO users (name, created_at, updated_at) VALUES(NULL, '2010-03-29 05:27:34', '2010-03-29 05:27:34')[0m
+  [4;36;1mSQL (1.0ms)[0m   [0;1mSELECT SEQ FROM SQLITE_SEQUENCE WHERE NAME = 'users'[0m
+Redirected to http://test.host/users/980190963
+Completed in 27ms (DB: 4) | 302 Found [http://test.host/users?]
+  [4;35;1mSQL (0.0ms)[0m   [0mSELECT count(*) AS count_all FROM users [0m
+  [4;36;1mSQL (0.0ms)[0m   [0;1mSELECT count(*) AS count_all FROM users [0m
+  [4;35;1mUser Load (0.0ms)[0m   [0mSELECT * FROM users WHERE (users.id = 980190962) [0m
+
+
+Processing UsersController#destroy (for 0.0.0.0 at 2010-03-29 10:57:34) [DELETE]
+  Parameters: {"id"=>"980190962"}
+  [4;36;1mUser Load (0.0ms)[0m   [0;1mSELECT * FROM users WHERE (users.id = 980190962) [0m
+  [4;35;1mUser Destroy (0.0ms)[0m   [0mDELETE FROM users WHERE id = 980190962[0m
+Redirected to http://test.host/users
+Completed in 20ms (DB: 0) | 302 Found [http://test.host/users/980190962]
+  [4;36;1mSQL (1.0ms)[0m   [0;1mSELECT count(*) AS count_all FROM users [0m
+  [4;35;1mUser Load (0.0ms)[0m   [0mSELECT * FROM users WHERE (users.id = 980190962) [0m
+
+
+Processing UsersController#edit (for 0.0.0.0 at 2010-03-29 10:57:34) [GET]
+  Parameters: {"id"=>"980190962"}
+  [4;36;1mUser Load (0.0ms)[0m   [0;1mSELECT * FROM users WHERE (users.id = 980190962) [0m
+Rendering template within layouts/users
+Rendering users/edit
+Completed in 42ms (View: 37, DB: 1) | 200 OK [http://test.host/users/980190962/edit]
+
+
+Processing UsersController#index (for 0.0.0.0 at 2010-03-29 10:57:34) [GET]
+  [4;35;1mUser Load (0.0ms)[0m   [0mSELECT * FROM users [0m
+Rendering template within layouts/users
+Rendering users/index
+Completed in 52ms (View: 48, DB: 0) | 200 OK [http://test.host/users]
+
+
+Processing UsersController#new (for 0.0.0.0 at 2010-03-29 10:57:34) [GET]
+Rendering template within layouts/users
+Rendering users/new
+Completed in 12ms (View: 9, DB: 0) | 200 OK [http://test.host/users/new]
+  [4;36;1mUser Load (0.0ms)[0m   [0;1mSELECT * FROM users WHERE (users.id = 980190962) [0m
+
+
+Processing UsersController#show (for 0.0.0.0 at 2010-03-29 10:57:34) [GET]
+  Parameters: {"id"=>"980190962"}
+  [4;35;1mUser Load (0.0ms)[0m   [0mSELECT * FROM users WHERE (users.id = 980190962) [0m
+Rendering template within layouts/users
+Rendering users/show
+Completed in 62ms (View: 59, DB: 0) | 200 OK [http://test.host/users/980190962]
+  [4;36;1mUser Load (0.0ms)[0m   [0;1mSELECT * FROM users WHERE (users.id = 980190962) [0m
+
+
+Processing UsersController#update (for 0.0.0.0 at 2010-03-29 10:57:34) [PUT]
+  Parameters: {"user"=>{}, "id"=>"980190962"}
+  [4;35;1mUser Load (0.0ms)[0m   [0mSELECT * FROM users WHERE (users.id = 980190962) [0m
+Redirected to http://test.host/users/980190962
+Completed in 46ms (DB: 0) | 302 Found [http://test.host/users/980190962?]
