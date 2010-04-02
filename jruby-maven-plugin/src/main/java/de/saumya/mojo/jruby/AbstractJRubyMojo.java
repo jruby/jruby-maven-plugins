@@ -45,7 +45,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected boolean                  fork;
 
     /**
-     * verbose jruby relatred output
+     * verbose jruby related output
      * 
      * @parameter expression="${jruby.verbose}" default-value="false"
      */
@@ -68,16 +68,16 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     /**
      * directory of gem home to use when forking JRuby.
      * 
-     * @parameter expression="${project.build.directory}/rubygems"
-     *            default-value="${jruby.gem.home}"
+     * @parameter expression="${jruby.gem.home}"
+     *            default-value="${project.build.directory}/rubygems"
      */
     protected File                     gemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby.
      * 
-     * @parameter expression="${project.build.directory}/rubygems"
-     *            default-value="${jruby.gem.path}"
+     * @parameter expression="${jruby.gem.path}"
+     *            default-value="${project.build.directory}/rubygems"
      */
     protected File                     gemPath;
 
@@ -157,6 +157,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @parameter expression="${jruby.gem.flags}"
      *            default-value="${project.build.directory}/gems"
      */
+    @Deprecated
     private File                       gemFlagsDirectory;
 
     /**
@@ -317,6 +318,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
     }
 
+    @Deprecated
     protected void ensureGem(final String gemName)
             throws MojoExecutionException {
         ensureGems(new String[] { gemName });
