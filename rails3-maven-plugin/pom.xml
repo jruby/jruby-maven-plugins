@@ -46,7 +46,7 @@
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>railties</artifactId>
-      <version>3.0.0.beta</version>
+      <version>3.0.0.beta2</version>
       <type>gem</type>
       <scope>runtime</scope>
     </dependency>
@@ -55,7 +55,7 @@
       <artifactId>rake</artifactId>
       <version>0.8.7</version>
       <type>gem</type>
-      <scope>test</scope>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
   <properties>

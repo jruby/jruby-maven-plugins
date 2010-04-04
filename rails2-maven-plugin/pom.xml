@@ -14,7 +14,7 @@
 
   <repositories>
     <repository>
-      <id>gemcutter</id>
+      <id>rubygems</id>
       <releases>
 	<updatePolicy>never</updatePolicy>
 	<checksumPolicy>ignore</checksumPolicy>
@@ -22,7 +22,7 @@
       <snapshots>
 	<enabled>false</enabled>
       </snapshots>
-      <url>http://www.gemcutter.org/gems</url>
+      <url>http://rubygems.org/gems</url>
       <layout>gem</layout>
     </repository>
   </repositories>
@@ -53,7 +53,7 @@
       <artifactId>rake</artifactId>
       <version>0.8.7</version>
       <type>gem</type>
-      <scope>test</scope>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 

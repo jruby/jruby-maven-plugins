@@ -1,7 +1,9 @@
 package de.saumya.mojo.rails;
 
 import java.io.File;
+import java.util.Arrays;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
@@ -28,6 +30,7 @@ public class RakeMojo extends AbstractRailsMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
+        execute(Arrays.asList(new Artifact[] { this.project.getArtifact() }));
         String commandString = new File(new File(this.gemHome, "bin"), "rake").getAbsolutePath();
         if (this.rakeArgs != null) {
             commandString += " " + this.rakeArgs;

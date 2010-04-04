@@ -25,35 +25,35 @@ public class RailsMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the rails command
-     *
+     * 
      * @parameter default-value="${rails.args}"
      */
     protected String          railsArgs    = null;
 
     /**
      * the path to the application to be generated
-     *
+     * 
      * @parameter default-value="${app_path}"
      */
     protected String          appPath      = null;
 
     /**
      * the rails version to use
-     *
+     * 
      * @parameter default-value="3.0.0.beta" expression="${railsVersion}"
      */
     protected String          railsVersion = null;
 
     /**
      * the groupId of the new pom
-     *
+     * 
      * @parameter default-value="rails" expression="${groupId}"
      */
     protected String          groupId      = null;
 
     /**
      * the version of the new pom
-     *
+     * 
      * @parameter default-value="1.0-SNAPSHOT" expression="${version}"
      */
     protected String          version      = null;
@@ -106,7 +106,9 @@ public class RailsMojo extends AbstractRailsMojo {
                                                                   + database
                                                                   + "\", :require => 'jdbc/"
                                                                   + database
-                                                                  + "' if defined?(JRUBY_VERSION)\n"));
+                                                                  + "' if defined?(JRUBY_VERSION)\n")
+                                            .replaceFirst("3.0.0.beta",
+                                                          this.railsVersion));
             }
             catch (final IOException e) {
                 throw new MojoExecutionException("failed to filter " + script,

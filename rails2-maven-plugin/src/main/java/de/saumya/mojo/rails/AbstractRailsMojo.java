@@ -1,7 +1,9 @@
 package de.saumya.mojo.rails;
 
 import java.io.File;
+import java.util.Arrays;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
@@ -39,6 +41,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
+        execute(Arrays.asList(new Artifact[] { this.project.getArtifact() }));
         String commandString = this.scriptName;
         if (this.args != null) {
             commandString += " " + this.args;

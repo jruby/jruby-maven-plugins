@@ -18,7 +18,7 @@
     -->
 #end
     <repository>
-      <id>gemcutter</id>
+      <id>rubygems</id>
       <releases>
 	<updatePolicy>never</updatePolicy>
 	<checksumPolicy>ignore</checksumPolicy>
@@ -26,7 +26,7 @@
       <snapshots>
 	<enabled>false</enabled>
       </snapshots>
-      <url>http://www.gemcutter.org/gems</url>
+      <url>http://rubygems.org/gems</url>
       <layout>gem</layout>
     </repository>
 #literal()
@@ -38,16 +38,14 @@
       <id>saumya</id>
       <name>Saumya's Plugins</name>
       <url>http://mojo.saumya.de</url>
-      <layout>default</layout>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
-      <id>saumya</id>
-      <name>Saumya's Plugins</name>
-      <url>http://mojo.saumya.de</url>
-      <layout>default</layout>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
     </pluginRepository>
   </pluginRepositories>
 

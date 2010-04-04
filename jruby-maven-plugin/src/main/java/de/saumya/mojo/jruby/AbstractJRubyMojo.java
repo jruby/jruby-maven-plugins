@@ -18,6 +18,7 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -184,28 +185,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      */
     private ClassRealm                 classRealm;
 
-    // /**
-    // * The project compile classpath.
-    // *
-    // * @parameter default-value="${project.compileClasspathElements}"
-    // * @required
-    // * @readonly
-    // */
-    // private List compileClasspathElements;
-    // /**
-    // * The project compile classpath.
-    // *
-    // * @parameter default-value="${project.testClasspathElements}"
-    // * @required
-    // * @readonly
-    // */
-    // private List testClasspathElements;
-
-    // /**
-    // * @parameter expression="${plugin}"
-    // */
-    // private PluginDescriptor plugin;
-
     /**
      * @component
      */
@@ -218,6 +197,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     private Artifact resolveJRUBYCompleteArtifact(final String version)
             throws DependencyResolutionRequiredException {
+        getLog().debug("resolve jruby for verions " + version);
         final Artifact artifact = this.artifactFactory.createArtifactWithClassifier("org.jruby",
                                                                                     "jruby-complete",
                                                                                     version,
@@ -254,24 +234,21 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private Artifact resolveJRUBYCompleteArtifact()
             throws DependencyResolutionRequiredException,
             MojoExecutionException {
-        for (final Object o : this.project.getDependencyArtifacts()) {
-            final Artifact artifact = (Artifact) o;
+
+        for (final Object o : this.project.getDependencies()) {
+            final Dependency artifact = (Dependency) o;
             if (artifact.getArtifactId().equals("jruby-complete")
                     && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
                     && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
-                if (this.jrubyVersion != null) {
+                if (this.jrubyVersion != null
+                        && !this.jrubyVersion.equals(artifact.getVersion())) {
                     getLog().warn("the configured jruby-version gets ignored in preference to the jruby dependency");
                 }
-                if (artifact.getFile() != null && artifact.getFile().exists()) {
-                    if (this.verbose) {
-                        getLog().info("jruby version   : "
-                                + artifact.getVersion());
-                    }
-                    return artifact;
-                }
-                else {
-                    return resolveJRUBYCompleteArtifact(artifact);
-                }
+                return resolveJRUBYCompleteArtifact(this.artifactFactory.createArtifact(artifact.getGroupId(),
+                                                                                        artifact.getArtifactId(),
+                                                                                        artifact.getVersion(),
+                                                                                        artifact.getScope(),
+                                                                                        artifact.getType()));
             }
         }
         return resolveJRUBYCompleteArtifact(this.jrubyVersion == null
