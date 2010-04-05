@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.example</groupId>
+    <artifactId>gem-maven-plugin</artifactId>
+    <version>0.0.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <groupId>rubygems</groupId>
+  <artifactId>deps</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rails</artifactId>
+      <version>2.3.5</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rack</artifactId>
+      <version>1.1.0</version>
+      <type>gem</type>
+    </dependency>
+  </dependencies>
+  <properties>
+    <gem.forceVersion>true</gem.forceVersion>
+  </properties>
+</project>
+

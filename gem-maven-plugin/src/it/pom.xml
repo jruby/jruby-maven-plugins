@@ -7,23 +7,6 @@
   <version>0.0.0</version>
   <name>play ground for gem testing</name>
 
-<!--
-  <repositories>
-    <repository>
-      <id>gemcutter</id>
-      <releases>
-	<updatePolicy>never</updatePolicy>
-	<checksumPolicy>ignore</checksumPolicy>
-      </releases>
-      <snapshots>
-	<enabled>false</enabled>
-      </snapshots>
-      <id>gemcutter</id>
-      <url>http://www.gemcutter.org/gems</url>
-      <layout>gem</layout>
-    </repository>
-  </repositories>
--->
   <build>
     <plugins>
       <plugin>

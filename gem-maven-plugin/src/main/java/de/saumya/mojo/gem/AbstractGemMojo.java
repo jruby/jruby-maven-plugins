@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,14 +43,22 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
-     * @parameter expression ="${settings.offline}"
+     * @parameter expression="${settings.offline}"
      */
-    private boolean                  offline;
+    private boolean                    offline;
+
+    /**
+     * allow to overwrite the version by explicitly declaring a dependency in
+     * the pom. will not check any dependencies on gemspecs level.
+     *
+     * @parameter expression="${gem.forceVersion}" default-value="false"
+     */
+    private boolean                    forceVersion;
 
     /**
      * @parameter default-value="${plugin.artifacts}"
      */
-    private java.util.List<Artifact> pluginArtifacts;
+    protected java.util.List<Artifact> pluginArtifacts;
 
     public class UpdateCheckManager {
 
@@ -208,7 +217,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         executeWithGems();
     }
 
-    public void execute(final List<Artifact> artifacts)
+    public void execute(final Collection<Artifact> artifacts)
             throws MojoExecutionException {
         for (final ArtifactRepository repository : this.remoteRepositories) {
             // instanceof does not work probably a classloader issue !!!
@@ -248,6 +257,37 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         }
         collectedArtifacts.remove(key(this.project.getArtifact()));
 
+        String extraFlag = "";
+        if (this.forceVersion) {
+            // allow to overwrite resolved version with version of project
+            // dependencies
+            for (final Object o : this.project.getDependencies()) {
+                final Dependency artifact = (Dependency) o;
+                final Artifact a = collectedArtifacts.get(artifact.getGroupId()
+                        + ":" + artifact.getArtifactId());
+                if (!a.getVersion().equals(artifact.getVersion())) {
+                    extraFlag = "--force";
+                    a.setVersion(artifact.getVersion());
+                    a.setResolved(false);
+                    a.setFile(null);
+                    try {
+                        this.resolver.resolve(a,
+                                              this.remoteRepositories,
+                                              this.localRepository);
+                    }
+                    catch (final ArtifactResolutionException e) {
+                        throw new MojoExecutionException("error resolving " + a,
+                                e);
+                    }
+                    catch (final ArtifactNotFoundException e) {
+                        throw new MojoExecutionException("error resolving " + a,
+                                e);
+                    }
+                }
+            }
+        }
+
+        // collect all uninstalled gems in a reverse dependency order
         for (final Artifact collectedArtifact : collectedArtifacts.values()) {
             if (collectedArtifact.getType().contains("gem")) {
                 final String prefix = collectedArtifact.getGroupId()
@@ -271,7 +311,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         if (gems.length() > 0) {
-            execute("-S gem install -l " + gems, false);
+            execute("-S gem install --no-ri --no-rdoc " + extraFlag + " -l "
+                    + gems, false);
         }
         else {
             getLog().debug("no gems found to install");

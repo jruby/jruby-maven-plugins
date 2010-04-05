@@ -3,6 +3,7 @@ package de.saumya.mojo.jruby;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -375,8 +376,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     @SuppressWarnings("unchecked")
-    private void resolveTransitively(final Set<Artifact> artifacts,
-            final Artifact artifact) {
+    protected void resolveTransitively(final Collection<Artifact> artifacts,
+            final Artifact artifact) throws MojoExecutionException {
         // System.out.println(artifact + " resolve:");
         // if (artifact.getArtifactHandler().isIncludesDependencies()) {
         try {
@@ -399,20 +400,17 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             }
         }
         catch (final ArtifactResolutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new MojoExecutionException("error resolving " + artifact, e);
         }
         catch (final ArtifactNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new MojoExecutionException("error resolving " + artifact, e);
         }
         catch (final InvalidDependencyVersionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new MojoExecutionException("error resolving " + artifact, e);
         }
         catch (final ProjectBuildingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new MojoExecutionException("error building project for "
+                    + artifact, e);
         }
     }
 
