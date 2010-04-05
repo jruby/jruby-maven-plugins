@@ -10,7 +10,7 @@
   <artifactId>rails-maven-archetype</artifactId>
   <version>0.11.0-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
-  <name>rails-archetype</name>
+  <name>Rails Archetype</name>
   <description>archetype to mavenize an existing rails 2.3.x or rails3 application</description>
   <build>
     <extensions>

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.velocity.VelocityContext;
 import org.codehaus.plexus.util.FileUtils;
@@ -64,6 +65,40 @@ public class RailsMojo extends AbstractRailsMojo {
     private VelocityComponent velocityComponent;
 
     @Override
+    public void execute() throws MojoExecutionException {
+        Artifact artifact;
+        if ("3.0.0.beta".equals(this.railsVersion)) {
+            artifact = this.artifactFactory.createArtifact("rubygems",
+                                                           "bundler",
+                                                           "0.9.9",
+                                                           "runtime",
+                                                           "gem");
+            this.pluginArtifacts.add(artifact);
+            artifact = this.artifactFactory.createArtifact("rubygems",
+                                                           "activesupport",
+                                                           this.railsVersion,
+                                                           "runtime",
+                                                           "gem");
+            this.pluginArtifacts.add(artifact);
+            artifact = this.artifactFactory.createArtifact("rubygems",
+                                                           "rails3b",
+                                                           "3.0.1",
+                                                           "runtime",
+                                                           "gem");
+            this.pluginArtifacts.add(artifact);
+        }
+        artifact = this.artifactFactory.createArtifact("rubygems",
+                                                       "railties",
+                                                       this.railsVersion,
+                                                       "runtime",
+                                                       "gem");
+        this.pluginArtifacts.add(artifact);
+
+        System.out.println(this.pluginArtifacts);
+        super.execute();
+    }
+
+    @Override
     public void executeWithGems() throws MojoExecutionException {
         String commandString;
         if (railsScriptFile().exists() && this.appPath == null) {
@@ -99,7 +134,7 @@ public class RailsMojo extends AbstractRailsMojo {
             try {
                 FileUtils.fileWrite(gemfile.getAbsolutePath(),
                                     FileUtils.fileRead(gemfile)
-                                            .replaceFirst("\ngem (\"[^r][a-z0-9-]+\".*)\n",
+                                            .replaceFirst("\ngem (.[^r][a-z0-9-]+.*)\n",
                                                           "\ngem $1 unless defined?(JRUBY_VERSION)\n"
                                                                   + "gem \"activerecord-jdbc-adapter\", :require =>'jdbc_adapter' if defined?(JRUBY_VERSION)\n"
                                                                   + "gem \"jdbc-"
@@ -107,7 +142,10 @@ public class RailsMojo extends AbstractRailsMojo {
                                                                   + "\", :require => 'jdbc/"
                                                                   + database
                                                                   + "' if defined?(JRUBY_VERSION)\n")
-                                            .replaceFirst("3.0.0.beta",
+                                            // this version must match the
+                                            // version of the rails gem from the
+                                            // pom.xml
+                                            .replaceFirst("3.0.0.beta2",
                                                           this.railsVersion));
             }
             catch (final IOException e) {
