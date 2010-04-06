@@ -84,7 +84,7 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
-	<version>0.10.0</version>
+	<version>0.11.0</version>
 	<extensions>true</extensions>
 	<executions>
 	  <execution>
