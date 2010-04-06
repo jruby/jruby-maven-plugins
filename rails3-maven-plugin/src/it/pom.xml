@@ -7,30 +7,12 @@
   <version>0.0.0</version>
   <name>play ground for rails testing</name>
 
-<!--
-  <repositories>
-    <repository>
-      <id>gemcutter</id>
-      <releases>
-	<updatePolicy>never</updatePolicy>
-	<checksumPolicy>ignore</checksumPolicy>
-      </releases>
-      <snapshots>
-	<enabled>false</enabled>
-      </snapshots>
-      <id>gemcutter</id>
-      <url>http://www.gemcutter.org/gems</url>
-      <layout>gem</layout>
-    </repository>
-  </repositories>
--->
   <build>
     <plugins>
       <plugin>
 	<groupId>de.saumya.mojo</groupId>
-	<artifactId>gem-maven-plugin</artifactId>
+	<artifactId>rails3-maven-plugin</artifactId>
 	<version>0.11.0-SNAPSHOT</version>
-        <extensions>true</extensions>
       </plugin>
     </plugins>
   </build>

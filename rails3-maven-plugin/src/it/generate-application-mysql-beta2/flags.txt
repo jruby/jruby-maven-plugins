@@ -1,0 +1,7 @@
+-Dapp_path=target/app 
+-Drails.args=-d mysql
+-DrailsVersion=3.0.0.beta2
+-Dtask=db:drop db:create db:migrate RAILS_ENV=production
+-Dgenerator=scaffold 
+-Dgenerate.args=user name:string
+-Djetty.port=8020

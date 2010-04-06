@@ -1,0 +1,3 @@
+-Dapp_path=target/app 
+-Drails.args=-f -d mysql
+-DrailsVersion=3.0.0.beta

@@ -1,0 +1,1 @@
+rails3:rails rails3:generate rails3:rake post-integration-test

@@ -18,7 +18,8 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
     protected String args = null;
 
     /**
-     * @parameter expression="${project.basedir}/src/main/rails"
+     * @parameter expression="${rails.dir}"
+     *            default-value="${project.basedir}/src/main/rails"
      */
     protected File   railsDirectory;
 

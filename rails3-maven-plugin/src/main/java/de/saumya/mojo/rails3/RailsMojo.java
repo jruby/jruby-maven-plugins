@@ -93,9 +93,18 @@ public class RailsMojo extends AbstractRailsMojo {
                                                        "runtime",
                                                        "gem");
         this.pluginArtifacts.add(artifact);
-
-        System.out.println(this.pluginArtifacts);
         super.execute();
+    }
+
+    @Override
+    protected File launchDirectory() {
+        if (this.launchDirectory == null) {
+            return new File(System.getProperty("user.dir"));
+        }
+        else {
+            this.launchDirectory.mkdirs();
+            return this.launchDirectory;
+        }
     }
 
     @Override
