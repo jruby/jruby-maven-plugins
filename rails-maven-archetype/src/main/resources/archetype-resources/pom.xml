@@ -131,7 +131,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <jruby.plugins.version>0.11.0-SNAPSHOT</jruby.plugins.version>
+    <jruby.plugins.version>0.11.1-SNAPSHOT</jruby.plugins.version>
     <jruby.fork>true</jruby.fork>
 #literal()
     <!-- 

@@ -1,1 +1,1 @@
-ruby:spec
+de.saumya.mojo:jruby-maven-plugin:spec

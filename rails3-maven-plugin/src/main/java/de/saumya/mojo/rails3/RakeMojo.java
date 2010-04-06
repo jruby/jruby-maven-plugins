@@ -24,6 +24,17 @@ public class RakeMojo extends AbstractRailsMojo {
      */
     protected String task     = null;
 
+    //
+    // @Override
+    // public void execute() throws MojoExecutionException {
+    // this.pluginArtifacts.add(this.artifactFactory.createArtifact("rubygems",
+    // "rake",
+    // "0.8.7",
+    // "runtime",
+    // "gem"));
+    // super.execute();
+    // }
+
     @Override
     public void executeWithGems() throws MojoExecutionException {
         String commandString = binScript("rake");

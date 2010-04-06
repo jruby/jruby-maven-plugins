@@ -1,1 +1,1 @@
-ruby:irb
+de.saumya.mojo:jruby-maven-plugin:irb

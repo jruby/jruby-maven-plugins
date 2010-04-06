@@ -9,21 +9,6 @@
   <packaging>maven-plugin</packaging>
   <name>Rails 2.3.x Maven Mojo</name>
 
-  <repositories>
-    <repository>
-      <id>rubygems</id>
-      <releases>
-	<updatePolicy>never</updatePolicy>
-	<checksumPolicy>ignore</checksumPolicy>
-      </releases>
-      <snapshots>
-	<enabled>false</enabled>
-      </snapshots>
-      <url>http://rubygems.org/gems</url>
-      <layout>gem</layout>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
@@ -44,13 +29,6 @@
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-embedder</artifactId>
       <version>2.0.4</version>
-    </dependency>
-    <dependency>
-      <groupId>rubygems</groupId>
-      <artifactId>rake</artifactId>
-      <version>0.8.7</version>
-      <type>gem</type>
-      <scope>runtime</scope>
     </dependency>
   </dependencies>
 
@@ -76,8 +54,8 @@
         </executions>
       </plugin>
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-dependency-plugin</artifactId>
+	<version>2.0</version>
 	<executions>
 	  <execution>
             <id>src-dependencies</id>
@@ -112,21 +90,6 @@
 	  </excludes>
         </configuration>
       </plugin>
-
-      <plugin>
-        <groupId>de.saumya.mojo</groupId>
-        <artifactId>gem-maven-plugin</artifactId>
-	<version>0.11.1-SNAPSHOT</version>
-	<extensions>true</extensions>
-        <executions>
-	  <execution>
-	    <goals>
-	      <goal>initialize</goal>
-	    </goals>
-	  </execution>
-	</executions>
-      </plugin>
-
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>  
 	<version>2.5.1</version>
