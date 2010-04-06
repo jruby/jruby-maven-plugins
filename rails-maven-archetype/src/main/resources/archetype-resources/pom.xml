@@ -104,6 +104,18 @@
       <scope>runtime</scope>
     </dependency>
 #end
+#if($railsVersion == "3.0.0.beta2")
+#literal()
+    <!-- needed to avoid (a bug) the prerelease to be choosen by maven -->
+#end
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>i18n</artifactId>
+      <version>[0.3.6,0.3.6.pre)</version>
+      <type>gem</type>
+      <scope>runtime</scope>
+    </dependency>
+#end
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>activerecord-jdbc-adapter</artifactId>
