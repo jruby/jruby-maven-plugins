@@ -1,12 +1,9 @@
-<project 
-    xmlns="http://maven.apache.org/POM/4.0.0" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>0.11.0</version>
   </parent>
   <artifactId>rails2-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
@@ -119,7 +116,7 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
-	<version>0.11.0-SNAPSHOT</version>
+	<version>0.10.0</version>
 	<extensions>true</extensions>
         <executions>
 	  <execution>
