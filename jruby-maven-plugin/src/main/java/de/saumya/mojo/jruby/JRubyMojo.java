@@ -35,7 +35,6 @@ public class JRubyMojo extends AbstractJRubyMojo {
      */
     protected String args   = null;
 
-    @Override
     public void execute() throws MojoExecutionException {
         final List<String> args = new ArrayList<String>();
         if (this.script != null && this.script.length() > 0) {

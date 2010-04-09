@@ -43,7 +43,6 @@ public class RakeMojo extends AbstractJRubyMojo {
      */
     private final String args            = null;
 
-    @Override
     public void execute() throws MojoExecutionException {
         this.outputDirectory.mkdirs();
         ensureGem("rake");

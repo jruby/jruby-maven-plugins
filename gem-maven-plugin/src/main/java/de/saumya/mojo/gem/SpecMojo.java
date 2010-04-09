@@ -17,7 +17,6 @@ public class SpecMojo extends AbstractJRubyMojo {
      */
     protected String args = null;
 
-    @Override
     public void execute() throws MojoExecutionException {
         String commandString = "-S gem spec";
         if (this.args != null) {

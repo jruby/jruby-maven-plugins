@@ -33,7 +33,6 @@ public class CompileMojo extends AbstractJRubyMojo {
      */
     protected boolean ignoreFailures;
 
-    @Override
     public void execute() throws MojoExecutionException {
         final StringBuilder script = new StringBuilder();
         if (!this.outputDirectory.exists()) {

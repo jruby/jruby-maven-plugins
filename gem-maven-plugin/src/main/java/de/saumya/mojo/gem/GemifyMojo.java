@@ -67,7 +67,6 @@ public class GemifyMojo extends AbstractJRubyMojo {
     private final Map<String, String> relocationMap  = new HashMap<String, String>();
 
     @SuppressWarnings("unchecked")
-    @Override
     public void execute() throws MojoExecutionException {
         if (this.artifactId != null || this.groupId != null
                 || this.version != null) {

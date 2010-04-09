@@ -17,7 +17,6 @@ public class GemMojo extends AbstractJRubyMojo {
      */
     protected String args = null;
 
-    @Override
     public void execute() throws MojoExecutionException {
         String commandString = "-S gem";
         if (this.args != null) {

@@ -205,7 +205,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     private final UpdateCheckManager       updateCheckManager = new UpdateCheckManager();
 
-    @Override
     public void execute() throws MojoExecutionException {
         if (this.project.getBasedir() == null) {
             this.gemHome = new File(this.gemHome.getAbsolutePath()

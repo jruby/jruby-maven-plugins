@@ -40,7 +40,6 @@ public class PackageMojo extends AbstractJRubyMojo {
 
     private final Map<String, String> relocationMap = new HashMap<String, String>();
 
-    @Override
     public void execute() throws MojoExecutionException {
         final MavenProject project = this.project;
         final GemArtifact artifact = new GemArtifact(project);

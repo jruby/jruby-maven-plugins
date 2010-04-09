@@ -106,7 +106,6 @@ public class SpecMojo extends AbstractJRubyMojo {
         return this.specFile;
     }
 
-    @Override
     public void execute() throws MojoExecutionException {
         if (this.skipSpecs) {
             getLog().info("skip specs");
