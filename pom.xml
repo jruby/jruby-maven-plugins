@@ -197,7 +197,7 @@
       </build>
     </profile>
     <profile>
-      <id>integration-tests</id>
+      <id>integration-test</id>
       <build>
 	<defaultGoal>install</defaultGoal>
 	<plugins>
