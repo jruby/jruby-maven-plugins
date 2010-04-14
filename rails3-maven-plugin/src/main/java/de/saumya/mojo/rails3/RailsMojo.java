@@ -41,7 +41,7 @@ public class RailsMojo extends AbstractRailsMojo {
     /**
      * the rails version to use
      * 
-     * @parameter default-value="3.0.0.beta" expression="${railsVersion}"
+     * @parameter default-value="3.0.0.beta2" expression="${railsVersion}"
      */
     protected String          railsVersion = null;
 

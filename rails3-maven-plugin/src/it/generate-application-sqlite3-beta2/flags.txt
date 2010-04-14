@@ -1,5 +1,4 @@
--Dapp_path=target/app 
--DrailsVersion=3.0.0.beta2
+-Dapp_path=target/app
 -Dtask=db:create db:migrate RAILS_ENV=production
 -Dgenerator=scaffold 
 -Dgenerate.args=user name:string
