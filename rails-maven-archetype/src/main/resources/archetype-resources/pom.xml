@@ -71,7 +71,7 @@
 #if($railsVersion == "3.0.0.beta" || $railsVersion.substring(0,1) == '2')
       <version>1.4.0</version>
 #else
-      <version>1.5.0dev</version>
+      <version>1.5.0.RC1</version>
 #end
     </dependency>
 #literal()
