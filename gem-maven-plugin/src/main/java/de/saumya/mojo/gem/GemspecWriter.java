@@ -28,6 +28,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 class GemspecWriter {
 
+	final MavenProject      project;
     final Writer            writer;
     final String            excludes       = ".*~$|^[.][a-zA-Z].*";
     final List<File>        dirs           = new ArrayList<File>();
@@ -47,6 +48,7 @@ class GemspecWriter {
         this.gemspec = gemspec;
         this.gemspec.getParentFile().mkdirs();
         this.writer = new FileWriter(gemspec);
+        this.project = project;
 
         append("Gem::Specification.new do |s|");
         append("name", artifact.getGemName());
@@ -166,11 +168,11 @@ class GemspecWriter {
                     .append(path)
                     .append("/**/*']\n");
         }
-        final File file = new File(path);
+        final File file = new File(this.project.getBasedir(), path);
         if (file.lastModified() > this.latestModified) {
             this.latestModified = file.lastModified();
         }
-        this.dirs.add(file);
+        this.dirs.add(new File( path ) );
     }
 
     void appendJarfile(final File jar, final String jarfileName)
@@ -193,6 +195,7 @@ class GemspecWriter {
                     .append(file.toString())
                     .append("']\n");
         }
+        
         if (file.lastModified() > this.latestModified) {
             this.latestModified = file.lastModified();
         }
@@ -302,14 +305,16 @@ class GemspecWriter {
     }
 
     private void copyDir(final File target, final File dir) throws IOException {
-        if (dir.isDirectory()) {
-            for (final String file : dir.list()) {
+    	final File realDir = new File( this.project.getBasedir(), dir.getPath() );
+        if (realDir.isDirectory()) {
+            for (final String file : realDir.list()) {
                 copyDir(target, new File(dir, file));
             }
         }
         else {
-            if (dir.exists() && !dir.getName().matches(this.excludes)) {
-                FileUtils.copyFile(dir, new File(target, dir.getPath()));
+            if (realDir.exists() && !realDir.getName().matches(this.excludes)) {
+            	final File targetFile = new File( target, dir.getPath() );
+                FileUtils.copyFile(realDir, targetFile);
             }
         }
     }
