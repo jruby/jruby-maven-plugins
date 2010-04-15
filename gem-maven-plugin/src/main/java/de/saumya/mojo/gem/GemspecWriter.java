@@ -314,7 +314,6 @@ class GemspecWriter {
         else {
             if (realDir.exists() && !realDir.getName().matches(this.excludes)) {
             	final File targetFile = new File( target, dir.getPath() );
-            	System.err.println( "copyFile(" + realDir + ", " + targetFile + ")" );
                 FileUtils.copyFile(realDir, targetFile);
             }
         }
