@@ -195,6 +195,7 @@ class GemspecWriter {
                     .append(file.toString())
                     .append("']\n");
         }
+        
         if (file.lastModified() > this.latestModified) {
             this.latestModified = file.lastModified();
         }
@@ -304,7 +305,6 @@ class GemspecWriter {
     }
 
     private void copyDir(final File target, final File dir) throws IOException {
-    	System.err.println( "copyDir(" + target + ", " + dir + ")" );
     	final File realDir = new File( this.project.getBasedir(), dir.getPath() );
         if (realDir.isDirectory()) {
             for (final String file : realDir.list()) {
