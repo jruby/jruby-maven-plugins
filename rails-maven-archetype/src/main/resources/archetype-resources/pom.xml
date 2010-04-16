@@ -143,6 +143,7 @@
     </dependency>
   </dependencies>
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jruby.plugins.version>0.11.1</jruby.plugins.version>
     <jruby.fork>true</jruby.fork>
 #literal()
