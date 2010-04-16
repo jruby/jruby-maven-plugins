@@ -241,7 +241,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     releases);
             getLog().info("gem plugin configured but no gem repository found - fall back to "
                     + rubygemsRepo.getUrl());
-            this.remoteRepositories.add(rubygemsRepo);
             this.gemRepositories.add(rubygemsRepo);
         }
         final File gemsDir = new File(this.gemPath, "gems");
@@ -415,6 +414,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 }
             }
             project.setArtifacts(result.getArtifacts());
+
             for (final Artifact dependencyArtifact : (Set<Artifact>) project.getDependencyArtifacts()) {
                 if ("gem".equals(dependencyArtifact.getType())) {
                     if (!visitedArtifacts.containsKey(key(dependencyArtifact))) {
@@ -479,7 +479,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 return false;
             }
             else {
-                getLog().debug("<gems> "
+                getLog().info("<gems> "
                         + (metadataFile.exists() ? "updating" : "creating")
                         + " metadata for " + dependencyArtifact);
 
@@ -510,14 +510,31 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                         // TODO maybe it is possible to obey fail-fast and
                         // fail-at-end from the command line switches
                         if (metadataFile.exists()) {
+                            // touch metadataFile to prevent further updates
+                            // today
+                            metadataFile.setLastModified(System.currentTimeMillis());
                             getLog().warn("failed to update metadata for "
-                                                  + this.artifacts
+                                                  + dependencyArtifact
                                                   + ", use old one",
                                           ee);
                         }
                         else {
                             throw ee;
                         }
+                    }
+                }
+                catch (final RuntimeException e) {
+                    // TODO maybe it is possible to obey fail-fast and
+                    // fail-at-end from the command line switches
+                    if (metadataFile.exists()) {
+                        // touch metadataFile to prevent further updates today
+                        metadataFile.setLastModified(System.currentTimeMillis());
+                        getLog().warn("failed to update metadata for "
+                                + dependencyArtifact + ", use old one");
+                        getLog().debug("metadata failure", e);
+                    }
+                    else {
+                        throw e;
                     }
                 }
                 tmp.delete();
