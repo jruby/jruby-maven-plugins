@@ -1,6 +1,10 @@
 package de.saumya.mojo.rspec;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.List;
 import java.util.Properties;
 
@@ -79,14 +83,14 @@ public class RSpecMojo extends AbstractJRubyMojo {
 			getLog().info("Skipping RSpec tests");
 			return;
 		}
-		
-		if ( ! new File(specSourceDirectory).exists() ) {
-			getLog().info( "Skipping RSpec tests since " + specSourceDirectory + " is missing" );
+
+		if (!new File(specSourceDirectory).exists()) {
+			getLog().info("Skipping RSpec tests since " + specSourceDirectory + " is missing");
 			return;
 		}
 		getLog().info("Running RSpec tests from " + specSourceDirectory);
 
-		String reportPath = outputDirectory + "/" + reportName;
+		String reportPath = new File(outputDirectory, reportName).getPath();
 
 		initScriptFactory(rspecScriptFactory, reportPath);
 		initScriptFactory(shellScriptFactory, reportPath);
@@ -103,16 +107,44 @@ public class RSpecMojo extends AbstractJRubyMojo {
 		}
 
 		execute(rspecScriptFactory.getScriptFile().getPath());
+
+		File reportFile = new File(this.project.getBasedir(), reportPath);
+		Reader in = null;
+		try {
+			in = new FileReader(reportFile);
+			BufferedReader reader = new BufferedReader(in);
+
+			String line = null;
+
+			while ((line = reader.readLine()) != null) {
+				if (line.contains("0 failures")) {
+					return;
+				}
+			}
+		} catch (IOException e) {
+			throw new MojoExecutionException("Unable to read test report file: " + reportFile);
+		} finally {
+			if ( in != null ) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					throw new MojoExecutionException( e.getMessage() );
+				}
+			}
+		}
+		
+
+		throw new MojoExecutionException("There were test failures");
 	}
 
 	private void initScriptFactory(ScriptFactory factory, String reportPath) {
 		factory.setBaseDir(basedir);
 		factory.setClasspathElements(classpathElements);
-		factory.setOutputDir(new File(outputDirectory));
+		factory.setOutputDir(new File(basedir, outputDirectory));
 		factory.setReportPath(reportPath);
 		factory.setSourceDir(specSourceDirectory);
 		Properties props = systemProperties;
-		if ( props == null ) {
+		if (props == null) {
 			props = new Properties();
 		}
 		factory.setSystemProperties(props);

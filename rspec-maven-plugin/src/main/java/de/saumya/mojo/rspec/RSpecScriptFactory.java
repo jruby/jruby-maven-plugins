@@ -26,6 +26,7 @@ public class RSpecScriptFactory extends AbstractScriptFactory {
 		builder.append("BASE_DIR=%q(" + baseDir + ")\n");
 		builder.append("SPEC_DIR=%q(" + sourceDir + ")\n");
 		builder.append("REPORT_PATH=%q(" + reportPath + ")\n");
+		builder.append("$: << File.join( BASE_DIR, 'lib' )\n");
 		builder.append("$: << SPEC_DIR\n");
 
 		return builder.toString();
