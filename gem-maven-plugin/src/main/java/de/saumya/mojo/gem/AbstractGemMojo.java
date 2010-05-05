@@ -54,6 +54,13 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter expression="${gem.forceVersion}" default-value="false"
      */
     private boolean                    forceVersion;
+    
+    /** 
+     * follow transitive dependencies when initializing rubygem dependencies.
+     * 
+     * @parameter expression="${gem.useTransitiveDependencies}" default-value="false"
+     */
+    boolean useTransitiveDependencies;
 
     /**
      * @parameter default-value="${plugin.artifacts}"
@@ -254,7 +261,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         collectedArtifacts.remove(key(this.project.getArtifact()));
-
+        
         String extraFlag = "";
         if (this.forceVersion) {
             // allow to overwrite resolved version with version of project
@@ -414,8 +421,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 }
             }
             project.setArtifacts(result.getArtifacts());
-
-            for (final Artifact dependencyArtifact : (Set<Artifact>) project.getDependencyArtifacts()) {
+            
+            final Set<Artifact> walkArtifacts = ( this.useTransitiveDependencies ? (Set<Artifact>)result.getArtifacts() : (Set<Artifact>) project.getDependencyArtifacts() );
+            for (final Artifact dependencyArtifact : walkArtifacts ) {
                 if ("gem".equals(dependencyArtifact.getType())) {
                     if (!visitedArtifacts.containsKey(key(dependencyArtifact))) {
                         collectArtifacts(dependencyArtifact,
