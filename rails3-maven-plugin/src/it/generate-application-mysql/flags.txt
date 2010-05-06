@@ -1,2 +1,6 @@
 -Dapp_path=target/app 
--Drails.args=-f -d mysql
+-Drails.args=-d mysql
+-Dtask=db:drop db:create db:migrate RAILS_ENV=production
+-Dgenerator=scaffold 
+-Dgenerate.args=user name:string
+-Djetty.port=8020
