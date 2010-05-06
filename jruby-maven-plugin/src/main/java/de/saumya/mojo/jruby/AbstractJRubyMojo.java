@@ -35,7 +35,7 @@ import org.codehaus.classworlds.ClassRealm;
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String              DEFAULT_JRUBY_VERSION = "1.4.0";
+    private static String              DEFAULT_JRUBY_VERSION = "1.4.1";
 
     private static final Set<Artifact> NO_ARTIFACTS          = Collections.emptySet();
 
@@ -147,7 +147,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     /**
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
      * this version is used to resolve the jruby-complete dependency from the
-     * local/remote maven repository. defaults to "1.4.0".
+     * local/remote maven repository. defaults to "1.4.1".
      * 
      * @parameter default-value="${jruby.version}"
      */
