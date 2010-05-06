@@ -19,6 +19,7 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -384,14 +385,21 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             final MavenProject mavenProject = this.builder.buildFromRepository(artifact,
                                                                                this.remoteRepositories,
                                                                                this.localRepository);
+            
             final Set<Artifact> moreArtifacts = mavenProject.createArtifacts(this.artifactFactory,
                                                                              null,
                                                                              null);
+            
             final ArtifactResolutionResult arr = this.resolver.resolveTransitively(moreArtifacts,
                                                                                    artifact,
-                                                                                   this.remoteRepositories,
+                                                                                   this.project.getManagedVersionMap(),
                                                                                    this.localRepository,
-                                                                                   this.metadata);
+                                                                                   this.remoteRepositories,
+                                                                                   this.metadata,
+                                                                                   new ArtifactFilter() {
+																				      public boolean include(Artifact artifact) {
+																					      return artifact.getType().equals( "gem" );
+																				      } });
             // System.out.println(artifact + " " + arr);
             for (final Object artiObject : arr.getArtifacts()) {
                 // allow older api to work

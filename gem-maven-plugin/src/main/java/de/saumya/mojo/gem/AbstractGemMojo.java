@@ -308,6 +308,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 // TODO force flag to install gems via command line
                 // argument
                 if (!(this.fork && gemDir.exists())) {
+                	getLog().info( "adding file: " + collectedArtifact.getFile() + " for " + collectedArtifact );
                     gems.append(" ").append(collectedArtifact.getFile()
                             .getAbsolutePath());
                 }
@@ -392,10 +393,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                                        this.remoteRepositories,
                                                        this.localRepository)
                     : this.project;
-
+                    
             project.setDependencyArtifacts(project.createArtifacts(this.artifactFactory,
                                                                    artifact.getScope(),
                                                                    null));
+            
             createMetadatasForDependencies(project);
 
             project.setRemoteArtifactRepositories(this.remoteRepositories);
@@ -407,6 +409,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     retry = false;
                     result = this.resolver.resolveTransitively(project.getDependencyArtifacts(),
                                                                project.getArtifact(),
+                                                               this.project.getManagedVersionMap(),
                                                                this.localRepository,
                                                                this.remoteRepositories,
                                                                this.metadata,
@@ -421,6 +424,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     }
                 }
             }
+            
             project.setArtifacts(result.getArtifacts());
             
             final Set<Artifact> walkArtifacts = ( this.useTransitiveDependencies ? (Set<Artifact>)result.getArtifacts() : (Set<Artifact>) project.getDependencyArtifacts() );
@@ -433,9 +437,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     }
                 }
             }
-
+            
             visitedArtifacts.put(key(artifact), artifact);
-
         }
         catch (final InvalidDependencyVersionException e) {
             throw new MojoExecutionException("resolve error", e);

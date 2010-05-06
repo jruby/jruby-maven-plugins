@@ -127,6 +127,7 @@
   <modules>
     <module>jruby-maven-plugin</module>
     <module>gem-maven-plugin</module>
+    <module>rspec-maven-plugin</module>
     <module>rails-maven-archetype</module>
     <module>rails2-maven-plugin</module>
     <module>rails3-maven-plugin</module>
