@@ -1,3 +1,2 @@
 -Dapp_path=target/app 
--Drails.args=-f 
--DrailsVersion=3.0.0.beta
+-Drails.args=-f

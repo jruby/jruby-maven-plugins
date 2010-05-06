@@ -12,7 +12,7 @@ success_jdbc = false
 success_version = false
 new File(basedir, 'target/app/pom.xml').eachLine{ 
   success_jdbc = success_jdbc || (it =~ '<artifactId>jdbc-sqlite3</artifactId>')
-  success_version = success_version || (it =~ '<version>3.0.0.beta2</version>')
+  success_version = success_version || (it =~ '<version>3.0.0.beta[3-9]</version>')
 }
 
 success_index = false
