@@ -29,66 +29,58 @@ public class RailsMojo extends AbstractRailsMojo {
      * 
      * @parameter default-value="${rails.args}"
      */
-    protected String          railsArgs    = null;
+    protected String            railsArgs                      = null;
 
     /**
      * the path to the application to be generated
      * 
      * @parameter default-value="${app_path}"
      */
-    protected String          appPath      = null;
+    protected String            appPath                        = null;
 
     /**
      * the rails version to use
      * 
-     * @parameter default-value="3.0.0.beta2" expression="${railsVersion}"
+     * @parameter default-value="3.0.0.beta3" expression="${railsVersion}"
      */
-    protected String          railsVersion = null;
+    protected String            railsVersion                   = null;
 
     /**
      * the groupId of the new pom
      * 
      * @parameter default-value="rails" expression="${groupId}"
      */
-    protected String          groupId      = null;
+    protected String            groupId                        = null;
 
     /**
      * the version of the new pom
      * 
      * @parameter default-value="1.0-SNAPSHOT" expression="${version}"
      */
-    protected String          version      = null;
+    protected String            version                        = null;
 
     /**
      * @component
      */
-    private VelocityComponent velocityComponent;
+    private VelocityComponent   velocityComponent;
+    private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.beta3";
+    private static final String NEEDED_JRUBY_VERSION_FOR_RAILS = "1.5.0.RC3";
 
     @Override
     public void execute() throws MojoExecutionException {
-        Artifact artifact;
-        if ("3.0.0.beta".equals(this.railsVersion)) {
-            artifact = this.artifactFactory.createArtifact("rubygems",
-                                                           "bundler",
-                                                           "0.9.9",
-                                                           "runtime",
-                                                           "gem");
-            this.pluginArtifacts.add(artifact);
-            artifact = this.artifactFactory.createArtifact("rubygems",
-                                                           "activesupport",
-                                                           this.railsVersion,
-                                                           "runtime",
-                                                           "gem");
-            this.pluginArtifacts.add(artifact);
-            artifact = this.artifactFactory.createArtifact("rubygems",
-                                                           "rails3b",
-                                                           "3.0.1",
-                                                           "runtime",
-                                                           "gem");
-            this.pluginArtifacts.add(artifact);
+        if (this.railsVersion.compareTo(SMALLEST_ALLOWED_RAILS_VERSION) < 0) {
+            getLog().warn("rails version before "
+                    + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
+        if (this.jrubyVersion == null
+                || this.jrubyVersion.compareTo(NEEDED_JRUBY_VERSION_FOR_RAILS) < 0) {
+            getLog().warn("use hardcoded jruby version for rails3: "
+                    + NEEDED_JRUBY_VERSION_FOR_RAILS);
+            this.jrubyVersion = NEEDED_JRUBY_VERSION_FOR_RAILS;
+        }
+        Artifact artifact;
         artifact = this.artifactFactory.createArtifact("rubygems",
-                                                       "railties",
+                                                       "rails",
                                                        this.railsVersion,
                                                        "runtime",
                                                        "gem");
@@ -150,12 +142,7 @@ public class RailsMojo extends AbstractRailsMojo {
                                                                   + database
                                                                   + "\", :require => 'jdbc/"
                                                                   + database
-                                                                  + "' if defined?(JRUBY_VERSION)\n")
-                                            // this version must match the
-                                            // version of the rails gem from the
-                                            // pom.xml
-                                            .replaceFirst("3.0.0.beta2",
-                                                          this.railsVersion));
+                                                                  + "' if defined?(JRUBY_VERSION)\n"));
             }
             catch (final IOException e) {
                 throw new MojoExecutionException("failed to filter " + script,
