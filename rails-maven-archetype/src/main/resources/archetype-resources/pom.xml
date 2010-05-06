@@ -29,6 +29,7 @@
       <url>http://rubygems.org/gems</url>
       <layout>gem</layout>
     </repository>
+#if($railsVersion.substring(0,1) == '2')
 #literal()
     <!-- 
 	 needed for jruby-rack artifact
@@ -40,6 +41,7 @@
       <url>http://mojo.saumya.de</url>
     </repository>
   </repositories>
+#end
 
   <pluginRepositories>
     <pluginRepository>
@@ -59,7 +61,7 @@
     <dependency>
       <groupId>org.jruby.rack</groupId>
       <artifactId>jruby-rack</artifactId>
-#if($railsVersion == "3.0.0.beta" || $railsVersion.substring(0,1) == '2')
+#if($railsVersion.substring(0,1) == '2')
       <version>0.9.7-SNAPSHOT</version>
 #else
       <version>0.9.7</version>
@@ -68,53 +70,16 @@
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-#if($railsVersion == "3.0.0.beta" || $railsVersion.substring(0,1) == '2')
+#if($railsVersion.substring(0,1) == '2')
       <version>1.4.0</version>
 #else
-      <version>1.5.0.RC1</version>
+      <version>1.5.0.RC3</version>
 #end
     </dependency>
 #literal()
     <!-- 
 	 gem dependencies
     -->
-#end
-#if($railsVersion == "3.0.0.beta")
-#literal()
-    <!-- use bundler version which works with builtin rubygems version -->
-#end
-    <dependency>
-      <groupId>rubygems</groupId>
-      <artifactId>bundler</artifactId>
-      <version>0.9.9</version>
-      <type>gem</type>
-    </dependency>
-    <dependency>
-      <groupId>rubygems</groupId>
-      <artifactId>activesupport</artifactId>
-      <version>3.0.0.beta</version>
-      <type>gem</type>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>rubygems</groupId>
-      <artifactId>rails3b</artifactId>
-      <version>3.0.1</version>
-      <type>gem</type>
-      <scope>runtime</scope>
-    </dependency>
-#end
-#if($railsVersion == "3.0.0.beta2")
-#literal()
-    <!-- needed to avoid (a bug) the prerelease to be choosen by maven -->
-#end
-    <dependency>
-      <groupId>rubygems</groupId>
-      <artifactId>i18n</artifactId>
-      <version>[0.3.6,0.3.6.pre)</version>
-      <type>gem</type>
-      <scope>runtime</scope>
-    </dependency>
 #end
     <dependency>
       <groupId>rubygems</groupId>
