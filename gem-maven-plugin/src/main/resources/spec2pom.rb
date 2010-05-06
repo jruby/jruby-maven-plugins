@@ -54,7 +54,10 @@ spec.dependencies.each do |dep|
       right_version = "#{gem_final_version})"
     when "~>"
       pre_version = gem_version.sub(/[.][0-9]+$/, '')
-      version = "[#{gem_version},#{pre_version.sub(/[0-9]+$/, '')}#{pre_version.sub(/.*[.]/, '').to_i + 1}.0)"
+      # hope the upper bound is "big" enough but needed, i.e.
+      # version 4.0.0 is bigger than 4.0.0.pre and [3.0.0, 4.0.0) will allow
+      # 4.0.0.pre which is NOT intended
+      version = "[#{gem_version},#{pre_version.sub(/[0-9]+$/, '')}#{pre_version.sub(/.*[.]/, '').to_i}.99999.99999)"
     else
       puts "not implemented comparator: #{req.inspect}"
     end
