@@ -29,7 +29,7 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
             // hack to generate some http error which let the download stop.
             // without it wagon will download the html with "page not found" and
             // stores it as artifact file
-            return "ixtlan/0.0.0/ixtlan-0.0.0.gem";
+            return "../nonexistant-artifact";
         }
         path.append(artifact.getArtifactId())
                 .append(ARTIFACT_SEPARATOR)
@@ -42,13 +42,13 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
         final String extension = artifact.getArtifactHandler().getExtension();
         if ("pom".equals(extension) || "gem".equals(extension)) {
             // just download the gem instead of the none existing pom
-            path.append(extension);
+            path.append("gem");
         }
         else {
             // hack to generate some http error which let the download stop.
             // without it wagon will download the html with "page not found" and
             // stores it as jar file
-            return "ixtlan/0.0.0/ixtlan-0.0.0.gem";
+            return "../nonexistant-artifact";
         }
 
         return path.toString();

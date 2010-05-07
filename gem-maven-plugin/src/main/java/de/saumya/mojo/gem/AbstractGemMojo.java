@@ -308,7 +308,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 // TODO force flag to install gems via command line
                 // argument
                 if (!(this.fork && gemDir.exists())) {
-                	getLog().info( "adding file: " + collectedArtifact.getFile() + " for " + collectedArtifact );
                     gems.append(" ").append(collectedArtifact.getFile()
                             .getAbsolutePath());
                 }
