@@ -21,6 +21,7 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
     }
 
     public String pathOf(final Artifact artifact) {
+    	System.err.println( "pathOf(" + artifact + ")" );
         final StringBuffer path = new StringBuffer();
 
         if (!"rubygems".equals(artifact.getGroupId())) {
@@ -42,7 +43,7 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
         final String extension = artifact.getArtifactHandler().getExtension();
         if ("pom".equals(extension) || "gem".equals(extension)) {
             // just download the gem instead of the none existing pom
-            path.append("gem");
+            path.append( extension );
         }
         else {
             // hack to generate some http error which let the download stop.
@@ -51,6 +52,7 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
             return "../nonexistant-artifact";
         }
 
+        System.err.println( " --> " + path );
         return path.toString();
     }
 
