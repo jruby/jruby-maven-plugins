@@ -40,8 +40,8 @@
       <name>Saumya's Plugins</name>
       <url>http://mojo.saumya.de</url>
     </repository>
-  </repositories>
 #end
+  </repositories>
 
   <pluginRepositories>
     <pluginRepository>

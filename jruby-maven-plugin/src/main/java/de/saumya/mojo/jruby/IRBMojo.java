@@ -25,7 +25,8 @@ public class IRBMojo extends AbstractJRubyMojo {
     protected String  args = null;
 
     public void execute() throws MojoExecutionException {
-        super.fork = this.fork;
+        // make sure the whole things run in the same process
+        super.fork = false;
         final StringBuilder args = new StringBuilder("-S irb");
         if (this.args != null) {
             args.append(" ").append(this.args);
