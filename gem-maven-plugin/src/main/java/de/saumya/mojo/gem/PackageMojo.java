@@ -100,8 +100,7 @@ public class PackageMojo extends AbstractJRubyMojo {
     private void build(final MavenProject project, final GemArtifact artifact)
             throws MojoExecutionException, IOException {
 
-        getLog().info("building gem for " + artifact + " . . ."
-                + artifact.hasJarFile());
+        getLog().info("building gem for " + artifact + " . . .");
         final File gemDir = new File(this.buildDirectory, artifact.getGemName());
         final File gemSpec = new File(gemDir, artifact.getGemName()
                 + ".gemspec");

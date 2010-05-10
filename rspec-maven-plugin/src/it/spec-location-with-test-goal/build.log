@@ -1,0 +1,59 @@
+OUT: -------------------------------------------------------------------------------
+OUT: TEST BUILD: /home/kristian/projects/jruby-maven-plugins/rspec-maven-plugin/src/it/spec-location-with-test-goal/pom.xml
+OUT: Goals: test
+OUT: -------------------------------------------------------------------------------
+OUT: [INFO] Error stacktraces are turned on.
+OUT: [INFO] Scanning for projects...
+OUT: [INFO]                                                                         
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] Building spec-file testing
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] 
+OUT: [INFO] --- maven-resources-plugin:2.4.1:resources (default-resources) @ spec-file ---
+OUT: [WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+OUT: [INFO] skip non existing resourceDirectory /home/kristian/projects/jruby-maven-plugins/rspec-maven-plugin/src/it/spec-location-with-test-goal/src/main/resources
+OUT: [INFO] 
+OUT: [INFO] --- maven-compiler-plugin:2.0.2:compile (default-compile) @ spec-file ---
+OUT: [INFO] No sources to compile
+OUT: [INFO] 
+OUT: [INFO] --- maven-resources-plugin:2.4.1:testResources (default-testResources) @ spec-file ---
+OUT: [WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+OUT: [INFO] skip non existing resourceDirectory /home/kristian/projects/jruby-maven-plugins/rspec-maven-plugin/src/it/spec-location-with-test-goal/src/test/resources
+OUT: [INFO] 
+OUT: [INFO] --- maven-compiler-plugin:2.0.2:testCompile (default-testCompile) @ spec-file ---
+OUT: [INFO] No sources to compile
+OUT: [INFO] 
+OUT: [INFO] --- maven-surefire-plugin:2.4.3:test (default-test) @ spec-file ---
+OUT: [INFO] No tests to run.
+OUT: [INFO] 
+OUT: [INFO] --- rspec-maven-plugin:0.12.0-SNAPSHOT:test (default) @ spec-file ---
+OUT: [INFO] gem plugin configured but no gem repository found - fall back to http://rubygems.org/gems
+OUT: [WARNING] JRuby limited openssl loaded. gem install jruby-openssl for full support.
+OUT: [WARNING] http://jruby.kenai.com/pages/JRuby_Builtin_OpenSSL
+OUT: [INFO] **************************************************
+OUT: [INFO] 
+OUT: [INFO]   Thank you for installing rspec-1.3.0
+OUT: [INFO] 
+OUT: [INFO]   Please be sure to read History.rdoc and Upgrade.rdoc
+OUT: [INFO]   for useful information about this release.
+OUT: [INFO] 
+OUT: [INFO] **************************************************
+OUT: [INFO] Successfully installed rspec-1.3.0
+OUT: [INFO] Successfully installed jruby-openssl-0.7
+OUT: [INFO] 2 gems installed
+OUT: [INFO] Running RSpec tests from /home/kristian/projects/jruby-maven-plugins/rspec-maven-plugin/src/it/spec-location-with-test-goal/spec
+OUT: [INFO] =========================================
+OUT: [INFO] TOTAL: 1 passing; 0 failing; 0 pending
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] BUILD SUCCESS
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] Total time: 47.353s
+OUT: [INFO] Finished at: Mon May 10 16:18:46 IST 2010
+OUT: [INFO] Final Memory: 5M/123M
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: -------------------------------------------------------------------------------
+OUT: -------------------------------------------------------------------------------
+OUT: SCRIPT (validate): /home/kristian/projects/jruby-maven-plugins/rspec-maven-plugin/src/it/spec-location-with-test-goal/validate.groovy
+OUT: -------------------------------------------------------------------------------
+OUT: SUCCESS
+OUT: -------------------------------------------------------------------------------

@@ -1,0 +1,45 @@
+OUT: -------------------------------------------------------------------------------
+OUT: TEST BUILD: /home/kristian/projects/jruby-maven-plugins/rspec-maven-plugin/src/it/success-with-rspec-goal/pom.xml
+OUT: Goals: de.saumya.mojo:gem-maven-plugin:initialize de.saumya.mojo:rspec-maven-plugin:test
+OUT: -------------------------------------------------------------------------------
+OUT: [INFO] Error stacktraces are turned on.
+OUT: [INFO] Scanning for projects...
+OUT: [INFO]                                                                         
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] Building spec-success testing
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] 
+OUT: [INFO] --- gem-maven-plugin:0.12.0-SNAPSHOT:initialize (default-cli) @ spec-success ---
+OUT: [INFO] gem plugin configured but no gem repository found - fall back to http://rubygems.org/gems
+OUT: [WARNING] JRuby limited openssl loaded. gem install jruby-openssl for full support.
+OUT: [WARNING] http://jruby.kenai.com/pages/JRuby_Builtin_OpenSSL
+OUT: [INFO] Successfully installed jruby-openssl-0.7
+OUT: [INFO] **************************************************
+OUT: [INFO] 
+OUT: [INFO]   Thank you for installing rspec-1.3.0
+OUT: [INFO] 
+OUT: [INFO]   Please be sure to read History.rdoc and Upgrade.rdoc
+OUT: [INFO]   for useful information about this release.
+OUT: [INFO] 
+OUT: [INFO] **************************************************
+OUT: [INFO] Successfully installed rspec-1.3.0
+OUT: [INFO] 2 gems installed
+OUT: [INFO] 
+OUT: [INFO] --- rspec-maven-plugin:0.12.0-SNAPSHOT:test (default-cli) @ spec-success ---
+OUT: [INFO] gem plugin configured but no gem repository found - fall back to http://rubygems.org/gems
+OUT: [INFO] Running RSpec tests from /home/kristian/projects/jruby-maven-plugins/rspec-maven-plugin/src/it/success-with-rspec-goal/specs
+OUT: [INFO] =========================================
+OUT: [INFO] TOTAL: 1 passing; 0 failing; 0 pending
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] BUILD SUCCESS
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: [INFO] Total time: 23.119s
+OUT: [INFO] Finished at: Mon May 10 16:19:07 IST 2010
+OUT: [INFO] Final Memory: 3M/93M
+OUT: [INFO] ------------------------------------------------------------------------
+OUT: -------------------------------------------------------------------------------
+OUT: -------------------------------------------------------------------------------
+OUT: SCRIPT (validate): /home/kristian/projects/jruby-maven-plugins/rspec-maven-plugin/src/it/success-with-rspec-goal/validate.groovy
+OUT: -------------------------------------------------------------------------------
+OUT: SUCCESS
+OUT: -------------------------------------------------------------------------------
