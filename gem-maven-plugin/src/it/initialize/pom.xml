@@ -11,6 +11,20 @@
   </parent>
   <groupId>rubygems</groupId>
   <artifactId>deps</artifactId>
+  <repositories>
+    <repository>
+      <id>rubygems</id>
+      <releases>
+	<updatePolicy>never</updatePolicy>
+	<checksumPolicy>ignore</checksumPolicy>
+      </releases>
+      <snapshots>
+	<enabled>false</enabled>
+      </snapshots>
+      <url>http://rubygems.org/gems</url>
+      <layout>gem</layout>
+    </repository>
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>

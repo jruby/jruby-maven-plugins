@@ -11,11 +11,6 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
     private static final char GROUP_SEPARATOR    = '.';
     private static final char ARTIFACT_SEPARATOR = '-';
 
-    // private static final ArtifactRepositoryPolicy DISABLED_POLICY = new
-    // ArtifactRepositoryPolicy(false,
-    // ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER,
-    // ArtifactRepositoryPolicy.CHECKSUM_POLICY_IGNORE);
-
     public String getId() {
         return "gem";
     }
@@ -82,43 +77,10 @@ public class GemRepositoryLayout implements ArtifactRepositoryLayout {
 
         path.append(filename);
 
-        System.out.println("metadata -------------- " + path);
-
         return path.toString();
     }
-
-    // private String pathOfRepositoryMetadata(final ArtifactMetadata metadata,
-    // final String filename) {
-    // System.out.println("metadata -------------- " + filename);
-    // final StringBuffer path = new StringBuffer();
-    //
-    // path.append(metadata.getGroupId()).append(GROUP_SEPARATOR);
-    // // .append(PATH_SEPARATOR);
-    // // if (!metadata.storedInGroupDirectory()) {
-    // // final String version = getBaseVersion(metadata);
-    // // // always store in version directory; default implementation does
-    // // // not
-    // // path.append(version).append(PATH_SEPARATOR);
-    // //
-    // path.append(metadata.getArtifactId()).append(GROUP_SEPARATOR);
-    // // }
-    //
-    // path.append(filename);
-    //
-    // return path.toString();
-    // }
 
     public String pathOfRemoteRepositoryMetadata(final ArtifactMetadata metadata) {
         return pathOfRepositoryMetadata(metadata, metadata.getRemoteFilename());
     }
-
-    // public ArtifactRepository newMavenArtifactRepository(final String id,
-    // final String url, final ArtifactRepositoryPolicy snapshots,
-    // final ArtifactRepositoryPolicy releases) {
-    // return new MavenArtifactRepository(id,
-    // url,
-    // this,
-    // DISABLED_POLICY,
-    // DISABLED_POLICY);
-    // }
 }

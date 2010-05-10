@@ -1,5 +1,0 @@
--Dapp_path=target/app 
--Drails.args=-f 
--Dtask=db:migrate 
--Dgenerator=scaffold 
--Dgenerate.args=account name:string

@@ -6,13 +6,27 @@
   <packaging>pom</packaging>
   <version>0.0.0</version>
   <name>play ground for rails testing</name>
-
+  <repositories>
+    <repository>
+      <id>rubygems</id>
+      <layout>gem</layout>
+      <releases>
+	<updatePolicy>never</updatePolicy>
+	<checksumPolicy>ignore</checksumPolicy>
+      </releases>
+      <snapshots>
+	<enabled>false</enabled>
+      </snapshots>
+      <url>http://rubygems.org/gems</url>
+    </repository>
+  </repositories>
   <build>
     <plugins>
       <plugin>
 	<groupId>de.saumya.mojo</groupId>
 	<artifactId>rails3-maven-plugin</artifactId>
-	<version>0.11.1-SNAPSHOT</version>
+	<version>0.11.1</version>
+        <extensions>true</extensions>
       </plugin>
     </plugins>
   </build>
