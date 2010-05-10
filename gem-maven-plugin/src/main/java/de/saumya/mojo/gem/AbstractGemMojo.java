@@ -56,7 +56,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * allow to overwrite the version by explicitly declaring a dependency in
      * the pom. will not check any dependencies on gemspecs level.
-     *
+     * 
      * @parameter expression="${gem.forceVersion}" default-value="false"
      */
     private boolean                    forceVersion;
@@ -227,6 +227,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     .replace("${project.basedir}", ""));
         }
         execute(this.artifacts);
+        execute(this.pluginArtifacts);
         executeWithGems();
     }
 
