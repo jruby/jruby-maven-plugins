@@ -101,10 +101,12 @@ public class GemifyMojo extends AbstractJRubyMojo {
                     final Set artifacts = project.createArtifacts(this.artifactFactory,
                                                                   null,
                                                                   null);
+                    getLog().info( "artifacts=" + artifacts );
                     final ArtifactResolutionResult arr = this.resolver.resolveTransitively(artifacts,
                                                                                            artifact,
-                                                                                           this.remoteRepositories,
+                                                                                           this.project.getManagedVersionMap(),
                                                                                            this.localRepository,
+                                                                                           this.remoteRepositories,
                                                                                            this.metadata);
                     gemify(project, arr.getArtifacts());
                 }
@@ -136,6 +138,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
 
     private void gemify(MavenProject project, final Set<Artifact> artifacts)
             throws MojoExecutionException {
+    	getLog().info( "gemify( " + project + ", " + artifacts + " )" );
         final Map<String, MavenProject> gems = new HashMap<String, MavenProject>();
         try {
             final String gem = build(project, project.getArtifact().getFile());
@@ -169,6 +172,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
         else {
             execute("-S gem install -l " + orderInResolvedManner(gems));
         }
+        
     }
 
     private MavenProject projectFromArtifact(final Artifact artifact)
@@ -248,6 +252,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                                                                                                                 dependency.getType(),
                                                                                                                 dependency.getClassifier());
                                     try {
+                                    	getLog().info( "resolving: " + artifact );
                                         this.resolver.resolve(artifact,
                                                               this.remoteRepositories,
                                                               this.localRepository);
@@ -336,6 +341,8 @@ public class GemifyMojo extends AbstractJRubyMojo {
         for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
             if (!dependency.isOptional() && "jar".equals(dependency.getType())
                     && dependency.getClassifier() == null) {
+            	getLog().info( "--" );
+            	getLog().info( "dependency=" + dependency );
                 // it will adjust the artifact as well (in case of relocation)
                 Artifact arti = null;
                 try {
@@ -344,6 +351,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                                                                              dependency.getVersion(),
                                                                              dependency.getScope(),
                                                                              dependency.getClassifier());
+                    getLog().info( "arti=" + arti );
                     projectFromArtifact(arti);
                     dependency.setGroupId(arti.getGroupId());
                     dependency.setArtifactId(arti.getArtifactId());
@@ -373,6 +381,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
             }
         }
 
+        getLog().info( "<gemify> A" );
         gemSpecWriter.close();
 
         gemSpecWriter.copy(gemDir);
@@ -415,7 +424,9 @@ public class GemifyMojo extends AbstractJRubyMojo {
             }
         }
         this.launchDir = gemDir;
+        getLog().info( "<gemify> B" );
         execute("-S gem build " + gemSpec.getAbsolutePath());
+        getLog().info( "<gemify> C" );
 
         return gemSpec.getAbsolutePath().replaceFirst(".gemspec$", "") + "-"
                 + gemVersion(project.getVersion()) + "-java.gem";
