@@ -1,3 +1,6 @@
 *~
 target
 *.gpg
+.classpath
+.settings
+.project
