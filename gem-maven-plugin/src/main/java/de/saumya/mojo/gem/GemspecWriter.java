@@ -39,6 +39,7 @@ class GemspecWriter {
     final File              gemspec;
     private boolean         firstAuthor    = true;
     private boolean         firstFile      = true;
+    private boolean         platformAppended = false;
 
     @SuppressWarnings("unchecked")
     GemspecWriter(final File gemspec, final MavenProject project,
@@ -177,7 +178,10 @@ class GemspecWriter {
 
     void appendJarfile(final File jar, final String jarfileName)
             throws IOException {
-        append("platform", "java");
+    	if ( ! this.platformAppended ) {
+            append("platform", "java");
+            this.platformAppended = true;
+    	}
         final File f = new File("lib", jarfileName);
         this.jarFiles.put(f.toString(), jar);
         appendFile(f);
