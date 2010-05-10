@@ -11,6 +11,7 @@ import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,11 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 /**
  */
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
+
+    /**
+     * @parameter expression="${jruby.include.openssl}" default-value="true"
+     */
+    private boolean                    includeOpenSSLGem;
 
     /**
      * @parameter expression="${settings.offline}"
@@ -220,13 +226,22 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             this.gemPath = new File(this.gemPath.getAbsolutePath()
                     .replace("${project.basedir}", ""));
         }
-        execute(this.pluginArtifacts);
+        execute(this.artifacts);
         executeWithGems();
     }
 
-    // TODO needs better name !!!!
-    public void execute(final Collection<Artifact> artifacts)
+    // TODO needs better name !!!! needs to be protected ?
+    public void execute(Collection<Artifact> artifacts)
             throws MojoExecutionException {
+        if (this.includeOpenSSLGem) {
+            final Artifact openssl = this.artifactFactory.createArtifact("rubygems",
+                                                                         "jruby-openssl",
+                                                                         "0.7",
+                                                                         "runtime",
+                                                                         "gem");
+            artifacts = new HashSet<Artifact>(artifacts);
+            artifacts.add(openssl);
+        }
         for (final ArtifactRepository repository : this.remoteRepositories) {
             // instanceof does not work probably a classloader issue !!!
             if (repository.getLayout()
