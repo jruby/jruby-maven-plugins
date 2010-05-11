@@ -331,8 +331,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private void execute(final String[] args, final Set<Artifact> artifacts,
             final File outputFile, final boolean resolveArtifacts)
             throws MojoExecutionException {
-
-        final Set<Artifact> artis = new HashSet<Artifact>();
+        final Set<Artifact> artis = new HashSet<Artifact>(artifacts);
         if (resolveArtifacts) {
             if (this.project.getArtifact().getFile() != null) {
                 resolveTransitively(artis, this.project.getArtifact());
