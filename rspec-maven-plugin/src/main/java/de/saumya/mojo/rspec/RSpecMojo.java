@@ -50,22 +50,22 @@ public class RSpecMojo extends AbstractGemMojo {
 	/**
 	 * The directory containing the RSpec source files
 	 * 
-	 * @parameter expression="specs"
+	 * @parameter expression="spec"
 	 */
 	protected String specSourceDirectory;
 
 	/**
 	 * The directory where the RSpec report will be written to
 	 * 
-	 * @parameter expression="target/"
+	 * @parameter expression="${basedir}/target"
 	 * @required
 	 */
 	protected String outputDirectory;
 
 	/**
-	 * The name of the RSpec report (optional, defaults to "rspec_report.html")
+	 * The name of the RSpec report (optional, defaults to "rspec-report.html")
 	 * 
-	 * @parameter expression="rspec_report.html"
+	 * @parameter expression="rspec-report.html"
 	 */
 	protected String reportName;
 

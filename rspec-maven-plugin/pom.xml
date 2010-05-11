@@ -17,10 +17,16 @@
       <artifactId>gem-maven-plugin</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
-   <dependency>
+    <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>file-management</artifactId>
       <version>1.2.1</version>
+    </dependency> 
+    <dependency>
+      <groupId>de.saumya.mojo</groupId>
+      <artifactId>gem-maven-plugin</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
     </dependency> 
 <!--
     <dependency>
