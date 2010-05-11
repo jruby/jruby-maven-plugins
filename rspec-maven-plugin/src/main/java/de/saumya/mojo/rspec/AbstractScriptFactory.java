@@ -49,6 +49,8 @@ public abstract class AbstractScriptFactory implements ScriptFactory {
 		
 		File scriptFile = getScriptFile();
 		
+		outputDir.mkdirs();
+
 		FileWriter out = new FileWriter( scriptFile );
 		
 		try {

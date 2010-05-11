@@ -11,6 +11,7 @@ import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,11 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
+     * @parameter expression="${jruby.include.openssl}" default-value="true"
+     */
+    private boolean                    includeOpenSSLGem;
+
+    /**
      * @parameter expression="${settings.offline}"
      */
     private boolean                    offline;
@@ -50,17 +56,18 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * allow to overwrite the version by explicitly declaring a dependency in
      * the pom. will not check any dependencies on gemspecs level.
-     *
+     * 
      * @parameter expression="${gem.forceVersion}" default-value="false"
      */
     private boolean                    forceVersion;
-    
-    /** 
+
+    /**
      * follow transitive dependencies when initializing rubygem dependencies.
      * 
-     * @parameter expression="${gem.useTransitiveDependencies}" default-value="false"
+     * @parameter expression="${gem.useTransitiveDependencies}"
+     *            default-value="false"
      */
-    boolean useTransitiveDependencies;
+    boolean                            useTransitiveDependencies;
 
     /**
      * @parameter default-value="${plugin.artifacts}"
@@ -219,12 +226,23 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             this.gemPath = new File(this.gemPath.getAbsolutePath()
                     .replace("${project.basedir}", ""));
         }
+        execute(this.artifacts);
         execute(this.pluginArtifacts);
         executeWithGems();
     }
 
-    public void execute(final Collection<Artifact> artifacts)
+    // TODO needs better name !!!! needs to be protected ?
+    public void execute(Collection<Artifact> artifacts)
             throws MojoExecutionException {
+        if (this.includeOpenSSLGem) {
+            final Artifact openssl = this.artifactFactory.createArtifact("rubygems",
+                                                                         "jruby-openssl",
+                                                                         "0.7",
+                                                                         "runtime",
+                                                                         "gem");
+            artifacts = new HashSet<Artifact>(artifacts);
+            artifacts.add(openssl);
+        }
         for (final ArtifactRepository repository : this.remoteRepositories) {
             // instanceof does not work probably a classloader issue !!!
             if (repository.getLayout()
@@ -261,7 +279,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         collectedArtifacts.remove(key(this.project.getArtifact()));
-        
+
         String extraFlag = "";
         if (this.forceVersion) {
             // allow to overwrite resolved version with version of project
@@ -424,9 +442,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
             
             project.setArtifacts(result.getArtifacts());
-            
-            final Set<Artifact> walkArtifacts = ( this.useTransitiveDependencies ? (Set<Artifact>)result.getArtifacts() : (Set<Artifact>) project.getDependencyArtifacts() );
-            for (final Artifact dependencyArtifact : walkArtifacts ) {
+
+            final Set<Artifact> walkArtifacts = (this.useTransitiveDependencies
+                    ? (Set<Artifact>) result.getArtifacts()
+                    : (Set<Artifact>) project.getDependencyArtifacts());
+            for (final Artifact dependencyArtifact : walkArtifacts) {
                 if ("gem".equals(dependencyArtifact.getType())) {
                     if (!visitedArtifacts.containsKey(key(dependencyArtifact))) {
                         collectArtifacts(dependencyArtifact,

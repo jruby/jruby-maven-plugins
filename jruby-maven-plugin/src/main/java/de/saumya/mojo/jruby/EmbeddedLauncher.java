@@ -22,7 +22,9 @@ import org.codehaus.classworlds.NoSuchRealmException;
 
 class EmbeddedLauncher extends AbstractLauncher {
 
-    private final ClassRealm classRealm;
+    private static final Class<?>[] No_ARG_TYPES = new Class[0];
+    private final ClassRealm        classRealm;
+    private static final Object[]   NO_ARGS      = new Object[0];
 
     EmbeddedLauncher(final Log log, final ClassRealm classRealm) {
         super(log);
@@ -45,15 +47,29 @@ class EmbeddedLauncher extends AbstractLauncher {
                 final PrintStream writer = new PrintStream(outputFile);
                 System.setOut(writer);
             }
+            // use reflection to avoid having jruby as plugin dependency
             Thread.currentThread()
                     .setContextClassLoader(jrubyClassRealm.getClassLoader());
             final Class<?> clazz = jrubyClassRealm.loadClass("org.jruby.Main");
             final Object main = clazz.newInstance();
             final Method m = clazz.getMethod("run", String[].class);
-            final Integer result = (Integer) m.invoke(main, (Object) args);
-            if (result.intValue() != 0) {
+            final Object result = m.invoke(main, (Object) args);
+            final int status;
+            if (result instanceof Integer) {
+                // jruby before version 1.5
+                status = ((Integer) result);
+            }
+            else {
+                // jruby from version 1.5 onwards
+                // TODO better error handling like error messages and . . . see
+                // org.jruby.Main
+                final Method statusMethod = result.getClass()
+                        .getMethod("getStatus", No_ARG_TYPES);
+                status = (Integer) statusMethod.invoke(result, NO_ARGS);
+            }
+            if (status != 0) {
                 throw new MojoExecutionException("some error in script "
-                        + Arrays.toString(args) + ": " + result);
+                        + Arrays.toString(args) + ": " + status);
             }
 
         }

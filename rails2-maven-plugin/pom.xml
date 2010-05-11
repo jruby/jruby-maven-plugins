@@ -3,7 +3,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.11.1</version>
+    <version>0.12.0-SNAPSHOT</version>
   </parent>
   <artifactId>rails2-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>

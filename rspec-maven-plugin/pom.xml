@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
-      <artifactId>jruby-maven-plugin</artifactId>
+      <artifactId>gem-maven-plugin</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
    <dependency>
@@ -84,7 +84,13 @@
             </goals>
             <configuration>
 	      <includeGroupIds>de.saumya.mojo</includeGroupIds>
-	      <includes>de/saumya/mojo/jruby/AbstractJRubyMojo.java</includes>
+	      <includeArtifactIds>
+		jruby-maven-plugin,gem-maven-plugin
+	      </includeArtifactIds>
+	      <includes>
+		de/saumya/mojo/jruby/AbstractJRubyMojo.java,
+		de/saumya/mojo/gem/AbstractGemMojo.java
+	      </includes>
               <classifier>sources</classifier>
               <outputDirectory>${project.build.directory}/sources</outputDirectory>
             </configuration>
@@ -98,6 +104,7 @@
         <configuration>
           <excludes>
 	    <exclude>de/saumya/mojo/jruby/**</exclude>
+	    <exclude>de/saumya/mojo/gem/**</exclude>
 	  </excludes>
         </configuration>
       </plugin>

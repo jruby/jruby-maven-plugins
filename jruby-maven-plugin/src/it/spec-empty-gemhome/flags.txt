@@ -1,3 +1,0 @@
--Djruby.gem.home=target 
--Djruby.gem.path=target
--Djruby.gem.flags=target

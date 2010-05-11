@@ -97,7 +97,7 @@ public class PackageMojo extends AbstractJRubyMojo {
 	@SuppressWarnings( { "unchecked" })
 	private void build(final MavenProject project, final GemArtifact artifact) throws MojoExecutionException, IOException {
 
-		getLog().info("building gem for " + artifact + " . . ." + artifact.hasJarFile());
+		getLog().info("building gem for " + artifact + " . . ." );
 		getLog().info("include dependencies? " + this.includeDependencies);
 		final File gemDir = new File(this.buildDirectory, artifact.getGemName());
 		final File gemSpec = new File(gemDir, artifact.getGemName() + ".gemspec");

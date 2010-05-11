@@ -5,12 +5,13 @@ import java.io.File;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
- * Goal to run rspecs.
+ * Goal to run rspecs. (deprecated, use rspec-maven-plugin instead)
  * 
  * @goal spec
  * @phase test
  * @requiresDependencyResolution test
  */
+@Deprecated
 public class SpecMojo extends AbstractJRubyMojo {
 
     /**
@@ -61,10 +62,9 @@ public class SpecMojo extends AbstractJRubyMojo {
 
     private String relativeFile(final File file) {
         if (this.project.getBasedir() != null) {
-            return file.getAbsolutePath()
-                    .substring(this.project.getBasedir()
-                            .getAbsolutePath()
-                            .length());
+            return file.getAbsolutePath().substring(this.project.getBasedir()
+                    .getAbsolutePath()
+                    .length());
         }
         else {
             return file.getPath();

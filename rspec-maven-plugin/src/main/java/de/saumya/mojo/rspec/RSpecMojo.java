@@ -9,17 +9,18 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 
-import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import de.saumya.mojo.gem.AbstractGemMojo;
 
 /**
  * executes the jruby command.
  * 
  * @goal test
+ * @phase test
+ * @execute phase="initialize"
  * @requiresDependencyResolution test
  */
-public class RSpecMojo extends AbstractJRubyMojo {
+public class RSpecMojo extends AbstractGemMojo {
 
 	/**
 	 * The project base directory
@@ -28,7 +29,7 @@ public class RSpecMojo extends AbstractJRubyMojo {
 	 * @required
 	 * @readonly
 	 */
-	protected String basedir;
+	protected File basedir;
 
 	/**
 	 * The classpath elements of the project being tested.
@@ -49,7 +50,7 @@ public class RSpecMojo extends AbstractJRubyMojo {
 	/**
 	 * The directory containing the RSpec source files
 	 * 
-	 * @parameter expression="${basedir}/specs/"
+	 * @parameter expression="specs"
 	 */
 	protected String specSourceDirectory;
 
@@ -78,19 +79,25 @@ public class RSpecMojo extends AbstractJRubyMojo {
 	private RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
 	private ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
 
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	private File specSourceDirectory() {
+		return new File(launchDirectory(), specSourceDirectory);
+	}
+
+	@Override
+	public void executeWithGems() throws MojoExecutionException {
 		if (skipTests) {
 			getLog().info("Skipping RSpec tests");
 			return;
 		}
 
-		if (!new File(specSourceDirectory).exists()) {
+		final File specSourceDirectory = specSourceDirectory();
+		if (!specSourceDirectory.exists()) {
 			getLog().info("Skipping RSpec tests since " + specSourceDirectory + " is missing");
 			return;
 		}
 		getLog().info("Running RSpec tests from " + specSourceDirectory);
 
-		String reportPath = new File(outputDirectory, reportName).getPath();
+		String reportPath = new File(outputDirectory, reportName).getAbsolutePath();
 
 		initScriptFactory(rspecScriptFactory, reportPath);
 		initScriptFactory(shellScriptFactory, reportPath);
@@ -108,7 +115,8 @@ public class RSpecMojo extends AbstractJRubyMojo {
 
 		execute(rspecScriptFactory.getScriptFile().getPath());
 
-		File reportFile = new File(this.project.getBasedir(), reportPath);
+		File reportFile = new File(reportPath);
+
 		Reader in = null;
 		try {
 			in = new FileReader(reportFile);
@@ -132,17 +140,16 @@ public class RSpecMojo extends AbstractJRubyMojo {
 				}
 			}
 		}
-		
 
 		throw new MojoExecutionException("There were test failures");
 	}
 
 	private void initScriptFactory(ScriptFactory factory, String reportPath) {
-		factory.setBaseDir(basedir);
+		factory.setBaseDir(basedir.getAbsolutePath());
 		factory.setClasspathElements(classpathElements);
 		factory.setOutputDir(new File(basedir, outputDirectory));
 		factory.setReportPath(reportPath);
-		factory.setSourceDir(specSourceDirectory);
+		factory.setSourceDir(specSourceDirectory().getAbsolutePath());
 		Properties props = systemProperties;
 		if (props == null) {
 			props = new Properties();
