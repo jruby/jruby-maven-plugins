@@ -6,7 +6,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * goal to run the rails server.
  * 
  * @goal server
- * @execute phase="initialize"
+ * @requiresDependencyResolution compile
  */
 public class ServerMojo extends AbstractRailsMojo {
 
@@ -19,13 +19,17 @@ public class ServerMojo extends AbstractRailsMojo {
 
     @Override
     protected void executeWithGems() throws MojoExecutionException {
-        String commandString = railsScript("server");
+        final StringBuilder command = railsScript("server");
         if (this.serverArgs != null) {
-            commandString += " " + this.serverArgs;
+            command.append(" ").append(this.serverArgs);
         }
         if (this.args != null) {
-            commandString += " " + this.args;
+            command.append(" ").append(this.args);
         }
-        execute(commandString, false);
+        // TODO verify this
+        if (this.environment != null) {
+            command.append(" -e ").append(this.environment);
+        }
+        execute(command.toString(), false);
     }
 }

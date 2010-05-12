@@ -27,16 +27,16 @@ public class GenerateMojo extends AbstractRailsMojo {
 
     @Override
     protected void executeWithGems() throws MojoExecutionException {
-        String commandString = railsScript("generate");
+        final StringBuilder command = railsScript("generate");
         if (this.generator != null) {
-            commandString += " " + this.generator;
+            command.append(" ").append(this.generator);
         }
         if (this.args != null) {
-            commandString += " " + this.args;
+            command.append(" ").append(this.args);
         }
         if (this.generateArgs != null) {
-            commandString += " " + this.generateArgs;
+            command.append(" ").append(this.generateArgs);
         }
-        execute(commandString, false);
+        execute(command.toString(), false);
     }
 }

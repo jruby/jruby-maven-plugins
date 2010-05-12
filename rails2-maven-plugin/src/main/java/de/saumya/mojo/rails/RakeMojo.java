@@ -10,7 +10,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * goal to run rails rake with the given arguments.
  * 
  * @goal rake
- * @execute phase="initialize"
+ * @requiresDependencyResolution compile
  */
 public class RakeMojo extends AbstractRailsMojo {
 
@@ -31,16 +31,21 @@ public class RakeMojo extends AbstractRailsMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException {
         execute(Arrays.asList(new Artifact[] { this.project.getArtifact() }));
-        String commandString = new File(new File(this.gemHome, "bin"), "rake").getAbsolutePath();
+        final StringBuilder command = new StringBuilder(new File(new File(this.gemHome,
+                "bin"),
+                "rake").getAbsolutePath());
         if (this.rakeArgs != null) {
-            commandString += " " + this.rakeArgs;
+            command.append(" ").append(this.rakeArgs);
         }
         if (this.args != null) {
-            commandString += " " + this.args;
+            command.append(" ").append(this.args);
         }
         if (this.task != null) {
-            commandString += " " + this.task;
+            command.append(" ").append(this.task);
         }
-        execute(commandString, false);
+        if (this.environment != null) {
+            command.append(" RAILS_ENV=").append(this.environment);
+        }
+        execute(command.toString(), false);
     }
 }

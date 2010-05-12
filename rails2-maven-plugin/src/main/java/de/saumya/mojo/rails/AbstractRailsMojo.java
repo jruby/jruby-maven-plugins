@@ -18,6 +18,14 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
     protected String     args;
 
     /**
+     * either development or test or production or whatever else is possible
+     * with your config
+     * 
+     * @parameter expression="${env}"
+     */
+    protected String     environment;
+
+    /**
      * @parameter expression="${rails.dir}"
      *            default-value="${project.basedir}/src/main/rails"
      */
@@ -40,14 +48,20 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
         return this.project.getFile() != null;
     }
 
+    void addEnvironment(final StringBuilder command) {
+    }
+
     @Override
     public void executeWithGems() throws MojoExecutionException {
         execute(Arrays.asList(new Artifact[] { this.project.getArtifact() }));
-        String commandString = this.scriptName;
-        if (this.args != null) {
-            commandString += " " + this.args;
+        final StringBuilder command = new StringBuilder(this.scriptName);
+        if (this.environment != null) {
+            addEnvironment(command);
         }
-        execute(commandString);
+        if (this.args != null) {
+            command.append(" ").append(this.args);
+        }
+        execute(command.toString());
     }
 
     protected File railsDirectory() {

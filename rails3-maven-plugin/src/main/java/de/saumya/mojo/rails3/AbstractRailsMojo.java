@@ -23,6 +23,14 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
      */
     protected File   railsDirectory;
 
+    /**
+     * either development or test or production or whatever else is possible
+     * with your config
+     * 
+     * @parameter expression="${env}"
+     */
+    protected String environment;
+
     @Override
     protected File launchDirectory() {
         if (this.railsDirectory.exists()) {
@@ -33,8 +41,8 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
         }
     }
 
-    protected String binScript(final String script) {
-        return new File(binDirectory(), script).getAbsolutePath();
+    protected StringBuilder binScript(final String script) {
+        return new StringBuilder(new File(binDirectory(), script).getAbsolutePath());
     }
 
     protected File binDirectory() {
@@ -56,8 +64,10 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
         return new File(new File(launchDirectory(), "script"), "rails");
     }
 
-    protected String railsScript(final String command) {
-        return railsScriptFile().getAbsolutePath() + " " + command;
+    protected StringBuilder railsScript(final String command) {
+        final StringBuilder builder = new StringBuilder(railsScriptFile().getAbsolutePath());
+        builder.append(" ").append(command);
+        return builder;
     }
 
 }

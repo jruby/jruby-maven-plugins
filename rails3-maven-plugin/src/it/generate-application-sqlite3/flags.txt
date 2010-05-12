@@ -2,4 +2,4 @@
 -Dtask=db:create db:migrate RAILS_ENV=production
 -Dgenerator=scaffold 
 -Dgenerate.args=user name:string
--Djetty.port=8010
+-Djetty.port=8033

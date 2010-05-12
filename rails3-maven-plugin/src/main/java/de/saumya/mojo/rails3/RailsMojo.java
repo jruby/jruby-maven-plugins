@@ -101,29 +101,29 @@ public class RailsMojo extends AbstractRailsMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
-        String commandString;
+        StringBuilder command;
         if (railsScriptFile().exists() && this.appPath == null) {
-            commandString = railsScript("");
+            command = railsScript("");
         }
         else {
-            commandString = binScript("rails");
+            command = binScript("rails");
             if (this.appPath != null) {
-                commandString += " " + this.appPath;
+                command.append(" ").append(this.appPath);
             }
         }
         if (this.railsArgs != null) {
-            commandString += " " + this.railsArgs;
+            command.append(" ").append(this.railsArgs);
         }
         if (this.args != null) {
-            commandString += " " + this.args;
+            command.append(" ").append(this.args);
         }
-        execute(commandString, false);
+        execute(command.toString(), false);
         if (this.appPath != null) {
             final File app = new File(launchDirectory(), this.appPath);
             final File script = new File(app, "script/rails");
             final String database;
             final Pattern pattern = Pattern.compile(".*-d\\s+([a-z0-9]+).*");
-            final Matcher matcher = pattern.matcher(commandString);
+            final Matcher matcher = pattern.matcher(command);
             if (matcher.matches()) {
                 database = matcher.group(1);
             }

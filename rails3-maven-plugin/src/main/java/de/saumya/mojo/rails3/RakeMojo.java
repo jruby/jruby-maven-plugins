@@ -37,16 +37,19 @@ public class RakeMojo extends AbstractRailsMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
-        String commandString = binScript("rake");
+        final StringBuilder command = binScript("rake");
         if (this.rakeArgs != null) {
-            commandString += " " + this.rakeArgs;
+            command.append(" ").append(this.rakeArgs);
         }
         if (this.args != null) {
-            commandString += " " + this.args;
+            command.append(" ").append(this.args);
         }
         if (this.task != null) {
-            commandString += " " + this.task;
+            command.append(" ").append(this.task);
         }
-        execute(commandString, false);
+        if (this.environment != null) {
+            command.append(" RAILS_ENV=").append(this.environment);
+        }
+        execute(command.toString(), false);
     }
 }
