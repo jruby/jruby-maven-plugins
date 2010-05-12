@@ -235,26 +235,31 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private Artifact resolveJRUBYCompleteArtifact()
             throws DependencyResolutionRequiredException,
             MojoExecutionException {
-
-        for (final Object o : this.project.getDependencies()) {
-            final Dependency artifact = (Dependency) o;
-            if (artifact.getArtifactId().equals("jruby-complete")
-                    && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
-                    && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
-                if (this.jrubyVersion != null
-                        && !this.jrubyVersion.equals(artifact.getVersion())) {
-                    getLog().warn("the configured jruby-version gets ignored in preference to the jruby dependency");
+        if (this.jrubyVersion != null) {
+            // preference to command line or property version
+            return resolveJRUBYCompleteArtifact(this.jrubyVersion);
+        }
+        else {
+            // then take jruby from the dependencies
+            for (final Object o : this.project.getDependencies()) {
+                final Dependency artifact = (Dependency) o;
+                if (artifact.getArtifactId().equals("jruby-complete")
+                        && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
+                        && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
+                    // if (this.jrubyVersion != null
+                    // && !this.jrubyVersion.equals(artifact.getVersion())) {
+                    // getLog().warn("the configured jruby-version gets ignored in preference to the jruby dependency");
+                    // }
+                    return resolveJRUBYCompleteArtifact(this.artifactFactory.createArtifact(artifact.getGroupId(),
+                                                                                            artifact.getArtifactId(),
+                                                                                            artifact.getVersion(),
+                                                                                            artifact.getScope(),
+                                                                                            artifact.getType()));
                 }
-                return resolveJRUBYCompleteArtifact(this.artifactFactory.createArtifact(artifact.getGroupId(),
-                                                                                        artifact.getArtifactId(),
-                                                                                        artifact.getVersion(),
-                                                                                        artifact.getScope(),
-                                                                                        artifact.getType()));
             }
         }
-        return resolveJRUBYCompleteArtifact(this.jrubyVersion == null
-                ? DEFAULT_JRUBY_VERSION
-                : this.jrubyVersion);
+        // take the default version of jruby
+        return resolveJRUBYCompleteArtifact(DEFAULT_JRUBY_VERSION);
     }
 
     protected File launchDirectory() {
