@@ -46,7 +46,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * @parameter expression="${jruby.include.openssl}" default-value="true"
      */
-    private boolean                    includeOpenSSLGem;
+    protected boolean                  includeOpenSSLGem;
 
     /**
      * @parameter expression="${settings.offline}"
@@ -324,7 +324,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                                                  "")));
                 // TODO force flag to install gems via command line
                 // argument
-                if (!(this.fork && gemDir.exists())) {
+                if (!gemDir.exists()) {
                     gems.append(" ").append(collectedArtifact.getFile()
                             .getAbsolutePath());
                 }
