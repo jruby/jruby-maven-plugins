@@ -29,7 +29,7 @@ public class RSpecMojo extends AbstractGemMojo {
      * @required
      * @readonly
      */
-    protected File             basedir;
+    protected File                   basedir;
 
     /**
      * The classpath elements of the project being tested.
@@ -38,21 +38,21 @@ public class RSpecMojo extends AbstractGemMojo {
      * @required
      * @readonly
      */
-    protected List<String>     classpathElements;
+    protected List<String>           classpathElements;
 
     /**
      * The flag to skip tests (optional, defaults to "false")
      * 
      * @parameter expression="${maven.test.skip}"
      */
-    protected boolean          skipTests;
+    protected boolean                skipTests;
 
     /**
      * The directory containing the RSpec source files
      * 
      * @parameter expression="specs"
      */
-    protected String           specSourceDirectory;
+    protected String                 specSourceDirectory;
 
     /**
      * The directory where the RSpec report will be written to
@@ -60,32 +60,32 @@ public class RSpecMojo extends AbstractGemMojo {
      * @parameter expression="target/"
      * @required
      */
-    protected String           outputDirectory;
+    protected String                 outputDirectory;
 
     /**
      * The name of the RSpec report (optional, defaults to "rspec_report.html")
      * 
      * @parameter expression="rspec_report.html"
      */
-    protected String           reportName;
+    protected String                 reportName;
 
     /**
      * List of system properties to set for the tests.
      * 
      * @parameter
      */
-    protected Properties       systemProperties;
+    protected Properties             systemProperties;
 
-    private RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
-    private ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
+    private final RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
+    private final ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
 
     private File specSourceDirectory() {
-        return new File(launchDirectory(), specSourceDirectory);
+        return new File(launchDirectory(), this.specSourceDirectory);
     }
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
-        if (skipTests) {
+        if (this.skipTests) {
             getLog().info("Skipping RSpec tests");
             return;
         }
@@ -98,32 +98,33 @@ public class RSpecMojo extends AbstractGemMojo {
         }
         getLog().info("Running RSpec tests from " + specSourceDirectory);
 
-        String reportPath = new File(outputDirectory, reportName).getAbsolutePath();
+        final String reportPath = new File(this.outputDirectory,
+                this.reportName).getAbsolutePath();
 
-        initScriptFactory(rspecScriptFactory, reportPath);
-        initScriptFactory(shellScriptFactory, reportPath);
+        initScriptFactory(this.rspecScriptFactory, reportPath);
+        initScriptFactory(this.shellScriptFactory, reportPath);
 
         try {
-            rspecScriptFactory.emit();
+            this.rspecScriptFactory.emit();
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             getLog().error("error emitting .rb", e);
         }
         try {
-            shellScriptFactory.emit();
+            this.shellScriptFactory.emit();
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             getLog().error("error emitting .sh", e);
         }
 
-        execute(rspecScriptFactory.getScriptFile().getPath());
+        execute(this.rspecScriptFactory.getScriptFile().getPath());
 
-        File reportFile = new File(reportPath);
+        final File reportFile = new File(reportPath);
 
         Reader in = null;
         try {
             in = new FileReader(reportFile);
-            BufferedReader reader = new BufferedReader(in);
+            final BufferedReader reader = new BufferedReader(in);
 
             String line = null;
 
@@ -133,7 +134,7 @@ public class RSpecMojo extends AbstractGemMojo {
                 }
             }
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             throw new MojoExecutionException("Unable to read test report file: "
                     + reportFile);
         }
@@ -142,7 +143,7 @@ public class RSpecMojo extends AbstractGemMojo {
                 try {
                     in.close();
                 }
-                catch (IOException e) {
+                catch (final IOException e) {
                     throw new MojoExecutionException(e.getMessage());
                 }
             }
@@ -151,13 +152,14 @@ public class RSpecMojo extends AbstractGemMojo {
         throw new MojoExecutionException("There were test failures");
     }
 
-    private void initScriptFactory(ScriptFactory factory, String reportPath) {
-        factory.setBaseDir(basedir.getAbsolutePath());
-        factory.setClasspathElements(classpathElements);
-        factory.setOutputDir(new File(basedir, outputDirectory));
+    private void initScriptFactory(final ScriptFactory factory,
+            final String reportPath) {
+        factory.setBaseDir(this.basedir.getAbsolutePath());
+        factory.setClasspathElements(this.classpathElements);
+        factory.setOutputDir(new File(this.basedir, this.outputDirectory));
         factory.setReportPath(reportPath);
         factory.setSourceDir(specSourceDirectory().getAbsolutePath());
-        Properties props = systemProperties;
+        Properties props = this.systemProperties;
         if (props == null) {
             props = new Properties();
         }

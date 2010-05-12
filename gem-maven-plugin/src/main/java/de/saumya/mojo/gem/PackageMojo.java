@@ -123,18 +123,18 @@ public class PackageMojo extends AbstractJRubyMojo {
         }
         // TODO make it the maven way (src/main/ruby + src/test/ruby) or the
         // ruby way (lib + spec + test)
-        final File libDir  = new File( project.getBasedir(), "lib" );
-        final File specDir = new File( project.getBasedir(), "spec" );
-        final File testDir = new File( project.getBasedir(), "test" );
-        
+        final File libDir = new File(project.getBasedir(), "lib");
+        final File specDir = new File(project.getBasedir(), "spec");
+        final File testDir = new File(project.getBasedir(), "test");
+
         if (libDir.exists()) {
-            gemSpecWriter.appendPath( "lib" );
+            gemSpecWriter.appendPath("lib");
         }
         if (specDir.exists()) {
-            gemSpecWriter.appendPath( "spec" );
+            gemSpecWriter.appendPath("spec");
         }
         if (testDir.exists()) {
-            gemSpecWriter.appendPath( "test" );
+            gemSpecWriter.appendPath("test");
         }
 
         for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
