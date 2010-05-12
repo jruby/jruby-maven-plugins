@@ -1,4 +1,4 @@
--Djruby.gem.home=target 
--Djruby.gem.path=target
+-Dgem.home=target
+-Dgem.path=target
 -Djruby.gem.flags=target
 -Djruby.rake.args=-T
