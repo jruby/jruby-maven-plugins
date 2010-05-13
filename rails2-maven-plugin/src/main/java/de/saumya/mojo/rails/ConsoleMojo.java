@@ -5,7 +5,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 /**
  * Goal to run rails console. it will ignore the fork parameter since forking
  * does not work with a console.
- * 
+ *
  * @goal console
  * @requiresDependencyResolution compile
  */
@@ -13,7 +13,7 @@ public class ConsoleMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the console command
-     * 
+     *
      * @parameter default-value="${console}"
      */
     protected String consoleArgs = null;

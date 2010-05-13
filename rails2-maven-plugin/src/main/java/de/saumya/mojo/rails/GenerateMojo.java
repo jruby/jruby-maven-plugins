@@ -4,7 +4,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * Goal to run rails generator script.
- * 
+ *
  * @goal generate
  * @requiresDependencyResolution test
  */
@@ -12,14 +12,14 @@ public class GenerateMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the generate command
-     * 
+     *
      * @parameter default-value="${generate.args}"
      */
     protected String generateArgs = null;
 
     /**
      * the name of the generator
-     * 
+     *
      * @parameter default-value="${generator}"
      */
     protected String generator    = null;

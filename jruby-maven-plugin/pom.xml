@@ -23,22 +23,22 @@
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
         <configuration>
-	  <encoding>UTF-8</encoding>
+          <encoding>UTF-8</encoding>
           <goalPrefix>ruby</goalPrefix>
         </configuration>
       </plugin>
       <plugin>
-	<artifactId>maven-source-plugin</artifactId>
-	<version>2.1.1</version>
-	<executions>
-	  <execution>
-	    <id>attach-sources</id>
-	    <goals>
-	      <goal>jar</goal>
-	    </goals>
-	  </execution>
-	</executions>
-      </plugin> 
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>

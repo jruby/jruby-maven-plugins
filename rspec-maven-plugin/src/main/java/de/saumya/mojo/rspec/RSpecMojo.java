@@ -14,7 +14,7 @@ import de.saumya.mojo.gem.AbstractGemMojo;
 
 /**
  * executes the jruby command.
- * 
+ *
  * @goal test
  * @phase test
  * @execute phase="initialize"
@@ -24,7 +24,7 @@ public class RSpecMojo extends AbstractGemMojo {
 
     /**
      * The project base directory
-     * 
+     *
      * @parameter expression="${basedir}"
      * @required
      * @readonly
@@ -33,7 +33,7 @@ public class RSpecMojo extends AbstractGemMojo {
 
     /**
      * The classpath elements of the project being tested.
-     * 
+     *
      * @parameter expression="${project.testClasspathElements}"
      * @required
      * @readonly
@@ -42,21 +42,21 @@ public class RSpecMojo extends AbstractGemMojo {
 
     /**
      * The flag to skip tests (optional, defaults to "false")
-     * 
+     *
      * @parameter expression="${maven.test.skip}"
      */
     protected boolean          skipTests;
 
     /**
      * The directory containing the RSpec source files
-     * 
+     *
      * @parameter expression="specs"
      */
     protected String           specSourceDirectory;
 
     /**
      * The directory where the RSpec report will be written to
-     * 
+     *
      * @parameter expression="target/"
      * @required
      */
@@ -64,14 +64,14 @@ public class RSpecMojo extends AbstractGemMojo {
 
     /**
      * The name of the RSpec report (optional, defaults to "rspec_report.html")
-     * 
+     *
      * @parameter expression="rspec_report.html"
      */
     protected String           reportName;
 
     /**
      * List of system properties to set for the tests.
-     * 
+     *
      * @parameter
      */
     protected Properties       systemProperties;

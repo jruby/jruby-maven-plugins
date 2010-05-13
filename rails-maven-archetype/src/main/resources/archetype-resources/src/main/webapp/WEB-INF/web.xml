@@ -21,7 +21,7 @@
     <param-name>jruby.min.runtimes</param-name>
     <param-value>1</param-value>
   </context-param>
- 
+
   <filter>
     <filter-name>RackFilter</filter-name>
     <filter-class>org.jruby.rack.RackFilter</filter-class>
@@ -34,7 +34,7 @@
   <listener>
     <listener-class>org.jruby.rack.rails.RailsServletContextListener</listener-class>
   </listener>
-<!-- 
+<!--
   <resource-ref>
     <res-ref-name><%= jndi %></res-ref-name>
     <res-type>javax.sql.DataSource</res-type>

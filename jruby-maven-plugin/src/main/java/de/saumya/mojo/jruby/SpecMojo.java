@@ -6,7 +6,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * Goal to run rspecs. (deprecated, use rspec-maven-plugin instead)
- * 
+ *
  * @goal spec
  * @phase test
  * @requiresDependencyResolution test
@@ -16,14 +16,14 @@ public class SpecMojo extends AbstractJRubyMojo {
 
     /**
      * directory with the spec files.
-     * 
+     *
      * @parameter expression="${jruby.spec.dir}" default-value="spec"
      */
     protected File    specDirectory;
 
     /**
      * include pattern for files in the spec directory
-     * 
+     *
      * @parameter expression="${jruby.spec.pattern}"
      *            default-value="**\/*_spec.rb"
      */
@@ -31,14 +31,14 @@ public class SpecMojo extends AbstractJRubyMojo {
 
     /**
      * file to run with spec.
-     * 
+     *
      * @parameter default-value="${jruby.spec.file}"
      */
     protected File    specFile;
 
     /**
      * file with spec options.
-     * 
+     *
      * @parameter expression="${jruby.spec.opts}" default-value="spec/spec.opts"
      * @required
      */
@@ -46,7 +46,7 @@ public class SpecMojo extends AbstractJRubyMojo {
 
     /**
      * skip specs.
-     * 
+     *
      * @parameter expression="${skipSpecs}" default-value="false"
      *            alias="skipTests"
      * @required
@@ -55,7 +55,7 @@ public class SpecMojo extends AbstractJRubyMojo {
 
     /**
      * arguments for the spec command.
-     * 
+     *
      * @parameter default-value="${jruby.spec.args}"
      */
     protected String  args      = null;

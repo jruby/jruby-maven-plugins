@@ -18,21 +18,20 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby-maven-plugin</artifactId>
-	<version>0.12.0-SNAPSHOT</version>
-	<configuration>
-	  <generateJava>true</generateJava>
-	</configuration>
-	<executions>
-	  <execution>
-	    <phase>compile</phase>
-	    <goals>
-	      <goal>compile</goal>
-	    </goals>
-	  </execution>
-	</executions>
+ <version>0.12.0-SNAPSHOT</version>
+ <configuration>
+   <generateJava>true</generateJava>
+ </configuration>
+ <executions>
+   <execution>
+     <phase>compile</phase>
+     <goals>
+       <goal>compile</goal>
+     </goals>
+   </execution>
+ </executions>
       </plugin>
     </plugins>
   </build>
- 
-</project>
 
+</project>

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.saumya.mojo.gem;
 

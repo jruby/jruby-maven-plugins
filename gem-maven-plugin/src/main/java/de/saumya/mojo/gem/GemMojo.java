@@ -6,13 +6,13 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
 /**
  * goal to run gem with the given arguments.
- * 
+ *
  * @goal gem
  */
 public class GemMojo extends AbstractJRubyMojo {
     /**
      * arguments for the gem command of JRuby.
-     * 
+     *
      * @parameter default-value="${gem.args}"
      */
     protected String args = null;

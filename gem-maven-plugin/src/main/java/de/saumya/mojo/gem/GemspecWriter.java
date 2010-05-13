@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.saumya.mojo.gem;
 
@@ -28,7 +28,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 class GemspecWriter {
 
-	final MavenProject      project;
+ final MavenProject      project;
     final Writer            writer;
     final String            excludes       = ".*~$|^[.][a-zA-Z].*";
     final List<File>        dirs           = new ArrayList<File>();
@@ -195,7 +195,7 @@ class GemspecWriter {
                     .append(file.toString())
                     .append("']\n");
         }
-        
+
         if (file.lastModified() > this.latestModified) {
             this.latestModified = file.lastModified();
         }
@@ -305,7 +305,7 @@ class GemspecWriter {
     }
 
     private void copyDir(final File target, final File dir) throws IOException {
-    	final File realDir = new File( this.project.getBasedir(), dir.getPath() );
+     final File realDir = new File( this.project.getBasedir(), dir.getPath() );
         if (realDir.isDirectory()) {
             for (final String file : realDir.list()) {
                 copyDir(target, new File(dir, file));
@@ -313,7 +313,7 @@ class GemspecWriter {
         }
         else {
             if (realDir.exists() && !realDir.getName().matches(this.excludes)) {
-            	final File targetFile = new File( target, dir.getPath() );
+             final File targetFile = new File( target, dir.getPath() );
                 FileUtils.copyFile(realDir, targetFile);
             }
         }

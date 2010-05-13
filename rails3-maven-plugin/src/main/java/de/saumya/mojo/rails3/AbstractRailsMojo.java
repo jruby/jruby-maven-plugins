@@ -12,7 +12,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
 
     /**
      * arguments for the rails command
-     * 
+     *
      * @parameter default-value="${args}"
      */
     protected String args = null;
@@ -26,7 +26,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
     /**
      * either development or test or production or whatever else is possible
      * with your config
-     * 
+     *
      * @parameter expression="${env}"
      */
     protected String environment;

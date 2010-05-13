@@ -2,11 +2,11 @@
   <components>
     <component>
       <role>
-	org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
+ org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
       </role>
       <role-hint>gem</role-hint>
       <implementation>
-	de.saumya.mojo.gem.GemRepositoryLayout
+ de.saumya.mojo.gem.GemRepositoryLayout
       </implementation>
     </component>
     <component>
@@ -17,9 +17,9 @@
       </implementation>
       <configuration>
         <phases>
-	  <initialize>
-	    de.saumya.mojo:gem-maven-plugin:initialize
-	  </initialize>
+   <initialize>
+     de.saumya.mojo:gem-maven-plugin:initialize
+   </initialize>
           <process-resources>
             org.apache.maven.plugins:maven-resources-plugin:resources
           </process-resources>
@@ -27,12 +27,12 @@
             org.apache.maven.plugins:maven-compiler-plugin:compile
           </compile>
           <package>
-	    de.saumya.mojo:gem-maven-plugin:package
-	  </package>
-	  <install>
+     de.saumya.mojo:gem-maven-plugin:package
+   </package>
+   <install>
             org.apache.maven.plugins:maven-install-plugin:install
-	  </install>
-	  <deploy>
+   </install>
+   <deploy>
             org.apache.maven.plugins:maven-deploy-plugin:deploy
           </deploy>
         </phases>
@@ -62,9 +62,9 @@
       </implementation>
       <configuration>
         <phases>
-	  <initialize>
-	    de.saumya.mojo:gem-maven-plugin:initialize
-	  </initialize>
+   <initialize>
+     de.saumya.mojo:gem-maven-plugin:initialize
+   </initialize>
           <process-resources>
             org.apache.maven.plugins:maven-resources-plugin:resources
           </process-resources>
@@ -72,13 +72,13 @@
             org.apache.maven.plugins:maven-compiler-plugin:compile
           </compile>
           <package>
-	    org.apache.maven.plugins:maven-jar-plugin:jar,
-	    de.saumya.mojo:gem-maven-plugin:package
-	  </package>
-	  <install>
+     org.apache.maven.plugins:maven-jar-plugin:jar,
+     de.saumya.mojo:gem-maven-plugin:package
+   </package>
+   <install>
             org.apache.maven.plugins:maven-install-plugin:install
-	  </install>
-	  <deploy>
+   </install>
+   <deploy>
             org.apache.maven.plugins:maven-deploy-plugin:deploy
           </deploy>
         </phases>

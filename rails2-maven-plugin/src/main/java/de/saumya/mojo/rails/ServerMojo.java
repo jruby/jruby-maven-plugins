@@ -4,7 +4,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * Goal to run rails with build-in server.
- * 
+ *
  * @goal server
  * @requiresDependencyResolution compile
  */
@@ -12,7 +12,7 @@ public class ServerMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the generate command
-     * 
+     *
      * @parameter default-value="${server.args}"
      */
     protected String serverArgs = null;

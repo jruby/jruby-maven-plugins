@@ -1,5 +1,5 @@
 -Dapp_path=target/app
 -Dtask=db:create db:migrate RAILS_ENV=production
--Dgenerator=scaffold 
+-Dgenerator=scaffold
 -Dgenerate.args=user name:string
 -Djetty.port=8033

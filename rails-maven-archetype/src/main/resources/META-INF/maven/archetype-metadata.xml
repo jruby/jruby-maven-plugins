@@ -32,7 +32,7 @@
         <include>Gemfile.maven</include>
       </includes>
     </fileSet>
-  </fileSets>  
+  </fileSets>
   <requiredProperties>
     <requiredProperty key="database">
       <defaultValue>sqlite3</defaultValue>

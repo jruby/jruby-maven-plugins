@@ -30,7 +30,7 @@ import org.codehaus.classworlds.ClassRealm;
 
 /**
  * Base for all JRuby mojos.
- * 
+ *
  * @requiresProject false
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
@@ -41,35 +41,35 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * fork the JRuby execution.
-     * 
+     *
      * @parameter expression="${jruby.fork}" default-value="true"
      */
     protected boolean                  fork;
 
     /**
      * verbose jruby related output
-     * 
+     *
      * @parameter expression="${jruby.verbose}" default-value="false"
      */
     protected boolean                  verbose;
 
     /**
      * the launch directory for the JRuby execution.
-     * 
+     *
      * @parameter expression="${project.basedir}"
      */
     protected File                     launchDirectory;
 
     /**
      * directory of JRuby home to use when forking JRuby.
-     * 
+     *
      * @parameter default-value="${jruby.home}"
      */
     protected File                     jrubyHome;
 
     /**
      * directory of gem home to use when forking JRuby.
-     * 
+     *
      * @parameter expression="${jruby.gem.home}"
      *            default-value="${project.build.directory}/rubygems"
      */
@@ -77,7 +77,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * directory of JRuby path to use when forking JRuby.
-     * 
+     *
      * @parameter expression="${jruby.gem.path}"
      *            default-value="${project.build.directory}/rubygems"
      */
@@ -85,14 +85,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * The amount of memory to use when forking JRuby.
-     * 
+     *
      * @parameter expression="${jruby.launch.memory}" default-value="384m"
      */
     protected String                   jrubyLaunchMemory;
 
     /**
      * reference to maven project for internal use.
-     * 
+     *
      * @parameter expression="${project}"
      * @required
      * @readOnly true
@@ -101,7 +101,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * The project's artifacts.
-     * 
+     *
      * @parameter default-value="${project.artifacts}"
      * @required
      * @readonly
@@ -110,7 +110,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * artifact factory for internal use.
-     * 
+     *
      * @component
      * @required
      * @readonly
@@ -119,7 +119,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * artifact resolver for internal use.
-     * 
+     *
      * @component
      * @required
      * @readonly
@@ -128,7 +128,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * local repository for internal use.
-     * 
+     *
      * @parameter default-value="${localRepository}"
      * @required
      * @readonly
@@ -137,7 +137,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * list of remote repositories for internal use.
-     * 
+     *
      * @parameter default-value="${project.remoteArtifactRepositories}"
      * @required
      * @readonly
@@ -148,14 +148,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
      * this version is used to resolve the jruby-complete dependency from the
      * local/remote maven repository. defaults to "1.4.1".
-     * 
+     *
      * @parameter default-value="${jruby.version}"
      */
     protected String                   jrubyVersion;
 
     /**
      * directory to leave some flags for already installed gems.
-     * 
+     *
      * @parameter expression="${jruby.gem.flags}"
      *            default-value="${project.build.directory}/gems"
      */
@@ -164,14 +164,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * output file where the stdout will be redirected to
-     * 
+     *
      * @parameter
      */
     protected File                     outputFile;
 
     /**
      * output directory for internal use.
-     * 
+     *
      * @parameter default-value="${project.build.outputDirectory}"
      * @required
      * @readonly
@@ -180,7 +180,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * classrealm for internal use.
-     * 
+     *
      * @parameter expression="${dummyExpression}"
      * @readonly
      */

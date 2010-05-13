@@ -1,7 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.example</groupId>
@@ -15,11 +13,11 @@
     <repository>
       <id>rubygems</id>
       <releases>
-	<updatePolicy>never</updatePolicy>
-	<checksumPolicy>ignore</checksumPolicy>
+        <updatePolicy>never</updatePolicy>
+        <checksumPolicy>ignore</checksumPolicy>
       </releases>
       <snapshots>
-	<enabled>false</enabled>
+        <enabled>false</enabled>
       </snapshots>
       <url>http://rubygems.org/gems</url>
       <layout>gem</layout>
@@ -40,4 +38,3 @@
     </dependency>
   </dependencies>
 </project>
-

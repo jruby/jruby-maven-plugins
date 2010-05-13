@@ -4,7 +4,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * goal to run the rails database console
- * 
+ *
  * @goal dbconsole
  * @requiresDependencyResolution compile
  */
@@ -12,7 +12,7 @@ public class DbConsoleMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the database console command
-     * 
+     *
      * @parameter default-value="${dbconsole}"
      */
     protected String dbconsoleArgs = null;

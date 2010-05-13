@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project 
-    xmlns="http://maven.apache.org/POM/4.0.0" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-<parent>
+  <parent>
     <groupId>com.example</groupId>
     <artifactId>rails-maven-plugin</artifactId>
     <version>0.0.0</version>
@@ -13,25 +10,24 @@
   <groupId>rails</groupId>
   <packaging>war</packaging>
   <artifactId>sqlite3-beta2</artifactId>
- 
   <repositories>
-    <!-- 
-	 the source for the gem artifacts
+    <!--
+  the source for the gem artifacts
     -->
     <repository>
       <id>rubygems</id>
       <releases>
-	<updatePolicy>never</updatePolicy>
-	<checksumPolicy>ignore</checksumPolicy>
+        <updatePolicy>never</updatePolicy>
+        <checksumPolicy>ignore</checksumPolicy>
       </releases>
       <snapshots>
-	<enabled>false</enabled>
+        <enabled>false</enabled>
       </snapshots>
       <url>http://rubygems.org/gems</url>
       <layout>gem</layout>
     </repository>
-    <!-- 
-	 needed for jruby-rack artifact
+    <!--
+  needed for jruby-rack artifact
     -->
     <repository>
       <id>saumya</id>
@@ -39,7 +35,6 @@
       <url>http://mojo.saumya.de</url>
     </repository>
   </repositories>
-
   <pluginRepositories>
     <pluginRepository>
       <id>sonatype-nexus-snapshots</id>
@@ -47,11 +42,10 @@
       <url>http://oss.sonatype.org/content/repositories/snapshots</url>
     </pluginRepository>
   </pluginRepositories>
-
   <dependencies>
-    <!-- 
-	 this is a version which works properly with having
-	 rails gems in WEB-INF/gems
+    <!--
+  this is a version which works properly with having
+  rails gems in WEB-INF/gems
     -->
     <dependency>
       <groupId>org.jruby.rack</groupId>
@@ -63,8 +57,8 @@
       <artifactId>jruby-complete</artifactId>
       <version>1.5.0dev</version>
     </dependency>
-    <!-- 
-	 gem dependencies
+    <!--
+  gem dependencies
     -->
     <dependency>
       <groupId>rubygems</groupId>
@@ -76,9 +70,9 @@
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>jdbc-sqlite3</artifactId>
-      <!-- 
-	   for the stability of the build it is better to change this to 
-	   specific working version 
+      <!--
+    for the stability of the build it is better to change this to
+    specific working version
       -->
       <version>[0.0.0,)</version>
       <type>gem</type>
@@ -99,8 +93,8 @@
   <properties>
     <jruby.plugins.version>0.12.0-SNAPSHOT</jruby.plugins.version>
     <jruby.fork>true</jruby.fork>
-    <!-- 
-	 this is needed for the maven-war-plugin configuration
+    <!--
+  this is needed for the maven-war-plugin configuration
     -->
     <jruby.gem.home>${project.build.directory}/wargems</jruby.gem.home>
     <jruby.gem.path>${project.build.directory}/wargems</jruby.gem.path>
@@ -109,34 +103,34 @@
   <build>
     <plugins>
       <!--
-	  this plugin gives you basic jruby related goals. overview:
-	   mvn ruby:help
+   this plugin gives you basic jruby related goals. overview:
+    mvn ruby:help
       -->
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby-maven-plugin</artifactId>
-	<version>${jruby.plugins.version}</version>
+        <version>${jruby.plugins.version}</version>
       </plugin>
       <!--
-	  this plugin gives you basic rubygems related goals and manages 
-	  the gems for maven. overview:
-	   mvn gem:help
+   this plugin gives you basic rubygems related goals and manages
+   the gems for maven. overview:
+    mvn gem:help
       -->
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
-	<version>${jruby.plugins.version}</version>
-	<extensions>true</extensions>
-	<executions>
-	  <execution>
-	    <goals>
-	      <goal>initialize</goal>
-	    </goals>
-	  </execution>
-	</executions>
+        <version>${jruby.plugins.version}</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>initialize</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <!--
-	  this plugin has some rails specific goals.
+   this plugin has some rails specific goals.
       -->
       <plugin>
         <groupId>de.saumya.mojo</groupId>
@@ -145,92 +139,91 @@
       </plugin>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-	<version>2.0.2</version>
+        <version>2.0.2</version>
         <configuration>
-	  <warSourceDirectory>${rails.dir}/src/main/webapp</warSourceDirectory>
-	  <webResources>
-	    <resource>
-	      <directory>${rails.dir}/public</directory>
-	    </resource>
-	    <resource>
-	      <directory>${rails.dir}</directory>
-	      <targetPath>WEB-INF</targetPath>
-	      <includes>
-		<include>Gemfile</include>
-		<include>app/**</include>
-		<include>config/**</include>
-		<include>lib/**</include>
-		<include>vendor/**</include>
-		<!--
-		    this might be not a good idea for production but for 
-		    testing this should be OK and I will not work when
-		    running the application from a packed war file
-		-->
-		<include>db/*sqlite3</include>
-	      </includes>
-	    </resource>
-	    <!-- 
-		 if you freeze your rails and unpack your gems you need to 
-		 comment/remove the next section to avoid ending up with 
-		 two sets of gems inside the war file
-	    -->
-	    <resource>
-	      <directory>${jruby.gem.path}</directory>
-	      <targetPath>WEB-INF/gems</targetPath>
-	    </resource>
-	  </webResources>
-        </configuration>	
+          <warSourceDirectory>${rails.dir}/src/main/webapp</warSourceDirectory>
+          <webResources>
+            <resource>
+              <directory>${rails.dir}/public</directory>
+            </resource>
+            <resource>
+              <directory>${rails.dir}</directory>
+              <targetPath>WEB-INF</targetPath>
+              <includes>
+                <include>Gemfile</include>
+                <include>app/**</include>
+                <include>config/**</include>
+                <include>lib/**</include>
+                <include>vendor/**</include>
+                <!--
+      this might be not a good idea for production but for
+      testing this should be OK and I will not work when
+      running the application from a packed war file
+  -->
+                <include>db/*sqlite3</include>
+              </includes>
+            </resource>
+            <!--
+   if you freeze your rails and unpack your gems you need to
+   comment/remove the next section to avoid ending up with
+   two sets of gems inside the war file
+     -->
+            <resource>
+              <directory>${jruby.gem.path}</directory>
+              <targetPath>WEB-INF/gems</targetPath>
+            </resource>
+          </webResources>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-	<version>7.0.1.v20091125</version> 
-	<configuration>
-	  <stopKey>foo</stopKey>
-	  <stopPort>9999</stopPort>
-	  <port>${jetty.port}</port>
-	</configuration>
-	<executions>
-	  <execution>
-	    <id>start-jetty</id>
-	    <phase>pre-integration-test</phase>
-	    <goals>
-	      <goal>run-war</goal>
-	    </goals>
-	    <configuration>
-	      <daemon>true</daemon>
-	    </configuration>
-	  </execution>
-	  <execution>
-	    <id>stop-jetty</id>
-	    <phase>post-integration-test</phase>
-	    <goals>
-	      <goal>stop</goal>
-	    </goals>
-	  </execution>
-	</executions>
+        <version>7.0.1.v20091125</version>
+        <configuration>
+          <stopKey>foo</stopKey>
+          <stopPort>9999</stopPort>
+          <port>${jetty.port}</port>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-jetty</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>run-war</goal>
+            </goals>
+            <configuration>
+              <daemon>true</daemon>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-jetty</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-	<version>1.3</version>
-	<executions>
-	  <execution>
-	    <id>get-files</id>
-	    <phase>integration-test</phase>
-	    <goals>
-	      <goal>run</goal>
-	    </goals>
-	    <configuration>
-	      <tasks>
-		<get src="http://localhost:${jetty.port}/index.html" dest="target/index.html"/>
-		<get src="http://localhost:${jetty.port}/users" dest="target/users.html"/>
-		<get src="http://localhost:${jetty.port}/users/new" dest="target/new.html"/>
-	      </tasks>
-	    </configuration>
-	  </execution>
-	</executions>
+        <version>1.3</version>
+        <executions>
+          <execution>
+            <id>get-files</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <get src="http://localhost:${jetty.port}/index.html" dest="target/index.html"/>
+                <get src="http://localhost:${jetty.port}/users" dest="target/users.html"/>
+                <get src="http://localhost:${jetty.port}/users/new" dest="target/new.html"/>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
-      
 </project>

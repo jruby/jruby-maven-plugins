@@ -19,42 +19,42 @@ import org.codehaus.plexus.velocity.VelocityComponent;
  * goal to run rails command with the given arguments. either to generate a
  * fresh rails application or to run the rails script from within a rails
  * application.
- * 
+ *
  * @goal rails
  */
 public class RailsMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the rails command
-     * 
+     *
      * @parameter default-value="${rails.args}"
      */
     protected String            railsArgs                      = null;
 
     /**
      * the path to the application to be generated
-     * 
+     *
      * @parameter default-value="${app_path}"
      */
     protected String            appPath                        = null;
 
     /**
      * the rails version to use
-     * 
+     *
      * @parameter default-value="3.0.0.beta3" expression="${railsVersion}"
      */
     protected String            railsVersion                   = null;
 
     /**
      * the groupId of the new pom
-     * 
+     *
      * @parameter default-value="rails" expression="${groupId}"
      */
     protected String            groupId                        = null;
 
     /**
      * the version of the new pom
-     * 
+     *
      * @parameter default-value="1.0-SNAPSHOT" expression="${version}"
      */
     protected String            version                        = null;
