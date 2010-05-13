@@ -64,7 +64,7 @@ public class RailsMojo extends AbstractRailsMojo {
      */
     private VelocityComponent   velocityComponent;
     private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.beta3";
-    private static final String NEEDED_JRUBY_VERSION_FOR_RAILS = "1.5.0.RC3";
+    private static final String NEEDED_JRUBY_VERSION_FOR_RAILS = "1.5.0";
 
     @Override
     public void execute() throws MojoExecutionException {

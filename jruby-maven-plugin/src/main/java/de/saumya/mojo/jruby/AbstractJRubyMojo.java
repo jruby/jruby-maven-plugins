@@ -35,7 +35,7 @@ import org.codehaus.classworlds.ClassRealm;
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String              DEFAULT_JRUBY_VERSION = "1.4.1";
+    private static String              DEFAULT_JRUBY_VERSION = "1.5.0";
 
     private static final Set<Artifact> NO_ARTIFACTS          = Collections.emptySet();
 
