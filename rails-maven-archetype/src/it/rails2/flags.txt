@@ -1,0 +1,12 @@
+-DarchetypeCatalog=local
+-DarchetypeArtifactId=rails-maven-archetype
+-DarchetypeGroupId=de.saumya.mojo
+-DgroupId=com.example
+-DartifactId=target
+-Dversion=1.0-SNAPSHOT
+-Dpackage=com.example
+-DinteractiveMode=false
+-Dtask=db:create db:migrate RAILS_ENV=production
+-Dgenerator=scaffold
+-Dgenerate.args=user name:string
+-Djetty.port=8043
