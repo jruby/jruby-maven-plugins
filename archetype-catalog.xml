@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><archetype-catalog>
+  <archetypes>
+    <archetype>
+      <groupId>de.saumya.mojo</groupId>
+      <artifactId>rails-maven-archetype</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+      <description>archetype to mavenize an existing rails 2.3.x or rails3 application</description>
+    </archetype>
+  </archetypes>
+</archetype-catalog>
