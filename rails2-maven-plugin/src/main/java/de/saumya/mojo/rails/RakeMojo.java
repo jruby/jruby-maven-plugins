@@ -1,16 +1,12 @@
 package de.saumya.mojo.rails;
 
-import java.io.File;
-import java.util.Arrays;
-
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * goal to run rails rake with the given arguments.
  * 
  * @goal rake
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution test
  */
 public class RakeMojo extends AbstractRailsMojo {
 
@@ -30,10 +26,7 @@ public class RakeMojo extends AbstractRailsMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
-        execute(Arrays.asList(new Artifact[] { this.project.getArtifact() }));
-        final StringBuilder command = new StringBuilder(new File(new File(this.gemHome,
-                "bin"),
-                "rake").getAbsolutePath());
+        final StringBuilder command = binScript("rake");
         if (this.rakeArgs != null) {
             command.append(" ").append(this.rakeArgs);
         }

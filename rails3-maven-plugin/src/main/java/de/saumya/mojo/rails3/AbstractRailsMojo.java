@@ -69,5 +69,4 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
         builder.append(" ").append(command);
         return builder;
     }
-
 }

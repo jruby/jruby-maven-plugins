@@ -1,21 +1,25 @@
 package de.saumya.mojo.rails;
 
 import java.io.File;
-import java.util.Arrays;
-
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
 
+/**
+ * abstract rails mojo which provides a few helper methods and the rails.args
+ * parameter.
+ */
 public abstract class AbstractRailsMojo extends AbstractGemMojo {
-
-    private final String scriptName;
 
     /**
      * @parameter expression="${args}"
      */
-    protected String     args;
+    protected String args;
+
+    /**
+     * @parameter expression="${rails.dir}"
+     *            default-value="${project.basedir}/src/main/rails"
+     */
+    protected File   railsDirectory;
 
     /**
      * either development or test or production or whatever else is possible
@@ -23,55 +27,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
      * 
      * @parameter expression="${env}"
      */
-    protected String     environment;
-
-    /**
-     * @parameter expression="${rails.dir}"
-     *            default-value="${project.basedir}/src/main/rails"
-     */
-    protected File       railsDirectory;
-
-    /**
-     * @parameter expression="${project.basedir}"
-     */
-    protected File       basedir;
-
-    public AbstractRailsMojo() {
-        this("");
-    }
-
-    public AbstractRailsMojo(final String scriptName) {
-        this.scriptName = scriptName;
-    }
-
-    protected boolean hasPomFile() {
-        return this.project.getFile() != null;
-    }
-
-    void addEnvironment(final StringBuilder command) {
-    }
-
-    @Override
-    public void executeWithGems() throws MojoExecutionException {
-        execute(Arrays.asList(new Artifact[] { this.project.getArtifact() }));
-        final StringBuilder command = new StringBuilder(this.scriptName);
-        if (this.environment != null) {
-            addEnvironment(command);
-        }
-        if (this.args != null) {
-            command.append(" ").append(this.args);
-        }
-        execute(command.toString());
-    }
-
-    protected File railsDirectory() {
-        if (this.railsDirectory.exists()) {
-            return this.railsDirectory;
-        }
-        else {
-            return this.basedir;
-        }
-    }
+    protected String environment;
 
     @Override
     protected File launchDirectory() {
@@ -81,5 +37,30 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
         else {
             return super.launchDirectory();
         }
+    }
+
+    protected File binDirectory() {
+        if (this.gemHome == null) {
+            if (System.getenv("GEM_HOME") == null) {
+                // TODO something better is needed I guess
+                return null;
+            }
+            else {
+                return new File(System.getenv("GEM_HOME"), "bin");
+            }
+        }
+        else {
+            return new File(this.gemHome, "bin");
+        }
+    }
+
+    protected StringBuilder binScript(final String script) {
+        return new StringBuilder(new File(binDirectory(), script).getAbsolutePath());
+    }
+
+    protected StringBuilder railsScript(final String command) {
+        final StringBuilder builder = new StringBuilder("script/");
+        builder.append(command);
+        return builder;
     }
 }

@@ -6,7 +6,6 @@ import org.apache.maven.plugin.MojoExecutionException;
  * goal to run a generator
  * 
  * @goal generate
- * @execute phase="initialize"
  * @requiresDependencyResolution test
  */
 public class GenerateMojo extends AbstractRailsMojo {

@@ -3,26 +3,20 @@ package de.saumya.mojo.rails3;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
- * goal to run the rails console
+ * goal to run the rails console. it will ignore the fork parameter since
+ * forking does not work with a console.
  * 
  * @goal console
  * @requiresDependencyResolution compile
  */
 public class ConsoleMojo extends AbstractRailsMojo {
 
-    // override super mojo and make this readonly
-    /**
-     * @parameter expression="false"
-     * @readonly
-     */
-    protected boolean fork;
-
     /**
      * arguments for the console command
      * 
      * @parameter default-value="${console}"
      */
-    protected String  consoleArgs = null;
+    protected String consoleArgs = null;
 
     @Override
     protected void executeWithGems() throws MojoExecutionException {
@@ -43,7 +37,7 @@ public class ConsoleMojo extends AbstractRailsMojo {
         }
         if (this.environment != null) {
             // TODO verify this
-            commandArgs.append(this.environment);
+            commandArgs.append(" ").append(this.environment);
         }
         execute("-e ENV['GEM_HOME']='" + this.gemHome + "';ENV['GEM_PATH']='"
                 + this.gemPath + "';ARGV<<[" + commandArgs
