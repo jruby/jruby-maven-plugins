@@ -1,0 +1,17 @@
+=== 0.12.0 / 2010-05-14
+
+* maven archetypes for rails2 and rails3
+
+* added rspec-maven-plugin by Bob McWhirter (previous mojo.codehaus.org)
+
+* more integration tests
+
+* compile goal can generate java code (as jrubyc from version 1.5.0 onwards can do)
+
+* updated version to jruby-1.5.0, jruby-rack-0.9.7, rails-3.0.0.beta3
+
+* unified parameters for goals in rails2-plugin and rails3-plugin
+
+* better offline support
+
+* lots of little improvements here and there

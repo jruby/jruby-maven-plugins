@@ -167,6 +167,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      *
      * @parameter
      */
+    // TODO move into goals where needed
     protected File                     outputFile;
 
     /**
