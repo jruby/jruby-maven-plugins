@@ -30,7 +30,7 @@ import org.codehaus.classworlds.ClassRealm;
 
 /**
  * Base for all JRuby mojos.
- *
+ * 
  * @requiresProject false
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
@@ -41,58 +41,58 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * fork the JRuby execution.
-     *
+     * 
      * @parameter expression="${jruby.fork}" default-value="true"
      */
     protected boolean                  fork;
 
     /**
      * verbose jruby related output
-     *
+     * 
      * @parameter expression="${jruby.verbose}" default-value="false"
      */
     protected boolean                  verbose;
 
     /**
      * the launch directory for the JRuby execution.
-     *
+     * 
      * @parameter expression="${project.basedir}"
      */
     protected File                     launchDirectory;
 
     /**
      * directory of JRuby home to use when forking JRuby.
-     *
+     * 
      * @parameter default-value="${jruby.home}"
      */
-    protected File                     jrubyHome;
+    protected File                     home;
 
     /**
      * directory of gem home to use when forking JRuby.
-     *
-     * @parameter expression="${jruby.gem.home}"
+     * 
+     * @parameter expression="${jruby.gemHome}"
      *            default-value="${project.build.directory}/rubygems"
      */
     protected File                     gemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby.
-     *
-     * @parameter expression="${jruby.gem.path}"
+     * 
+     * @parameter expression="${jruby.gemPath}"
      *            default-value="${project.build.directory}/rubygems"
      */
     protected File                     gemPath;
 
     /**
      * The amount of memory to use when forking JRuby.
-     *
+     * 
      * @parameter expression="${jruby.launch.memory}" default-value="384m"
      */
-    protected String                   jrubyLaunchMemory;
+    protected String                   launchMemory;
 
     /**
      * reference to maven project for internal use.
-     *
+     * 
      * @parameter expression="${project}"
      * @required
      * @readOnly true
@@ -101,7 +101,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * The project's artifacts.
-     *
+     * 
      * @parameter default-value="${project.artifacts}"
      * @required
      * @readonly
@@ -110,7 +110,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * artifact factory for internal use.
-     *
+     * 
      * @component
      * @required
      * @readonly
@@ -119,7 +119,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * artifact resolver for internal use.
-     *
+     * 
      * @component
      * @required
      * @readonly
@@ -128,7 +128,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * local repository for internal use.
-     *
+     * 
      * @parameter default-value="${localRepository}"
      * @required
      * @readonly
@@ -137,7 +137,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * list of remote repositories for internal use.
-     *
+     * 
      * @parameter default-value="${project.remoteArtifactRepositories}"
      * @required
      * @readonly
@@ -148,14 +148,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
      * this version is used to resolve the jruby-complete dependency from the
      * local/remote maven repository. defaults to "1.4.1".
-     *
+     * 
      * @parameter default-value="${jruby.version}"
      */
-    protected String                   jrubyVersion;
+    protected String                   version;
 
     /**
      * directory to leave some flags for already installed gems.
-     *
+     * 
      * @parameter expression="${jruby.gem.flags}"
      *            default-value="${project.build.directory}/gems"
      */
@@ -164,7 +164,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * output file where the stdout will be redirected to
-     *
+     * 
      * @parameter
      */
     // TODO move into goals where needed
@@ -172,7 +172,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * output directory for internal use.
-     *
+     * 
      * @parameter default-value="${project.build.outputDirectory}"
      * @required
      * @readonly
@@ -181,7 +181,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * classrealm for internal use.
-     *
+     * 
      * @parameter expression="${dummyExpression}"
      * @readonly
      */
@@ -236,9 +236,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private Artifact resolveJRUBYCompleteArtifact()
             throws DependencyResolutionRequiredException,
             MojoExecutionException {
-        if (this.jrubyVersion != null) {
+        if (this.version != null) {
             // preference to command line or property version
-            return resolveJRUBYCompleteArtifact(this.jrubyVersion);
+            return resolveJRUBYCompleteArtifact(this.version);
         }
         else {
             // then take jruby from the dependencies
@@ -247,10 +247,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                 if (artifact.getArtifactId().equals("jruby-complete")
                         && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
                         && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
-                    // if (this.jrubyVersion != null
-                    // && !this.jrubyVersion.equals(artifact.getVersion())) {
-                    // getLog().warn("the configured jruby-version gets ignored in preference to the jruby dependency");
-                    // }
                     return resolveJRUBYCompleteArtifact(this.artifactFactory.createArtifact(artifact.getGroupId(),
                                                                                             artifact.getArtifactId(),
                                                                                             artifact.getVersion(),
@@ -361,10 +357,10 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             final Launcher launcher;
             if (this.fork) {
                 launcher = new AntLauncher(getLog(),
-                        this.jrubyHome,
+                        this.home,
                         this.gemHome,
                         this.gemPath,
-                        this.jrubyLaunchMemory,
+                        this.launchMemory,
                         this.verbose);
             }
             else {

@@ -8,6 +8,8 @@ p. maybe these plugins helps projects where ruby and java lives side by side. ma
 
 h2. how to use it
 
+p. there are plenty of integrations test in src/it of each plugin. so the best is to look through those examples.
+
 h3. nice plugin prefixes
 
 p. add following to your settings.xml (see also "http://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html":http://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html)
@@ -17,8 +19,7 @@ bc. <settings>
     <pluginGroup>de.saumya.mojo</pluginGroup>
   </pluginGroups>
   . . . 
-
-p. there are plenty of integrations test in src/it of each plugin. so the best is to look through those examples.
+h3. pom.xml config
 
 p. important is to declare the rubygems repository whenever you have gem artifacts as dependencies:
 
@@ -41,18 +42,6 @@ p. here there are a few things to mention: update-policy is set to 'never' to te
 
 h3. jruby-maven-plugin, rails2-maven-plugin, rails3-maven-plugin, rspec-maven-plugin
 
-p. more help you get with
-
-* @mvn ruby:help@
-
-* @mvn rails2:help@
-
-* @mvn rails3:help@
-
-* @mvn rspec:help@
-
-p. the prefix is **ruby** since there is already a jruby plugin on codehaus with the prefix **jruby**.
-
 p. for example the jruby plugin declaration looks like this:
 
 bc.   <build>
@@ -64,6 +53,18 @@ bc.   <build>
         <version>${jruby.plugins.version}</version>
       </plugin>
       . . . .
+
+p. more help you get with
+
+* @mvn ruby:help@
+
+* @mvn rails2:help@
+
+* @mvn rails3:help@
+
+* @mvn rspec:help@
+
+p. the prefix is **ruby** since there is already a jruby plugin on codehaus with the prefix **jruby**.
 
 h3. gem-maven-plugin
 
@@ -86,17 +87,19 @@ p. more help you get with
 
 h2. common parameters for all goals
 
-p. please use ruby:help, gem:help, rspec:help, rails2:help and rails3:help to get more info about the parameters for a specific goal
+p. please use ruby:help, gem:help, rspec:help, rails2:help and rails3:help to get more info about the parameters for a specific goal.
+
+p. the first name is the system property which can be set either via the commandline (-Dmy.property.name=value) or via the properties section in the pom.xml. and the second name is the name for configuration part of the plugin.
 
 * jruby.fork (fork) - default: true
 
 * jruby.verbose (verbose) - default: false
 
-* jruby.home (jrubyHome) - default: none
+* jruby.home (home) - default: none
 
-* jruby.version (jrubyVersion) - default: taken from dependency or 1.5.0 
+* jruby.version (version) - default: taken from dependency or 1.5.0 
 
-* jruby.launch.memory (jrubyLaunchMemory) - default: 384m
+* jruby.launchMemory (launchMemory) - default: 384m
 
 * jruby.gem.home (gemHome) - default: target/rubygems
 
@@ -106,9 +109,9 @@ p. please use ruby:help, gem:help, rspec:help, rails2:help and rails3:help to ge
 
 h2. common parameters for all goals from gem, rpec and rails plugins
 
-* jruby.include.openssl (includeOpenSSLGem) - default: true
-
 * "offline command line switch -o" (offline) - default: false
+
+* gem.includeOpenSSL (includeOpenSSL) - default: true
 
 * gem.forceVersion (forceVersion) - default: false
 
@@ -118,23 +121,23 @@ p. any goal has the properties 'jruby.version' and 'jruby.fork'. you can set via
 
 h2. common parameters for all goals from rails2/rails3 plugins
 
-* args (args) - default: none
+* args (arguments) - default: none
 
-* rails.dir (railsDirectory) - default: src/main/rails or basedir
+* dir (directory) - default: src/main/rails or basedir
 
 * env (environment) - default: none (but rails defaults to development)
 
 h2. rubygems
 
-p. the default behaviour is to fork jruby which allows to use a custom gem home/path and default location is target/rubygems. there maven will install all gems which were declared as dependency (including transitive gem depedencies). **important**: this does not work if you use the embedded jruby !
+p. the default behaviour is to fork jruby which allows to use a custom gem home/path wiith a default location of *target/rubygems*. there maven will install all gems which were declared as dependency (including transitive gem depedencies). **important**: this does not work if you use the embedded jruby (*fork=false*)!
 
-p. after a @mvn clean@ you can be sure that there is just one version for given gem present in target/rubygems. maven also resolves also version needed which might be different from what you get if you use rubygems or bundler. you can always use an explicit dependency to select specific version of particular gem.
+p. after a @mvn clean@ you can be sure that there is just one version for given gem present in target/rubygems. maven also resolves the version needed which might be different from what you get if you use rubygems or bundler. you can always use an explicit dependency to select a specific version of a particular gem.
 
-p. **note**: with rubygems any version with an alphabet is a "prerelease". for maven this is not the case and it treats all versions in similar manner. to fix this is a pending issue.
+p. **note**: with rubygems any version with an alphabet is a "prerelease". for maven this is not the case and it treats all versions in similarthe same manner. to rectify this is a pending issue.
 
 h2. rails-maven-archetype
 
-p. suppose you have already a rails-2.3.5 or a rails-3.0.0.beta3 application inside a *myapp* directory. have a terminal open in the parent directory of this application and execute following command:
+p. suppose you have already a rails-2.3.5 application inside a *myapp* directory. have a terminal open in the parent directory of this application and execute following command:
 
 @mvn archetype:generate -DarchetypeCatalog=http://github.com/mkristian/jruby-maven-plugins/raw/master/archetype-catalog.xml@
 
@@ -146,7 +149,7 @@ p. suppose you have already a rails-2.3.5 or a rails-3.0.0.beta3 application ins
 
 * the version and package just take the default
 
-p. the archetype is stupid and uses rails version 2.3.5 as default and sqlite3 as database and it does not matter what the rails application actually uses. in case you need something else do as follow:
+p. the archetype is stupid and uses rails version *2.3.5* as default and *sqlite3* as database and it does not matter what the rails application actually uses. in case you need something else do as follow:
 
 @mvn archetype:generate -DarchetypeCatalog=http://github.com/mkristian/jruby-maven-plugins/raw/master/archetype-catalog.xml -Drails.version=3.0.0.beta3 -Ddatabase=mysql@
 

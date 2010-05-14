@@ -30,8 +30,8 @@ public class RakeMojo extends AbstractRailsMojo {
         if (this.rakeArgs != null) {
             command.append(" ").append(this.rakeArgs);
         }
-        if (this.args != null) {
-            command.append(" ").append(this.args);
+        if (this.arguments != null) {
+            command.append(" ").append(this.arguments);
         }
         if (this.task != null) {
             command.append(" ").append(this.task);

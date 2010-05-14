@@ -57,7 +57,7 @@ public class RailsMojo extends AbstractRailsMojo {
      *
      * @parameter default-value="1.0-SNAPSHOT" expression="${version}"
      */
-    protected String            version                        = null;
+    protected String            artifactVersion                        = null;
 
     /**
      * @component
@@ -72,11 +72,11 @@ public class RailsMojo extends AbstractRailsMojo {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
-        if (this.jrubyVersion == null
-                || this.jrubyVersion.compareTo(NEEDED_JRUBY_VERSION_FOR_RAILS) < 0) {
+        if (this.artifactVersion == null
+                || this.artifactVersion.compareTo(NEEDED_JRUBY_VERSION_FOR_RAILS) < 0) {
             getLog().warn("use hardcoded jruby version for rails3: "
                     + NEEDED_JRUBY_VERSION_FOR_RAILS);
-            this.jrubyVersion = NEEDED_JRUBY_VERSION_FOR_RAILS;
+            this.artifactVersion = NEEDED_JRUBY_VERSION_FOR_RAILS;
         }
         Artifact artifact;
         artifact = this.artifactFactory.createArtifact("rubygems",
@@ -114,8 +114,8 @@ public class RailsMojo extends AbstractRailsMojo {
         if (this.railsArgs != null) {
             command.append(" ").append(this.railsArgs);
         }
-        if (this.args != null) {
-            command.append(" ").append(this.args);
+        if (this.arguments != null) {
+            command.append(" ").append(this.arguments);
         }
         execute(command.toString(), false);
         if (this.appPath != null) {
@@ -152,7 +152,7 @@ public class RailsMojo extends AbstractRailsMojo {
 
             context.put("groupId", this.groupId);
             context.put("artifactId", app.getName());
-            context.put("version", this.version);
+            context.put("version", this.artifactVersion);
             context.put("database", database);
             context.put("railsVersion", this.railsVersion);
 

@@ -44,9 +44,9 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
-     * @parameter expression="${jruby.include.openssl}" default-value="true"
+     * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
-    protected boolean                  includeOpenSSLGem;
+    protected boolean                  includeOpenSSL;
 
     /**
      * @parameter expression="${settings.offline}"
@@ -56,14 +56,14 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * allow to overwrite the version by explicitly declaring a dependency in
      * the pom. will not check any dependencies on gemspecs level.
-     *
+     * 
      * @parameter expression="${gem.forceVersion}" default-value="false"
      */
     private boolean                    forceVersion;
 
     /**
      * follow transitive dependencies when initializing rubygem dependencies.
-     *
+     * 
      * @parameter expression="${gem.useTransitiveDependencies}"
      *            default-value="false"
      */
@@ -234,7 +234,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     // TODO needs better name !!!! needs to be protected ?
     public void execute(Collection<Artifact> artifacts)
             throws MojoExecutionException {
-        if (this.includeOpenSSLGem) {
+        if (this.includeOpenSSL) {
             final Artifact openssl = this.artifactFactory.createArtifact("rubygems",
                                                                          "jruby-openssl",
                                                                          "0.7",
