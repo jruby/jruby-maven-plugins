@@ -13,26 +13,26 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
     /**
      * @parameter expression="${args}"
      */
-    protected String arguments;
+    protected String args;
 
     /**
-     * @parameter expression="${dir}"
+     * @parameter expression="${rails.dir}"
      *            default-value="${project.basedir}/src/main/rails"
      */
-    protected File   directory;
+    protected File   dir;
 
     /**
      * either development or test or production or whatever else is possible
      * with your config
      * 
-     * @parameter expression="${env}"
+     * @parameter expression="${rails.env}"
      */
-    protected String environment;
+    protected String env;
 
     @Override
     protected File launchDirectory() {
-        if (this.directory.exists()) {
-            return this.directory;
+        if (this.dir.exists()) {
+            return this.dir;
         }
         else {
             return super.launchDirectory();

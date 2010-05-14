@@ -25,8 +25,8 @@ public class ConsoleMojo extends AbstractRailsMojo {
         // no openssl since we are not forking
         this.includeOpenSSL = false;
         final StringBuilder commandArgs = new StringBuilder("'console'");
-        if (this.arguments != null) {
-            for (final String arg : this.arguments.split("\\s+")) {
+        if (this.args != null) {
+            for (final String arg : this.args.split("\\s+")) {
                 commandArgs.append(",'").append(arg).append("'");
             }
         }
@@ -35,9 +35,9 @@ public class ConsoleMojo extends AbstractRailsMojo {
                 commandArgs.append(",'").append(arg).append("'");
             }
         }
-        if (this.environment != null) {
+        if (this.env != null) {
             // TODO verify this
-            commandArgs.append(" ").append(this.environment);
+            commandArgs.append(" ").append(this.env);
         }
         execute("-e ENV['GEM_HOME']='" + this.gemHome + "';ENV['GEM_PATH']='"
                 + this.gemPath + "';ARGV<<[" + commandArgs

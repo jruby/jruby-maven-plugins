@@ -70,7 +70,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     /**
      * directory of gem home to use when forking JRuby.
      * 
-     * @parameter expression="${jruby.gemHome}"
+     * @parameter expression="${jruby.gem.home}"
      *            default-value="${project.build.directory}/rubygems"
      */
     protected File                     gemHome;
@@ -78,7 +78,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     /**
      * directory of JRuby path to use when forking JRuby.
      * 
-     * @parameter expression="${jruby.gemPath}"
+     * @parameter expression="${jruby.gem.path}"
      *            default-value="${project.build.directory}/rubygems"
      */
     protected File                     gemPath;

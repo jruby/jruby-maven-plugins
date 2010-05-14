@@ -272,7 +272,7 @@
             <li>
               <h2>Create your database</h2>
               <p>Run <code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate"</code> to create your database. If you're not using SQLite (the default), edit <code>config/database.yml</code> with your username and password.</p>
-       <p><code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate RAILS_ENV=production"</code>
+       <p><code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate" -Drails.env=production</code>
             </li>
 
      <li>

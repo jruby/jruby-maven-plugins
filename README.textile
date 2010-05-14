@@ -121,11 +121,11 @@ p. any goal has the properties 'jruby.version' and 'jruby.fork'. you can set via
 
 h2. common parameters for all goals from rails2/rails3 plugins
 
-* args (arguments) - default: none
+* args (args) - default: none
 
-* dir (directory) - default: src/main/rails or basedir
+* rails.dir (dir) - default: src/main/rails or basedir
 
-* env (environment) - default: none (but rails defaults to development)
+* rails.env (env) - default: none (but rails defaults to development)
 
 h2. rubygems
 

@@ -3,7 +3,7 @@
     <archetype>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>rails-maven-archetype</artifactId>
-      <version>0.12.0-SNAPSHOT</version>
+      <version>0.12.0</version>
       <description>archetype to mavenize an existing rails 2.3.x or rails3 application</description>
     </archetype>
   </archetypes>

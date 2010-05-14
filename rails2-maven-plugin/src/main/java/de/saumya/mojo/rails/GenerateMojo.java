@@ -30,8 +30,8 @@ public class GenerateMojo extends AbstractRailsMojo {
         if (this.generator != null) {
             command.append(" ").append(this.generator);
         }
-        if (this.arguments != null) {
-            command.append(" ").append(this.arguments);
+        if (this.args != null) {
+            command.append(" ").append(this.args);
         }
         if (this.generateArgs != null) {
             command.append(" ").append(this.generateArgs);

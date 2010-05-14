@@ -114,8 +114,8 @@ public class RailsMojo extends AbstractRailsMojo {
         if (this.railsArgs != null) {
             command.append(" ").append(this.railsArgs);
         }
-        if (this.arguments != null) {
-            command.append(" ").append(this.arguments);
+        if (this.args != null) {
+            command.append(" ").append(this.args);
         }
         execute(command.toString(), false);
         if (this.appPath != null) {

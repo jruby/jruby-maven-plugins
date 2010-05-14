@@ -23,11 +23,11 @@ public class ServerMojo extends AbstractRailsMojo {
         if (this.serverArgs != null) {
             command.append(" ").append(this.serverArgs);
         }
-        if (this.arguments != null) {
-            command.append(" ").append(this.arguments);
+        if (this.args != null) {
+            command.append(" ").append(this.args);
         }
-        if (this.environment != null) {
-            command.append(" -e ").append(this.environment);
+        if (this.env != null) {
+            command.append(" -e ").append(this.env);
         }
         execute(command.toString(), false);
     }
