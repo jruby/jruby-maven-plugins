@@ -85,6 +85,7 @@
                   <goal>test</goal>
                 </goals>
                 <configuration>
+		  <parallel>false</parallel>
                   <projects>
                     <fileset>
                       <directory>src/it</directory>

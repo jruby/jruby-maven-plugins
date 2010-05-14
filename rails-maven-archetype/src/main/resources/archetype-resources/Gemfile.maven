@@ -13,8 +13,11 @@ if defined?(JRUBY_VERSION)
   gem "activerecord-jdbc-adapter", :require =>'jdbc_adapter'
   gem "jdbc-${database}", :require => 'jdbc/${database}'
 else
-  # needs to be changed to the needed library
+#if($database == 'sqlite3')
   gem "sqlite3-ruby", :require => "sqlite3"
+#else
+  gem "${database}"
+#end
 end
 
 ## Bundle the gems you use:
