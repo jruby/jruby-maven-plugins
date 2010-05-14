@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>rubygems</groupId>
+  <artifactId>application</artifactId>
+  <version>0.0.0</version>
+  <packaging>gem</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>ruby-world</artifactId>
+      <version>0.0.0</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>java-world</artifactId>
+      <version>0.0.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>0.12.0-SNAPSHOT</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>jruby-maven-plugin</artifactId>
+        <version>0.12.0-SNAPSHOT</version>
+	<executions>
+	  <execution>
+	    <phase>compile</phase>
+	    <goals>
+	      <goal>jruby</goal>
+	    </goals>
+	    <configuration>
+	      <script>
+		require 'rubygems'
+		require 'hello'
+		
+		puts Hello.new.world
+		
+		require 'java'
+		
+		puts com.example.Hello.new.world    
+	      </script>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
