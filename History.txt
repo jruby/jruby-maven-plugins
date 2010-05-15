@@ -1,8 +1,8 @@
 === 0.12.0 / 2010-05-14
 
-* maven archetypes for rails2 and rails3
+* maven archetypes for rails2 and rails3 (inspired by email from Reto Schüttel)
 
-* added rspec-maven-plugin by Bob McWhirter (previous mojo.codehaus.org)
+* added rspec-maven-plugin (by Bob McWhirter previous mojo.codehaus.org)
 
 * more integration tests
 
