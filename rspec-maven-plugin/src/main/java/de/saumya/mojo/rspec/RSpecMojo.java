@@ -146,7 +146,7 @@ public class RSpecMojo extends AbstractGemMojo {
 	private void initScriptFactory(ScriptFactory factory, String reportPath) {
 		factory.setBaseDir(basedir.getAbsolutePath());
 		factory.setClasspathElements(classpathElements);
-		factory.setOutputDir(new File(basedir, outputDirectory));
+		factory.setOutputDir(new File( outputDirectory) );
 		factory.setReportPath(reportPath);
 		factory.setSourceDir(specSourceDirectory().getAbsolutePath());
 		Properties props = systemProperties;
