@@ -17,7 +17,6 @@ import de.saumya.mojo.gem.AbstractGemMojo;
  * 
  * @goal test
  * @phase test
- * @execute phase="initialize"
  * @requiresDependencyResolution test
  */
 public class RSpecMojo extends AbstractGemMojo {
