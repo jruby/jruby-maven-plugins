@@ -47,14 +47,18 @@ module Maven
       req = Gem::Requirement.new(version)
       dep = Gem::Dependency.new(/^#{name}$/, req)
 
-      tuple = find(dep, req.prerelease?).first
-      @fetcher.fetch_spec(tuple[0], URI.parse(tuple[1]))
+      tuples = find(dep, req.prerelease?)
+      unless tuples.empty?
+        tuple = tuples.first
+        @fetcher.fetch_spec(tuple[0], URI.parse(tuple[1]))
+      end
     end
 
     def spec_to_pom(name, version)
       pom = pom_file(name, version)
       unless File.exists?(pom)
         spec = spec(name, version)
+        return nil unless spec
         File.open(pom, "w") do |f|
           f.puts <<-POM
 <?xml version="1.0"?>
@@ -154,12 +158,23 @@ POM
 
     def pom_sha1_file(name, version)
       file = pom_file(name, version) + ".sha1"
-      spec_to_pom(name, version) unless File.exists?(file)
+      unless File.exists?(file)
+        return nil if spec_to_pom(name, version).nil?
+      end
       file
     end
 
+    def gem_location(name, version)
+      file = pom_file(name, version)
+      # TODO maybe a better way to check if name + version is valid
+      return nil if file.nil?
+      "http://#{source_uri}/gems/#{name}-#{version}.gem"
+    end
+
     def gem_sha1_file(name, version)
-      file = pom_file(name, version).sub(/\.pom$/, ".gem") + ".sha1"
+      file = pom_file(name, version)
+      return nil if file.nil?
+      file = file.sub(/\.pom$/, ".gem") + ".sha1"
       unless File.exists?(file)
         require 'net/http'
         resource = Net::HTTP.new(@source_uri,80)
@@ -170,6 +185,8 @@ POM
           path = headers["location"].sub(/.*:\/\/[^\/]*\//, '/')
           resource = Net::HTTP.new(domain,80)
           headers,data = resource.get(path)
+          # TODO do it better here
+          return nil if(headers.code != "200")
         end
         File.open(file, "w") { |f| f << Digest::SHA1.hexdigest(data) }
       end
@@ -200,7 +217,7 @@ POM
 
     def metadata(name)
       versions = map[name]
-      to_metadata(name, versions)
+      to_metadata(name, versions) if versions
     end
 
     def metadata_file(name)
@@ -211,7 +228,9 @@ POM
 
     def metadata_sha1_file(name, is_sha1 = false)
       file = metadata_file(name) + ".sha1"
-      metadata(name) unless File.exists?(file)
+      unless File.exists?(file)
+        return nil if metadata(name).nil?
+      end
       file
     end
 

@@ -30,8 +30,18 @@ class ControllerService {
                                            Object.class);
     }
 
-    String getGemLocation(final String name, final String version) {
-        return "http://rubygems.org/gems/" + name + "-" + version + ".gem";
+    String getGemLocation(final String name, final String version)
+            throws FileNotFoundException {
+        final String uri = this.scriptingContainer.callMethod(this.rubyObject,
+                                                              "gem_location",
+                                                              new String[] {
+                                                                      name,
+                                                                      version },
+                                                              String.class);
+        if (uri == null) {
+            throw new FileNotFoundException();
+        }
+        return uri;
     }
 
     void writePom(final String name, final String version, final Writer writer)
@@ -87,6 +97,9 @@ class ControllerService {
 
     private void writeout(final Writer writer, final String file)
             throws FileNotFoundException, IOException {
+        if (file == null) {
+            throw new FileNotFoundException();
+        }
         // TODO make sure utf-8 is used
         final Reader in = new BufferedReader(new FileReader(file));
         try {
