@@ -131,6 +131,7 @@
     <module>rails-maven-archetype</module>
     <module>rails2-maven-plugin</module>
     <module>rails3-maven-plugin</module>
+    <module>gem-proxy</module>
   </modules>
 
   <profiles>
