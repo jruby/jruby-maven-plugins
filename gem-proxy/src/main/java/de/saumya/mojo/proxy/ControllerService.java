@@ -4,6 +4,7 @@
 package de.saumya.mojo.proxy;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,13 +31,14 @@ class ControllerService {
                                            Object.class);
     }
 
-    String getGemLocation(final String name, final String version)
-            throws FileNotFoundException {
+    String getGemLocation(final String name, final String version,
+            final String file) throws FileNotFoundException {
         final String uri = this.scriptingContainer.callMethod(this.rubyObject,
                                                               "gem_location",
                                                               new String[] {
                                                                       name,
-                                                                      version },
+                                                                      version,
+                                                                      file },
                                                               String.class);
         if (uri == null) {
             throw new FileNotFoundException();
@@ -44,10 +46,19 @@ class ControllerService {
         return uri;
     }
 
+    void spec2Pom(final File specFile, final File pomFile) {
+        this.scriptingContainer.callMethod(this.rubyObject,
+                                           "spec_to_pom",
+                                           new String[] {
+                                                   specFile.getAbsolutePath(),
+                                                   pomFile.getAbsolutePath() },
+                                           Object.class);
+    }
+
     void writePom(final String name, final String version, final Writer writer)
             throws IOException {
         final String file = this.scriptingContainer.callMethod(this.rubyObject,
-                                                               "spec_to_pom",
+                                                               "to_pom",
                                                                new String[] {
                                                                        name,
                                                                        version },

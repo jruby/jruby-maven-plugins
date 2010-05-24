@@ -22,7 +22,7 @@ public class GemProxyServletContextListener implements ServletContextListener {
             System.out.println("started update job");
             while (this.isRunning) {
                 try {
-                    Thread.sleep(60 * 1000);
+                    Thread.sleep(120 * 1000);
                     this.controller.update();
                     System.out.println("updated metadata");
                 }

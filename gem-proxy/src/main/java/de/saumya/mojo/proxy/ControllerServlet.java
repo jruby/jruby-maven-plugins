@@ -46,7 +46,8 @@ public class ControllerServlet extends HttpServlet {
             case 3:// #{name}/#{version}/#{name}-#{version}.{gem|pom}
                 if (parts[2].endsWith(".gem")) {
                     resp.sendRedirect(this.controller.getGemLocation(parts[0],
-                                                                     parts[1]));
+                                                                     parts[1],
+                                                                     parts[2]));
                 }
                 else if (parts[2].endsWith(".gem.sha1")) {
                     resp.setContentType("text/plain");

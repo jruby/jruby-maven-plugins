@@ -25,42 +25,52 @@ module Maven
       @fetcher = Gem::SpecFetcher.fetcher
     end
 
-    def find(dep, prerelease)
+    def find(fetcher, dep, prerelease)
       # all = !req.prerelease? since "all == true" excludes prereleases
       # all == true => prerelease == false
       # all == false => only latest !! unless prerelease == true
-      @fetcher.find_matching(dep, !prerelease, false, prerelease)
+      fetcher.find_matching(dep, !prerelease, false, prerelease)
     end
 
     def update(name = '', update = true)
       dep = Gem::Dependency.new(/^#{name}/, Gem::Requirement.default)
       dep.name = '' if dep.name == //
-
-      @fetcher.instance_variable_set(:@update_cache, update)
-
-      @tuples = find(dep, false) + find(dep, true)
-
+      fetcher = Gem::SpecFetcher.fetcher
+      fetcher.instance_variable_set(:@update_cache, update)
+      #TODO not sure if this is threadsafe
+      @tuples = find(fetcher, dep, false) + find(fetcher, dep, true)
+      @fetcher = fetcher
       @last_update = File.new(@fetcher.cache_dir(URI.parse("http://rubygems.org/gems")) + "/specs.#{Gem.marshal_version}").mtime      
     end
-
+    
     def spec(name, version)
       req = Gem::Requirement.new(version)
       dep = Gem::Dependency.new(/^#{name}$/, req)
-
-      tuples = find(dep, req.prerelease?)
+      
+      tuples = find(@fetcher, dep, req.prerelease?)
       unless tuples.empty?
         tuple = tuples.first
         @fetcher.fetch_spec(tuple[0], URI.parse(tuple[1]))
       end
     end
 
-    def spec_to_pom(name, version)
+    def to_pom(name, version)
       pom = pom_file(name, version)
       unless File.exists?(pom)
         spec = spec(name, version)
         return nil unless spec
-        File.open(pom, "w") do |f|
-          f.puts <<-POM
+        _spec_to_pom(spec, pom)
+      end
+    end
+    
+    def spec_to_pom(spec, pom)
+      #TODO spec file to Gem::Specification
+      _spec_to_pom(spec, pom)
+    end
+    
+    def _spec_to_pom(spec, pom)
+      File.open(pom, "w") do |f|
+        f.puts <<-POM
 <?xml version="1.0"?>
 <project
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
@@ -76,75 +86,74 @@ module Maven
   <url>#{spec.homepage}</url>
   <dependencies>
 POM
-          spec.dependencies.each do |dep|
-            scope = case dep.type
-                    when :runtime
+        spec.dependencies.each do |dep|
+          scope = case dep.type
+                  when :runtime
                       "compile"
-                    when :development
-                      "test"
-                    else
-                      warn "unknown scope: #{dep.type}"
-                      "compile"
-                    end
-            left_version = nil
-            right_version = nil
-            version = nil
-            (0..(dep.version_requirements.requirements.size - 1)).each do |index|
-              req = dep.version_requirements.requirements[index]
-              gem_version = req[1].to_s
-              gem_final_version = gem_version
-              gem_final_version = gem_final_version + ".0" if gem_final_version =~ /^[0-9]+\.[0-9]+$/
-              gem_final_version = gem_final_version + ".0.0" if gem_final_version =~ /^[0-9]+$/
-              case req[0]
-              when "="
-                version = gem_final_version
-              when ">="
-                left_version = "[#{gem_final_version}"
-              when ">"
-                left_version = "(#{gem_final_version}"
-              when "<="
-                right_version = "#{gem_final_version}]"
-              when "<"
-                right_version = "#{gem_final_version})"
-              when "~>"
-                pre_version = gem_version.sub(/[.][0-9]+$/, '')
-                # hope the upper bound is "big" enough but needed, i.e.
-                # version 4.0.0 is bigger than 4.0.0.pre and [3.0.0, 4.0.0) will allow
-                # 4.0.0.pre which is NOT intended
-                version = "[#{gem_version},#{pre_version.sub(/[0-9]+$/, '')}#{pre_version.sub(/.*[.]/, '').to_i}.99999.99999)"
-              else
-                puts "not implemented comparator: #{req.inspect}"
-              end
+                  when :development
+                    "test"
+                  else
+                    warn "unknown scope: #{dep.type}"
+                    "compile"
+                  end
+          left_version = nil
+          right_version = nil
+          version = nil
+          (0..(dep.requirement.requirements.size - 1)).each do |index|
+            req = dep.requirement.requirements[index]
+            gem_version = req[1].to_s
+            gem_final_version = gem_version
+            gem_final_version = gem_final_version + ".0" if gem_final_version =~ /^[0-9]+\.[0-9]+$/
+            gem_final_version = gem_final_version + ".0.0" if gem_final_version =~ /^[0-9]+$/
+            case req[0]
+            when "="
+              version = gem_final_version
+            when ">="
+              left_version = "[#{gem_final_version}"
+            when ">"
+              left_version = "(#{gem_final_version}"
+            when "<="
+              right_version = "#{gem_final_version}]"
+            when "<"
+              right_version = "#{gem_final_version})"
+            when "~>"
+              pre_version = gem_version.sub(/[.][0-9]+$/, '')
+              # hope the upper bound is "big" enough but needed, i.e.
+              # version 4.0.0 is bigger than 4.0.0.pre and [3.0.0, 4.0.0) will allow
+              # 4.0.0.pre which is NOT intended
+              version = "[#{gem_version},#{pre_version.sub(/[0-9]+$/, '')}#{pre_version.sub(/.*[.]/, '').to_i}.99999.99999)"
+            else
+              puts "not implemented comparator: #{req.inspect}"
             end
-            warn "having left_version or right_version and version which does not makes sense" if (right_version || left_version) && version
-            version = (left_version || "[") + "," + (right_version || ")") if right_version || left_version
-            version = "[0.0.0,)" if version.nil?
-            
-            spec_tuples = @fetcher.find_matching dep, true, false, nil
-            is_java = spec_tuples.detect { |s| s[0][2] == 'java' }
-            # require 'net/http'
-            f.puts <<-POM
+          end
+          warn "having left_version or right_version and version which does not makes sense" if (right_version || left_version) && version
+          version = (left_version || "[") + "," + (right_version || ")") if right_version || left_version
+          version = "[0.0.0,)" if version.nil?
+          
+          spec_tuples = @fetcher.find_matching dep, true, false, nil
+          is_java = spec_tuples.detect { |s| s[0][2] == 'java' }
+          # require 'net/http'
+          f.puts <<-POM
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>#{dep.name}</artifactId>
       <version>#{version}</version>
       <type>gem</type>
 POM
-            if is_java
-              f.puts <<-POM
-      <classifier>java</classifier>
-POM
-            end
+          if is_java
             f.puts <<-POM
-      <scope>#{scope}</scope>
-    </dependency>
+      <classifier>java</classifier>
 POM
           end
           f.puts <<-POM
+      <scope>#{scope}</scope>
+    </dependency>
+POM
+        end
+        f.puts <<-POM
   </dependencies>
 </project>
 POM
-        end
       end
       sha1(pom)
       pom
@@ -164,11 +173,11 @@ POM
       file
     end
 
-    def gem_location(name, version)
+    def gem_location(name, version, filename)
       file = pom_file(name, version)
       # TODO maybe a better way to check if name + version is valid
       return nil if file.nil?
-      "http://#{@source_uri}/gems/#{name}-#{version}.gem"
+      "http://#{@source_uri}/gems/#{filename}"
     end
 
     def gem_sha1_file(name, version)
