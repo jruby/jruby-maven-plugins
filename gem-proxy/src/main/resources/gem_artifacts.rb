@@ -168,7 +168,7 @@ POM
       file = pom_file(name, version)
       # TODO maybe a better way to check if name + version is valid
       return nil if file.nil?
-      "http://#{source_uri}/gems/#{name}-#{version}.gem"
+      "http://#{@source_uri}/gems/#{name}-#{version}.gem"
     end
 
     def gem_sha1_file(name, version)
