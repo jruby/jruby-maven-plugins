@@ -35,7 +35,7 @@ module Maven
     def update(name = '', update = true)
       dep = Gem::Dependency.new(/^#{name}/, Gem::Requirement.default)
       dep.name = '' if dep.name == //
-      fetcher = Gem::SpecFetcher.fetcher
+      fetcher = Gem::SpecFetcher.new
       fetcher.instance_variable_set(:@update_cache, update)
       #TODO not sure if this is threadsafe
       @tuples = find(fetcher, dep, false) + find(fetcher, dep, true)
