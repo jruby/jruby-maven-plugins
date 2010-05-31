@@ -56,10 +56,16 @@ module Maven
 
     def to_pom(name, version)
       pom = pom_file(name, version)
-      unless File.exists?(pom)
+      if File.exists?(pom)
+        pom
+      else
         spec = spec(name, version)
-        return nil unless spec
-        _spec_to_pom(spec, pom)
+        if spec
+          _spec_to_pom(spec, pom)
+          pom
+        else
+          nil
+        end
       end
     end
     
@@ -79,7 +85,7 @@ module Maven
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>#{spec.name}</artifactId>
-  <version>#{spec.version}#{spec.version.prerelease? ? "-SNAPSHOT": ""}</version>
+  <version>#{spec.version}</version>
   <packaging>gem</packaging>
   <name><![CDATA[#{spec.summary}]]></name>
   <description><![CDATA[#{spec.description}]]></description>
@@ -105,7 +111,6 @@ POM
             gem_final_version = gem_version
             gem_final_version = gem_final_version + ".0" if gem_final_version =~ /^[0-9]+\.[0-9]+$/
             gem_final_version = gem_final_version + ".0.0" if gem_final_version =~ /^[0-9]+$/
-            gem_final_version = gem_final_version + "-SNAPSHOT" if gem_final_version =~ /[a-zA-Z]/
             case req[0]
             when "="
               version = gem_final_version
@@ -118,7 +123,8 @@ POM
             when "<"
               right_version = "#{gem_final_version})"
             when "~>"
-              pre_version = gem_version.sub(/-SNAPSHOT/, '').sub(/[.][0-9]+$/, '')
+              # TODO not sure if this makes sense for prereleases
+              pre_version = gem_version.sub(/[.][a-zA-Z0-9]+$/, '')
               # hope the upper bound is "big" enough but needed, i.e.
               # version 4.0.0 is bigger than 4.0.0.pre and [3.0.0, 4.0.0) will allow
               # 4.0.0.pre which is NOT intended
@@ -157,7 +163,6 @@ POM
 POM
       end
       sha1(pom)
-      pom
     end
 
     def pom_file(name, version)
@@ -225,27 +230,34 @@ POM
       map
     end
 
-    def metadata(name)
+    def metadata(name, prereleases = false)
       versions = map[name]
-      to_metadata(name, versions) if versions
+      if versions
+        if prereleases
+          versions = versions.select {|v| v =~ /[a-zA-Z]/ }
+        else
+          versions = versions.select {|v| v =~ /^[0-9.]+$/ }
+        end
+        to_metadata(name, versions, prereleases)
+      end
     end
 
-    def metadata_file(name)
+    def metadata_file(name, prereleases)
       dir = File.join(@local_repo, name)
       FileUtils.makedirs(dir)
-      File.join(dir, "maven-metadata-#{@repository_id}.xml")
+      File.join(dir, "maven-metadata-#{@repository_id}#{prereleases ? "-prereleases" : ""}.xml")
     end
 
-    def metadata_sha1_file(name, is_sha1 = false)
-      file = metadata_file(name) + ".sha1"
+    def metadata_sha1_file(name, prereleases = false, is_sha1 = false)
+      file = metadata_file(name, prereleases) + ".sha1"
       unless File.exists?(file)
         return nil if metadata(name).nil?
       end
       file
     end
 
-    def to_metadata(name, versions)
-      metadata = metadata_file(name)
+    def to_metadata(name, versions, prereleases = false)
+      metadata = metadata_file(name, prereleases)
       if !File.exists?(metadata) || (File.new(metadata).mtime < @last_update)
         File.open(metadata, "w") do |f|
           f.puts <<-METADATA
@@ -258,7 +270,7 @@ POM
 METADATA
           versions.each do |v|
             f.puts <<-METADATA
-      <version>#{v}#{v =~ /[a-zA-Z]/ ? "-SNAPSHOT": ""}</version>
+      <version>#{v}</version>
 METADATA
           end
           f.puts <<-METADATA

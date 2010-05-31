@@ -25,49 +25,53 @@ public class ControllerServlet extends HttpServlet {
             final HttpServletResponse resp) throws ServletException,
             IOException {
         final String[] parts = req.getPathInfo().substring(1).split("/");
+        // System.out.println(Arrays.toString(parts));
         try {
             switch (parts.length) {
-            case 2: // #{name}/maven-metadata.xml
-                if (parts[1].equals("maven-metadata.xml")) {
+            case 4: // {releases|prereleases}/rubygems/#{name}/maven-metadata.xml
+                if (parts[3].equals("maven-metadata.xml")) {
                     resp.setContentType("application/xml");
                     resp.setCharacterEncoding("UTF-8");
-                    this.controller.writeMetaData(parts[0], resp.getWriter());
+                    this.controller.writeMetaData(parts[2],
+                                                  resp.getWriter(),
+                                                  "prereleases".equals(parts[0]));
                 }
-                else if (parts[1].equals("maven-metadata.xml.sha1")) {
+                else if (parts[3].equals("maven-metadata.xml.sha1")) {
                     resp.setContentType("text/plain");
                     resp.setCharacterEncoding("ASCII");
-                    this.controller.writeMetaDataSHA1(parts[0],
-                                                      resp.getWriter());
+                    this.controller.writeMetaDataSHA1(parts[2],
+                                                      resp.getWriter(),
+                                                      "prereleases".equals(parts[0]));
                 }
                 else {
                     notFound(resp);
                 }
                 break;
-            case 3:// #{name}/#{version}/#{name}-#{version}.{gem|pom}
-                if (parts[2].endsWith(".gem")) {
-                    resp.sendRedirect(this.controller.getGemLocation(parts[0],
-                                                                     parts[1],
-                                                                     parts[2]));
+            case 5:// {releases|prereleases}/rubygems/#{name}/#{version}/#{name}-#{version}.{gem|pom}
+                if (parts[4].endsWith(".gem")) {
+                    resp.sendRedirect(this.controller.getGemLocation(parts[2],
+                                                                     parts[3],
+                                                                     parts[4]));
                 }
-                else if (parts[2].endsWith(".gem.sha1")) {
+                else if (parts[4].endsWith(".gem.sha1")) {
                     resp.setContentType("text/plain");
                     resp.setCharacterEncoding("ASCII");
-                    this.controller.writeGemSHA1(parts[0],
-                                                 parts[1],
+                    this.controller.writeGemSHA1(parts[2],
+                                                 parts[3],
                                                  resp.getWriter());
                 }
-                else if (parts[2].endsWith(".pom")) {
+                else if (parts[4].endsWith(".pom")) {
                     resp.setContentType("application/xml");
                     resp.setCharacterEncoding("UTF-8");
-                    this.controller.writePom(parts[0],
-                                             parts[1],
+                    this.controller.writePom(parts[2],
+                                             parts[3],
                                              resp.getWriter());
                 }
-                else if (parts[2].endsWith(".pom.sha1")) {
+                else if (parts[4].endsWith(".pom.sha1")) {
                     resp.setContentType("text/plain");
                     resp.setCharacterEncoding("ASCII");
-                    this.controller.writePomSHA1(parts[0],
-                                                 parts[1],
+                    this.controller.writePomSHA1(parts[2],
+                                                 parts[3],
                                                  resp.getWriter());
                 }
                 else {

@@ -88,20 +88,25 @@ class ControllerService {
         writeout(writer, file);
     }
 
-    void writeMetaData(final String name, final Writer writer)
-            throws IOException {
+    void writeMetaData(final String name, final Writer writer,
+            final boolean prereleases) throws IOException {
+        System.out.println(prereleases);
         final String file = this.scriptingContainer.callMethod(this.rubyObject,
                                                                "metadata",
-                                                               new String[] { name },
+                                                               new Object[] {
+                                                                       name,
+                                                                       prereleases },
                                                                String.class);
         writeout(writer, file);
     }
 
-    void writeMetaDataSHA1(final String name, final Writer writer)
-            throws IOException {
+    void writeMetaDataSHA1(final String name, final Writer writer,
+            final boolean prereleases) throws IOException {
         final String file = this.scriptingContainer.callMethod(this.rubyObject,
                                                                "metadata_sha1_file",
-                                                               new String[] { name },
+                                                               new Object[] {
+                                                                       name,
+                                                                       prereleases },
                                                                String.class);
         writeout(writer, file);
     }
