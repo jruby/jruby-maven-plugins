@@ -79,7 +79,7 @@ module Maven
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>#{spec.name}</artifactId>
-  <version>#{spec.version}</version>
+  <version>#{spec.version}#{spec.version.prerelease? ? "-SNAPSHOT": ""}</version>
   <packaging>gem</packaging>
   <name><![CDATA[#{spec.summary}]]></name>
   <description><![CDATA[#{spec.description}]]></description>
@@ -105,6 +105,7 @@ POM
             gem_final_version = gem_version
             gem_final_version = gem_final_version + ".0" if gem_final_version =~ /^[0-9]+\.[0-9]+$/
             gem_final_version = gem_final_version + ".0.0" if gem_final_version =~ /^[0-9]+$/
+            gem_final_version = gem_final_version + "-SNAPSHOT" if gem_final_version =~ /[a-z][A-Z]/
             case req[0]
             when "="
               version = gem_final_version
@@ -117,7 +118,7 @@ POM
             when "<"
               right_version = "#{gem_final_version})"
             when "~>"
-              pre_version = gem_version.sub(/[.][0-9]+$/, '')
+              pre_version = gem_version.sub(/-SNAPSHOT/, '').sub(/[.][0-9]+$/, '')
               # hope the upper bound is "big" enough but needed, i.e.
               # version 4.0.0 is bigger than 4.0.0.pre and [3.0.0, 4.0.0) will allow
               # 4.0.0.pre which is NOT intended
@@ -257,7 +258,7 @@ POM
 METADATA
           versions.each do |v|
             f.puts <<-METADATA
-      <version>#{v}</version>
+      <version>#{v}#{v =~ /[a-z][A-Z]/ ? "-SNAPSHOT": ""}</version>
 METADATA
           end
           f.puts <<-METADATA
