@@ -4,4 +4,3 @@ Gem::Specification.new do |s|
   s.files = ["lib/gem_first.rb"]
   s.summary = "gem first test gem"
 end
-

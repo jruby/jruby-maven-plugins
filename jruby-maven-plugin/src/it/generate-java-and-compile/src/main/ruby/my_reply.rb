@@ -1,4 +1,6 @@
+require 'java'
 java_import 'com.example.Reply'
+java_package 'com.otherexample'
 
 class MyReply
   java_implements Reply

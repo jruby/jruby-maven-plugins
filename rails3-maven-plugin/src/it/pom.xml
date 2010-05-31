@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
   <artifactId>rails-maven-plugin</artifactId>
@@ -11,11 +11,11 @@
       <id>rubygems</id>
       <layout>gem</layout>
       <releases>
-	<updatePolicy>never</updatePolicy>
-	<checksumPolicy>ignore</checksumPolicy>
+        <updatePolicy>never</updatePolicy>
+        <checksumPolicy>ignore</checksumPolicy>
       </releases>
       <snapshots>
-	<enabled>false</enabled>
+        <enabled>false</enabled>
       </snapshots>
       <url>http://rubygems.org/gems</url>
     </repository>
@@ -23,9 +23,9 @@
   <build>
     <plugins>
       <plugin>
-	<groupId>de.saumya.mojo</groupId>
-	<artifactId>rails3-maven-plugin</artifactId>
-	<version>0.12.0-SNAPSHOT</version>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>rails3-maven-plugin</artifactId>
+        <version>0.12.1-SNAPSHOT</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>

@@ -36,7 +36,7 @@ import org.codehaus.classworlds.ClassRealm;
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String              DEFAULT_JRUBY_VERSION = "1.4.1";
+    private static String              DEFAULT_JRUBY_VERSION = "1.5.0";
 
     private static final Set<Artifact> NO_ARTIFACTS          = Collections.emptySet();
 
@@ -66,7 +66,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * 
      * @parameter default-value="${jruby.home}"
      */
-    protected File                     jrubyHome;
+    protected File                     home;
 
     /**
      * directory of gem home to use when forking JRuby.
@@ -89,7 +89,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * 
      * @parameter expression="${jruby.launch.memory}" default-value="384m"
      */
-    protected String                   jrubyLaunchMemory;
+    protected String                   launchMemory;
 
     /**
      * reference to maven project for internal use.
@@ -152,7 +152,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * 
      * @parameter default-value="${jruby.version}"
      */
-    protected String                   jrubyVersion;
+    protected String                   version;
 
     /**
      * directory to leave some flags for already installed gems.
@@ -168,6 +168,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * 
      * @parameter
      */
+    // TODO move into goals where needed
     protected File                     outputFile;
 
     /**
@@ -236,26 +237,27 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private Artifact resolveJRUBYCompleteArtifact()
             throws DependencyResolutionRequiredException,
             MojoExecutionException {
-
-        for (final Object o : this.project.getDependencies()) {
-            final Dependency artifact = (Dependency) o;
-            if (artifact.getArtifactId().equals("jruby-complete")
-                    && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
-                    && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
-                if (this.jrubyVersion != null
-                        && !this.jrubyVersion.equals(artifact.getVersion())) {
-                    getLog().warn("the configured jruby-version gets ignored in preference to the jruby dependency");
+        if (this.version != null) {
+            // preference to command line or property version
+            return resolveJRUBYCompleteArtifact(this.version);
+        }
+        else {
+            // then take jruby from the dependencies
+            for (final Object o : this.project.getDependencies()) {
+                final Dependency artifact = (Dependency) o;
+                if (artifact.getArtifactId().equals("jruby-complete")
+                        && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
+                        && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
+                    return resolveJRUBYCompleteArtifact(this.artifactFactory.createArtifact(artifact.getGroupId(),
+                                                                                            artifact.getArtifactId(),
+                                                                                            artifact.getVersion(),
+                                                                                            artifact.getScope(),
+                                                                                            artifact.getType()));
                 }
-                return resolveJRUBYCompleteArtifact(this.artifactFactory.createArtifact(artifact.getGroupId(),
-                                                                                        artifact.getArtifactId(),
-                                                                                        artifact.getVersion(),
-                                                                                        artifact.getScope(),
-                                                                                        artifact.getType()));
             }
         }
-        return resolveJRUBYCompleteArtifact(this.jrubyVersion == null
-                ? DEFAULT_JRUBY_VERSION
-                : this.jrubyVersion);
+        // take the default version of jruby
+        return resolveJRUBYCompleteArtifact(DEFAULT_JRUBY_VERSION);
     }
 
     protected File launchDirectory() {
@@ -332,8 +334,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private void execute(final String[] args, final Set<Artifact> artifacts,
             final File outputFile, final boolean resolveArtifacts)
             throws MojoExecutionException {
-
-        final Set<Artifact> artis = new HashSet<Artifact>();
+        final Set<Artifact> artis = new HashSet<Artifact>(artifacts);
         if (resolveArtifacts) {
             if (this.project.getArtifact().getFile() != null) {
                 resolveTransitively(artis, this.project.getArtifact());
@@ -357,10 +358,10 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             final Launcher launcher;
             if (this.fork) {
                 launcher = new AntLauncher(getLog(),
-                        this.jrubyHome,
+                        this.home,
                         this.gemHome,
                         this.gemPath,
-                        this.jrubyLaunchMemory,
+                        this.launchMemory,
                         this.verbose);
             }
             else {

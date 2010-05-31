@@ -4,10 +4,10 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>0.12.1-SNAPSHOT</version>
   </parent>
   <artifactId>rails-maven-archetype</artifactId>
-  <version>0.12.0-SNAPSHOT</version>
+  <version>0.12.1-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
   <name>Rails Archetype</name>
   <description>archetype to mavenize an existing rails 2.3.x or rails3 application</description>
@@ -27,4 +27,79 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <defaultGoal>install</defaultGoal>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>shitty-maven-plugin</artifactId>
+            <version>1.0-alpha-3</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>clean</goal>
+                  <goal>install</goal>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <buildLogFile>pre-build.log</buildLogFile>
+                  <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
+                  <version>0.12.1-SNAPSHOT</version>
+                  <goalsFile>pre-goal.txt</goalsFile>
+                  <validateScriptFilename>pre-validate.groovy</validateScriptFilename>
+                  <projects>
+                    <fileset>
+                      <directory>src/it</directory>
+                      <includes>
+                        <include>*/pre-pom.xml</include>
+                      </includes>
+                    </fileset>
+                  </projects>
+                </configuration>
+              </execution>
+              <execution>
+                <id>asd</id>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <buildLogFile>generate-build.log</buildLogFile>
+                  <goalsFile>generate-goal.txt</goalsFile>
+                  <validateScriptFilename>generate-validate.groovy</validateScriptFilename>
+                  <projects>
+                    <fileset>
+                      <directory>src/it</directory>
+                      <includes>
+                        <include>*/pom.xml</include>
+                      </includes>
+                    </fileset>
+                  </projects>
+                </configuration>
+              </execution>
+              <execution>
+                <id>asddas</id>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+		  <parallel>false</parallel>
+                  <projects>
+                    <fileset>
+                      <directory>src/it</directory>
+                      <includes>
+                        <include>*/rails-pom.xml</include>
+                      </includes>
+                    </fileset>
+                  </projects>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

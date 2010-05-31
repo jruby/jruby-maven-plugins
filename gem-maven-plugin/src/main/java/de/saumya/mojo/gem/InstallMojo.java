@@ -7,7 +7,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
 /**
  * goal to locally install a given gem
- * 
+ *
  * @goal install
  */
 public class InstallMojo extends AbstractJRubyMojo {
@@ -19,7 +19,7 @@ public class InstallMojo extends AbstractJRubyMojo {
 
     /**
      * arguments for the gem command of JRuby.
-     * 
+     *
      * @parameter default-value="${gem.install}"
      */
     protected String       args     = null;

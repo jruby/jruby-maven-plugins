@@ -1,7 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>spec-somewhere</artifactId>
@@ -18,30 +16,29 @@
   <build>
     <plugins>
       <plugin>
-	<groupId>de.saumya.mojo</groupId>
-	<artifactId>gem-maven-plugin</artifactId>
-	<version>0.12.0-SNAPSHOT</version>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>0.12.1-SNAPSHOT</version>
         <extensions>true</extensions>
       </plugin>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>rspec-maven-plugin</artifactId>
-	<version>0.12.0-SNAPSHOT</version>
-	<configuration>
-	  <launchDirectory>somewhere</launchDirectory>
-	</configuration><executions>
-	  <execution>
-	    <goals>
-	      <goal>test</goal>
-	    </goals>
-	    <configuration>
-	      <specSourceDirectory>${basedir}/spec</specSourceDirectory>
-	    </configuration>
-	  </execution>
-	</executions>
+        <version>0.12.1-SNAPSHOT</version>
+        <configuration>
+          <launchDirectory>somewhere</launchDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <specSourceDirectory>${basedir}/spec</specSourceDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
- 
 </project>
-

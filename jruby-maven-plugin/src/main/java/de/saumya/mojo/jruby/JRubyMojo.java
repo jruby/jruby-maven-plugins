@@ -8,7 +8,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * executes the jruby command.
- * 
+ *
  * @goal jruby
  * @requiresDependencyResolution test
  */
@@ -16,21 +16,21 @@ public class JRubyMojo extends AbstractJRubyMojo {
 
     /**
      * ruby code which gets executed.
-     * 
+     *
      * @parameter default-value="${jruby.script}"
      */
     protected String script = null;
 
     /**
      * ruby file which gets executed.
-     * 
+     *
      * @parameter default-value="${jruby.file}"
      */
     protected File   file   = null;
 
     /**
      * arguments for the jruby command.
-     * 
+     *
      * @parameter default-value="${jruby.args}"
      */
     protected String args   = null;

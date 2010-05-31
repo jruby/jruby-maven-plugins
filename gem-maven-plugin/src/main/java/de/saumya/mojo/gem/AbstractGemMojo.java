@@ -44,9 +44,9 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
-     * @parameter expression="${jruby.include.openssl}" default-value="true"
+     * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
-    private boolean                    includeOpenSSLGem;
+    protected boolean                  includeOpenSSL;
 
     /**
      * @parameter expression="${settings.offline}"
@@ -234,7 +234,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     // TODO needs better name !!!! needs to be protected ?
     public void execute(Collection<Artifact> artifacts)
             throws MojoExecutionException {
-        if (this.includeOpenSSLGem) {
+        if (this.includeOpenSSL) {
             final Artifact openssl = this.artifactFactory.createArtifact("rubygems",
                                                                          "jruby-openssl",
                                                                          "0.7",
@@ -324,7 +324,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                                                  "")));
                 // TODO force flag to install gems via command line
                 // argument
-                if (!(this.fork && gemDir.exists())) {
+                if (!gemDir.exists()) {
                     gems.append(" ").append(collectedArtifact.getFile()
                             .getAbsolutePath());
                 }

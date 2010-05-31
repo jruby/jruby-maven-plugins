@@ -1,81 +1,161 @@
 h1. maven plugins for jruby
 
-p. this is fork of http://github.com/jruby/jruby and it basically did some better naming (in my opinion) and added spec goal. allow to reuse AbstactJrubyMojo in other projects and show how to do it in gem-maven-plugin
-
 h2. my problem with maven vs. gem
 
-p. both project try to solve the same problems. I just wrote a gem for jruby only, now I need to include some java code as a jar file and I depend on 3rd party jars. what shall I do ? pack them all up with the gem. but then I loose all dependency info from my jars and I cannot share them and I might run into version conflicts later since for the gem a packed jar file is just file like any ruby file.
+p. both project try to solve the same problems. I just wrote a gem for jruby only, now I need to include some java code as a jar file and I depend on 3rd party jars. what shall I do ? pack them all up with the gem. but then I loose all dependency info from my jars and I cannot share them and I might run into version conflicts later since the gem packed jar file is just a file like any ruby file.
 
-p. pending: this is an attempt to make gem artifact, make maven use gemcutter (or any other gem repository) extract a minimal pom from the gemspec or so.
+p. maybe these plugins helps projects where ruby and java lives side by side. maybe you have a java project and need some rubygems for your ruby scripting. or the other way around you have a ruby project and want to use java libraries with a lot of dependencies. have look at these plugins they might help you to manage the java world and ruby world in the same manner.
 
 h2. how to use it
 
-p. add following segment to your pom.xml
+p. there are plenty of integrations test in src/it of each plugin. so the best is to look through those examples.
 
-bc.   <pluginRepositories>
-    <pluginRepository>
-      <id>saumya</id>
-      <name>Saumyas Plugins</name>
-      <url>http://mojo.saumya.de</url>
-    </pluginRepository>
-  </pluginRepositories>
+h3. nice plugin prefixes
+
+p. add following to your settings.xml (see also "http://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html":http://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html)
+
+bc. <settings>
+  <pluginGroups>
+    <pluginGroup>de.saumya.mojo</pluginGroup>
+  </pluginGroups>
+  . . . 
+h3. pom.xml config
+
+p. important is to declare the rubygems repository whenever you have gem artifacts as dependencies:
+
+bc.  <repositories>
+    <repository>
+      <id>rubygems</id>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+        <checksumPolicy>ignore</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <url>http://rubygems.org/gems</url>
+      <layout>gem</layout>
+    </repository>
+  </repositories>
+
+p. here there are a few things to mention: update-policy is set to 'never' to tell core maven to not do it, the gem plugin will take of this on daily manner. the checksum-policy is set to 'ignore' since there are no checksum files - anyways you will see some error messages with the checksum which can be safely ignored. the gem layout works only with maven3 (maven2 produces some error of not finding the layout with hint 'gem')
+
+h3. jruby-maven-plugin, rails2-maven-plugin, rails3-maven-plugin, rspec-maven-plugin
+
+p. for example the jruby plugin declaration looks like this:
+
+bc.   <build>
+    <plugins>
+      . . . .
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>rails3-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+      </plugin>
+      . . . .
+
+p. more help you get with
+
+* @mvn ruby:help@
+
+* @mvn rails2:help@
+
+* @mvn rails3:help@
+
+* @mvn rspec:help@
+
+p. the prefix is **ruby** since there is already a jruby plugin on codehaus with the prefix **jruby**.
+
+h3. gem-maven-plugin
+
+bc.   <build>
+    <plugins>
+      . . . .
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+        <extensions>true</extensions>
+      </plugin>
+      . . . .
+
+p. please not the **extensions** set to true - only with this setting the gem plugin can manage the gem artifacts properly
+
+p. more help you get with
+
+@mvn gem:help@
+
+h2. common parameters for all goals
+
+p. please use ruby:help, gem:help, rspec:help, rails2:help and rails3:help to get more info about the parameters for a specific goal.
+
+p. the first name is the system property which can be set either via the commandline (-Dmy.property.name=value) or via the properties section in the pom.xml. and the second name is the name for configuration part of the plugin.
+
+* jruby.fork (fork) - default: true
+
+* jruby.verbose (verbose) - default: false
+
+* jruby.home (home) - default: none
+
+* jruby.version (version) - default: taken from dependency or 1.5.0 
+
+* jruby.launchMemory (launchMemory) - default: 384m
+
+* jruby.gem.home (gemHome) - default: target/rubygems
+
+* jruby.gem.path (gemPath) - default: target/rubygems
+
+* (launchDirectory) - default: current-directory when there is no pom, or basedir
+
+h2. common parameters for all goals from gem, rpec and rails plugins
+
+* "offline command line switch -o" (offline) - default: false
+
+* gem.includeOpenSSL (includeOpenSSL) - default: true
+
+* gem.forceVersion (forceVersion) - default: false
+
+* gem.useTransitiveDependencies (useTransitiveDependencies) - default: false
 
 p. any goal has the properties 'jruby.version' and 'jruby.fork'. you can set via the command line
 
-@mvn ruby:jruby -Djruby.args=--version -Djruby.version=1.3.1 -Djruby.fork=false@
+h2. common parameters for all goals from rails2/rails3 plugins
 
-p. or you can set them in your settings.xml
+* args (args) - default: none
 
-bc.   <profiles>
-    <profile>
-      <id>jruby</id>
-      <activation>
-         <file>
-            <exists>${user.home}/.m2</exists>
-         </file>
-      </activation>
-      <properties>
-        <jruby.fork>false</jruby.fork>
-      </properties>
-    </profile>
-  </profiles>
+* rails.dir (dir) - default: src/main/rails or basedir
 
-p. or in your plugin configuration
+* rails.env (env) - default: none (but rails defaults to development)
 
-bc.      <plugin>
-        <groupId>de.saumya.mojo</groupId>
-        <artifactId>jruby-maven-plugin</artifactId>
-	<version>0.4.0</version>
-        <configuration>
-          <fork>false</fork>
-        </configuration>
-      </plugin>
+h2. rubygems
 
-p. when you fork (default) then you can specify the GEM_HOME and GEM_PATH for jruby. the properties for the command line are 'ruby.gem.home' and 'ruby.gem.path'. and they can be set via the settings.xml as well. **important**: this does not work if you use the embedded jruby !
+p. the default behaviour is to fork jruby which allows to use a custom gem home/path wiith a default location of *target/rubygems*. there maven will install all gems which were declared as dependency (including transitive gem depedencies). **important**: this does not work if you use the embedded jruby (*fork=false*)!
 
-bc.   <profiles>
-    <profile>
-      <id>jruby</id>
-      <activation>
-         <file>
-            <exists>${user.home}/.m2</exists>
-         </file>
-      </activation>
-      <properties>
-        <jruby.gem.home>${user.home}/.m2/rubygems</jruby.gem.home>
-        <jruby.gem.path>${user.home}/.m2/rubygems</jruby.gem.path>
-      </properties>
-    </profile>
-  </profiles>
+p. after a @mvn clean@ you can be sure that there is just one version for given gem present in target/rubygems. maven also resolves the version needed which might be different from what you get if you use rubygems or bundler. you can always use an explicit dependency to select a specific version of a particular gem.
 
-p. and the same config inside the pom.xml
+p. **note**: with rubygems any version with an alphabet is a "prerelease". for maven this is not the case and it treats all versions in similarthe same manner. to rectify this is a pending issue.
 
-bc.       <plugin>
-        <groupId>de.saumya.mojo</groupId>
-        <artifactId>jruby-maven-plugin</artifactId>
-	<version>0.4.0</version>
-        <configuration>
-          <gemHome>${user.home}/.m2/rubygems</gemHome>
-          <gemPath>${user.home}/.m2/rubygems</gemPath>
-        </configuration>
-      </plugin>
+h2. rails-maven-archetype
+
+p. suppose you have already a rails-2.3.5 application inside a *myapp* directory. have a terminal open in the parent directory of this application and execute following command:
+
+@mvn archetype:generate -DarchetypeCatalog=http://github.com/mkristian/jruby-maven-plugins/raw/master/archetype-catalog.xml@
+
+* there you have only one choice - so choose it :-)
+
+* for the groupId just use "rails" or whatever you desire
+
+* the artifactId is important and must match your application directory - i.e. *myapp*
+
+* the version and package just take the default
+
+p. the archetype is stupid and uses rails version *2.3.5* as default and *sqlite3* as database and it does not matter what the rails application actually uses. in case you need something else do as follow:
+
+@mvn archetype:generate -DarchetypeCatalog=http://github.com/mkristian/jruby-maven-plugins/raw/master/archetype-catalog.xml -Drails.version=3.0.0.beta3 -Ddatabase=mysql@
+
+p. for some little more info what you can do with this start the server (as usual or) with
+
+@mvn rails2:server@
+
+p. and open the browser at "http://localhost:3000/maven.html":http://localhost:3000/maven.html
+

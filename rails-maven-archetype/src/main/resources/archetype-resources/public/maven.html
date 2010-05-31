@@ -235,7 +235,7 @@
               <li><a href="http://stdlib.rubyonrails.org/">Ruby standard library</a></li>
               <li><a href="http://corelib.rubyonrails.org/">Ruby core</a></li>
               <li><a href="http://guides.rubyonrails.org/">Rails Guides</a></li>
-           
+
               <li><a href="http://maven.apache.org/">Maven</a></li>
             </ul>
           </li>
@@ -261,7 +261,7 @@
             <li>
               <h2>Use <code>mvn rails${railsVersion.substring(0,1)}:generate</code> to create your models and controllers</h2>
               <p>To see all available options, run it without parameters.</p>
-	      <p>example: <code>mvn rails${railsVersion.substring(0,1)}:generate -Dargs="scaffold user name:string"</code></p>
+       <p>example: <code>mvn rails${railsVersion.substring(0,1)}:generate -Dargs="scaffold user name:string"</code></p>
             </li>
 
             <li>
@@ -272,26 +272,26 @@
             <li>
               <h2>Create your database</h2>
               <p>Run <code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate"</code> to create your database. If you're not using SQLite (the default), edit <code>config/database.yml</code> with your username and password.</p>
-	      <p><code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate RAILS_ENV=production"</code>
+       <p><code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate" -Drails.env=production</code>
             </li>
 
-	    <li>
+     <li>
               <h2>Start embedded servlet-engine</h2>
               <p>Run <code>mvn jetty:run-war</code> after creating a production database.</p>
-	      <p><a href="http://localhost:8080/users">users resource</a></p>
-	    </li>
+       <p><a href="http://localhost:8080/users">users resource</a></p>
+     </li>
 
-	    <li>
+     <li>
               <h2>Package your war file</h2>
               <p><code>mvn package</code> will produce a war file in <code>target</code>.</p>
-	    </li>
+     </li>
 
-	    <li>
+     <li>
               <h2>More help for maven goals</h2>
               <p><code>mvn rails${railsVersion.substring(0,1)}:help</code> for rails specific goals.</p>
               <p><code>mvn gem:help</code> for rubygems specific goals.</p>
               <p><code>mvn ruby:help</code> for jruby specific goals.</p>
-	    </li>
+     </li>
           </ol>
         </div>
       </div>

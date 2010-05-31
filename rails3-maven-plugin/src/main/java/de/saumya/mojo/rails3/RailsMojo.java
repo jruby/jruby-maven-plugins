@@ -19,52 +19,52 @@ import org.codehaus.plexus.velocity.VelocityComponent;
  * goal to run rails command with the given arguments. either to generate a
  * fresh rails application or to run the rails script from within a rails
  * application.
- * 
+ *
  * @goal rails
  */
 public class RailsMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the rails command
-     * 
+     *
      * @parameter default-value="${rails.args}"
      */
     protected String            railsArgs                      = null;
 
     /**
      * the path to the application to be generated
-     * 
+     *
      * @parameter default-value="${app_path}"
      */
     protected String            appPath                        = null;
 
     /**
      * the rails version to use
-     * 
+     *
      * @parameter default-value="3.0.0.beta3" expression="${railsVersion}"
      */
     protected String            railsVersion                   = null;
 
     /**
      * the groupId of the new pom
-     * 
+     *
      * @parameter default-value="rails" expression="${groupId}"
      */
     protected String            groupId                        = null;
 
     /**
      * the version of the new pom
-     * 
+     *
      * @parameter default-value="1.0-SNAPSHOT" expression="${version}"
      */
-    protected String            version                        = null;
+    protected String            artifactVersion                        = null;
 
     /**
      * @component
      */
     private VelocityComponent   velocityComponent;
     private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.beta3";
-    private static final String NEEDED_JRUBY_VERSION_FOR_RAILS = "1.5.0.RC3";
+    private static final String NEEDED_JRUBY_VERSION_FOR_RAILS = "1.5.0";
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -72,11 +72,11 @@ public class RailsMojo extends AbstractRailsMojo {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
-        if (this.jrubyVersion == null
-                || this.jrubyVersion.compareTo(NEEDED_JRUBY_VERSION_FOR_RAILS) < 0) {
+        if (this.artifactVersion == null
+                || this.artifactVersion.compareTo(NEEDED_JRUBY_VERSION_FOR_RAILS) < 0) {
             getLog().warn("use hardcoded jruby version for rails3: "
                     + NEEDED_JRUBY_VERSION_FOR_RAILS);
-            this.jrubyVersion = NEEDED_JRUBY_VERSION_FOR_RAILS;
+            this.artifactVersion = NEEDED_JRUBY_VERSION_FOR_RAILS;
         }
         Artifact artifact;
         artifact = this.artifactFactory.createArtifact("rubygems",
@@ -101,29 +101,29 @@ public class RailsMojo extends AbstractRailsMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
-        String commandString;
+        StringBuilder command;
         if (railsScriptFile().exists() && this.appPath == null) {
-            commandString = railsScript("");
+            command = railsScript("");
         }
         else {
-            commandString = binScript("rails");
+            command = binScript("rails");
             if (this.appPath != null) {
-                commandString += " " + this.appPath;
+                command.append(" ").append(this.appPath);
             }
         }
         if (this.railsArgs != null) {
-            commandString += " " + this.railsArgs;
+            command.append(" ").append(this.railsArgs);
         }
         if (this.args != null) {
-            commandString += " " + this.args;
+            command.append(" ").append(this.args);
         }
-        execute(commandString, false);
+        execute(command.toString(), false);
         if (this.appPath != null) {
             final File app = new File(launchDirectory(), this.appPath);
             final File script = new File(app, "script/rails");
             final String database;
             final Pattern pattern = Pattern.compile(".*-d\\s+([a-z0-9]+).*");
-            final Matcher matcher = pattern.matcher(commandString);
+            final Matcher matcher = pattern.matcher(command);
             if (matcher.matches()) {
                 database = matcher.group(1);
             }
@@ -152,7 +152,7 @@ public class RailsMojo extends AbstractRailsMojo {
 
             context.put("groupId", this.groupId);
             context.put("artifactId", app.getName());
-            context.put("version", this.version);
+            context.put("version", this.artifactVersion);
             context.put("database", database);
             context.put("railsVersion", this.railsVersion);
 

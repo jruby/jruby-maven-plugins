@@ -16,7 +16,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  * goal to build a gem from the given project. must be of type "gem". it takes
  * the metainfo from the pom alongs with extra configuration of the plugin to
  * build the gem.
- * 
+ *
  * @goal build
  * @requiresProject true
  * @deprecated use package goal
@@ -24,7 +24,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 @Deprecated
 public class BuildMojo extends AbstractJRubyMojo {
     /**
-     * 
+     *
      * @parameter
      */
     protected final List<Fileset> gemfilesets             = null;
@@ -32,7 +32,7 @@ public class BuildMojo extends AbstractJRubyMojo {
     /**
      * map of dependency where the key is the gemname and value is the version
      * pattern
-     * 
+     *
      * @parameter
      */
     protected Map<String, String> dependencies            = null;
@@ -40,30 +40,30 @@ public class BuildMojo extends AbstractJRubyMojo {
     /**
      * map of developer dependency where the key is the gemname and value is the
      * version pattern
-     * 
+     *
      * @parameter
      */
     protected Map<String, String> developmentDependencies = null;
 
     /**
      * the file location for the generated gemspec
-     * 
-     * @parameter 
+     *
+     * @parameter
      *            default-value="${project.build.directory}/${project.artifactId}.gemspec"
      */
     private final File            gemSpec                 = null;
 
     /**
      * temporary directory to collect all the files for the gem
-     * 
-     * @parameter 
+     *
+     * @parameter
      *            default-value="${project.build.directory}/${project.artifactId}"
      */
     private final File            gemDirectory            = null;
 
     /**
      * file of the generated jar file
-     * 
+     *
      * @parameter default-value=
      *            "${project.build.directory}/${project.build.finalName}.jar"
      */
@@ -71,7 +71,7 @@ public class BuildMojo extends AbstractJRubyMojo {
 
     /**
      * file of the final gem.
-     * 
+     *
      * @parameter default-value=
      *            "${project.build.directory}/${project.build.finalName}-java.gem"
      */

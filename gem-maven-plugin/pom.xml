@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.12.0-SNAPSHOT</version>
+    <version>0.12.1-SNAPSHOT</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-maven-plugin</artifactId>
@@ -17,18 +17,18 @@
       <artifactId>jruby-maven-plugin</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
-   <dependency>
+    <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>file-management</artifactId>
       <version>1.2.1</version>
-    </dependency> 
+    </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-	<version>1.4</version>
+        <version>1.4</version>
         <executions>
           <execution>
             <id>add-source</id>
@@ -45,44 +45,43 @@
         </executions>
       </plugin>
       <plugin>
-	<artifactId>maven-source-plugin</artifactId>
-	<version>2.1.1</version>
-	<executions>
-	  <execution>
-	    <id>attach-sources</id>
-	    <goals>
-	      <goal>jar</goal>
-	    </goals>
-	  </execution>
-	</executions>
-      </plugin> 
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-         <artifactId>maven-dependency-plugin</artifactId>
-         <executions>     
-	   <execution>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
             <id>src-dependencies</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
             <configuration>
-	      <includeGroupIds>de.saumya.mojo</includeGroupIds>
-	      <includes>de/saumya/mojo/jruby/AbstractJRubyMojo.java</includes>
+              <includeGroupIds>de.saumya.mojo</includeGroupIds>
+              <includes>de/saumya/mojo/jruby/AbstractJRubyMojo.java</includes>
               <classifier>sources</classifier>
               <outputDirectory>${project.build.directory}/sources</outputDirectory>
             </configuration>
           </execution>
-
-         </executions>
+        </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId> 
-	<version>2.3</version>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3</version>
         <configuration>
           <excludes>
-	    <exclude>de/saumya/mojo/jruby/**</exclude>
-	  </excludes>
+            <exclude>de/saumya/mojo/jruby/**</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

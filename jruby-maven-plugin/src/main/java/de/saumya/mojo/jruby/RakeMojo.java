@@ -8,21 +8,21 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * maven wrapper around the rake command.
- * 
+ *
  * @goal rake
  * @requiresDependencyResolution test
  */
 public class RakeMojo extends AbstractJRubyMojo {
     /**
      * rakefile to be used for the rake command.
-     * 
+     *
      * @parameter default-value="${jruby.rake.file}"
      */
     private final File   rakefile        = null;
 
     /**
      * output directory for internal use.
-     * 
+     *
      * @parameter expression="${project.build.directory}"
      * @required
      * @readOnly
@@ -31,14 +31,14 @@ public class RakeMojo extends AbstractJRubyMojo {
 
     /**
      * ruby script which rakes executes as rakefile.
-     * 
+     *
      * @parameter default-value="${jruby.rake.script}"
      */
     private final String script          = null;
 
     /**
      * arguments for the rake command.
-     * 
+     *
      * @parameter default-value="${jruby.rake.args}"
      */
     private final String args            = null;

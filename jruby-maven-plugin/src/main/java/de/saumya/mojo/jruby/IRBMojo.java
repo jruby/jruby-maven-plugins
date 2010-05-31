@@ -4,7 +4,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * maven wrpper around IRB.
- * 
+ *
  * @goal irb
  * @requiresDependencyResolution test
  */
@@ -19,7 +19,7 @@ public class IRBMojo extends AbstractJRubyMojo {
 
     /**
      * arguments for the irb command.
-     * 
+     *
      * @parameter default-value="${jruby.irb.args}"
      */
     protected String  args = null;
