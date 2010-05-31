@@ -105,7 +105,7 @@ POM
             gem_final_version = gem_version
             gem_final_version = gem_final_version + ".0" if gem_final_version =~ /^[0-9]+\.[0-9]+$/
             gem_final_version = gem_final_version + ".0.0" if gem_final_version =~ /^[0-9]+$/
-            gem_final_version = gem_final_version + "-SNAPSHOT" if gem_final_version =~ /[a-z][A-Z]/
+            gem_final_version = gem_final_version + "-SNAPSHOT" if gem_final_version =~ /[a-zA-Z]/
             case req[0]
             when "="
               version = gem_final_version
@@ -258,7 +258,7 @@ POM
 METADATA
           versions.each do |v|
             f.puts <<-METADATA
-      <version>#{v}#{v =~ /[a-z][A-Z]/ ? "-SNAPSHOT": ""}</version>
+      <version>#{v}#{v =~ /[a-zA-Z]/ ? "-SNAPSHOT": ""}</version>
 METADATA
           end
           f.puts <<-METADATA
