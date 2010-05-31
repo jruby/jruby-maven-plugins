@@ -9,7 +9,7 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby-maven-plugin</artifactId>
-        <version>0.12.0</version>
+        <version>0.12.1-SNAPSHOT</version>
         <configuration>
           <launchDirectory>somewhere</launchDirectory>
         </configuration>

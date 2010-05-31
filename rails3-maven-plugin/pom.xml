@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.12.0</version>
+    <version>0.12.1-SNAPSHOT</version>
   </parent>
   <artifactId>rails3-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
@@ -14,12 +14,12 @@
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
       <artifactId>gem-maven-plugin</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
       <artifactId>rails-maven-archetype</artifactId>
-      <version>0.12.0</version>
+      <version>0.12.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
@@ -115,7 +115,7 @@
                 </goals>
                 <configuration>
                   <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
-                  <version>0.12.0</version>
+                  <version>0.12.1-SNAPSHOT</version>
                   <parallel>false</parallel>
                 </configuration>
               </execution>

@@ -4,7 +4,7 @@
   <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-maven-plugins</artifactId>
   <packaging>pom</packaging>
-  <version>0.12.0</version>
+  <version>0.12.1-SNAPSHOT</version>
   <name>JRuby Maven Mojos</name>
   <description>
     aggregation project for various jruby related maven plugins
@@ -212,7 +212,7 @@
             </executions>
             <configuration>
               <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
-              <version>0.12.0</version>
+              <version>0.12.1-SNAPSHOT</version>
               <parallel>true</parallel>
               <threadCount>2</threadCount>
             </configuration>
