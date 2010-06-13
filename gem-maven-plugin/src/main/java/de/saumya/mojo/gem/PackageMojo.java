@@ -5,15 +5,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -80,7 +79,6 @@ public class PackageMojo extends AbstractJRubyMojo {
 
     private MavenProject projectFromArtifact(final Artifact artifact)
             throws ProjectBuildingException {
-
         final MavenProject project = this.builder.buildFromRepository(artifact,
                                                                       this.remoteRepositories,
                                                                       this.localRepository);
@@ -136,7 +134,7 @@ public class PackageMojo extends AbstractJRubyMojo {
         ArtifactResolutionResult jarDependencyArtifacts = null;
         if (this.includeDependencies) {
             try {
-                jarDependencyArtifacts = this.resolver.resolveTransitively(project.getDependencyArtifacts(),
+                jarDependencyArtifacts = this.resolver.resolveTransitively(project.getArtifacts(),
                                                                            project.getArtifact(),
                                                                            this.project.getManagedVersionMap(),
                                                                            this.localRepository,
@@ -186,7 +184,7 @@ public class PackageMojo extends AbstractJRubyMojo {
             gemSpecWriter.appendPath("test");
         }
 
-        for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
+        for (final Artifact dependency : (Set<Artifact>) project.getDependencyArtifacts()) {
             if (!dependency.isOptional()
                     && dependency.getType().contains("gem")) {
                 // it will adjust the artifact as well (in case of relocation)
