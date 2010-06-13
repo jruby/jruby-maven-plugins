@@ -28,18 +28,19 @@ import org.codehaus.plexus.util.FileUtils;
 
 class GemspecWriter {
 
- final MavenProject      project;
+    final MavenProject      project;
     final Writer            writer;
-    final String            excludes       = ".*~$|^[.][a-zA-Z].*";
-    final List<File>        dirs           = new ArrayList<File>();
-    final List<File>        files          = new ArrayList<File>();
-    final List<URL>         licenses       = new ArrayList<URL>();
-    final Map<String, File> jarFiles       = new HashMap<String, File>();
-    long                    latestModified = 0;
+    final String            excludes         = ".*~$|^[.][a-zA-Z].*";
+    final List<File>        dirs             = new ArrayList<File>();
+    final List<File>        files            = new ArrayList<File>();
+    final List<URL>         licenses         = new ArrayList<URL>();
+    final Map<String, File> jarFiles         = new HashMap<String, File>();
+    long                    latestModified   = 0;
     final File              gemspec;
-    private boolean         firstAuthor    = true;
-    private boolean         firstFile      = true;
+    private boolean         firstAuthor      = true;
+    private boolean         firstFile        = true;
     private boolean         platformAppended = false;
+    private boolean         firstTestFile;
 
     @SuppressWarnings("unchecked")
     GemspecWriter(final File gemspec, final MavenProject project,
@@ -173,15 +174,34 @@ class GemspecWriter {
         if (file.lastModified() > this.latestModified) {
             this.latestModified = file.lastModified();
         }
-        this.dirs.add(new File( path ) );
+        this.dirs.add(new File(path));
+    }
+
+    void appendTestPath(final String path) throws IOException {
+        if (this.firstTestFile) {
+            this.writer.append("  s.test_files = Dir['")
+                    .append(path)
+                    .append("/**/*']\n");
+            this.firstTestFile = false;
+        }
+        else {
+            this.writer.append("  s.test_files += Dir['")
+                    .append(path)
+                    .append("/**/*']\n");
+        }
+        final File file = new File(this.project.getBasedir(), path);
+        if (file.lastModified() > this.latestModified) {
+            this.latestModified = file.lastModified();
+        }
+        this.dirs.add(new File(path));
     }
 
     void appendJarfile(final File jar, final String jarfileName)
             throws IOException {
-    	if ( ! this.platformAppended ) {
+        if (!this.platformAppended) {
             append("platform", "java");
             this.platformAppended = true;
-    	}
+        }
         final File f = new File("lib", jarfileName);
         this.jarFiles.put(f.toString(), jar);
         appendFile(f);
@@ -309,7 +329,7 @@ class GemspecWriter {
     }
 
     private void copyDir(final File target, final File dir) throws IOException {
-     final File realDir = new File( this.project.getBasedir(), dir.getPath() );
+        final File realDir = new File(this.project.getBasedir(), dir.getPath());
         if (realDir.isDirectory()) {
             for (final String file : realDir.list()) {
                 copyDir(target, new File(dir, file));
@@ -317,7 +337,7 @@ class GemspecWriter {
         }
         else {
             if (realDir.exists() && !realDir.getName().matches(this.excludes)) {
-             final File targetFile = new File( target, dir.getPath() );
+                final File targetFile = new File(target, dir.getPath());
                 FileUtils.copyFile(realDir, targetFile);
             }
         }

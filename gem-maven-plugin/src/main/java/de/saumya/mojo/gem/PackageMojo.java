@@ -178,10 +178,10 @@ public class PackageMojo extends AbstractJRubyMojo {
             gemSpecWriter.appendPath("lib");
         }
         if (specDir.exists()) {
-            gemSpecWriter.appendPath("spec");
+            gemSpecWriter.appendTestPath("spec");
         }
         if (testDir.exists()) {
-            gemSpecWriter.appendPath("test");
+            gemSpecWriter.appendTestPath("test");
         }
 
         for (final Artifact dependency : (Set<Artifact>) project.getDependencyArtifacts()) {
