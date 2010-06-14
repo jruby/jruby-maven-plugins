@@ -50,8 +50,7 @@ public class ControllerServlet extends HttpServlet {
             case 5:// {releases|prereleases}/rubygems/#{name}/#{version}/#{name}-#{version}.{gem|pom}
                 if (parts[4].endsWith(".gem")) {
                     resp.sendRedirect(this.controller.getGemLocation(parts[2],
-                                                                     parts[3],
-                                                                     parts[4]));
+                                                                     parts[3]));
                 }
                 else if (parts[4].endsWith(".gem.sha1")) {
                     resp.setContentType("text/plain");

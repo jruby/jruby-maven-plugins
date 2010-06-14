@@ -4,7 +4,7 @@ require 'digest/sha1'
 
 module Maven
   class LocalRepository
-    
+
     attr_reader :tuples
 
     def initialize(name = '', repository_id = 'rubygems', source_uri = "rubygems.org", local_repository = nil)
@@ -29,7 +29,8 @@ module Maven
       # all = !req.prerelease? since "all == true" excludes prereleases
       # all == true => prerelease == false
       # all == false => only latest !! unless prerelease == true
-      fetcher.find_matching(dep, !prerelease, false, prerelease)
+      platform = true # assume that code will run on jruby
+      fetcher.find_matching(dep, !prerelease, platform, prerelease)
     end
 
     def update(name = '', update = true)
@@ -40,13 +41,13 @@ module Maven
       #TODO not sure if this is threadsafe
       @tuples = find(fetcher, dep, false) + find(fetcher, dep, true)
       @fetcher = fetcher
-      @last_update = File.new(@fetcher.cache_dir(URI.parse("http://rubygems.org/gems")) + "/specs.#{Gem.marshal_version}").mtime      
+      @last_update = File.new(@fetcher.cache_dir(URI.parse("http://rubygems.org/gems")) + "/specs.#{Gem.marshal_version}").mtime
     end
-    
+
     def spec(name, version)
       req = Gem::Requirement.new(version)
       dep = Gem::Dependency.new(/^#{name}$/, req)
-      
+
       tuples = find(@fetcher, dep, req.prerelease?)
       unless tuples.empty?
         tuple = tuples.first
@@ -61,21 +62,29 @@ module Maven
       else
         spec = spec(name, version)
         if spec
-          _spec_to_pom(spec, pom)
+          spec_to_pom(spec, pom)
           pom
         else
           nil
         end
       end
     end
-    
+
     def spec_to_pom(spec, pom)
-      #TODO spec file to Gem::Specification
-      _spec_to_pom(spec, pom)
-    end
-    
-    def _spec_to_pom(spec, pom)
       File.open(pom, "w") do |f|
+        _spec_to_pom(spec, f)
+      end
+      sha1(pom)
+    end
+
+    def to_pomxml(specfile)
+      spec = Gem::Specification.load(specfile)
+      result = StringIO.new
+      _spec_to_pom(spec, result)
+      result.string
+    end
+
+    def _spec_to_pom(spec, f)
         f.puts <<-POM
 <?xml version="1.0"?>
 <project
@@ -136,7 +145,7 @@ POM
           warn "having left_version or right_version and version which does not makes sense" if (right_version || left_version) && version
           version = (left_version || "[") + "," + (right_version || ")") if right_version || left_version
           version = "[0.0.0,)" if version.nil?
-          
+
           spec_tuples = @fetcher.find_matching dep, true, false, nil
           is_java = spec_tuples.detect { |s| s[0][2] == 'java' }
           # require 'net/http'
@@ -159,10 +168,41 @@ POM
         end
         f.puts <<-POM
   </dependencies>
+  <repositories>
+    <repository>
+      <id>rubygems</id>
+      <url>http://gems.saumya.de/releases</url>
+    </repository>
+  </repositories>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jruby.plugins.version>0.12.1-SNAPSHOT</jruby.plugins.version>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>rspec-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+ <version>2.0.2</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
 POM
-      end
-      sha1(pom)
     end
 
     def pom_file(name, version)
@@ -179,11 +219,20 @@ POM
       file
     end
 
-    def gem_location(name, version, filename)
-      file = pom_file(name, version)
-      # TODO maybe a better way to check if name + version is valid
-      return nil if file.nil?
-      "http://#{@source_uri}/gems/#{filename}"
+    def gem_details(name,version)
+      req = Gem::Requirement.new(version)
+      dep = Gem::Dependency.new(/^#{name}$/, req)
+
+      tuples = find(@fetcher, dep, req.prerelease?)
+      return nil if tuples.empty?
+      tuples.detect {|t| t[0][2] == 'java' } || tuples.first
+    end
+
+    def gem_location(name, version)
+      tuple = gem_details(name, version)
+      return nil if tuple.nil?
+      "#{tuple[1]}/gems/#{name}-#{version}" +
+        ("java" == tuple[0][2] ? "-java" : "") + ".gem"
     end
 
     def gem_sha1_file(name, version)
@@ -192,8 +241,11 @@ POM
       file = file.sub(/\.pom$/, ".gem") + ".sha1"
       unless File.exists?(file)
         require 'net/http'
-        resource = Net::HTTP.new(@source_uri,80)
-        headers,data = resource.get("/gems/#{name}-#{version}.gem")
+        tuple = gem_details(name, version)
+        resource = Net::HTTP.new(tuple[1].sub(/http:../,80)
+        headers,data = resource.get("/gems/#{name}-#{version}" +
+                                    ("java" == tuple[0][2] ? "-java" : "") +
+                                    ".gem")
         if(headers.code == "302")
           # follow one redirect
           domain = headers["location"].sub(/.*:\/\//, '').sub(/\/.*/, '')
@@ -286,7 +338,7 @@ METADATA
       sha1(metadata)
       metadata
     end
-    
+
     def update_all_metadata
       map.each do |name, versions|
         to_metadata(name, versions)

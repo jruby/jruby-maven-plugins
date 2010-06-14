@@ -31,14 +31,13 @@ class ControllerService {
                                            Object.class);
     }
 
-    String getGemLocation(final String name, final String version,
-            final String file) throws FileNotFoundException {
+    String getGemLocation(final String name, final String version)
+            throws FileNotFoundException {
         final String uri = this.scriptingContainer.callMethod(this.rubyObject,
                                                               "gem_location",
                                                               new String[] {
                                                                       name,
-                                                                      version,
-                                                                      file },
+                                                                      version },
                                                               String.class);
         if (uri == null) {
             throw new FileNotFoundException();
