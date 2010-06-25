@@ -99,6 +99,33 @@ module Maven
   <name><![CDATA[#{spec.summary}]]></name>
   <description><![CDATA[#{spec.description}]]></description>
   <url>#{spec.homepage}</url>
+  <developers>
+POM
+      (spec.email || []).zip(spec.authors || []).map do |e, a|     
+        f.puts <<-POM
+    <developer>
+      <id>#{e.sub(/@.*/, '')}</id>
+      <name>#{a}</name>
+      <email>#{e}</email>
+    </developer>
+POM
+      end
+      f.puts <<-POM
+  </developers>
+  <licenses>
+POM
+      license = spec.files.detect {|file| file.to_s =~ /MIT-LICENSE/ }
+      unless license.nil?
+        f.puts <<-POM
+    <license>
+      <name>MIT-LICENSE</name>
+      <url>./#{license}</url>
+      <distribution>repo</distribution>
+    </license>
+ POM
+      end
+      f.puts <<-POM
+  </licenses>
   <dependencies>
 POM
         spec.dependencies.each do |dep|
@@ -174,9 +201,16 @@ POM
       <url>http://gems.saumya.de/releases</url>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+    </pluginRepository>
+  </pluginRepositories>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jruby.plugins.version>0.12.1-SNAPSHOT</jruby.plugins.version>
+    <jruby.plugins.version>0.20.0-SNAPSHOT</jruby.plugins.version>
   </properties>
   <build>
     <plugins>
@@ -190,10 +224,15 @@ POM
         <groupId>de.saumya.mojo</groupId>
         <artifactId>rspec-maven-plugin</artifactId>
         <version>${jruby.plugins.version}</version>
+	<executions>
+          <execution>
+	    <goals><goal>test</goal></goals>
+	  </execution>
+	</executions>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
- <version>2.0.2</version>
+        <version>2.0.2</version>
         <configuration>
           <source>1.5</source>
           <target>1.5</target>
@@ -242,7 +281,9 @@ POM
       unless File.exists?(file)
         require 'net/http'
         tuple = gem_details(name, version)
-        resource = Net::HTTP.new(tuple[1].sub(/http:../,80)
+        # TODO it does not seems to work with tuple[1].sub(/http:../,"") instead
+        # of @source_uri on my production server
+        resource = Net::HTTP.new(@source_uri,80)
         headers,data = resource.get("/gems/#{name}-#{version}" +
                                     ("java" == tuple[0][2] ? "-java" : "") +
                                     ".gem")
