@@ -59,7 +59,7 @@ public class RSpecMojo extends AbstractGemMojo {
      * @parameter expression="${basedir}/target"
      * @required
      */
-    protected String                 outputDirectory;
+    protected String                 reportDirectory;
 
     /**
      * The name of the RSpec report (optional, defaults to "rspec-report.html")
@@ -97,7 +97,7 @@ public class RSpecMojo extends AbstractGemMojo {
         }
         getLog().info("Running RSpec tests from " + specSourceDirectory);
 
-        final String reportPath = new File(this.outputDirectory,
+        final String reportPath = new File(this.reportDirectory,
                 this.reportName).getAbsolutePath();
 
         initScriptFactory(this.rspecScriptFactory, reportPath);
@@ -155,7 +155,7 @@ public class RSpecMojo extends AbstractGemMojo {
             final String reportPath) {
         factory.setBaseDir(this.basedir.getAbsolutePath());
         factory.setClasspathElements(this.classpathElements);
-        factory.setOutputDir(new File(this.outputDirectory));
+        factory.setOutputDir(new File(this.reportDirectory));
         factory.setReportPath(reportPath);
         factory.setSourceDir(specSourceDirectory().getAbsolutePath());
         Properties props = this.systemProperties;
