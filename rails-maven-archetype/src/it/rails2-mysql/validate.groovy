@@ -25,7 +25,7 @@ new File(basedir, 'target/users.html').eachLine{
 }
 success_new = false
 new File(basedir, 'target/new.html').eachLine{ 
-  success_new = success_new || (it =~ 'value="Create"')
+  success_new = success_new || (it =~ 'value="Create')
 }
 
 
