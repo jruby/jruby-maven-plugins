@@ -149,6 +149,7 @@ class AntLauncher extends AbstractLauncher {
                 list.add(path);
             }
         }
+
         if (classesDirectory != null && classesDirectory.exists()) {
             list.add(classesDirectory);
         }

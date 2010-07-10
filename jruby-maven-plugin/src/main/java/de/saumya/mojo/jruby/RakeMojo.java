@@ -45,7 +45,6 @@ public class RakeMojo extends AbstractJRubyMojo {
 
     public void execute() throws MojoExecutionException {
         this.outputDirectory.mkdirs();
-        ensureGem("rake");
 
         final StringBuilder args = new StringBuilder("-S rake ");
         if (this.script != null) {

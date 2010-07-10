@@ -1,10 +1,8 @@
 package de.saumya.mojo.jruby;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -36,9 +34,9 @@ import org.codehaus.classworlds.ClassRealm;
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String              DEFAULT_JRUBY_VERSION = "1.5.0";
+    private static String              DEFAULT_JRUBY_VERSION = "1.5.1";
 
-    private static final Set<Artifact> NO_ARTIFACTS          = Collections.emptySet();
+    // private static final Set<Artifact> NO_ARTIFACTS = Collections.emptySet();
 
     /**
      * fork the JRuby execution.
@@ -57,7 +55,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     /**
      * the launch directory for the JRuby execution.
      * 
-     * @parameter expression="${project.basedir}"
+     * @parameter default-value="${launchDirectory}"
      */
     protected File                     launchDirectory;
 
@@ -155,15 +153,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected String                   version;
 
     /**
-     * directory to leave some flags for already installed gems.
-     * 
-     * @parameter expression="${jruby.gem.flags}"
-     *            default-value="${project.build.directory}/gems"
-     */
-    @Deprecated
-    private File                       gemFlagsDirectory;
-
-    /**
      * output file where the stdout will be redirected to
      * 
      * @parameter
@@ -186,7 +175,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @parameter expression="${dummyExpression}"
      * @readonly
      */
-    private ClassRealm                 classRealm;
+    protected ClassRealm               classRealm;
 
     /**
      * @component
@@ -234,7 +223,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         return artifact;
     }
 
-    private Artifact resolveJRUBYCompleteArtifact()
+    protected Artifact resolveJRUBYCompleteArtifact()
             throws DependencyResolutionRequiredException,
             MojoExecutionException {
         if (this.version != null) {
@@ -262,47 +251,16 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected File launchDirectory() {
         if (this.launchDirectory == null) {
-            return new File(System.getProperty("user.dir"));
-        }
-        else {
-            this.launchDirectory.mkdirs();
-            return this.launchDirectory;
-        }
-    }
-
-    @Deprecated
-    protected void ensureGems(final String[] gemNames)
-            throws MojoExecutionException {
-        final StringBuilder gems = new StringBuilder();
-        this.gemFlagsDirectory.mkdirs();
-        for (final String gemName : gemNames) {
-            if (!new File(this.gemFlagsDirectory, gemName).exists()) {
-                gems.append(" ").append(gemName);
+            this.launchDirectory = this.project.getBasedir();
+            if (this.launchDirectory == null || !this.launchDirectory.exists()) {
+                this.launchDirectory = new File(System.getProperty("user.dir"));
             }
+            // return new File(System.getProperty("user.dir"));
         }
-        if (gems.length() > 0) {
-
-            execute(("-S maybe_install_gems" + gems.toString()).split("\\s+"),
-                    NO_ARTIFACTS,
-                    null,
-                    true);
-
-            for (final String gem : gemNames) {
-                try {
-                    new File(this.gemFlagsDirectory, gem).createNewFile();
-                }
-                catch (final IOException e) {
-                    throw new MojoExecutionException("can not create empty file",
-                            e);
-                }
-            }
-        }
-    }
-
-    @Deprecated
-    protected void ensureGem(final String gemName)
-            throws MojoExecutionException {
-        ensureGems(new String[] { gemName });
+        // else {
+        // this.launchDirectory.mkdirs();
+        return this.launchDirectory;
+        // }
     }
 
     protected void execute(final String args, final boolean resolveArtifacts)
@@ -328,7 +286,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected void execute(final String[] args, final File outputFile,
             final boolean resolveArtifacts) throws MojoExecutionException {
-        execute(args, this.artifacts, outputFile, false);
+        execute(args, this.artifacts, outputFile, resolveArtifacts);
     }
 
     private void execute(final String[] args, final Set<Artifact> artifacts,
@@ -336,7 +294,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             throws MojoExecutionException {
         final Set<Artifact> artis = new HashSet<Artifact>(artifacts);
         if (resolveArtifacts) {
-            if (this.project.getArtifact().getFile() != null) {
+            if (this.project.getArtifact().getFile() != null
+                    && this.project.getArtifact().getFile().exists()) {
                 resolveTransitively(artis, this.project.getArtifact());
             }
 
@@ -388,11 +347,11 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             final MavenProject mavenProject = this.builder.buildFromRepository(artifact,
                                                                                this.remoteRepositories,
                                                                                this.localRepository);
-            
+
             final Set<Artifact> moreArtifacts = mavenProject.createArtifacts(this.artifactFactory,
                                                                              null,
                                                                              null);
-            
+
             final ArtifactResolutionResult arr = this.resolver.resolveTransitively(moreArtifacts,
                                                                                    artifact,
                                                                                    this.project.getManagedVersionMap(),
@@ -400,9 +359,12 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                                                                                    this.remoteRepositories,
                                                                                    this.metadata,
                                                                                    new ArtifactFilter() {
-																				      public boolean include(Artifact artifact) {
-																					      return artifact.getType().equals( "gem" );
-																				      } });
+                                                                                       public boolean include(
+                                                                                               final Artifact artifact) {
+                                                                                           return artifact.getType()
+                                                                                                   .equals("gem");
+                                                                                       }
+                                                                                   });
             // System.out.println(artifact + " " + arr);
             for (final Object artiObject : arr.getArtifacts()) {
                 // allow older api to work

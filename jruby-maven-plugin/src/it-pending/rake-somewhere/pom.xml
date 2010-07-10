@@ -11,9 +11,7 @@
         <artifactId>jruby-maven-plugin</artifactId>
         <version>0.20.0-SNAPSHOT</version>
         <configuration>
-          <file>${basedir}/src/main/ruby/hello.rb</file>
-          <args>kristian</args>
-          <outputFile>log</outputFile>
+          <launchDirectory>somewhere</launchDirectory>
         </configuration>
       </plugin>
     </plugins>

@@ -27,7 +27,9 @@ public class IRBMojo extends AbstractJRubyMojo {
     public void execute() throws MojoExecutionException {
         // make sure the whole things run in the same process
         super.fork = false;
-        final StringBuilder args = new StringBuilder("-S irb");
+        final StringBuilder args = new StringBuilder("-e ENV['GEM_HOME']='"
+                + this.gemHome + "';ENV['GEM_PATH']='" + this.gemPath
+                + "';$LOAD_PATH<<'./lib' -S irb");
         if (this.args != null) {
             args.append(" ").append(this.args);
         }
