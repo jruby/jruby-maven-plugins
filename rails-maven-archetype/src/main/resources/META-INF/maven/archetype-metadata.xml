@@ -12,13 +12,13 @@
         <include>**/*.html</include>
       </includes>
     </fileSet>
-    <fileSet encoding="UTF-8">
+    <fileSet filtered="true" encoding="UTF-8">
       <directory>lib/tasks</directory>
       <includes>
         <include>**/*.rake</include>
       </includes>
     </fileSet>
-    <fileSet encoding="UTF-8">
+    <fileSet filtered="true" encoding="UTF-8">
       <directory>config/initializers</directory>
       <includes>
         <include>**/*.rb</include>
@@ -38,7 +38,7 @@
       <defaultValue>sqlite3</defaultValue>
     </requiredProperty>
     <requiredProperty key="railsVersion">
-      <defaultValue>2.3.5</defaultValue>
+      <defaultValue>2.3.8</defaultValue>
     </requiredProperty>
   </requiredProperties>
 </archetype-descriptor>

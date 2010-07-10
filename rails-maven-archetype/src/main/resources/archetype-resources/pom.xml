@@ -9,48 +9,46 @@
   <artifactId>${artifactId}</artifactId>
   <packaging>war</packaging>
   <version>${version}</version>
-  <name>rails${railsVersion.substring(0,1)} skeleton ${artifactId}</name>
+  <name>${artifactId} - rails${railsVersion.substring(0,1)} application</name>
 
   <repositories>
 #literal()
     <!--
-  the source for the gem artifacts
+	the source for the gem artifacts
     -->
 #end
     <repository>
-      <id>rubygems</id>
-      <releases>
-        <updatePolicy>never</updatePolicy>
-        <checksumPolicy>ignore</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <url>http://rubygems.org/gems</url>
-      <layout>gem</layout>
+      <id>rubygems-releases</id>
+      <url>http://gems.saumya.de/releases</url>
     </repository>
+#if( $railsVersion.matches(".*[a-zA-Z].*") )
+    <repository>
+      <id>rubygems-prereleases</id>
+      <url>http://gems.saumya.de/prereleases</url>
+    </repository>
+#end
   </repositories>
 
   <dependencies>
 #literal()
     <!--
-  this is a version which works properly with having
-  rails gems in WEB-INF/gems
+	this is a version which works properly with having
+	rails gems in WEB-INF/gems
     -->
 #end
     <dependency>
       <groupId>org.jruby.rack</groupId>
       <artifactId>jruby-rack</artifactId>
-      <version>0.9.7</version>
+      <version>1.0.1</version>
     </dependency>
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>1.5.0</version>
+      <version>1.5.1</version>
     </dependency>
 #literal()
     <!--
-  gem dependencies
+	gem dependencies
     -->
 #end
     <dependency>
@@ -58,15 +56,14 @@
       <artifactId>activerecord-jdbc-adapter</artifactId>
       <version>0.9.4</version>
       <type>gem</type>
-      <classifier>java</classifier>
     </dependency>
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>jdbc-${database}</artifactId>
 #literal()
       <!--
-    for the stability of the build it is better to change this to
-    specific working version
+	  for the stability of the build it is better to change this to
+	  specific working version
       -->
 #end
       <version>[0.0.0,)</version>
@@ -81,34 +78,33 @@
   </dependencies>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jruby.plugins.version>0.12.1-SNAPSHOT</jruby.plugins.version>
-    <jruby.fork>true</jruby.fork>
+    <jruby.plugins.version>0.20.0-SNAPSHOT</jruby.plugins.version>
 #literal()
     <!--
-  this is needed for the maven-war-plugin configuration
+	this is needed for the maven-war-plugin configuration
     -->
 #end
-    <jruby.gem.home>${symbol_dollar}{project.build.directory}/wargems</jruby.gem.home>
-    <jruby.gem.path>${symbol_dollar}{project.build.directory}/wargems</jruby.gem.path>
+    <jruby.gem.home>${symbol_dollar}{project.build.directory}/rubygems</jruby.gem.home>
+    <jruby.gem.path>${symbol_dollar}{project.build.directory}/rubygems</jruby.gem.path>
   </properties>
   <build>
     <plugins>
 #literal()
       <!--
-   this plugin gives you basic jruby related goals. overview:
-   $ mvn ruby:help
+	  this plugin gives you basic jruby related goals. overview:
+	  $ mvn ruby:help
       -->
 #end
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby-maven-plugin</artifactId>
- <version>${symbol_dollar}{jruby.plugins.version}</version>
+        <version>${symbol_dollar}{jruby.plugins.version}</version>
       </plugin>
 #literal()
       <!--
-   this plugin gives you basic rubygems related goals and manages
-   the gems for maven. overview:
-   $ mvn gem:help
+	  this plugin gives you basic rubygems related goals and manages
+	  the gems for maven. overview:
+	  $ mvn gem:help
       -->
 #end
       <plugin>
@@ -116,23 +112,38 @@
         <artifactId>gem-maven-plugin</artifactId>
         <version>${symbol_dollar}{jruby.plugins.version}</version>
         <extensions>true</extensions>
-        <executions>
-          <execution>
-            <goals>
-              <goal>initialize</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 #literal()
       <!--
-   this plugin has some rails specific goals.
+	  this plugin has some rails specific goals.
       -->
 #end
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>rails${railsVersion.substring(0,1)}-maven-plugin</artifactId>
         <version>${symbol_dollar}{jruby.plugins.version}</version>
+      </plugin>
+#literal()
+      <!--
+	  this plugin has some rspec specific goals.
+      -->
+#end
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>rspec-maven-plugin</artifactId>
+        <version>${symbol_dollar}{jruby.plugins.version}</version>
+#literal()
+      <!-- uncomment this if you want to use rspec in test phase
+#end
+	<executions>
+	  <execution>
+	    <phase>test</phase>
+	    <goals><goal>test</goal></goals>
+	  </execution>
+	</executions>
+#literal()
+        rspec -->
+#end
       </plugin>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
@@ -155,7 +166,7 @@
 #literal()
   <!--
       this might be not a good idea for production but for
-      testing this should be OK and I will not work when
+      testing this should be OK. anyways it will not work when
       running the application from a packed war file
   -->
 #end
@@ -165,9 +176,9 @@
             </resource>
 #literal()
      <!--
-   if you freeze your rails and unpack your gems you need to
-   comment/remove the next section to avoid ending up with
-   two sets of gems inside the war file
+	 if you freeze your rails and unpack your gems you need to
+	 comment/remove the next section to avoid ending up with
+	 two sets of gems inside the war file
      -->
 #end
             <resource>
