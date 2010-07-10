@@ -128,6 +128,7 @@
     <module>rails2-maven-plugin</module>
     <module>rails3-maven-plugin</module>
     <module>gem-proxy</module>
+    <module>ruby-tools</module>
   </modules>
   <profiles>
     <profile>
@@ -213,7 +214,7 @@
             </executions>
             <configuration>
               <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
-              <version>0.12.1-SNAPSHOT</version>
+              <version>0.20.0-SNAPSHOT</version>
               <parallel>true</parallel>
               <threadCount>2</threadCount>
             </configuration>
