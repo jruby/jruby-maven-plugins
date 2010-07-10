@@ -55,6 +55,7 @@
     <jruby.gem.home>${project.build.directory}/rubygems</jruby.gem.home>
     <jruby.gem.path>${project.build.directory}/rubygems</jruby.gem.path>
     <rails.dir>${project.basedir}/target</rails.dir>
+    <maven.html>maven.html</maven.html>
   </properties>
   <build>
     <plugins>
@@ -157,7 +158,7 @@
 	    </goals>
 	    <configuration>
 	      <tasks>
-		<get src="http://localhost:${jetty.port}/maven.html" dest="target/index.html"/>
+		<get src="http://localhost:${jetty.port}/${maven.html}" dest="target/index.html"/>
 		<get src="http://localhost:${jetty.port}/users" dest="target/users.html"/>
 		<get src="http://localhost:${jetty.port}/users/new" dest="target/new.html"/>
 	      </tasks>

@@ -1,11 +1,9 @@
-success1 = false
 success2 = false
 success3 = false
 new File(basedir, 'target/Gemfile.maven').eachLine{ 
-  success1 = success1 || (it =~ '^\\s*gem .sqlite3-ruby.')
   success2 = success2 || (it =~ '^\\s*gem "activerecord-jdbc-adapter"')
   success3 = success3 || (it =~ '^\\s*gem "jdbc-sqlite3"')
-  // println "read the following line -> " + it + " " + success1 + success2 + success3
+  // println "read the following line -> " + it + " " + success2 + success3
 }
 
 success_jdbc = false
@@ -29,7 +27,6 @@ new File(basedir, 'target/new.html').eachLine{
 }
 
 
-assert success1
 assert success2
 assert success3
 assert success_jdbc
