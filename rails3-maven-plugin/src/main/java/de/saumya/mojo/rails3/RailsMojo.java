@@ -63,9 +63,8 @@ public class RailsMojo extends AbstractRailsMojo {
      * @component
      */
     private VelocityComponent   velocityComponent;
+    // needs to be the default in mojo parameter as welld
     private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.beta4";
-
-    // private static final String NEEDED_JRUBY_VERSION_FOR_RAILS = "1.5.0";
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -73,13 +72,6 @@ public class RailsMojo extends AbstractRailsMojo {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
-        // if (this.artifactVersion == null
-        // || this.artifactVersion.compareTo(NEEDED_JRUBY_VERSION_FOR_RAILS) <
-        // 0) {
-        // getLog().warn("use hardcoded jruby version for rails3: "
-        // + NEEDED_JRUBY_VERSION_FOR_RAILS);
-        // this.artifactVersion = NEEDED_JRUBY_VERSION_FOR_RAILS;
-        // }
         Artifact artifact;
         artifact = this.artifactFactory.createArtifact("rubygems",
                                                        "rails",
