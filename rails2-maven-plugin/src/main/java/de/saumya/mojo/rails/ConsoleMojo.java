@@ -20,7 +20,7 @@ public class ConsoleMojo extends AbstractRailsMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
-        if (this.version.compareTo("1.5.0") < 0) {
+        if (this.version != null && this.version.compareTo("1.5.0") < 0) {
             throw new MojoExecutionException("does not work with jruby version < 1.5.0");
         }
         // make sure the whole things run in the same process
@@ -40,8 +40,9 @@ public class ConsoleMojo extends AbstractRailsMojo {
         }
 
         if (this.env != null) {
-            // TODO verify this
-            commandArgs.append(" ").append(this.env);
+            commandArgs.append(commandArgs.length() == 0 ? "'" : ",'")
+                    .append(this.env)
+                    .append("'");
         }
         execute("-e ENV['GEM_HOME']='" + this.gemHome + "';ENV['GEM_PATH']='"
                 + this.gemPath + "';ARGV<<[" + commandArgs
