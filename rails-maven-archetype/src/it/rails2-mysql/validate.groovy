@@ -12,7 +12,7 @@ success_jdbc = false
 success_version = false
 new File(basedir, 'target/pom.xml').eachLine{ 
   success_jdbc = success_jdbc || (it =~ '<artifactId>jdbc-mysql</artifactId>')
-  success_version = success_version || (it =~ '<version>2.3.5</version>')
+  success_version = success_version || (it =~ '<version>2.3.8</version>')
 }
 
 success_index = false

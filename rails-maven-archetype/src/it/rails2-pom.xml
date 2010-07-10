@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <version>0.0.0</version>
+    <groupId>com.example.rails</groupId>
+    <artifactId>common-base</artifactId>
+    <relativePath>rails-pom.xml</relativePath>
+  </parent>
+  <groupId>com.example.rails2</groupId>
+  <packaging>pom</packaging>
+  <artifactId>base</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rails</artifactId>
+      <version>2.3.8</version>
+      <type>gem</type>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>rails2-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

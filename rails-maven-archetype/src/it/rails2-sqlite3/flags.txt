@@ -6,7 +6,8 @@
 -Dversion=1.0-SNAPSHOT
 -Dpackage=com.example
 -DinteractiveMode=false
--Dtask=db:create db:migrate RAILS_ENV=production
+-Dtask=db:create db:migrate
+-Drails.env=production
 -Dgenerator=scaffold
 -Dgenerate.args=user name:string
 -Djetty.port=8043

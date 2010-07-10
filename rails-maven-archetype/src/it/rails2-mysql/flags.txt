@@ -8,7 +8,7 @@
 -Ddatabase=mysql
 -DinteractiveMode=false
 -Dtask=db:drop db:create db:migrate
--Denv=production
+-Drails.env=production
 -Dgenerator=scaffold
 -Dgenerate.args=user name:string
 -Djetty.port=8017
