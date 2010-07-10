@@ -5,3 +5,4 @@
 -Dgenerator=scaffold
 -Dgenerate.args=user name:string
 -Djetty.port=8020
+-Djruby.verbose=true

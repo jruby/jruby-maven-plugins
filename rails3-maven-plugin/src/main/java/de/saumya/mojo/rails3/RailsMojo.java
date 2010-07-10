@@ -19,52 +19,53 @@ import org.codehaus.plexus.velocity.VelocityComponent;
  * goal to run rails command with the given arguments. either to generate a
  * fresh rails application or to run the rails script from within a rails
  * application.
- *
+ * 
  * @goal rails
  */
 public class RailsMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the rails command
-     *
+     * 
      * @parameter default-value="${rails.args}"
      */
     protected String            railsArgs                      = null;
 
     /**
      * the path to the application to be generated
-     *
+     * 
      * @parameter default-value="${app_path}"
      */
-    protected String            appPath                        = null;
+    protected File              appPath                        = null;
 
     /**
      * the rails version to use
-     *
-     * @parameter default-value="3.0.0.beta3" expression="${railsVersion}"
+     * 
+     * @parameter default-value="3.0.0.beta4" expression="${railsVersion}"
      */
     protected String            railsVersion                   = null;
 
     /**
      * the groupId of the new pom
-     *
+     * 
      * @parameter default-value="rails" expression="${groupId}"
      */
     protected String            groupId                        = null;
 
     /**
      * the version of the new pom
-     *
+     * 
      * @parameter default-value="1.0-SNAPSHOT" expression="${version}"
      */
-    protected String            artifactVersion                        = null;
+    protected String            artifactVersion                = null;
 
     /**
      * @component
      */
     private VelocityComponent   velocityComponent;
-    private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.beta3";
-    private static final String NEEDED_JRUBY_VERSION_FOR_RAILS = "1.5.0";
+    private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.beta4";
+
+    // private static final String NEEDED_JRUBY_VERSION_FOR_RAILS = "1.5.0";
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -72,12 +73,13 @@ public class RailsMojo extends AbstractRailsMojo {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
-        if (this.artifactVersion == null
-                || this.artifactVersion.compareTo(NEEDED_JRUBY_VERSION_FOR_RAILS) < 0) {
-            getLog().warn("use hardcoded jruby version for rails3: "
-                    + NEEDED_JRUBY_VERSION_FOR_RAILS);
-            this.artifactVersion = NEEDED_JRUBY_VERSION_FOR_RAILS;
-        }
+        // if (this.artifactVersion == null
+        // || this.artifactVersion.compareTo(NEEDED_JRUBY_VERSION_FOR_RAILS) <
+        // 0) {
+        // getLog().warn("use hardcoded jruby version for rails3: "
+        // + NEEDED_JRUBY_VERSION_FOR_RAILS);
+        // this.artifactVersion = NEEDED_JRUBY_VERSION_FOR_RAILS;
+        // }
         Artifact artifact;
         artifact = this.artifactFactory.createArtifact("rubygems",
                                                        "rails",
@@ -88,6 +90,8 @@ public class RailsMojo extends AbstractRailsMojo {
         super.execute();
     }
 
+    // hmm ignore rails.dir property if set so execute
+    // super.super.lanuchDirectory()
     @Override
     protected File launchDirectory() {
         if (this.launchDirectory == null) {
@@ -106,7 +110,7 @@ public class RailsMojo extends AbstractRailsMojo {
             command = railsScript("");
         }
         else {
-            command = binScript("rails");
+            command = binScript("rails _" + this.railsVersion + "_ new");
             if (this.appPath != null) {
                 command.append(" ").append(this.appPath);
             }
@@ -119,7 +123,8 @@ public class RailsMojo extends AbstractRailsMojo {
         }
         execute(command.toString(), false);
         if (this.appPath != null) {
-            final File app = new File(launchDirectory(), this.appPath);
+            final File app = this.appPath;// new File(launchDirectory(),
+            // this.appPath);
             final File script = new File(app, "script/rails");
             final String database;
             final Pattern pattern = Pattern.compile(".*-d\\s+([a-z0-9]+).*");
@@ -166,9 +171,9 @@ public class RailsMojo extends AbstractRailsMojo {
 
             // create web.xml
             filterContent(app, context, "src/main/webapp/WEB-INF/web.xml");
-
-            // create lib/tasks/jdbc.task
-            filterContent(app, context, "lib/tasks/jdbc.rake");
+            //
+            // // create lib/tasks/jdbc.task
+            // filterContent(app, context, "lib/tasks/jdbc.rake");
         }
     }
 

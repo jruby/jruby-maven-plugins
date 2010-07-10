@@ -1,33 +1,17 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.example</groupId>
-  <artifactId>rails-maven-plugin</artifactId>
+  <parent>
+    <version>0.0.0</version>
+    <groupId>com.example.rails3</groupId>
+    <artifactId>base</artifactId>
+    <relativePath>../../../rails-maven-archetype/src/it/rails3-pom.xml</relativePath>
+  </parent>
   <packaging>pom</packaging>
-  <version>0.0.0</version>
-  <name>play ground for rails testing</name>
-  <repositories>
-    <repository>
-      <id>rubygems</id>
-      <layout>gem</layout>
-      <releases>
-        <updatePolicy>never</updatePolicy>
-        <checksumPolicy>ignore</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <url>http://rubygems.org/gems</url>
-    </repository>
-  </repositories>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>de.saumya.mojo</groupId>
-        <artifactId>rails3-maven-plugin</artifactId>
-        <version>0.12.1-SNAPSHOT</version>
-        <extensions>true</extensions>
-      </plugin>
-    </plugins>
-  </build>
+  <artifactId>plugin-base</artifactId>
+
+  <properties>
+    <rails.dir>${project.basedir}/target/app</rails.dir>
+    <maven.html>index.html</maven.html>
+  </properties>
 </project>
