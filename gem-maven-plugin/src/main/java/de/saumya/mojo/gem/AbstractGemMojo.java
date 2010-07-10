@@ -19,6 +19,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  */
@@ -57,13 +58,12 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             this.gemPath = new File(this.gemPath.getAbsolutePath()
                     .replace("${project.basedir}", ""));
         }
-        execute(this.artifacts);
-        execute(this.pluginArtifacts);
+        setupGems(this.artifacts);
+        setupGems(this.pluginArtifacts);
         executeWithGems();
     }
 
-    // TODO needs better name !!!! needs to be protected ?
-    public void execute(Collection<Artifact> artifacts)
+    protected void setupGems(Collection<Artifact> artifacts)
             throws MojoExecutionException {
         if (this.includeOpenSSL) {
             final Artifact openssl = this.artifactFactory.createArtifact("rubygems",
@@ -130,9 +130,15 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                 .getName()
                                 .replaceAll(".gem$", "").replace("-SNAPSHOT",
                                                                  "")));
+                final File javaGemDir = new File(gemsDir,
+                        prefix
+                                + (collectedArtifact.getFile()
+                                        .getName()
+                                        .replaceAll(".gem$", "-java").replace("-SNAPSHOT",
+                                                                              "")));
                 // TODO force flag to install gems via command line
                 // argument
-                if (!gemDir.exists()) {
+                if (!gemDir.exists() && !javaGemDir.exists()) {
                     gems.append(" ").append(collectedArtifact.getFile()
                             .getAbsolutePath());
                 }
@@ -184,12 +190,19 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                                            this.remoteRepositories,
                                                            this.metadata,
                                                            null);
+                project.setArtifacts(result.getArtifacts());
             }
             catch (final AbstractArtifactResolutionException e) {
-                getLog().error("error resolving " + project.getArtifact(), e);
+                if (!getLog().isInfoEnabled()) {
+                    getLog().debug("error resolving " + project.getArtifact(),
+                                   e);
+                }
+                else {
+                    getLog().warn("error resolving " + project.getArtifact()
+                            + "\n\tjust ignored and let 'gem install' decide !");
+                }
+                project.setArtifacts(Collections.emptySet());
             }
-
-            project.setArtifacts(result.getArtifacts());
 
             final Set<Artifact> walkArtifacts = (this.useTransitiveDependencies
                     ? (Set<Artifact>) result.getArtifacts()
@@ -221,11 +234,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             if (artifact.getFile() == null || !artifact.getFile().exists()) {
 
                 getLog().debug("<gems> resolve " + artifact);
-
-                // final ArtifactResolutionRequest request = new
-                // ArtifactResolutionReqquest().setArtifact(artifact)
-                // .setLocalRepository(this.localRepository)
-                // .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
                 try {
                     this.resolver.resolve(artifact,
                                           this.remoteRepositories,

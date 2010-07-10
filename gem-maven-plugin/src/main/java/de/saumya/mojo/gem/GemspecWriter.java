@@ -52,9 +52,10 @@ class GemspecWriter {
         this.writer = new FileWriter(gemspec);
         this.project = project;
 
+        append("# create by maven - leave it as is");
         append("Gem::Specification.new do |s|");
         append("name", artifact.getGemName());
-        append("version", gemVersion(project.getVersion()));
+        appendRaw("version", gemVersion(project.getVersion()));
         append();
         append("summary", project.getName());
         append("description", project.getDescription());
@@ -78,24 +79,38 @@ class GemspecWriter {
         return this.gemspec.lastModified() > this.latestModified;
     }
 
-    private String gemVersion(final String versionString) {
-        final StringBuilder version = new StringBuilder();
-        boolean first = true;
-        for (final String part : versionString.replaceAll("beta", "1")
-                .replaceAll("alpha", "0")
-                .replaceAll("\\D+", ".")
-                .split("\\.")) {
-            if (part.length() > 0) {
-                if (first) {
-                    first = false;
-                    version.append(part);
-                }
-                else {
-                    version.append(".").append(part);
-                }
+    private String gemVersion(String version) {
+        version = version.replaceAll("-SNAPSHOT", "")
+                .replace("-", ".")
+                .toLowerCase();
+        if (version.matches("^[\\[\\(].*[\\]\\)]$")) {
+            final int comma = version.indexOf(",");
+            final String first = version.substring(1, comma);
+            final String second = version.substring(comma + 1,
+                                                    version.length() - 1);
+            if (version.matches("\\[.*99999.99999\\)$")) {
+                final String prefix = second.replaceFirst("99999.99999$", "");
+
+                return "'~> "
+                        + prefix
+                        + first.substring(prefix.length())
+                                .replaceFirst("[.].*", "") + "'";
+            }
+            else {
+                final StringBuilder buf = new StringBuilder("['>");
+                buf.append(version.charAt(0) == '[' ? "=" : "");
+                buf.append(first).append("','<");
+                buf.append(version.charAt(version.length() - 1) == '['
+                        ? "="
+                        : "");
+                buf.append(second);
+                buf.append("']");
+                return buf.toString();
             }
         }
-        return version.toString();
+        else {
+            return "'" + version + "'";
+        }
     }
 
     private void append() throws IOException {
@@ -129,8 +144,7 @@ class GemspecWriter {
         }
     }
 
-    private void append(final String key, final String value)
-            throws IOException {
+    void append(final String key, final String value) throws IOException {
         if (value != null) {
             this.writer.append("  s.")
                     .append(key)
@@ -140,22 +154,33 @@ class GemspecWriter {
         }
     }
 
+    private void appendRaw(final String key, final String value)
+            throws IOException {
+        if (value != null) {
+            this.writer.append("  s.")
+                    .append(key)
+                    .append(" = ")
+                    .append(value)
+                    .append("\n");
+        }
+    }
+
     void appendDependency(final String name, final String version)
             throws IOException {
         this.writer.append("  s.add_dependency '")
                 .append(name)
-                .append("', '~>")
+                .append("', ")
                 .append(gemVersion(version))
-                .append("'\n");
+                .append("\n");
     }
 
     void appendDevelopmentDependency(final String name, final String version)
             throws IOException {
         this.writer.append("  s.add_development_dependency '")
                 .append(name)
-                .append("', '~>")
+                .append("', ")
                 .append(gemVersion(version))
-                .append("'\n");
+                .append("\n");
     }
 
     void appendPath(final String path) throws IOException {
@@ -181,13 +206,13 @@ class GemspecWriter {
         if (this.firstTestFile) {
             this.writer.append("  s.test_files = Dir['")
                     .append(path)
-                    .append("/**/*']\n");
+                    .append("/**/*_" + path + ".rb']\n");
             this.firstTestFile = false;
         }
         else {
             this.writer.append("  s.test_files += Dir['")
                     .append(path)
-                    .append("/**/*']\n");
+                    .append("/**/*_" + path + ".rb']\n");
         }
         final File file = new File(this.project.getBasedir(), path);
         if (file.lastModified() > this.latestModified) {
@@ -196,12 +221,15 @@ class GemspecWriter {
         this.dirs.add(new File(path));
     }
 
-    void appendJarfile(final File jar, final String jarfileName)
-            throws IOException {
-        if (!this.platformAppended) {
-            append("platform", "java");
+    void appendPlatform(final String platform) throws IOException {
+        if (!this.platformAppended && platform != null) {
+            append("platform", platform);
             this.platformAppended = true;
         }
+    }
+
+    void appendJarfile(final File jar, final String jarfileName)
+            throws IOException {
         final File f = new File("lib", jarfileName);
         this.jarFiles.put(f.toString(), jar);
         appendFile(f);
@@ -226,17 +254,6 @@ class GemspecWriter {
     }
 
     void appendFile(final String file) throws IOException {
-        // if (this.files.size() + this.dirs.size() == 0) {
-        // this.writer.append("  s.files = Dir['").append(file).append("']\n");
-        // }
-        // else {
-        // this.writer.append("  s.files += Dir['")
-        // .append(file)
-        // .append("']\n");
-        // }
-        // if (f.lastModified() > this.latestModified) {
-        // this.latestModified = f.lastModified();
-        // }
         final File f = new File(file);
         appendFile(f);
         this.files.add(f);
@@ -349,6 +366,21 @@ class GemspecWriter {
         }
         finally {
             this.writer.close();
+        }
+    }
+
+    void appendList(final String name, final String list) throws IOException {
+        if (list != null) {
+            appendRaw(name, "['" + list.replace(",", "','") + "']");
+        }
+    }
+
+    void appendRdocFiles(final String extraRdocFiles) throws IOException {
+        if (extraRdocFiles != null) {
+            for (final String f : extraRdocFiles.split(",")) {
+                this.files.add(new File(f));
+            }
+            appendList("extra_rdoc_files", extraRdocFiles);
         }
     }
 }

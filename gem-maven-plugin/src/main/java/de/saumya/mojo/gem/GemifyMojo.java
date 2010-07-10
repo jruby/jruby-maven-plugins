@@ -26,7 +26,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
 /**
  * goal to convert that artifact into a gem.
- *
+ * 
  * @goal gemify
  * @requiresDependencyResolution test
  */
@@ -101,7 +101,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                     final Set artifacts = project.createArtifacts(this.artifactFactory,
                                                                   null,
                                                                   null);
-                    getLog().info( "artifacts=" + artifacts );
+                    getLog().info("artifacts=" + artifacts);
                     final ArtifactResolutionResult arr = this.resolver.resolveTransitively(artifacts,
                                                                                            artifact,
                                                                                            this.project.getManagedVersionMap(),
@@ -138,7 +138,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
 
     private void gemify(MavenProject project, final Set<Artifact> artifacts)
             throws MojoExecutionException {
-    	getLog().info( "gemify( " + project + ", " + artifacts + " )" );
+        getLog().info("gemify( " + project + ", " + artifacts + " )");
         final Map<String, MavenProject> gems = new HashMap<String, MavenProject>();
         try {
             final String gem = build(project, project.getArtifact().getFile());
@@ -172,7 +172,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
         else {
             execute("-S gem install -l " + orderInResolvedManner(gems));
         }
-        
+
     }
 
     private MavenProject projectFromArtifact(final Artifact artifact)
@@ -252,7 +252,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                                                                                                                 dependency.getType(),
                                                                                                                 dependency.getClassifier());
                                     try {
-                                    	getLog().info( "resolving: " + artifact );
+                                        getLog().info("resolving: " + artifact);
                                         this.resolver.resolve(artifact,
                                                               this.remoteRepositories,
                                                               this.localRepository);
@@ -341,8 +341,8 @@ public class GemifyMojo extends AbstractJRubyMojo {
         for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
             if (!dependency.isOptional() && "jar".equals(dependency.getType())
                     && dependency.getClassifier() == null) {
-            	getLog().info( "--" );
-            	getLog().info( "dependency=" + dependency );
+                getLog().info("--");
+                getLog().info("dependency=" + dependency);
                 // it will adjust the artifact as well (in case of relocation)
                 Artifact arti = null;
                 try {
@@ -351,7 +351,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                                                                              dependency.getVersion(),
                                                                              dependency.getScope(),
                                                                              dependency.getClassifier());
-                    getLog().info( "arti=" + arti );
+                    getLog().info("arti=" + arti);
                     projectFromArtifact(arti);
                     dependency.setGroupId(arti.getGroupId());
                     dependency.setArtifactId(arti.getArtifactId());
@@ -381,7 +381,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
             }
         }
 
-        getLog().info( "<gemify> A" );
+        getLog().info("<gemify> A");
         gemSpecWriter.close();
 
         gemSpecWriter.copy(gemDir);
@@ -424,12 +424,12 @@ public class GemifyMojo extends AbstractJRubyMojo {
             }
         }
         this.launchDir = gemDir;
-        getLog().info( "<gemify> B" );
+        getLog().info("<gemify> B");
         execute("-S gem build " + gemSpec.getAbsolutePath());
-        getLog().info( "<gemify> C" );
+        getLog().info("<gemify> C");
 
         return gemSpec.getAbsolutePath().replaceFirst(".gemspec$", "") + "-"
-                + gemVersion(project.getVersion()) + "-java.gem";
+                + gemVersion(project.getVersion()) + ".gem";
     }
 
     private String titleizedClassname(final String artifactId) {
@@ -441,28 +441,20 @@ public class GemifyMojo extends AbstractJRubyMojo {
     }
 
     private String gemVersion(final String versionString) {
-        final StringBuilder version = new StringBuilder();
-        boolean first = true;
-        for (final String part : versionString.replaceAll("beta", "1")
-                .replaceAll("alpha", "0")
-                .replaceAll("\\D+", ".")
-                .split("\\.")) {
-            if (part.length() > 0) {
-                if (first) {
-                    first = false;
-                    version.append(part);
-                }
-                else {
-                    version.append(".").append(part);
-                }
-            }
-        }
-        return version.toString();
+        // needs to match with GemWriter#gemVersion
+        return versionString.replaceAll("-SNAPSHOT", "")
+                .replace("-", ".")
+                .toLowerCase();
     }
 
     @Override
     protected File launchDirectory() {
-        return this.launchDir.getAbsoluteFile();
+        if (this.launchDir != null) {
+            return this.launchDir.getAbsoluteFile();
+        }
+        else {
+            return super.launchDirectory();
+        }
     }
 
 }

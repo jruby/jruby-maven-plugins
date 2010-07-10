@@ -68,8 +68,10 @@ public class GemArtifact implements Artifact {
     public GemArtifact(final MavenProject project) {
         this.artifact = project.getArtifact();
         this.jarFile = this.artifact.getFile();
-        this.artifact.setFile(new File(new File(project.getBuild()
-                .getDirectory()), getGemFile()));
+        if (isGem()) {
+            this.artifact.setFile(new File(new File(project.getBuild()
+                    .getDirectory()), getGemFile()));
+        }
         // allow maven2 to do the right thing with the classifier
         project.setArtifact(this);
         this.artifact.setArtifactHandler(new GemArtifactHandler(this.artifact.getArtifactHandler()));
@@ -89,9 +91,7 @@ public class GemArtifact implements Artifact {
     public String getGemVersion() {
         final StringBuilder version = new StringBuilder();
         boolean first = true;
-        for (final String part : getVersion().replaceAll("beta", "1")
-                .replaceAll("alpha", "0")
-                .replaceAll("\\D+", ".")
+        for (final String part : getVersion().replaceAll("-SNAPSHOT", "")
                 .split("\\.")) {
             if (part.length() > 0) {
                 if (first) {
@@ -120,25 +120,17 @@ public class GemArtifact implements Artifact {
         return this.artifact.getFile();
     }
 
-    // allow maven 2 as well
     public String getClassifier() {
-        if ("java-gem".equals(this.artifact.getType())) {
-            return "java";
-        }
-        else {
-            return this.artifact.getClassifier();
-        }
+        return this.artifact.getClassifier();
     }
 
     public boolean hasJarFile() {
-        return "java".equals(getClassifier());
+        return "java-gem".equals(getType());
     }
 
     public File getJarFile() {
         if (hasJarFile()) {
-            return this.jarFile;// new
-            // File(getFile().toString().replaceFirst("gem$",
-            // "jar"));
+            return this.jarFile;
         }
         else {
             return null;
@@ -342,4 +334,7 @@ public class GemArtifact implements Artifact {
         return null;
     }
 
+    public boolean isGem() {
+        return this.artifact.getType().contains("gem");
+    }
 }
