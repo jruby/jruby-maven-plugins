@@ -173,8 +173,6 @@ POM
           version = (left_version || "[") + "," + (right_version || ")") if right_version || left_version
           version = "[0.0.0,)" if version.nil?
 
-          spec_tuples = @fetcher.find_matching dep, true, false, nil
-          is_java = spec_tuples.detect { |s| s[0][2] == 'java' }
           # require 'net/http'
           f.puts <<-POM
     <dependency>
@@ -182,13 +180,6 @@ POM
       <artifactId>#{dep.name}</artifactId>
       <version>#{version}</version>
       <type>gem</type>
-POM
-          if is_java
-            f.puts <<-POM
-      <classifier>java</classifier>
-POM
-          end
-          f.puts <<-POM
       <scope>#{scope}</scope>
     </dependency>
 POM
