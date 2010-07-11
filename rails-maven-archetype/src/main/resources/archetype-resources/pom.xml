@@ -99,6 +99,22 @@
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby-maven-plugin</artifactId>
         <version>${symbol_dollar}{jruby.plugins.version}</version>
+#if( $railsVersion.substring(0,1) == '3' )
+	<executions>
+	  <execution>
+	    <phase>prepare-package</phase>
+	    <goals><goal>jruby</goal></goals>
+	    <configuration>
+	      <script>
+		require 'fileutils'
+		web_inf = File.join('${project.build.directory}', '${project.build.finalName}', 'WEB-INF')
+		FileUtils.mkdir_p(web_inf)
+		FileUtils.cp('Gemfile.maven', File.join(web_inf, 'Gemfile'))
+	      </script>
+	    </configuration>
+	  </execution>
+	</executions>
+#end
       </plugin>
 #literal()
       <!--
@@ -112,6 +128,12 @@
         <artifactId>gem-maven-plugin</artifactId>
         <version>${symbol_dollar}{jruby.plugins.version}</version>
         <extensions>true</extensions>
+	<executions>
+	  <execution>
+	    <phase>prepare-package</phase>
+	    <goals><goal>initialize</goal></goals>
+	  </execution>
+	</executions>
       </plugin>
 #literal()
       <!--
@@ -157,7 +179,6 @@
               <directory>.</directory>
               <targetPath>WEB-INF</targetPath>
               <includes>
-                <include>Gemfile</include>
                 <include>app/**</include>
                 <include>config/**</include>
                 <include>lib/**</include>

@@ -29,6 +29,25 @@
     <plugins>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
+        <artifactId>jruby-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+	<executions>
+	  <execution>
+	    <phase>prepare-package</phase>
+	    <goals><goal>jruby</goal></goals>
+	    <configuration>
+	      <script>
+		require 'fileutils'
+		web_inf = File.join('${project.build.directory}','${project.build.finalName}','WEB-INF')
+		FileUtils.mkdir_p(web_inf)
+		FileUtils.cp(File.join('${project.build.directory}','Gemfile.maven'), File.join(web_inf, 'Gemfile'))
+	      </script>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
         <artifactId>rails3-maven-plugin</artifactId>
         <version>${jruby.plugins.version}</version>
       </plugin>

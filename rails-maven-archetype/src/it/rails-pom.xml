@@ -92,7 +92,6 @@
 	      <directory>${rails.dir}</directory>
 	      <targetPath>WEB-INF</targetPath>
 	      <includes>
-		<include>Gemfile</include>
 		<include>app/**</include>
 		<include>config/**</include>
 		<include>lib/**</include>

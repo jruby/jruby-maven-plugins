@@ -1,9 +1,17 @@
 # this is minimal Gemfile used by maven if its name is 'Gemfile.maven'
-# it does not work with MRI. it works with jruby when you have your gems around
-# in way that there are no version conflicts
+# it does work with MRI or JRuby ONLY when you have your gems around in way 
+# that rubygems can load them wihtout version conflicts (actually bypassing bundler)
+
+# if you do not want maven to use this - just delete the file
 source 'http://rubygems.org'
+
+gem 'rails'
 
 # ActiveRecord requires a database adapter. By default,
 # Rails has selected sqlite3.
 gem "activerecord-jdbc-adapter", :require =>'jdbc_adapter'
 gem "jdbc-${database}", :require => 'jdbc/${database}'
+
+# use this file to add your "auto require"
+# do NOT use versions to avoid conflicts with maven
+# gem "aws-s3", :require => "aws/s3"
