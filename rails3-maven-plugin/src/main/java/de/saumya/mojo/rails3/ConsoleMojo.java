@@ -39,8 +39,6 @@ public class ConsoleMojo extends AbstractRailsMojo {
             // TODO verify this
             commandArgs.append(" ").append(this.env);
         }
-        execute("-e ENV['GEM_HOME']='" + this.gemHome + "';ENV['GEM_PATH']='"
-                + this.gemPath + "';ARGV<<[" + commandArgs
-                + "];ARGV.flatten!;load('" + railsScriptFile() + "');", false);
+        executeScript(railsScriptFile(), commandArgs.toString(), false);
     }
 }

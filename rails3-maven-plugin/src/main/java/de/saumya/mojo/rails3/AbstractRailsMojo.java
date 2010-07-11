@@ -1,6 +1,14 @@
 package de.saumya.mojo.rails3;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.maven.plugin.MojoExecutionException;
+import org.codehaus.plexus.util.IOUtil;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
 
@@ -30,6 +38,54 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
      * @parameter expression="${rails.env}"
      */
     protected String env;
+
+    private void patchBootScript() throws MojoExecutionException {
+        final File boot = new File(new File(launchDirectory(), "config"),
+                "boot.rb");
+        if (boot.exists()) {
+            try {
+                if (IOUtil.contentEquals(new FileInputStream(boot),
+                                         Thread.currentThread()
+                                                 .getContextClassLoader()
+                                                 .getResourceAsStream("boot.rb.orig"))) {
+                    IOUtil.copy(Thread.currentThread()
+                                        .getContextClassLoader()
+                                        .getResourceAsStream("boot.rb"),
+                                new FileOutputStream(boot));
+                }
+            }
+            catch (final IOException e) {
+                throw new MojoExecutionException("error patching config/boot.rb",
+                        e);
+            }
+        }
+    }
+
+    protected void executeScript(final File script, final String args,
+            final boolean resolveArtifacts) throws MojoExecutionException {
+        patchBootScript();
+        executeScript(script, args, resolveArtifacts, envParameters());
+    }
+
+    @Override
+    protected void execute(final String args, final boolean resolveArtifacts)
+            throws MojoExecutionException {
+        patchBootScript();
+        super.execute(args, resolveArtifacts, envParameters());
+    }
+
+    private Map<String, String> envParameters() {
+        final File gemfile = new File(launchDirectory(), "Gemfile.maven");
+        if (gemfile.exists()) {
+            final Map<String, String> env = new HashMap<String, String>();
+            env.put("BUNDLE_GEMFILE", gemfile.getAbsolutePath());
+            return env;
+        }
+        else {
+            // must be mutable !!!
+            return new HashMap<String, String>();
+        }
+    }
 
     @Override
     protected File launchDirectory() {

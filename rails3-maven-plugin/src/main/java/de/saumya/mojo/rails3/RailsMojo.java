@@ -163,9 +163,9 @@ public class RailsMojo extends AbstractRailsMojo {
 
             // create web.xml
             filterContent(app, context, "src/main/webapp/WEB-INF/web.xml");
-            //
-            // // create lib/tasks/jdbc.task
-            // filterContent(app, context, "lib/tasks/jdbc.rake");
+
+            // create Gemfile.maven
+            filterContent(app, context, "Gemfile.maven");
         }
     }
 
