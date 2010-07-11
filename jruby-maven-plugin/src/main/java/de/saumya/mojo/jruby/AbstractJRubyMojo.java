@@ -3,9 +3,11 @@ package de.saumya.mojo.jruby;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -35,8 +37,6 @@ import org.codehaus.classworlds.ClassRealm;
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     private static String              DEFAULT_JRUBY_VERSION = "1.5.1";
-
-    // private static final Set<Artifact> NO_ARTIFACTS = Collections.emptySet();
 
     /**
      * fork the JRuby execution.
@@ -255,20 +255,42 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             if (this.launchDirectory == null || !this.launchDirectory.exists()) {
                 this.launchDirectory = new File(System.getProperty("user.dir"));
             }
-            // return new File(System.getProperty("user.dir"));
         }
-        // else {
-        // this.launchDirectory.mkdirs();
         return this.launchDirectory;
-        // }
     }
 
     protected void execute(final String args, final boolean resolveArtifacts)
             throws MojoExecutionException {
+        execute(args, resolveArtifacts, new HashMap<String, String>());
+    }
+
+    protected void executeScript(final File script, final String args,
+            final boolean resolveArtifacts, final Map<String, String> env)
+            throws MojoExecutionException {
+        final StringBuilder buf = new StringBuilder("-e ");
+        setupEnv(env);
+        for (final Map.Entry<String, String> entry : env.entrySet()) {
+            buf.append("ENV['")
+                    .append(entry.getKey())
+                    .append("']='")
+                    .append(entry.getValue())
+                    .append("';");
+        }
+        buf.append("';ARGV<<[")
+                .append(args)
+                .append("];ARGV.flatten!;load('")
+                .append(script)
+                .append("');");
+        execute(buf.toString(), resolveArtifacts, new HashMap<String, String>());
+    }
+
+    protected void execute(final String args, final boolean resolveArtifacts,
+            final Map<String, String> env) throws MojoExecutionException {
         execute(args.trim().split("\\s+"),
                 this.artifacts,
                 this.outputFile,
-                resolveArtifacts);
+                resolveArtifacts,
+                env);
     }
 
     protected void execute(final String args) throws MojoExecutionException {
@@ -276,22 +298,34 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     protected void execute(final String[] args) throws MojoExecutionException {
-        execute(args, this.artifacts, this.outputFile, true);
+        execute(args,
+                this.artifacts,
+                this.outputFile,
+                true,
+                new HashMap<String, String>());
     }
 
     protected void execute(final String[] args, final File outputFile)
             throws MojoExecutionException {
-        execute(args, this.artifacts, outputFile, true);
+        execute(args,
+                this.artifacts,
+                outputFile,
+                true,
+                new HashMap<String, String>());
     }
 
     protected void execute(final String[] args, final File outputFile,
             final boolean resolveArtifacts) throws MojoExecutionException {
-        execute(args, this.artifacts, outputFile, resolveArtifacts);
+        execute(args,
+                this.artifacts,
+                outputFile,
+                resolveArtifacts,
+                new HashMap<String, String>());
     }
 
     private void execute(final String[] args, final Set<Artifact> artifacts,
-            final File outputFile, final boolean resolveArtifacts)
-            throws MojoExecutionException {
+            final File outputFile, final boolean resolveArtifacts,
+            final Map<String, String> env) throws MojoExecutionException {
         final Set<Artifact> artis = new HashSet<Artifact>(artifacts);
         if (resolveArtifacts) {
             if (this.project.getArtifact().getFile() != null
@@ -316,10 +350,10 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             }
             final Launcher launcher;
             if (this.fork) {
+                setupEnv(env);
                 launcher = new AntLauncher(getLog(),
                         this.home,
-                        this.gemHome,
-                        this.gemPath,
+                        env,
                         this.launchMemory,
                         this.verbose);
             }
@@ -335,6 +369,15 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
         catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("error creating launcher", e);
+        }
+    }
+
+    private void setupEnv(final Map<String, String> env) {
+        if (this.gemHome != null) {
+            env.put(AntLauncher.GEM_HOME, this.gemHome.getAbsolutePath());
+        }
+        if (this.gemPath != null) {
+            env.put(AntLauncher.GEM_PATH, this.gemPath.getAbsolutePath());
         }
     }
 

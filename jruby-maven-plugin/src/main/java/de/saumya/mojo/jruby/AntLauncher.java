@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -22,22 +23,23 @@ import org.codehaus.plexus.util.StringUtils;
 
 class AntLauncher extends AbstractLauncher {
 
-    private final File    jrubyHome;
+    static final String               GEM_HOME = "GEM_HOME";
 
-    private final File    jrubyGemHome;
+    static final String               GEM_PATH = "GEM_PATH";
 
-    private final File    jrubyGemPath;
+    private final File                jrubyHome;
 
-    private final String  jrubyLaunchMemory;
+    private final Map<String, String> env;
 
-    private final boolean verbose;
+    private final String              jrubyLaunchMemory;
 
-    AntLauncher(final Log log, final File jrubyHome, final File jrubyGemHome,
-            final File jrubyGemPath, final String jrubyLaunchMemory,
+    private final boolean             verbose;
+
+    AntLauncher(final Log log, final File jrubyHome,
+            final Map<String, String> env, final String jrubyLaunchMemory,
             final boolean verbose) {
         super(log);
-        this.jrubyGemHome = jrubyGemHome;
-        this.jrubyGemPath = jrubyGemPath;
+        this.env = env;
         this.jrubyHome = jrubyHome;
         this.jrubyLaunchMemory = jrubyLaunchMemory;
         this.verbose = verbose;
@@ -85,20 +87,21 @@ class AntLauncher extends AbstractLauncher {
             v.setValue(this.jrubyHome.getAbsolutePath());
             java.addSysproperty(v);
         }
-        if (this.jrubyGemHome != null) {
+        for (final Map.Entry<String, String> entry : this.env.entrySet()) {
             final Variable v = new Variable();
-            v.setKey("GEM_HOME");
-            v.setValue(this.jrubyGemHome.getAbsolutePath());
-            java.addEnv(v);
-        }
-        if (this.jrubyGemPath != null) {
-            final Variable v = new Variable();
-            v.setKey("GEM_PATH");
-            v.setValue(this.jrubyGemPath.getAbsolutePath());
+            v.setKey(entry.getKey());
+            v.setValue(entry.getValue());
             java.addEnv(v);
         }
         if (this.verbose) {
             getLog().info("java classpath  : " + p.toString());
+            if (this.env.size() > 0) {
+                getLog().info("environment     :");
+                for (final Map.Entry<String, String> entry : this.env.entrySet()) {
+                    getLog().info("\t\t" + entry.getKey() + " => "
+                            + entry.getValue());
+                }
+            }
         }
 
         for (final String arg : args) {
