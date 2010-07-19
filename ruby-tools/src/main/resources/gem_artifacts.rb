@@ -358,7 +358,7 @@ POM
     def metadata_file(name, prereleases)
       dir = File.join(@local_repo, name)
       FileUtils.makedirs(dir)
-      File.join(dir, "maven-metadata-#{@repository_id}#{prereleases ? "-prereleases" : ""}.xml")
+      File.join(dir, "maven-metadata-#{@repository_id}#{prereleases ? "-prereleases" : "-releases"}.xml")
     end
 
     def metadata_sha1_file(name, prereleases = false, is_sha1 = false)
@@ -369,9 +369,17 @@ POM
       file
     end
 
-    def to_metadata(name, versions, prereleases = false)
+    def to_metadata(name, versions, prereleases = false, create_sha1 = true)
       metadata = metadata_file(name, prereleases)
-      if !File.exists?(metadata) || (File.new(metadata).mtime < @last_update)
+      if !File.exists?(metadata) # || (File.new(metadata).mtime < @last_update)
+        @count ||= 0
+        print "." if @count % 10 == 0
+        if(@count == 800)
+          puts
+          @count = 0
+        else
+          @count = @count + 1
+        end
         File.open(metadata, "w") do |f|
           f.puts <<-METADATA
 <?xml version="1.0" encoding="UTF-8"?>
@@ -396,13 +404,14 @@ METADATA
         # puts "#{@last_update} #{metadata}"
         File.utime(@last_update, @last_update, metadata)
       end
-      sha1(metadata)
+      sha1(metadata) if create_sha1
       metadata
     end
 
-    def update_all_metadata
+    def update_all_metadata(prerelease)
+      update
       map.each do |name, versions|
-        to_metadata(name, versions)
+        to_metadata(name, versions, prerelease, false)
       end
     end
   end
