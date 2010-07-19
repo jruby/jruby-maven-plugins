@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>jruby-maven-plugins</artifactId>
+    <artifactId>parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
     <version>0.20.0-SNAPSHOT</version>
+    <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
-  <groupId>de.saumya.mojo</groupId>
   <artifactId>rspec-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>RSpec Maven Mojo</name>
@@ -21,12 +21,6 @@
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>file-management</artifactId>
       <version>1.2.1</version>
-    </dependency> 
-    <dependency>
-      <groupId>de.saumya.mojo</groupId>
-      <artifactId>gem-maven-plugin</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
     </dependency> 
   </dependencies>
   <build>
@@ -59,18 +53,6 @@
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.1.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
@@ -83,12 +65,12 @@
             <configuration>
               <includeGroupIds>de.saumya.mojo</includeGroupIds>
               <includeArtifactIds>
-  jruby-maven-plugin,gem-maven-plugin
-       </includeArtifactIds>
+		jruby-maven-plugin,gem-maven-plugin
+	      </includeArtifactIds>
               <includes>
-  de/saumya/mojo/jruby/AbstractJRubyMojo.java,
-  de/saumya/mojo/gem/AbstractGemMojo.java
-       </includes>
+		de/saumya/mojo/jruby/AbstractJRubyMojo.java,
+		de/saumya/mojo/gem/AbstractGemMojo.java
+	      </includes>
               <classifier>sources</classifier>
               <outputDirectory>${project.build.directory}/sources</outputDirectory>
             </configuration>

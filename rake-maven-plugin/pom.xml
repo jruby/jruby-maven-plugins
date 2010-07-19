@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>parent-mojo</artifactId>
@@ -7,27 +8,31 @@
     <version>0.20.0-SNAPSHOT</version>
     <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
-  <artifactId>rails2-maven-plugin</artifactId>
+  <artifactId>rake-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Rails 2.3.x Maven Mojo</name>
+  <name>Rake Maven Mojo</name>
+  <url>http://github.com/mkristian/jruby-maven-plugins</url>
   <dependencies>
-    <dependency>
-      <groupId>${project.parent.groupId}</groupId>
-      <artifactId>jruby-maven-plugin</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
       <artifactId>gem-maven-plugin</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-velocity</artifactId>
-      <version>1.1.8</version>
+      <groupId>de.saumya.mojo</groupId>
+      <artifactId>ruby-tools</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.rb</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -49,8 +54,8 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.0</version>
         <executions>
           <execution>
             <id>src-dependencies</id>
@@ -81,13 +86,6 @@
             <exclude>de/saumya/mojo/jruby/**</exclude>
             <exclude>de/saumya/mojo/gem/**</exclude>
           </excludes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>2.5.1</version>
-        <configuration>
-          <goalPrefix>rails2</goalPrefix>
         </configuration>
       </plugin>
     </plugins>

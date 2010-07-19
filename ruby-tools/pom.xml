@@ -10,38 +10,34 @@
   <groupId>de.saumya.mojo</groupId>
   <artifactId>ruby-tools</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>ruby-tools</name>
-  <url>http://maven.apache.org</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <name>Ruby Tools</name>
+  <url>http://github.com/mkristian/jruby-maven-plugins</url>
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-complete</artifactId>
+      <version>1.5.1</version>
     </dependency>
     <dependency>
-    	<groupId>org.jruby</groupId>
-    	<artifactId>jruby-complete</artifactId>
-    	<version>1.5.1</version>
+    	<groupId>org.codehaus.plexus</groupId>
+    	<artifactId>plexus-classworlds</artifactId>
+    	<version>2.2.3</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.codehaus.plexus</groupId>
+    	<artifactId>plexus-utils</artifactId>
+    	<version>2.0.5</version>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.1.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <properties>
+    <skipTests>true</skipTests>
+  </properties>
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <properties>
+	<skipTests>false</skipTests>
+      </properties>
+    </profile>
+  </profiles>
 </project>
