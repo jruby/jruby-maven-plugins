@@ -1,1 +1,0 @@
--Djruby.rake.args=-T
