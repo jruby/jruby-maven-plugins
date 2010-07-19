@@ -36,35 +36,35 @@ import org.codehaus.classworlds.ClassRealm;
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String              DEFAULT_JRUBY_VERSION = "1.5.1";
+    private static String DEFAULT_JRUBY_VERSION = "1.5.1";
 
     /**
      * fork the JRuby execution.
      * 
      * @parameter expression="${jruby.fork}" default-value="true"
      */
-    protected boolean                  fork;
+    protected boolean fork;
 
     /**
      * verbose jruby related output
      * 
      * @parameter expression="${jruby.verbose}" default-value="false"
      */
-    protected boolean                  verbose;
+    protected boolean verbose;
 
     /**
      * the launch directory for the JRuby execution.
      * 
      * @parameter default-value="${launchDirectory}"
      */
-    protected File                     launchDirectory;
+    protected File launchDirectory;
 
     /**
      * directory of JRuby home to use when forking JRuby.
      * 
      * @parameter default-value="${jruby.home}"
      */
-    protected File                     home;
+    protected File home;
 
     /**
      * directory of gem home to use when forking JRuby.
@@ -72,7 +72,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @parameter expression="${jruby.gem.home}"
      *            default-value="${project.build.directory}/rubygems"
      */
-    protected File                     gemHome;
+    protected File gemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby.
@@ -80,14 +80,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @parameter expression="${jruby.gem.path}"
      *            default-value="${project.build.directory}/rubygems"
      */
-    protected File                     gemPath;
+    protected File gemPath;
 
     /**
      * The amount of memory to use when forking JRuby.
      * 
      * @parameter expression="${jruby.launch.memory}" default-value="384m"
      */
-    protected String                   launchMemory;
+    protected String launchMemory;
 
     /**
      * reference to maven project for internal use.
@@ -96,7 +96,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readOnly true
      */
-    protected MavenProject             project;
+    protected MavenProject project;
 
     /**
      * The project's artifacts.
@@ -105,7 +105,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    protected Set<Artifact>            artifacts;
+    protected Set<Artifact> artifacts;
 
     /**
      * artifact factory for internal use.
@@ -114,7 +114,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    protected ArtifactFactory          artifactFactory;
+    protected ArtifactFactory artifactFactory;
 
     /**
      * artifact resolver for internal use.
@@ -123,7 +123,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    protected ArtifactResolver         resolver;
+    protected ArtifactResolver resolver;
 
     /**
      * local repository for internal use.
@@ -132,7 +132,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    protected ArtifactRepository       localRepository;
+    protected ArtifactRepository localRepository;
 
     /**
      * list of remote repositories for internal use.
@@ -150,7 +150,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * 
      * @parameter default-value="${jruby.version}"
      */
-    protected String                   version;
+    protected String version;
 
     /**
      * output file where the stdout will be redirected to
@@ -158,7 +158,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @parameter
      */
     // TODO move into goals where needed
-    protected File                     outputFile;
+    protected File outputFile;
 
     /**
      * output directory for internal use.
@@ -167,7 +167,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    protected File                     outputDirectory;
+    protected File outputDirectory;
 
     /**
      * classrealm for internal use.
@@ -175,26 +175,24 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @parameter expression="${dummyExpression}"
      * @readonly
      */
-    protected ClassRealm               classRealm;
+    protected ClassRealm classRealm;
 
     /**
      * @component
      */
-    protected ArtifactMetadataSource   metadata;
+    protected ArtifactMetadataSource metadata;
 
     /**
      * @component
      */
-    protected MavenProjectBuilder      builder;
+    protected MavenProjectBuilder builder;
 
     private Artifact resolveJRUBYCompleteArtifact(final String version)
             throws DependencyResolutionRequiredException {
         getLog().debug("resolve jruby for verions " + version);
-        final Artifact artifact = this.artifactFactory.createArtifactWithClassifier("org.jruby",
-                                                                                    "jruby-complete",
-                                                                                    version,
-                                                                                    "jar",
-                                                                                    null);
+        final Artifact artifact = this.artifactFactory
+                .createArtifactWithClassifier("org.jruby", "jruby-complete",
+                        version, "jar", null);
         return resolveJRUBYCompleteArtifact(artifact);
     }
 
@@ -206,14 +204,11 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             // request.setArtifact(artifact);
             // request.setLocalRepository(this.localRepository);
             // request.setRemoteRepostories(this.remoteRepositories);
-            this.resolver.resolve(artifact,
-                                  this.remoteRepositories,
-                                  this.localRepository);
-        }
-        catch (final ArtifactResolutionException e) {
+            this.resolver.resolve(artifact, this.remoteRepositories,
+                    this.localRepository);
+        } catch (final ArtifactResolutionException e) {
             throw new DependencyResolutionRequiredException(artifact);
-        }
-        catch (final ArtifactNotFoundException e) {
+        } catch (final ArtifactNotFoundException e) {
             throw new DependencyResolutionRequiredException(artifact);
         }
 
@@ -229,19 +224,17 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         if (this.version != null) {
             // preference to command line or property version
             return resolveJRUBYCompleteArtifact(this.version);
-        }
-        else {
+        } else {
             // then take jruby from the dependencies
             for (final Object o : this.project.getDependencies()) {
                 final Dependency artifact = (Dependency) o;
                 if (artifact.getArtifactId().equals("jruby-complete")
                         && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
                         && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
-                    return resolveJRUBYCompleteArtifact(this.artifactFactory.createArtifact(artifact.getGroupId(),
-                                                                                            artifact.getArtifactId(),
-                                                                                            artifact.getVersion(),
-                                                                                            artifact.getScope(),
-                                                                                            artifact.getType()));
+                    return resolveJRUBYCompleteArtifact(this.artifactFactory
+                            .createArtifact(artifact.getGroupId(), artifact
+                                    .getArtifactId(), artifact.getVersion(),
+                                    artifact.getScope(), artifact.getType()));
                 }
             }
         }
@@ -270,27 +263,18 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         final StringBuilder buf = new StringBuilder("-e ");
         setupEnv(env);
         for (final Map.Entry<String, String> entry : env.entrySet()) {
-            buf.append("ENV['")
-                    .append(entry.getKey())
-                    .append("']='")
-                    .append(entry.getValue())
-                    .append("';");
+            buf.append("ENV['").append(entry.getKey()).append("']='").append(
+                    entry.getValue()).append("';");
         }
-        buf.append("';ARGV<<[")
-                .append(args)
-                .append("];ARGV.flatten!;load('")
-                .append(script)
-                .append("');");
+        buf.append("';ARGV<<[").append(args).append("];ARGV.flatten!;load('")
+                .append(script).append("');");
         execute(buf.toString(), resolveArtifacts, new HashMap<String, String>());
     }
 
     protected void execute(final String args, final boolean resolveArtifacts,
             final Map<String, String> env) throws MojoExecutionException {
-        execute(args.trim().split("\\s+"),
-                this.artifacts,
-                this.outputFile,
-                resolveArtifacts,
-                env);
+        execute(args.trim().split("\\s+"), this.artifacts, this.outputFile,
+                resolveArtifacts, env);
     }
 
     protected void execute(final String args) throws MojoExecutionException {
@@ -298,28 +282,19 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     protected void execute(final String[] args) throws MojoExecutionException {
-        execute(args,
-                this.artifacts,
-                this.outputFile,
-                true,
+        execute(args, this.artifacts, this.outputFile, true,
                 new HashMap<String, String>());
     }
 
     protected void execute(final String[] args, final File outputFile)
             throws MojoExecutionException {
-        execute(args,
-                this.artifacts,
-                outputFile,
-                true,
+        execute(args, this.artifacts, outputFile, true,
                 new HashMap<String, String>());
     }
 
     protected void execute(final String[] args, final File outputFile,
             final boolean resolveArtifacts) throws MojoExecutionException {
-        execute(args,
-                this.artifacts,
-                outputFile,
-                resolveArtifacts,
+        execute(args, this.artifacts, outputFile, resolveArtifacts,
                 new HashMap<String, String>());
     }
 
@@ -351,33 +326,33 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             final Launcher launcher;
             if (this.fork) {
                 setupEnv(env);
-                launcher = new AntLauncher(getLog(),
-                        this.home,
-                        env,
-                        this.launchMemory,
-                        this.verbose);
-            }
-            else {
+                launcher = new AntLauncher(getLog(), this.home, env,
+                        this.launchMemory, this.verbose);
+            } else {
                 launcher = new EmbeddedLauncher(getLog(), this.classRealm);
             }
-            launcher.execute(launchDirectory(),
-                             args,
-                             artis,
-                             resolveJRUBYCompleteArtifact(),
-                             this.outputDirectory,
-                             outputFile);
-        }
-        catch (final DependencyResolutionRequiredException e) {
+            launcher.execute(launchDirectory(), args, artis,
+                    resolveJRUBYCompleteArtifact(), this.outputDirectory,
+                    outputFile);
+        } catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("error creating launcher", e);
         }
     }
 
-    private void setupEnv(final Map<String, String> env) {
+    protected Map<String, String> setupEnv() {
+        final Map<String, String> env = new HashMap<String, String>();
+        setupEnv(env);
+        return env;
+    }
+
+    protected void setupEnv(final Map<String, String> env) {
         if (this.gemHome != null) {
-            env.put(AntLauncher.GEM_HOME, this.gemHome.getAbsolutePath());
+            env.put(AntLauncher.GEM_HOME, this.gemHome.getAbsolutePath()
+                    .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
         }
         if (this.gemPath != null) {
-            env.put(AntLauncher.GEM_PATH, this.gemPath.getAbsolutePath());
+            env.put(AntLauncher.GEM_PATH, this.gemPath.getAbsolutePath()
+                    .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
         }
     }
 
@@ -387,53 +362,61 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         // System.out.println(artifact + " resolve:");
         // if (artifact.getArtifactHandler().isIncludesDependencies()) {
         try {
-            final MavenProject mavenProject = this.builder.buildFromRepository(artifact,
-                                                                               this.remoteRepositories,
-                                                                               this.localRepository);
+            final MavenProject mavenProject = this.builder.buildFromRepository(
+                    artifact, this.remoteRepositories, this.localRepository);
 
-            final Set<Artifact> moreArtifacts = mavenProject.createArtifacts(this.artifactFactory,
-                                                                             null,
-                                                                             null);
+            final Set<Artifact> moreArtifacts = mavenProject.createArtifacts(
+                    this.artifactFactory, null, null);
 
-            final ArtifactResolutionResult arr = this.resolver.resolveTransitively(moreArtifacts,
-                                                                                   artifact,
-                                                                                   this.project.getManagedVersionMap(),
-                                                                                   this.localRepository,
-                                                                                   this.remoteRepositories,
-                                                                                   this.metadata,
-                                                                                   new ArtifactFilter() {
-                                                                                       public boolean include(
-                                                                                               final Artifact artifact) {
-                                                                                           return artifact.getType()
-                                                                                                   .equals("gem");
-                                                                                       }
-                                                                                   });
+            final ArtifactResolutionResult arr = this.resolver
+                    .resolveTransitively(moreArtifacts, artifact, this.project
+                            .getManagedVersionMap(), this.localRepository,
+                            this.remoteRepositories, this.metadata,
+                            new ArtifactFilter() {
+                                public boolean include(final Artifact artifact) {
+                                    return artifact.getType().equals("gem");
+                                }
+                            });
             // System.out.println(artifact + " " + arr);
             for (final Object artiObject : arr.getArtifacts()) {
                 // allow older api to work
                 final Artifact arti = (Artifact) artiObject;
                 artifacts.add(arti);
             }
-        }
-        catch (final ArtifactResolutionException e) {
+        } catch (final ArtifactResolutionException e) {
             throw new MojoExecutionException("error resolving " + artifact, e);
-        }
-        catch (final ArtifactNotFoundException e) {
+        } catch (final ArtifactNotFoundException e) {
             throw new MojoExecutionException("error resolving " + artifact, e);
-        }
-        catch (final InvalidDependencyVersionException e) {
+        } catch (final InvalidDependencyVersionException e) {
             throw new MojoExecutionException("error resolving " + artifact, e);
-        }
-        catch (final ProjectBuildingException e) {
+        } catch (final ProjectBuildingException e) {
             throw new MojoExecutionException("error building project for "
                     + artifact, e);
         }
     }
 
     protected String fileFromClassloader(final String file) {
-        return Thread.currentThread()
-                .getContextClassLoader()
-                .getResource(file)
+        return Thread.currentThread().getContextClassLoader().getResource(file)
                 .toExternalForm();
     }
+
+    protected File binDirectory() {
+        if (this.gemHome == null) {
+            if (System.getenv("GEM_HOME") == null) {
+                // TODO something better is needed
+                // maybe an exception
+                return null;
+            } else {
+                return new File(System.getenv("GEM_HOME"), "bin");
+            }
+        } else {
+            return new File(this.gemHome, "bin");
+        }
+    }
+
+    protected StringBuilder binScript(final String script) {
+        return new StringBuilder(new File(binDirectory(), script)
+                .getAbsolutePath());
+    }
+
 }

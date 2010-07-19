@@ -8,8 +8,9 @@ import java.util.List;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.GemspecService;
+import de.saumya.mojo.GemService;
 import de.saumya.mojo.LauncherFactory;
+import de.saumya.mojo.Log;
 import de.saumya.mojo.RubyScriptException;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
@@ -21,6 +22,13 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 public class PomMojo extends AbstractJRubyMojo {
 
     private static List<String> NO_CLASSPATH = Collections.emptyList();
+
+    protected final Log         log          = new Log() {
+                                                 public void info(
+                                                         final CharSequence content) {
+                                                     getLog().info(content);
+                                                 }
+                                             };
     /**
      * arguments for the gem command of JRuby.
      * 
@@ -72,27 +80,24 @@ public class PomMojo extends AbstractJRubyMojo {
         }
         else {
             try {
-                final GemspecService gemspec = new GemspecService(new LauncherFactory().getEmbeddedLauncher(this.verbose,
-                                                                                                            NO_CLASSPATH,
-                                                                                                            this.gemHome,
-                                                                                                            this.gemPath,
-                                                                                                            resolveJRUBYCompleteArtifact().getFile(),
-                                                                                                            this.classRealm),
-                        new File(this.localRepository.getBasedir()));
+                final GemService gemspec = new GemService(this.log,
+                        new LauncherFactory().getEmbeddedLauncher(this.verbose,
+                                                                  NO_CLASSPATH,
+                                                                  setupEnv(),
+                                                                  resolveJRUBYCompleteArtifact().getFile(),
+                                                                  this.classRealm));
 
                 gemspec.convertGemspec2Pom(this.gemspecFile, this.pom);
+
             }
             catch (final RubyScriptException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new MojoExecutionException("error in rake script", e);
             }
             catch (final DependencyResolutionRequiredException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new MojoExecutionException("could not resolve jruby", e);
             }
             catch (final IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new MojoExecutionException("IO error", e);
             }
         }
     }
