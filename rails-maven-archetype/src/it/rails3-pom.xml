@@ -40,7 +40,7 @@
 		require 'fileutils'
 		web_inf = File.join('${project.build.directory}','${project.build.finalName}','WEB-INF')
 		FileUtils.mkdir_p(web_inf)
-		FileUtils.cp(File.join('${project.build.directory}','Gemfile.maven'), File.join(web_inf, 'Gemfile'))
+		FileUtils.cp(File.join('${rails.dir}','Gemfile.maven'), File.join(web_inf, 'Gemfile'))
 	      </script>
 	    </configuration>
 	  </execution>
