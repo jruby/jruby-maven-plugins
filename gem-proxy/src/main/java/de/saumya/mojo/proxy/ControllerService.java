@@ -13,22 +13,38 @@ import java.io.Writer;
 
 import org.jruby.embed.ScriptingContainer;
 
+import de.saumya.mojo.ScriptingService;
+
 class ControllerService {
 
     private final Object             rubyObject;
 
     private final ScriptingContainer scriptingContainer;
 
-    ControllerService(final JRubyService jruby) throws IOException {
-        this.rubyObject = jruby.rubyObject("gem_artifacts.rb");
-        this.scriptingContainer = jruby.scripting();
+    private long                     blockUpdatesUntil = 0;
+
+    private final Object             mutex             = new Object();
+
+    ControllerService(final ScriptingService scripting) throws IOException {
+        this.rubyObject = scripting.rubyObjectFromClassloader("gem_artifacts.rb");
+        this.scriptingContainer = scripting.scripting();
         update();
     }
 
-    void update() {
-        this.scriptingContainer.callMethod(this.rubyObject,
-                                           "update",
-                                           Object.class);
+    boolean update() {
+        boolean update = false;
+        synchronized (this.mutex) {
+            if (this.blockUpdatesUntil < System.currentTimeMillis()) {
+                this.blockUpdatesUntil = System.currentTimeMillis() + 5 * 60 * 1000;
+                update = true;
+            }
+        }
+        if (update) {
+            this.scriptingContainer.callMethod(this.rubyObject,
+                                               "update",
+                                               Object.class);
+        }
+        return update;
     }
 
     String getGemLocation(final String name, final String version)
@@ -89,7 +105,6 @@ class ControllerService {
 
     void writeMetaData(final String name, final Writer writer,
             final boolean prereleases) throws IOException {
-        System.out.println(prereleases);
         final String file = this.scriptingContainer.callMethod(this.rubyObject,
                                                                "metadata",
                                                                new Object[] {

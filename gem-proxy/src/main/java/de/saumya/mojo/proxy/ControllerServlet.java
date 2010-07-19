@@ -31,7 +31,8 @@ public class ControllerServlet extends HttpServlet {
             case 4: // {releases|prereleases}/rubygems/#{name}/maven-metadata.xml
                 if (parts[3].equals("maven-metadata.xml")) {
                     resp.setContentType("application/xml");
-                    resp.setCharacterEncoding("UTF-8");
+                    resp.setCharacterEncoding("utf-8");
+                    resp.setHeader("Vary", "Accept");
                     this.controller.writeMetaData(parts[2],
                                                   resp.getWriter(),
                                                   "prereleases".equals(parts[0]));

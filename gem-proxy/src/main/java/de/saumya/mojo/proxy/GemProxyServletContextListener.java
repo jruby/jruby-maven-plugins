@@ -6,17 +6,19 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import de.saumya.mojo.ScriptingService;
+
 public class GemProxyServletContextListener implements ServletContextListener {
 
     static class Updater extends Thread {
 
-        private volatile boolean        isRunning  = true;
+        private volatile boolean        isRunning = true;
 
         private final ControllerService controller;
 
         private final ServletContext    context;
 
-        private static long             lastUpdate = 0;
+        // private static long lastUpdate = 0;
 
         Updater(final ControllerService controller, final ServletContext context) {
             this.controller = controller;
@@ -37,7 +39,8 @@ public class GemProxyServletContextListener implements ServletContextListener {
             log("started update job");
             while (this.isRunning) {
                 try {
-                    Thread.sleep(120 * 1000);
+                    // 12 hours
+                    Thread.sleep(12 * 60 * 60 * 1000);
                     this.controller.update();
                     log("updated metadata");
                 }
@@ -68,13 +71,13 @@ public class GemProxyServletContextListener implements ServletContextListener {
     }
 
     public void contextInitialized(final ServletContextEvent sce) {
-        final JRubyService jruby = new JRubyService();
+        final ScriptingService scripting = new ScriptingService();
         ControllerService controller;
         sce.getServletContext().log("registering "
                 + ControllerService.class.getName() + " . . .");
 
         try {
-            controller = new ControllerService(jruby);
+            controller = new ControllerService(scripting);
         }
         catch (final IOException e) {
             throw new RuntimeException("error initializing controller", e);

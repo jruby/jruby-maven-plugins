@@ -8,6 +8,18 @@
     <servlet-name>gems</servlet-name>
     <servlet-class>de.saumya.mojo.proxy.ControllerServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>update</servlet-name>
+    <servlet-class>de.saumya.mojo.proxy.UpdateServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>update</servlet-name>
+    <url-pattern>/releases/update</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>update</servlet-name>
+    <url-pattern>/prereleases/update</url-pattern>
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>gems</servlet-name>
     <url-pattern>/*</url-pattern>
