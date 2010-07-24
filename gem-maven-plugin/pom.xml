@@ -75,6 +75,7 @@
             <configuration>
               <includeGroupIds>de.saumya.mojo</includeGroupIds>
               <includes>de/saumya/mojo/jruby/AbstractJRubyMojo.java</includes>
+	      <excludeArtifactIds>ruby-tools</excludeArtifactIds>
               <classifier>sources</classifier>
               <outputDirectory>${project.build.directory}/sources</outputDirectory>
             </configuration>
