@@ -231,7 +231,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         if (gems.length() > 0) {
-            execute("-S gem install --no-ri --no-rdoc " + extraFlag + " -l "
+            execute("-S gem install --no-ri --no-rdoc " + extraFlag + " "
                     + gems, false);
         }
         else {
