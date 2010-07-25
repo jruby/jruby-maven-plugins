@@ -2,6 +2,19 @@ require 'rubygems'
 require 'fileutils'
 require 'digest/sha1'
 
+require 'rubygems/remote_fetcher'
+class Gem::RemoteFetcher
+  alias :fetch_path_old :fetch_path
+  def fetch_path(uri, mtime = nil, head = false)
+    begin
+      fetch_path_old(uri, mtime, head)
+    rescue FetchError => e
+      warn e.message
+      nil
+    end
+  end
+end
+
 module Maven
   class LocalRepository
 
@@ -121,7 +134,7 @@ POM
         f.puts <<-POM
     <license>
       <name>#{File.basename(license)}</name>
-      <url>./#{license}</url>
+      <url>./#{license.sub(/^.\//,'')}</url>
       <distribution>repo</distribution>
     </license>
  POM
@@ -226,18 +239,21 @@ POM
             <goals><goal>pom</goal></goals>
             <configuration>
               <date>#{spec.date.strftime("%Y-%m-%d")}</date>
-              <extraRdocFiles>#{spec.extra_rdoc_files.join(',')}</extraRdocFiles>
-              <rdocOptions>#{spec.rdoc_options.join(',')}</rdocOptions>
-              <requirePaths>#{spec.require_paths.join(',')}</requirePaths>
-              <rubyforgeProject>#{spec.rubyforge_project}</rubyforgeProject>
-              <rubygemsVersion>#{spec.rubygems_version}</rubygemsVersion>
-              <requiredRubygemsVersion>#{spec.required_rubygems_version}</requiredRubygemsVersion>
-              <bindir>#{spec.bindir}</bindir>
-              <requiredRubyVersion>#{spec.required_ruby_version}</requiredRubyVersion>
-              <postInstallMessage>#{spec.post_install_message}</postInstallMessage>
-              <executables>#{spec.executables}</executables>
-              <extensions>#{spec.extensions}</extensions>
-              <platform>#{spec.platform}</platform>
+POM
+      _add_tag(f, "extraRdocFiles", spec.extra_rdoc_files.join(',').to_s)
+      _add_tag(f, "rdocOptions", spec.rdoc_options.join(',').to_s)
+      _add_tag(f, "requirePaths", spec.require_paths.join(',').to_s) if  spec.require_paths.join(',').to_s != "lib"
+      _add_tag(f, "rubyforgeProject", spec.rubyforge_project.to_s)
+      _add_tag(f, "rubygemsVersion", spec.rubygems_version.to_s)
+      _add_tag(f, "requiredRubygemsVersion", spec.required_rubygems_version.to_s) if spec.required_rubygems_version.to_s != ">= 0"
+      _add_tag(f, "bindir", spec.bindir.to_s) if spec.bindir.to_s != "bin"
+      _add_tag(f, "requiredRubyVersion", spec.required_ruby_version.to_s) if spec.required_ruby_version.to_s != ">= 0"
+      _add_tag(f, "postInstallMessage", spec.post_install_message.to_s)
+      _add_tag(f, "executables", spec.executables.to_s)
+      _add_tag(f, "extensions", spec.extensions.to_s)
+      _add_tag(f, "platform", spec.platform.to_s) if spec.platform != 'ruby'
+      _extra_files(f, spec)
+      f.puts <<-POM
             </configuration>
           </execution>
         </executions>
@@ -264,6 +280,25 @@ POM
   </build>
 </project>
 POM
+    end
+
+    def _add_tag(io, tag, value)
+      if value && value.size > 0
+        io.puts "              <#{tag}>#{value}</#{tag}>"
+      end
+    end
+
+    def _extra_files(io, spec)
+      files = spec.files.dup
+      (Dir['lib/**/*'] + Dir['generators/**/*'] + Dir['spec/**/*'] + spec.licenses + spec.extra_rdoc_files).each do |f|
+        files.delete(f)
+        if f =~ /^.\//
+          files.delete(f.sub(/^.\//, ''))
+        else
+          files.delete("./#{f}")
+        end
+      end
+      _add_tag(io, "extra_files", files.join(","))
     end
 
     def pom_file(name, version)

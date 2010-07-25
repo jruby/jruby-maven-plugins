@@ -43,11 +43,19 @@ public class PackageMojo extends AbstractJRubyMojo {
      */
     File                              gemSpec;
 
+    /**
+     * @parameter default-value="{gemspec.overwrite}"
+     */
+    boolean                           gemspecOverwrite = false;
+
     /** @parameter */
     private String                    date;
 
     /** @parameter */
     private String                    extraRdocFiles;
+
+    /** @parameter */
+    private String                    extraFiles;
 
     /** @parameter */
     private String                    rdocOptions;
@@ -82,7 +90,7 @@ public class PackageMojo extends AbstractJRubyMojo {
     /** @parameter */
     private String                    platform;
 
-    private final Map<String, String> relocationMap = new HashMap<String, String>();
+    private final Map<String, String> relocationMap    = new HashMap<String, String>();
 
     /**
      * @parameter expression="false"
@@ -95,6 +103,8 @@ public class PackageMojo extends AbstractJRubyMojo {
         try {
             if (this.gemSpec == null && project.getBasedir() != null
                     && project.getBasedir().exists()) {
+                // TODO generate the gemspec in the prepare-package phase so we
+                // can use it separately
                 build(project, artifact);
             }
             else {
@@ -195,6 +205,7 @@ public class PackageMojo extends AbstractJRubyMojo {
 
         gemSpecWriter.append("rubyforge_project", this.rubyforgeProject);
         gemSpecWriter.appendRdocFiles(this.extraRdocFiles);
+        gemSpecWriter.appendFiles(this.extraFiles);
         gemSpecWriter.appendList("executables", this.executables);
         gemSpecWriter.appendList("extensions", this.extensions);
         gemSpecWriter.appendList("rdoc_options", this.rdocOptions);
@@ -380,8 +391,9 @@ public class PackageMojo extends AbstractJRubyMojo {
         this.launchDirectory = gemDir;
         execute("-S gem build " + gemSpec.getAbsolutePath());
 
-        if (!localGemspec.exists()
-                || !FileUtils.contentEquals(localGemspec, gemSpec)) {
+        if ((!localGemspec.exists() || !FileUtils.contentEquals(localGemspec,
+                                                                gemSpec))
+                && this.gemspecOverwrite) {
             FileUtils.copyFile(gemSpec, localGemspec);
         }
 

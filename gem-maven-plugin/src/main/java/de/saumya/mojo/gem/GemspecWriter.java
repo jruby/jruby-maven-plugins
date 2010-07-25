@@ -273,9 +273,10 @@ class GemspecWriter {
         if (this.latestModified < con.getLastModified()) {
             this.latestModified = con.getLastModified();
         }
-        appendFile(new File(u.getFile().substring(1))); // omit the first slash
+        // omit the first slash
+        appendFile(new File(u.getFile().substring(1).replaceFirst("^./", "")));
         if (name != null) {
-            append("  s.licenses << '" + name + "'");
+            append("  s.licenses << '" + name.replaceFirst("^./", "") + "'");
         }
     }
 
@@ -371,16 +372,37 @@ class GemspecWriter {
 
     void appendList(final String name, final String list) throws IOException {
         if (list != null) {
-            appendRaw(name, "['" + list.replace(",", "','") + "']");
+            final StringBuilder buf = new StringBuilder("[");
+            boolean first = true;
+            for (final String part : list.split(",")) {
+                if (first) {
+                    first = false;
+                }
+                else {
+                    buf.append(",");
+                }
+                final char quoteChar = part.contains("'") ? '"' : '\'';
+                buf.append(quoteChar).append(part.trim()).append(quoteChar);
+            }
+            buf.append("]");
+            appendRaw(name, buf.toString());
         }
     }
 
     void appendRdocFiles(final String extraRdocFiles) throws IOException {
         if (extraRdocFiles != null) {
             for (final String f : extraRdocFiles.split(",")) {
-                this.files.add(new File(f));
+                appendFile(f.trim());
             }
             appendList("extra_rdoc_files", extraRdocFiles);
+        }
+    }
+
+    void appendFiles(final String files) throws IOException {
+        if (files != null) {
+            for (final String f : files.split(",")) {
+                appendFile(f.trim());
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ import de.saumya.mojo.RubyScriptException;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
 
 /**
- * goal to convert a gemspec into pom.xml.
+ * goal to converts a gemspec file into pom.xml.
  * 
  * @goal pom
  */
@@ -29,12 +29,6 @@ public class PomMojo extends AbstractJRubyMojo {
                                                      getLog().info(content);
                                                  }
                                              };
-    /**
-     * arguments for the gem command of JRuby.
-     * 
-     * @parameter default-value="${args}"
-     */
-    protected String            args         = null;
 
     /**
      * @parameter expression="${pom}" default-value="pom.xml"
@@ -47,19 +41,15 @@ public class PomMojo extends AbstractJRubyMojo {
     protected boolean           force        = false;
 
     /**
-     * @parameter default-value="${gemspec}"
+     * @parameter default-value="${pom.gemspec}"
      */
     protected File              gemspecFile;
 
     public void execute() throws MojoExecutionException {
         if (this.pom.exists() && !this.force) {
             getLog().info(this.pom.getName()
-                    + " already exists. use '-Dgemspec.force=true' to overwrite");
+                    + " already exists. use '-Dpom.force=true' to overwrite");
             return;
-        }
-        String commandString = "";
-        if (this.args == null) {
-            commandString += " " + this.args;
         }
         if (this.gemspecFile == null) {
             getLog().debug("no gemspec file given, see if there is single one");
@@ -67,7 +57,7 @@ public class PomMojo extends AbstractJRubyMojo {
                 if (file.getName().endsWith(".gemspec")) {
                     if (this.gemspecFile != null) {
                         getLog().info("there is no gemspec file given but there are more then one in the current directory.");
-                        getLog().info("do not know what to do. give up");
+                        getLog().info("use '-Dpom.gemspec=...' to select the gemspec file to process");
                         return;
                     }
                     this.gemspecFile = file;
