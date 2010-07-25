@@ -220,7 +220,7 @@ public class PackageMojo extends AbstractJRubyMojo {
         ArtifactResolutionResult jarDependencyArtifacts = null;
         if (this.includeDependencies) {
             try {
-                jarDependencyArtifacts = this.resolver.resolveTransitively(project.getDependencyArtifacts(),
+                jarDependencyArtifacts = this.resolver.resolveTransitively(project.getArtifacts(),
                                                                            project.getArtifact(),
                                                                            this.project.getManagedVersionMap(),
                                                                            this.localRepository,
