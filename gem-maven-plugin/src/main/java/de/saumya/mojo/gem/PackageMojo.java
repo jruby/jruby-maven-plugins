@@ -94,7 +94,7 @@ public class PackageMojo extends AbstractJRubyMojo {
         final GemArtifact artifact = new GemArtifact(project);
         try {
             if (this.gemSpec == null && project.getBasedir() != null
-		&& project.getBasedir().exists()) {
+                    && project.getBasedir().exists()) {
                 build(project, artifact);
             }
             else {
@@ -133,7 +133,7 @@ public class PackageMojo extends AbstractJRubyMojo {
                 else {
                     FileUtils.copyFileIfModified(gem,
                                                  new File(this.buildDirectory,
-							  gem.getName()));
+                                                         gem.getName()));
                 }
                 gem.deleteOnExit();
             }
@@ -144,25 +144,25 @@ public class PackageMojo extends AbstractJRubyMojo {
     }
 
     private MavenProject projectFromArtifact(final Artifact artifact)
-	throws ProjectBuildingException {
+            throws ProjectBuildingException {
         final MavenProject project = this.builder.buildFromRepository(artifact,
                                                                       this.remoteRepositories,
                                                                       this.localRepository);
         if (project.getDistributionManagement() != null
-	    && project.getDistributionManagement().getRelocation() != null) {
+                && project.getDistributionManagement().getRelocation() != null) {
             final Relocation reloc = project.getDistributionManagement()
-		.getRelocation();
+                    .getRelocation();
             final String key = artifact.getGroupId() + ":"
-		+ artifact.getArtifactId() + ":" + artifact.getType() + ":"
-		+ artifact.getVersion();
+                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
+                    + artifact.getVersion();
             artifact.setArtifactId(reloc.getArtifactId());
             artifact.setGroupId(reloc.getGroupId());
             if (reloc.getVersion() != null) {
                 artifact.setVersion(reloc.getVersion());
             }
             this.relocationMap.put(key, artifact.getGroupId() + ":"
-				   + artifact.getArtifactId() + ":" + artifact.getType() + ":"
-				   + artifact.getVersion());
+                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
+                    + artifact.getVersion());
             return projectFromArtifact(artifact);
         }
         else {
@@ -171,17 +171,17 @@ public class PackageMojo extends AbstractJRubyMojo {
     }
 
     @SuppressWarnings( { "unchecked" })
-	private void build(final MavenProject project, final GemArtifact artifact)
-	throws MojoExecutionException, IOException {
+    private void build(final MavenProject project, final GemArtifact artifact)
+            throws MojoExecutionException, IOException {
 
         getLog().info("building gem for " + artifact + " . . .");
         getLog().info("include dependencies? " + this.includeDependencies);
         final File gemDir = new File(this.buildDirectory, artifact.getGemName());
         final File gemSpec = new File(gemDir, artifact.getGemName()
-				      + ".gemspec");
+                + ".gemspec");
         final GemspecWriter gemSpecWriter = new GemspecWriter(gemSpec,
-							      project,
-							      artifact);
+                project,
+                artifact);
 
         if (this.date != null) {
             gemSpecWriter.append("date", Date.valueOf(this.date).toString());
@@ -202,8 +202,8 @@ public class PackageMojo extends AbstractJRubyMojo {
         final File rubyFile;
         if (artifact.hasJarFile()) {
             gemSpecWriter.appendPlatform(this.platform == null
-					 ? "java"
-					 : this.platform);
+                    ? "java"
+                    : this.platform);
             gemSpecWriter.appendJarfile(artifact.getJarFile(),
                                         artifact.getJarFile().getName());
             final File lib = new File(gemDir, "lib");
@@ -228,18 +228,18 @@ public class PackageMojo extends AbstractJRubyMojo {
                                                                            this.metadata,
                                                                            new ArtifactFilter() {
                                                                                public boolean include(
-												      final Artifact candidate) {
+                                                                                       final Artifact candidate) {
                                                                                    if (candidate == artifact) {
                                                                                        return true;
                                                                                    }
                                                                                    final boolean result = (candidate.getType()
-													   .equals("jar") && ("compile".equals(candidate.getScope()) || "runtime".equals(candidate.getScope())));
+                                                                                           .equals("jar") && ("compile".equals(candidate.getScope()) || "runtime".equals(candidate.getScope())));
                                                                                    return result;
                                                                                }
 
                                                                            });
                 for (final Iterator each = jarDependencyArtifacts.getArtifacts()
-			 .iterator(); each.hasNext();) {
+                        .iterator(); each.hasNext();) {
                     final Artifact dependency = (Artifact) each.next();
                     getLog().info(" -- include -- " + dependency);
                     gemSpecWriter.appendJarfile(dependency.getFile(),
@@ -279,7 +279,7 @@ public class PackageMojo extends AbstractJRubyMojo {
 
         for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
             if (!dependency.isOptional()
-		&& dependency.getType().contains("gem")) {
+                    && dependency.getType().contains("gem")) {
                 if (!dependency.getVersion().matches(".*[\\)\\]]$")) {
                     // it will adjust the artifact as well (in case of
                     // relocation)
@@ -297,22 +297,22 @@ public class PackageMojo extends AbstractJRubyMojo {
                     }
                     catch (final ProjectBuildingException e) {
                         throw new MojoExecutionException("error building project for "
-							 + arti,
-							 e);
+                                + arti,
+                                e);
                     }
                 }
 
                 final String prefix = dependency.getGroupId()
-		    .equals("rubygems") ? "" : dependency.getGroupId()
-		    + ".";
+                        .equals("rubygems") ? "" : dependency.getGroupId()
+                        + ".";
                 if ((Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
                     gemSpecWriter.appendDependency(prefix
-						   + dependency.getArtifactId(),
+                                                           + dependency.getArtifactId(),
                                                    dependency.getVersion());
                 }
                 else if ((Artifact.SCOPE_PROVIDED + Artifact.SCOPE_TEST).contains(dependency.getScope())) {
                     gemSpecWriter.appendDevelopmentDependency(prefix
-							      + dependency.getArtifactId(),
+                                                                      + dependency.getArtifactId(),
                                                               dependency.getVersion());
                 }
                 else {
@@ -332,27 +332,27 @@ public class PackageMojo extends AbstractJRubyMojo {
                 writer = new FileWriter(new File(gemDir, rubyFile.getPath()));
 
                 writer.append("module ")
-		    .append(titleizedClassname(project.getArtifactId()))
-		    .append("\n");
+                        .append(titleizedClassname(project.getArtifactId()))
+                        .append("\n");
                 writer.append("  VERSION = '")
-		    .append(artifact.getGemVersion())
-		    .append("'\n");
+                        .append(artifact.getGemVersion())
+                        .append("'\n");
                 writer.append("  MAVEN_VERSION = '")
-		    .append(project.getVersion())
-		    .append("'\n");
+                        .append(project.getVersion())
+                        .append("'\n");
                 writer.append("end\n");
                 writer.append("begin\n");
                 writer.append("  require 'java'\n");
                 writer.append("  require File.dirname(__FILE__) + '/")
-		    .append(artifact.getJarFile().getName())
-		    .append("'\n");
+                        .append(artifact.getJarFile().getName())
+                        .append("'\n");
                 if (jarDependencyArtifacts != null) {
                     for (final Iterator each = jarDependencyArtifacts.getArtifacts()
-			     .iterator(); each.hasNext();) {
+                            .iterator(); each.hasNext();) {
                         final Artifact dependency = (Artifact) each.next();
                         writer.append("  require File.dirname(__FILE__) + '/")
-			    .append(dependency.getFile().getName())
-			    .append("'\n");
+                                .append(dependency.getFile().getName())
+                                .append("'\n");
                     }
 
                 }
@@ -381,17 +381,17 @@ public class PackageMojo extends AbstractJRubyMojo {
         execute("-S gem build " + gemSpec.getAbsolutePath());
 
         if (!localGemspec.exists()
-	    || !FileUtils.contentEquals(localGemspec, gemSpec)) {
+                || !FileUtils.contentEquals(localGemspec, gemSpec)) {
             FileUtils.copyFile(gemSpec, localGemspec);
         }
 
         final StringBuilder gemFilename = new StringBuilder("rubygems".equals(artifact.getGroupId())
-							    ? ""
-							    : artifact.getGroupId() + ".").append(artifact.getArtifactId())
-	    .append("-")
-	    .append(artifact.getGemVersion())
-	    .append("java-gem".equals(artifact.getType()) ? "-java" : "")
-	    .append(".gem");
+                ? ""
+                : artifact.getGroupId() + ".").append(artifact.getArtifactId())
+                .append("-")
+                .append(artifact.getGemVersion())
+                .append("java-gem".equals(artifact.getType()) ? "-java" : "")
+                .append(".gem");
 
         FileUtils.copyFile(new File(gemDir, gemFilename.toString()),
                            artifact.getFile());
