@@ -338,7 +338,7 @@ POM
       unless File.exists?(file)
         require 'net/http'
         tuple = gem_details(name, version)
-        resource = Net::HTTP.new(tuple[1].sub(/http:../,80))
+        resource = Net::HTTP.new(tuple[1].sub(/http:../,''))
         headers,data = resource.get("/gems/#{name}-#{version}" +
                                     ("java" == tuple[0][2] ? "-java" : "") +
                                     ".gem")
