@@ -1,0 +1,1 @@
+-Dgem.exec.script=puts 'hello world'

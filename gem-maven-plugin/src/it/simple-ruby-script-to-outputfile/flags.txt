@@ -1,0 +1,1 @@
+-Djruby.fork=false
