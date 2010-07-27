@@ -54,6 +54,15 @@ public class ExecMojo extends AbstractGemMojo {
     protected String args      = null;
 
     @Override
+    public void execute() throws MojoExecutionException {
+        // TODO jruby-complete can tries to install gems
+        // file:/jruby-complete-1.5.1.jar!/META-INF/jruby.home/lib/ruby/gems/1.8
+        // instead of in $HOME/.gem
+        this.includeOpenSSL = this.fork;
+        super.execute();
+    }
+
+    @Override
     public void executeWithGems() throws MojoExecutionException {
         final List<String> args = new ArrayList<String>();
         if (this.jrubyArgs != null) {

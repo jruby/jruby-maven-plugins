@@ -25,9 +25,18 @@ public class IRBMojo extends AbstractGemMojo {
     protected String  args = null;
 
     @Override
-    public void executeWithGems() throws MojoExecutionException {
+    public void execute() throws MojoExecutionException {
         // make sure the whole things run in the same process
         super.fork = false;
+        // TODO jruby-complete can tries to install gems
+        // file:/jruby-complete-1.5.1.jar!/META-INF/jruby.home/lib/ruby/gems/1.8
+        // instead of in $HOME/.gem
+        this.includeOpenSSL = false;
+        super.execute();
+    }
+
+    @Override
+    public void executeWithGems() throws MojoExecutionException {
         final StringBuilder args = new StringBuilder("-e ENV['GEM_HOME']='"
                 + this.gemHome + "';ENV['GEM_PATH']='" + this.gemPath
                 + "';$LOAD_PATH<<'./lib' -S irb");
