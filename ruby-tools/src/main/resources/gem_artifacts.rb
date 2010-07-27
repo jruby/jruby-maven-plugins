@@ -39,7 +39,7 @@ module Maven
     end
 
     def find(fetcher, dep, prerelease)
-      # all = !req.prerelease? since "all == true" excludes prereleases
+      # all = !prerelease since "all == true" excludes prereleases
       # all == true => prerelease == false
       # all == false => only latest !! unless prerelease == true
       platform = true # assume that code will run on jruby
@@ -338,10 +338,14 @@ POM
       unless File.exists?(file)
         require 'net/http'
         tuple = gem_details(name, version)
-        resource = Net::HTTP.new(tuple[1].sub(/http:../,''))
+        resource = Net::HTTP.new(tuple[1].sub(/http:../,'').sub(/\/.*/,''), 80)
+        begin
         headers,data = resource.get("/gems/#{name}-#{version}" +
                                     ("java" == tuple[0][2] ? "-java" : "") +
                                     ".gem")
+        rescue => e
+          raise resource.inspect + " #{e.message}"
+        end
         if(headers.code == "302")
           # follow one redirect
           domain = headers["location"].sub(/.*:\/\//, '').sub(/\/.*/, '')
@@ -406,7 +410,7 @@ POM
 
     def to_metadata(name, versions, prereleases = false, create_sha1 = true)
       metadata = metadata_file(name, prereleases)
-      if !File.exists?(metadata) # || (File.new(metadata).mtime < @last_update)
+      if !File.exists?(metadata) || (File.new(metadata).mtime < @last_update)
         @count ||= 0
         print "." if @count % 10 == 0
         if(@count == 800)
