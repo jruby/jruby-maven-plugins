@@ -68,6 +68,21 @@ public class GemifyMojo extends AbstractJRubyMojo {
 
     @SuppressWarnings("unchecked")
     public void execute() throws MojoExecutionException {
+        if (this.project.getBasedir() == null
+                || !this.project.getBasedir().exists()) {
+            if (!this.buildDirectory.exists()) {
+                this.buildDirectory = new File("target");
+            }
+            if (!this.gemify.exists()) {
+                this.gemify = new File(this.buildDirectory, "gemify");
+            }
+            if (!this.gemHome.exists()) {
+                this.gemHome = new File(this.buildDirectory, "rubygems");
+            }
+            if (!this.gemPath.exists()) {
+                this.gemPath = new File(this.buildDirectory, "rubygems");
+            }
+        }
         if (this.artifactId != null || this.groupId != null
                 || this.version != null) {
             if (this.artifactId != null && this.groupId != null
@@ -165,7 +180,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                 }
             }
         }
-        this.launchDir = this.launchDirectory;
+        this.launchDir = this.launchDirectory();
         if (this.skipGemInstall) {
             getLog().info("skip installing gems");
         }
