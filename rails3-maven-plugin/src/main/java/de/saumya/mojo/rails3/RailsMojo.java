@@ -5,10 +5,14 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.DefaultArtifactRepository;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.velocity.VelocityContext;
 import org.codehaus.plexus.util.FileUtils;
@@ -41,7 +45,7 @@ public class RailsMojo extends AbstractRailsMojo {
     /**
      * the rails version to use
      * 
-     * @parameter default-value="3.0.0.beta4" expression="${railsVersion}"
+     * @parameter default-value="3.0.0.rc" expression="${railsVersion}"
      */
     protected String            railsVersion                   = null;
 
@@ -63,8 +67,8 @@ public class RailsMojo extends AbstractRailsMojo {
      * @component
      */
     private VelocityComponent   velocityComponent;
-    // needs to be the default in mojo parameter as welld
-    private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.beta4";
+    // needs to be the default in mojo parameter as well
+    private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.rc";
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -79,6 +83,17 @@ public class RailsMojo extends AbstractRailsMojo {
                                                        "runtime",
                                                        "gem");
         this.pluginArtifacts.add(artifact);
+        final List<String> postfixes = new ArrayList<String>(2);
+        postfixes.add("releases");
+        if (this.railsVersion.matches(".*[a-zA-Z].*")) {
+            postfixes.add("prereleases");
+        }
+        for (final String postfix : postfixes) {
+            this.remoteRepositories.add(new DefaultArtifactRepository("rubygems-"
+                    + postfix,
+                    "http://gems.saumya.de/" + postfix,
+                    new DefaultRepositoryLayout()));
+        }
         super.execute();
     }
 
