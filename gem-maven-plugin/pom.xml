@@ -26,7 +26,7 @@
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>ruby-tools</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>0.1</version>
     </dependency>
   </dependencies>
   <build>
@@ -74,6 +74,7 @@
             </goals>
             <configuration>
               <includeGroupIds>de.saumya.mojo</includeGroupIds>
+              <includeArtifactIds>jruby-maven-plugin</includeArtifactIds>
               <includes>de/saumya/mojo/jruby/AbstractJRubyMojo.java</includes>
               <classifier>sources</classifier>
               <outputDirectory>${project.build.directory}/sources</outputDirectory>
