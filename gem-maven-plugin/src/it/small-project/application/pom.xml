@@ -25,16 +25,11 @@
         <artifactId>gem-maven-plugin</artifactId>
         <version>0.20.0</version>
         <extensions>true</extensions>
-      </plugin>
-      <plugin>
-        <groupId>de.saumya.mojo</groupId>
-        <artifactId>jruby-maven-plugin</artifactId>
-        <version>0.20.0</version>
 	<executions>
 	  <execution>
 	    <phase>compile</phase>
 	    <goals>
-	      <goal>jruby</goal>
+	      <goal>exec</goal>
 	    </goals>
 	    <configuration>
 	      <script>
