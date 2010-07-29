@@ -36,6 +36,7 @@ public class InstallMojo extends AbstractJRubyMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         String commandString = "-S gem install";
+        // TODO if artifact is set, check on an existing gem in target
         if (this.artifact != null && this.artifact.getFile() != null
                 && this.artifact.getFile().exists()) {
             final GemArtifact gemArtifact = new GemArtifact(this.project);
@@ -43,7 +44,7 @@ public class InstallMojo extends AbstractJRubyMojo {
         }
         else {
             if (this.gem == null) {
-                for (final File f : this.launchDirectory.listFiles()) {
+                for (final File f : this.launchDirectory().listFiles()) {
                     if (f.getName().endsWith(".gem")) {
                         if (this.gem == null) {
                             this.gem = f;
