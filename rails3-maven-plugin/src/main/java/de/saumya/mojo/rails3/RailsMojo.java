@@ -76,13 +76,11 @@ public class RailsMojo extends AbstractRailsMojo {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
-        Artifact artifact;
-        artifact = this.artifactFactory.createArtifact("rubygems",
-                                                       "rails",
-                                                       this.railsVersion,
-                                                       "runtime",
-                                                       "gem");
-        this.pluginArtifacts.add(artifact);
+        final Artifact artifact = this.artifactFactory.createArtifact("rubygems",
+                                                                      "rails",
+                                                                      this.railsVersion,
+                                                                      "runtime",
+                                                                      "gem");
         final List<String> postfixes = new ArrayList<String>(2);
         postfixes.add("releases");
         if (this.railsVersion.matches(".*[a-zA-Z].*")) {
@@ -94,6 +92,7 @@ public class RailsMojo extends AbstractRailsMojo {
                     "http://gems.saumya.de/" + postfix,
                     new DefaultRepositoryLayout()));
         }
+        setupGems(artifact);
         super.execute();
     }
 

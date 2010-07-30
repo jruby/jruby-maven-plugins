@@ -79,7 +79,7 @@ public class RakeMojo extends AbstractGemMojo {
                                                                           this.rakeVersion,
                                                                           "test",
                                                                           "gem");
-            this.pluginArtifacts.add(artifact);
+            setupGems(artifact);
             final String preRelease = this.rakeVersion != null
                     && this.rakeVersion.matches(".*[a-z][A-Z].*") ? "pre" : "";
             final DefaultArtifactRepository gemsRepo = new DefaultArtifactRepository("rubygems-"

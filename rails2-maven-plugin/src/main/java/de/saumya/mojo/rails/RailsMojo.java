@@ -73,16 +73,21 @@ public class RailsMojo extends AbstractRailsMojo {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
-        Artifact artifact = this.artifactFactory.createArtifact("rubygems",
-                                                       "rails",
-                                                       this.railsVersion,
-                                                       "runtime",
-                                                       "gem");
-        this.pluginArtifacts.add(artifact);
+        if (!this.railsVersion.startsWith("2.")) {
+            throw new MojoExecutionException("given rails verions is not rails2: "
+                    + this.railsVersion);
+        }
+
+        final Artifact artifact = this.artifactFactory.createArtifact("rubygems",
+                                                                      "rails",
+                                                                      this.railsVersion,
+                                                                      "runtime",
+                                                                      "gem");
         final DefaultArtifactRepository gemsRepo = new DefaultArtifactRepository("rubygems-releases",
                 "http://gems.saumya.de/releases",
                 new DefaultRepositoryLayout());
         this.remoteRepositories.add(gemsRepo);
+        setupGems(artifact);
         super.execute();
     }
 
