@@ -5,11 +5,11 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.20.0</version>
+    <version>0.21.0-SNAPSHOT</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-proxy</artifactId>
-  <version>0.1</version>
+  <version>0.2-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Rubygems as Maven Repository Webapp</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
@@ -17,7 +17,7 @@
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>ruby-tools</artifactId>
-      <version>0.1</version>
+      <version>0.2-SNAPSHOT</version>
       <exclusions>
 	<exclusion>
 	  <groupId>org.codehaus.plexus</groupId>
