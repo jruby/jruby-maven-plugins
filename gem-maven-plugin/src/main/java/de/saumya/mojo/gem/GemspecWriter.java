@@ -274,7 +274,14 @@ class GemspecWriter {
             this.latestModified = con.getLastModified();
         }
         // omit the first slash
-        appendFile(new File(u.getFile().substring(1).replaceFirst("^./", "")));
+        final File license = new File(u.getFile()
+                .substring(1)
+                .replaceFirst("^./", ""));
+        appendFile(license);
+        if ("file".equals(u.getProtocol())) {
+            // make a nice File without unix style prefix "./"
+            this.files.add(new File(license.getPath().replaceFirst("^./", "")));
+        }
         if (name != null) {
             append("  s.licenses << '" + name.replaceFirst("^./", "") + "'");
         }

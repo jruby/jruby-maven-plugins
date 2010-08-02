@@ -42,9 +42,16 @@ public class RSpecMojo extends AbstractGemMojo {
     /**
      * The flag to skip tests (optional, defaults to "false")
      * 
-     * @parameter expression="${maven.test.skip}"
+     * @parameter expression="${maven.test.skip}" default-value="false"
      */
     protected boolean                skipTests;
+
+    /**
+     * The flag to skip tests (optional, defaults to "false")
+     * 
+     * @parameter expression="${skipTests}" default-value="false"
+     */
+    protected boolean                skip;
 
     /**
      * The directory containing the RSpec source files
@@ -84,7 +91,7 @@ public class RSpecMojo extends AbstractGemMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException {
-        if (this.skipTests) {
+        if (this.skipTests || this.skip) {
             getLog().info("Skipping RSpec tests");
             return;
         }

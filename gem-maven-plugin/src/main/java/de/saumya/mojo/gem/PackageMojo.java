@@ -44,7 +44,7 @@ public class PackageMojo extends AbstractJRubyMojo {
     File                              gemSpec;
 
     /**
-     * @parameter default-value="{gemspec.overwrite}"
+     * @parameter default-value="${gemspec.overwrite}"
      */
     boolean                           gemspecOverwrite = false;
 
@@ -394,6 +394,7 @@ public class PackageMojo extends AbstractJRubyMojo {
         if ((!localGemspec.exists() || !FileUtils.contentEquals(localGemspec,
                                                                 gemSpec))
                 && this.gemspecOverwrite) {
+            getLog().info("overwrite gemspec '" + localGemspec.getName() + "'");
             FileUtils.copyFile(gemSpec, localGemspec);
         }
 

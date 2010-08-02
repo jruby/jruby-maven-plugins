@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,7 +21,6 @@ import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -37,12 +37,12 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  */
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
-    private static List<String>        NO_CLASSPATH = Collections.emptyList();
+    private static List<String> NO_CLASSPATH = Collections.emptyList();
 
     /**
      * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
-    protected boolean                  includeOpenSSL;
+    protected boolean           includeOpenSSL;
 
     /**
      * allow to overwrite the version by explicitly declaring a dependency in
@@ -50,34 +50,21 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * 
      * @parameter expression="${gem.forceVersion}" default-value="false"
      */
-    private boolean                    forceVersion;
+    private boolean             forceVersion;
 
     /**
      * triggers an update of maven metadata for all gems.
      * 
      * @parameter expression="${gem.update}" default-value="false"
      */
-    private boolean                    update;
+    private boolean             update;
 
-    /**
-     * follow transitive dependencies when initializing rubygem dependencies.
-     * 
-     * @parameter expression="${gem.useTransitiveDependencies}"
-     *            default-value="false"
-     */
-    boolean                            useTransitiveDependencies;
-
-    /**
-     * @parameter default-value="${plugin.artifacts}"
-     */
-    protected java.util.List<Artifact> pluginArtifacts;
-
-    protected final Log                log          = new Log() {
-                                                        public void info(
-                                                                final CharSequence content) {
-                                                            getLog().info(content);
-                                                        }
-                                                    };
+    protected final Log         log          = new Log() {
+                                                 public void info(
+                                                         final CharSequence content) {
+                                                     getLog().info(content);
+                                                 }
+                                             };
 
     public void execute() throws MojoExecutionException {
         if (this.project.getBasedir() == null) {
@@ -88,9 +75,15 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         }
 
         updateMetadata();
-        setupGems(this.artifacts);
-        setupGems(this.pluginArtifacts);
+        if (this.artifacts.size() > 0) {
+            setupGems(this.artifacts, false);
+        }
         executeWithGems();
+    }
+
+    protected void setupGems(final Artifact artifact)
+            throws MojoExecutionException {
+        setupGems(Arrays.asList(new Artifact[] { artifact }), true);
     }
 
     void updateMetadata() throws MojoExecutionException {
@@ -146,7 +139,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         }
     }
 
-    protected void setupGems(Collection<Artifact> artifacts)
+    @SuppressWarnings("unchecked")
+    private void setupGems(Collection<Artifact> artifacts, final boolean resolve)
             throws MojoExecutionException {
         if (this.includeOpenSSL) {
             final Artifact openssl = this.artifactFactory.createArtifact("rubygems",
@@ -165,7 +159,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         for (final Artifact artifact : artifacts) {
             if (artifact.getType().contains("gem")
                     || artifact == this.project.getArtifact()) {
-                collectArtifacts(artifact, collectedArtifacts, true);
+                collectArtifacts(artifact, collectedArtifacts, resolve);
             }
         }
 
@@ -175,8 +169,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         if (this.forceVersion) {
             // allow to overwrite resolved version with version of project
             // dependencies
-            for (final Object o : this.project.getDependencies()) {
-                final Dependency artifact = (Dependency) o;
+            for (final Dependency artifact : (List<Dependency>) this.project.getDependencies()) {
                 final Artifact a = collectedArtifacts.get(artifact.getGroupId()
                         + ":" + artifact.getArtifactId());
                 if (!a.getVersion().equals(artifact.getVersion())) {
@@ -184,19 +177,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     a.setVersion(artifact.getVersion());
                     a.setResolved(false);
                     a.setFile(null);
-                    try {
-                        this.resolver.resolve(a,
-                                              this.remoteRepositories,
-                                              this.localRepository);
-                    }
-                    catch (final ArtifactResolutionException e) {
-                        throw new MojoExecutionException("error resolving " + a,
-                                e);
-                    }
-                    catch (final ArtifactNotFoundException e) {
-                        throw new MojoExecutionException("error resolving " + a,
-                                e);
-                    }
+                    resolve(a);
                 }
             }
         }
@@ -231,8 +212,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         if (gems.length() > 0) {
-            execute("-S gem install --no-ri --no-rdoc " + extraFlag + " "
-                    + gems, false);
+            execute("-S gem install --no-ri --no-rdoc --no-user-install "
+                    + extraFlag + " -l " + gems, false);
         }
         else {
             getLog().debug("no gems found to install");
@@ -247,8 +228,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     @SuppressWarnings("unchecked")
     private void collectArtifacts(final Artifact artifact,
-            final Map<String, Artifact> visitedArtifacts,
-            final boolean includeTest) throws MojoExecutionException {
+            final Map<String, Artifact> visitedArtifacts, final boolean resolve)
+            throws MojoExecutionException {
         getLog().debug("<gems> collect artifacts for " + artifact);
         resolve(artifact);
         try {
@@ -264,16 +245,30 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
             project.setRemoteArtifactRepositories(this.remoteRepositories);
 
-            ArtifactResolutionResult result = null;
+            final List<Artifact> artifacts = new ArrayList<Artifact>();
+
             try {
-                result = this.resolver.resolveTransitively(project.getDependencyArtifacts(),
-                                                           project.getArtifact(),
-                                                           this.project.getManagedVersionMap(),
-                                                           this.localRepository,
-                                                           this.remoteRepositories,
-                                                           this.metadata,
-                                                           null);
-                project.setArtifacts(result.getArtifacts());
+                if (resolve) {
+                    final ArtifactResolutionResult result = this.resolver.resolveTransitively(project.getDependencyArtifacts(),
+                                                                                              project.getArtifact(),
+                                                                                              this.project.getManagedVersionMap(),
+                                                                                              this.localRepository,
+                                                                                              this.remoteRepositories,
+                                                                                              this.metadata);
+                    project.setArtifacts(result.getArtifacts());
+                    for (final Artifact a : (Set<Artifact>) result.getArtifacts()) {
+                        artifacts.add(a);
+                        this.project.getArtifactMap()
+                                .put(a.getGroupId() + ":" + a.getArtifactId(),
+                                     a);
+                    }
+                }
+                else {
+                    for (final Artifact a : (Set<Artifact>) project.getDependencyArtifacts()) {
+                        artifacts.add((Artifact) this.project.getArtifactMap()
+                                .get(a.getGroupId() + ":" + a.getArtifactId()));
+                    }
+                }
             }
             catch (final AbstractArtifactResolutionException e) {
                 if (!getLog().isInfoEnabled()) {
@@ -282,15 +277,13 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 }
                 else {
                     getLog().warn("error resolving " + project.getArtifact()
-                            + "\n\tjust ignored and let 'gem install' decide !");
+                                          + "\n\tjust ignored for now . . .",
+                                  e);
                 }
                 project.setArtifacts(Collections.emptySet());
             }
 
-            final Set<Artifact> walkArtifacts = (this.useTransitiveDependencies
-                    ? (Set<Artifact>) result.getArtifacts()
-                    : (Set<Artifact>) project.getDependencyArtifacts());
-            for (final Artifact dependencyArtifact : walkArtifacts) {
+            for (final Artifact dependencyArtifact : artifacts) {
                 if ("gem".equals(dependencyArtifact.getType())) {
                     if (!visitedArtifacts.containsKey(key(dependencyArtifact))) {
                         collectArtifacts(dependencyArtifact,
@@ -313,41 +306,19 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     }
 
     private void resolve(final Artifact artifact) throws MojoExecutionException {
-        if (artifact != null && this.project.getArtifact() != artifact) {
-            if (artifact.getFile() == null || !artifact.getFile().exists()) {
-
-                try {
-                    getLog().debug("<gems> resolve " + artifact
-                            + " selected version "
-                            + artifact.getSelectedVersion());
-                }
-                catch (final OverConstrainedVersionException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-                if (artifact.getVersion() != "das") {
-                    try {
-                        this.resolver.resolveAlways(artifact,
-                                                    this.remoteRepositories,
-                                                    this.localRepository);
-                    }
-                    catch (final ArtifactResolutionException e) {
-                        throw new MojoExecutionException("resolve error "
-                                + e.getArtifact(), e);
-                    }
-                    catch (final ArtifactNotFoundException e) {
-                        throw new MojoExecutionException("not found "
-                                + e.getArtifact(), e);
-                    }
-                }
-                else {
-                    // TODO
-                }
-                // catch (final NullPointerException e) {
-                // throw new MojoExecutionException("npe " + artifact + " "
-                // + artifact.getVersion() + " "
-                // + artifact.getVersionRange(), e);
-                // }
+        if (artifact.getFile() == null || !artifact.getFile().exists()) {
+            try {
+                this.resolver.resolveAlways(artifact,
+                                            this.remoteRepositories,
+                                            this.localRepository);
+            }
+            catch (final ArtifactResolutionException e) {
+                throw new MojoExecutionException("resolve error "
+                        + e.getArtifact(), e);
+            }
+            catch (final ArtifactNotFoundException e) {
+                throw new MojoExecutionException("not found " + e.getArtifact(),
+                        e);
             }
         }
     }

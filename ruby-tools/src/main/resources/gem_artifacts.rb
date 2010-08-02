@@ -20,7 +20,8 @@ module Maven
 
     attr_reader :tuples
 
-    def initialize(name = '', repository_id = 'rubygems', source_uri = "rubygems.org", local_repository = nil)
+    def initialize(plugin_version = '0.20.0', repository_id = 'rubygems', source_uri = "rubygems.org", local_repository = nil)
+      @plugin_version = plugin_version
       @repository_id = repository_id
       if local_repository.nil?
         if File.exists?("/var/cache/gem-proxy")
@@ -39,7 +40,7 @@ module Maven
     end
 
     def find(fetcher, dep, prerelease)
-      # all = !req.prerelease? since "all == true" excludes prereleases
+      # all = !prerelease since "all == true" excludes prereleases
       # all == true => prerelease == false
       # all == false => only latest !! unless prerelease == true
       platform = true # assume that code will run on jruby
@@ -98,6 +99,14 @@ module Maven
     end
 
     def _spec_to_pom(spec, f)
+# TODO added compile-plugin + jvm versions only if there is a src/main/java dir
+# TODO only for snapshot version add the snapshot repo
+# TODO only if there is a 'spec' directory add rspec plugin
+# TODO remove date,rubygems_version also when generating the gemspec
+# TODO if url is from github then create SCM tag as well
+# TODO use spec.requirements << 'A powerful graphics card' to specify
+# the maven plugins: spec.requirements << 'maven-plugin: de.saumya.mojo:gem-maven-plugin:0.20.0' or something or nothing ?
+
         f.puts <<-POM
 <?xml version="1.0"?>
 <project
@@ -225,7 +234,7 @@ POM
   </pluginRepositories>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jruby.plugins.version>0.20.0-SNAPSHOT</jruby.plugins.version>
+    <jruby.plugins.version>#{@plugin_version}</jruby.plugins.version>
   </properties>
   <build>
     <plugins>
@@ -234,17 +243,12 @@ POM
         <artifactId>gem-maven-plugin</artifactId>
         <version>${jruby.plugins.version}</version>
         <extensions>true</extensions>
-        <executions>
-          <execution>
-            <goals><goal>pom</goal></goals>
-            <configuration>
-              <date>#{spec.date.strftime("%Y-%m-%d")}</date>
+        <configuration>
 POM
       _add_tag(f, "extraRdocFiles", spec.extra_rdoc_files.join(',').to_s)
       _add_tag(f, "rdocOptions", spec.rdoc_options.join(',').to_s)
       _add_tag(f, "requirePaths", spec.require_paths.join(',').to_s) if  spec.require_paths.join(',').to_s != "lib"
       _add_tag(f, "rubyforgeProject", spec.rubyforge_project.to_s)
-      _add_tag(f, "rubygemsVersion", spec.rubygems_version.to_s)
       _add_tag(f, "requiredRubygemsVersion", spec.required_rubygems_version.to_s) if spec.required_rubygems_version.to_s != ">= 0"
       _add_tag(f, "bindir", spec.bindir.to_s) if spec.bindir.to_s != "bin"
       _add_tag(f, "requiredRubyVersion", spec.required_ruby_version.to_s) if spec.required_ruby_version.to_s != ">= 0"
@@ -254,9 +258,10 @@ POM
       _add_tag(f, "platform", spec.platform.to_s) if spec.platform != 'ruby'
       _extra_files(f, spec)
       f.puts <<-POM
-            </configuration>
-          </execution>
-        </executions>
+          <!--
+          <gemspecOverwrite>true</gemspecOverwrite>
+          -->
+        </configuration>
       </plugin>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
@@ -284,7 +289,7 @@ POM
 
     def _add_tag(io, tag, value)
       if value && value.size > 0
-        io.puts "              <#{tag}>#{value}</#{tag}>"
+        io.puts "          <#{tag}>#{value}</#{tag}>"
       end
     end
 
@@ -298,7 +303,7 @@ POM
           files.delete("./#{f}")
         end
       end
-      _add_tag(io, "extra_files", files.join(","))
+      _add_tag(io, "extraFiles", files.join(","))
     end
 
     def pom_file(name, version)
@@ -338,10 +343,14 @@ POM
       unless File.exists?(file)
         require 'net/http'
         tuple = gem_details(name, version)
-        resource = Net::HTTP.new(tuple[1].sub(/http:../,80))
+        resource = Net::HTTP.new(tuple[1].sub(/http:../,'').sub(/\/.*/,''), 80)
+        begin
         headers,data = resource.get("/gems/#{name}-#{version}" +
                                     ("java" == tuple[0][2] ? "-java" : "") +
                                     ".gem")
+        rescue => e
+          raise resource.inspect + " #{e.message}"
+        end
         if(headers.code == "302")
           # follow one redirect
           domain = headers["location"].sub(/.*:\/\//, '').sub(/\/.*/, '')
@@ -406,7 +415,7 @@ POM
 
     def to_metadata(name, versions, prereleases = false, create_sha1 = true)
       metadata = metadata_file(name, prereleases)
-      if !File.exists?(metadata) # || (File.new(metadata).mtime < @last_update)
+      if !File.exists?(metadata) || (File.new(metadata).mtime < @last_update)
         @count ||= 0
         print "." if @count % 10 == 0
         if(@count == 800)

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.20.0-SNAPSHOT</version>
+    <version>0.21.0-SNAPSHOT</version>
   </parent>
   <artifactId>rails-maven-archetype</artifactId>
   <packaging>maven-archetype</packaging>
@@ -46,7 +46,7 @@
                 <configuration>
                   <buildLogFile>pre-build.log</buildLogFile>
                   <!-- WORK AROUND: use same version as plugin otherwise test plugin will not work -->
-                  <version>0.20.0-SNAPSHOT</version>
+                  <version>0.21.0-SNAPSHOT</version>
                   <goalsFile>pre-goal.txt</goalsFile>
                   <validateScriptFilename>pre-validate.groovy</validateScriptFilename>
                   <projects>

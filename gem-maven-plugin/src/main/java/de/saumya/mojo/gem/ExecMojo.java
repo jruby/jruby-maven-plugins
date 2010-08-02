@@ -21,21 +21,21 @@ public class ExecMojo extends AbstractGemMojo {
     /**
      * ruby code from the pom configuration part which gets executed.
      * 
-     * @parameter
+     * @parameter default-value="${gem.exec.script}"
      */
     protected String script    = null;
 
     /**
      * ruby file which gets executed in context of the given gems..
      * 
-     * @parameter default-value="${exec.file}"
+     * @parameter default-value="${gem.exec.file}"
      */
     protected File   file      = null;
 
     /**
      * arguments for the ruby script given through file parameter.
      * 
-     * @parameter default-value="${exec.args}"
+     * @parameter default-value="${gem.exec.args}"
      */
     protected String execArgs  = null;
 
@@ -52,6 +52,15 @@ public class ExecMojo extends AbstractGemMojo {
      * @parameter default-value="${args}"
      */
     protected String args      = null;
+
+    @Override
+    public void execute() throws MojoExecutionException {
+        // TODO jruby-complete can tries to install gems
+        // file:/jruby-complete-1.5.1.jar!/META-INF/jruby.home/lib/ruby/gems/1.8
+        // instead of in $HOME/.gem
+        this.includeOpenSSL = this.fork;
+        super.execute();
+    }
 
     @Override
     public void executeWithGems() throws MojoExecutionException {

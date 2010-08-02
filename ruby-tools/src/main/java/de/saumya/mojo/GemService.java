@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-
 public class GemService {
 
     private final Launcher launcher;
@@ -22,7 +21,9 @@ public class GemService {
             throws RubyScriptException, IOException {
         this.launcher.executeScript("gem2pom.rb",
                                     pom,
-                                    gemspec.getAbsolutePath());
+                                    gemspec.getAbsolutePath(),
+				    // TODO pass this into the service
+				    "0.20.0"); // plugin version
     }
 
     /*

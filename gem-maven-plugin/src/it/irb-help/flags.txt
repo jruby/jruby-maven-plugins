@@ -1,0 +1,1 @@
+-Dgem.irb.args=--help
