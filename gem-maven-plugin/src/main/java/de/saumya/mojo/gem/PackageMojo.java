@@ -108,6 +108,12 @@ public class PackageMojo extends AbstractJRubyMojo {
                 build(project, artifact);
             }
             else {
+                if (this.project.getBasedir() == null) {
+                    this.gemHome = new File(this.gemHome.getAbsolutePath()
+                            .replace("/${project.basedir}/", "/"));
+                    this.gemPath = new File(this.gemPath.getAbsolutePath()
+                            .replace("/${project.basedir}/", "/"));
+                }
                 if (this.gemSpec == null) {
                     for (final File f : this.launchDirectory().listFiles()) {
                         if (f.getName().endsWith(".gemspec")) {
@@ -139,13 +145,17 @@ public class PackageMojo extends AbstractJRubyMojo {
                 if (project.getFile() != null && artifact.isGem()) {
                     // only when the pom exist there will be an artifact
                     FileUtils.copyFileIfModified(gem, artifact.getFile());
+                    gem.deleteOnExit();
                 }
                 else {
-                    FileUtils.copyFileIfModified(gem,
-                                                 new File(this.buildDirectory,
-                                                         gem.getName()));
+                    // keep the gem where it when there is no buildDirectory
+                    if (this.buildDirectory.exists()) {
+                        FileUtils.copyFileIfModified(gem,
+                                                     new File(this.buildDirectory,
+                                                             gem.getName()));
+                        gem.deleteOnExit();
+                    }
                 }
-                gem.deleteOnExit();
             }
         }
         catch (final IOException e) {
