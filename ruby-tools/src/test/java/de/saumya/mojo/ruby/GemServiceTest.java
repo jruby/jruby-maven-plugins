@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -16,61 +17,8 @@ import de.saumya.mojo.gems.GemspecConverter;
 public class GemServiceTest extends TestCase {
 
     private static class NoLog implements Log {
-
-        // public void debug(final CharSequence content) {
-        // }
-        //
-        // public void debug(final Throwable error) {
-        // }
-        //
-        // public void debug(final CharSequence content, final Throwable error)
-        // {
-        // }
-        //
-        // public void error(final CharSequence content) {
-        // }
-        //
-        // public void error(final Throwable error) {
-        // }
-        //
-        // public void error(final CharSequence content, final Throwable error)
-        // {
-        // }
-
         public void info(final CharSequence content) {
         }
-
-        // public void info(final Throwable error) {
-        // }
-        //
-        // public void info(final CharSequence content, final Throwable error) {
-        // }
-        //
-        // public boolean isDebugEnabled() {
-        // return false;
-        // }
-        //
-        // public boolean isErrorEnabled() {
-        // return false;
-        // }
-        //
-        // public boolean isInfoEnabled() {
-        // return false;
-        // }
-        //
-        // public boolean isWarnEnabled() {
-        // return false;
-        // }
-        //
-        // public void warn(final CharSequence content) {
-        // }
-        //
-        // public void warn(final Throwable error) {
-        // }
-        //
-        // public void warn(final CharSequence content, final Throwable error) {
-        // }
-
     }
 
     public GemServiceTest(final String testName) {
@@ -89,10 +37,16 @@ public class GemServiceTest extends TestCase {
         final LauncherFactory factory = new EmbeddedLauncherFactory();
         final List<String> classpathElements = new ArrayList<String>();
         classpathElements.add(".");
+        final Map<String, String> env = new HashMap<String, String>();
+        // setup local rubygems repository
+        final File rubygems = new File("target/rubygems");
+        rubygems.mkdirs();
+        env.put("GEM_PATH", rubygems.getAbsolutePath());
+        env.put("GEM_HOME", rubygems.getAbsolutePath());
         this.gemspec = new GemspecConverter(new NoLog(),
                 factory.getLauncher(true,
                                     classpathElements,
-                                    new HashMap<String, String>(),
+                                    env,
                                     new File("./pom.xml"),
                                     null));
 

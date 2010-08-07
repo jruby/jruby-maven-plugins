@@ -1,8 +1,5 @@
 package de.saumya.mojo.gems;
 
-import static org.jruby.embed.LocalContextScope.SINGLETON;
-import static org.jruby.embed.LocalVariableBehavior.PERSISTENT;
-
 import java.io.File;
 import java.io.FileReader;
 
@@ -13,10 +10,10 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
-import org.jruby.embed.ScriptingContainer;
 
 import de.saumya.mojo.gems.spec.GemSpecification;
 import de.saumya.mojo.gems.spec.GemSpecificationIO;
+import de.saumya.mojo.ruby.ScriptingService;
 
 /**
  * Unit test for simple App.
@@ -29,23 +26,13 @@ public class MavenArtifactConverterTest extends PlexusTestCase {
         return new TestSuite(MavenArtifactConverterTest.class);
     }
 
-    private ScriptingContainer scriptingContainer;
+    private ScriptingService scripting;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        this.scriptingContainer = new ScriptingContainer(SINGLETON, PERSISTENT);
-
-        // setting the JRUBY_HOME to the one from the jruby jar - ignoring the
-        // environment setting !
-        this.scriptingContainer.getProvider()
-                .getRubyInstanceConfig()
-                .setJRubyHome(Thread.currentThread()
-                        .getContextClassLoader()
-                        .getResource("META-INF/jruby.home")
-                        .toString()
-                        .replaceFirst("^jar:", ""));
+        this.scripting = new ScriptingService();
     }
 
     @Override
@@ -53,9 +40,6 @@ public class MavenArtifactConverterTest extends PlexusTestCase {
         super.tearDown();
     }
 
-    /**
-     * Rigourous Test :-)
-     */
     public void testSpecifiction() throws Exception {
         final File yamlFile = new File("src/test/resources/metadata-prawn");
 
@@ -88,43 +72,48 @@ public class MavenArtifactConverterTest extends PlexusTestCase {
                              "1.7.1"));
 
         // load helper script
-        final Object gemTester = this.scriptingContainer.runScriptlet(getClass().getResourceAsStream("gem_tester.rb"),
-                                                                      "gem_tester.rb");
+        final Object gemTester = this.scripting.rubyObjectFromClassloader("gem_tester.rb",
+                                                                          getClass());
+        // this.scriptingContainer.runScriptlet(getClass().getResourceAsStream("gem_tester.rb"),
+        // "gem_tester.rb");
 
         // setup local rubygems repository
         final File rubygems = new File(getBasedir(), "target/rubygems");
         rubygems.mkdirs();
-        this.scriptingContainer.callMethod(gemTester,
-                                           "setup_gems",
-                                           rubygems.getAbsolutePath(),
-                                           Object.class);
+        this.scripting.scripting().callMethod(gemTester,
+                                              "setup_gems",
+                                              rubygems.getAbsolutePath(),
+                                              Object.class);
 
         // install the slf4j gems
-        this.scriptingContainer.callMethod(gemTester,
-                                           "install_gems",
-                                           new String[] {
-                                                   "target/gems/org.slf4j.slf4j-api-1.5.8-java.gem",
-                                                   "target/gems/org.slf4j.slf4j-simple-1.5.8-java.gem" },
-                                           Object.class);
+        this.scripting.scripting()
+                .callMethod(gemTester,
+                            "install_gems",
+                            new String[] {
+                                    "target/gems/org.slf4j.slf4j-api-1.5.8-java.gem",
+                                    "target/gems/org.slf4j.slf4j-simple-1.5.8-java.gem" },
+                            Object.class);
         // TODO do not know why this is needed. but without it the first run
         // fails and any successive runs succeeds !!
-        this.scriptingContainer.callMethod(gemTester,
-                                           "gem",
-                                           "org.slf4j.slf4j-simple",
-                                           Object.class);
+        this.scripting.scripting().callMethod(gemTester,
+                                              "gem",
+                                              "org.slf4j.slf4j-simple",
+                                              Object.class);
 
         // load the slf4j-simple
-        Boolean result = this.scriptingContainer.callMethod(gemTester,
-                                                            "require_gem",
-                                                            "maven/org.slf4j/slf4j-simple",
-                                                            Boolean.class);
+        Boolean result = this.scripting.scripting()
+                .callMethod(gemTester,
+                            "require_gem",
+                            "maven/org.slf4j/slf4j-simple",
+                            Boolean.class);
         assertTrue(result);
 
         // slf4j-api is already loaded as dependency of slf4j-simple
-        result = this.scriptingContainer.callMethod(gemTester,
-                                                    "require_gem",
-                                                    "maven/org.slf4j/slf4j-api",
-                                                    Boolean.class);
+        result = this.scripting.scripting()
+                .callMethod(gemTester,
+                            "require_gem",
+                            "maven/org.slf4j/slf4j-api",
+                            Boolean.class);
         assertFalse(result);
     }
 

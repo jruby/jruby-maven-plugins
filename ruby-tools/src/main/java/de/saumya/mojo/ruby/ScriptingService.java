@@ -29,6 +29,13 @@ public class ScriptingService {
 
     }
 
+    public Object rubyObjectFromClassloader(final String name, final Class<?> clazz)
+            throws IOException {
+        return this.scriptingContainer.runScriptlet(ScriptUtils.getScriptAsStream(name,
+                                                                                  clazz),
+                                                    name);
+    }
+
     public Object rubyObjectFromClassloader(final String name)
             throws IOException {
         return this.scriptingContainer.runScriptlet(ScriptUtils.getScriptAsStream(name),

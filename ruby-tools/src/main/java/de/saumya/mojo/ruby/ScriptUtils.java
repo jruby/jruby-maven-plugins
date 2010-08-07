@@ -16,17 +16,26 @@ public class ScriptUtils {
 
     public static InputStream getScriptAsStream(final String name)
             throws IOException {
-        InputStream stream = ScriptUtils.class.getResourceAsStream(name);
-        if (stream == null) {
-            stream = Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResourceAsStream(name);
-        }
+        final InputStream stream = Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(name);
+
         if (stream == null) {
             throw new FileNotFoundException("loading resource from classloader failed: "
                     + name);
         }
         return stream;
+    }
+
+    public static InputStream getScriptAsStream(final String name,
+            final Class<?> clazz) throws IOException {
+        final InputStream stream = clazz.getResourceAsStream(name);
+        if (stream == null) {
+            return getScriptAsStream(name);
+        }
+        else {
+            return stream;
+        }
     }
 
     public static URL getScript(final String name) throws IOException {
