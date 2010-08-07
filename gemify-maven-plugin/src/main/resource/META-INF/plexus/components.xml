@@ -1,0 +1,10 @@
+<component-set>
+  <components>
+    <component>
+      <role>de.saumya.mojo.gems.MavenArtifactConverter</role>
+      <implementation>
+	de.saumya.mojo.gems.DefaultMavenArtifactConverter
+      </implementation>
+    </component>
+  </components>
+</component-set>
