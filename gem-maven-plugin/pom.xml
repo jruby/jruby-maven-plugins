@@ -38,7 +38,7 @@
         <executions>
           <execution>
             <id>add-source</id>
-            <phase>prepare-package</phase>
+            <phase>generate-sources</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
