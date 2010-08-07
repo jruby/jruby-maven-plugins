@@ -6,7 +6,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import de.saumya.mojo.ScriptingService;
+import de.saumya.mojo.ruby.ScriptingService;
 
 public class GemProxyServletContextListener implements ServletContextListener {
 
