@@ -1,0 +1,7 @@
+#if( $jarfile )
+require File.dirname(__FILE__) + '/$jarfile'
+
+#end
+#foreach( $dep in $dependencies )
+require 'maven/$dep'
+#end

@@ -1,0 +1,106 @@
+--- !ruby/object:Gem::Specification 
+name: prawn
+version: !ruby/object:Gem::Version 
+  version: 0.6.3
+platform: ruby
+authors: 
+- Gregory Brown
+autorequire: 
+bindir: bin
+cert_chain: []
+
+date: 2009-11-17 00:00:00 -05:00
+default_executable: 
+dependencies: 
+- !ruby/object:Gem::Dependency 
+  name: prawn-core
+  type: :runtime
+  version_requirement: 
+  version_requirements: !ruby/object:Gem::Requirement 
+    requirements: 
+    - - ">="
+      - !ruby/object:Gem::Version 
+        version: 0.6.3
+    - - <
+      - !ruby/object:Gem::Version 
+        version: "0.7"
+    version: 
+- !ruby/object:Gem::Dependency 
+  name: prawn-layout
+  type: :runtime
+  version_requirement: 
+  version_requirements: !ruby/object:Gem::Requirement 
+    requirements: 
+    - - ">="
+      - !ruby/object:Gem::Version 
+        version: 0.3.2
+    - - <
+      - !ruby/object:Gem::Version 
+        version: "0.4"
+    version: 
+- !ruby/object:Gem::Dependency 
+  name: prawn-format
+  type: :runtime
+  version_requirement: 
+  version_requirements: !ruby/object:Gem::Requirement 
+    requirements: 
+    - - ">="
+      - !ruby/object:Gem::Version 
+        version: 0.2.3
+    - - <
+      - !ruby/object:Gem::Version 
+        version: "0.3"
+    version: 
+- !ruby/object:Gem::Dependency 
+  name: prawn-security
+  type: :runtime
+  version_requirement: 
+  version_requirements: !ruby/object:Gem::Requirement 
+    requirements: 
+    - - ">="
+      - !ruby/object:Gem::Version 
+        version: 0.1.1
+    - - <
+      - !ruby/object:Gem::Version 
+        version: "0.2"
+    version: 
+description: Prawn is a fast, tiny, and nimble PDF generator for Ruby
+email: "  gregory.t.brown@gmail.com"
+executables: []
+
+extensions: []
+
+extra_rdoc_files: []
+
+files: 
+- lib/prawn.rb
+has_rdoc: true
+homepage: http://prawn.majesticseacreature.com
+licenses: []
+
+post_install_message: "\n  Welcome to Prawn, the best pure-Ruby PDF solution ever!\n  This is version 0.6\n   \n  For those coming from Prawn 0.5 or earlier, note that this release has\n  some API breaking changes as well as many new features.  *** You'll want \n  to know about these changes, as we will no longer be supporting\n  Prawn 0.5 or any earlier version of Prawn***\n\n  For details on what has changed, see:\n    http://wiki.github.com/sandal/prawn/changelog\n\n  If you have questions, contact us at:\n    http://groups.google.com/group/prawn-ruby\n\n  To submit a patch or report a bug, select the appropriate package below: \n    http://github.com/sandal/prawn\n    http://github.com/sandal/prawn-layout\n    http://github.com/sandal/prawn-format\n    http://github.com/madriska/prawn-security\n\n  Prawn is meant for experienced Ruby hackers, so if you are new to Ruby, you\n  might want to wait until you've had some practice with the language before\n  expecting Prawn to work for you.  Things may change after 1.0, but for now\n  if you're not ready to read source code and patch bugs or missing features \n  yourself (with our help), Prawn might not be the right fit.\n\n  But if you know what you're getting yourself into, enjoy!\n  "
+rdoc_options: []
+
+require_paths: 
+- lib
+required_ruby_version: !ruby/object:Gem::Requirement 
+  requirements: 
+  - - ">="
+    - !ruby/object:Gem::Version 
+      version: "0"
+  version: 
+required_rubygems_version: !ruby/object:Gem::Requirement 
+  requirements: 
+  - - ">="
+    - !ruby/object:Gem::Version 
+      version: "0"
+  version: 
+requirements: []
+
+rubyforge_project: prawn
+rubygems_version: 1.3.5
+signing_key: 
+specification_version: 3
+summary: A fast and nimble PDF generator for Ruby
+test_files: []
+

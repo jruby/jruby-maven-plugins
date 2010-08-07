@@ -1,0 +1,19 @@
+module Maven
+#foreach( $part in $packageParts )
+module $part
+#end
+VERSION = '$gemVersion'
+MAVEN_VERSION = '$version'
+MAVEN_ARTIFACT_ID = '$artifactId'
+MAVEN_GROUP_ID = '$groupId'
+MAVEN_TYPE = '$type'
+MAVEN_CLASSIFIER = nil
+#if( $filename )
+JAR_FILE = File.dirname(__FILE__) + '/$filename'
+#else
+JAR_FILE = nil
+#end
+#foreach( $part in $packageParts )
+end
+#end
+end
