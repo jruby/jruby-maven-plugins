@@ -142,8 +142,10 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
         if (artifact.getPom().getDependencies().size() > 0) {
             for (final Dependency dependency : artifact.getPom()
                     .getDependencies()) {
-                result.getDependencies().add(convertDependency(artifact,
-                                                               dependency));
+                if (!dependency.isOptional()) {
+                    result.getDependencies().add(convertDependency(artifact,
+                                                                   dependency));
+                }
             }
         }
 
