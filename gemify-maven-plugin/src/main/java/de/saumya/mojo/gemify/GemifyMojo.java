@@ -232,9 +232,8 @@ public class GemifyMojo extends AbstractMojo {
     }
 
     private boolean inScope(final Artifact artifact) {
-        getLog().error(artifact + " " + this.development
-                + (this.development || "compile".equals(artifact.getScope())));
-        return this.development || "compile".equals(artifact.getScope());
+        return this.development || "compile".equals(artifact.getScope())
+                || "runtime".equals(artifact.getScope());
     }
 
     private File gemifyArtifact(final Artifact artifact)

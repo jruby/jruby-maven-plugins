@@ -1,0 +1,20 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+File target = new File( basedir, "target");
+
+if ( target.exists() )
+{
+    throw new FileNotFoundException( "target directory should not exists: " + target );
+}
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+if ( !log.contains( "No POM" ) )
+{
+    throw new RuntimeException( "log file does not contain 'No POM'" );
+}
+
+if ( !log.contains( "[1.1.0-RC0, 1.1.0-RC1, 1.1.0, 1.2, 1.3.0, 1.3.1, 1.4.0, 1.4.1, 1.4.2, 1.4.3, 1.5.0-M0, 1.5.0, 1.5.2, 1.5.3, 1.5.4, 1.5.5, 1.5.6, 1.5.7, 1.5.8, 1.5.9-RC0, 1.5.9.RC1, 1.5.10, 1.5.11, 1.6.0-RC0, 1.6.0-alpha2, 1.6.0, 1.6.1" ) )
+{
+    throw new RuntimeException( "log file does not contain '[1.1.0-RC0, 1.1.0-RC1, 1.1.0, 1.2, 1.3.0, 1.3.1, 1.4.0, 1.4.1, 1.4.2, 1.4.3, 1.5.0-M0, 1.5.0, 1.5.2, 1.5.3, 1.5.4, 1.5.5, 1.5.6, 1.5.7, 1.5.8, 1.5.9-RC0, 1.5.9.RC1, 1.5.10, 1.5.11, 1.6.0-RC0, 1.6.0-alpha2, 1.6.0, 1.6.1'" );
+}

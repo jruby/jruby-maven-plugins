@@ -1,0 +1,3 @@
+import java.io.*;
+
+new File( basedir, "pom.xml").delete();
