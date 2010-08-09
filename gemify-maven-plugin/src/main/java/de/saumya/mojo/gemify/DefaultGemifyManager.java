@@ -27,13 +27,29 @@ public class DefaultGemifyManager implements GemifyManager {
 
     ArtifactHandlerManager    artifactHandlerManager;
 
-    Artifact resolveArtifact(final String gemName, final String version,
+    Artifact createArtifact(final String gemName, final String version,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories)
             throws MojoExecutionException {
-        final Artifact artifact = createArtifact(gemName, version);
+        return createArtifact(createArtifact(gemName, version),
+                              localRepository,
+                              remoteRepositories);
+    }
 
-        if (version == null) {
+    Artifact createArtifact(final String groupId, final String artifactId,
+            final String version, final ArtifactRepository localRepository,
+            final List<ArtifactRepository> remoteRepositories)
+            throws MojoExecutionException {
+        return createArtifact(createArtifact(groupId, artifactId, version),
+                              localRepository,
+                              remoteRepositories);
+    }
+
+    Artifact createArtifact(final Artifact artifact,
+            final ArtifactRepository localRepository,
+            final List<ArtifactRepository> remoteRepositories)
+            throws MojoExecutionException {
+        if (artifact.getVersion() == null) {
             final List<String> versions = availableVersions(localRepository,
                                                             remoteRepositories,
                                                             artifact);
@@ -81,6 +97,12 @@ public class DefaultGemifyManager implements GemifyManager {
         final int index = gemName.lastIndexOf(".");
         final String groupId = gemName.substring(0, index);
         final String artifactId = gemName.substring(index + 1);
+        return createArtifact(groupId, artifactId, version);
+    }
+
+    private Artifact createArtifact(final String groupId,
+            final String artifactId, final String version)
+            throws MojoExecutionException {
 
         final ArtifactHandler handler = this.artifactHandlerManager.getArtifactHandler("jar");
         Artifact artifact = null;

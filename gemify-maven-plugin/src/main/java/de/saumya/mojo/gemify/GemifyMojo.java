@@ -31,6 +31,7 @@ import org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ResolutionNode;
 import org.apache.maven.model.Relocation;
+import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
@@ -78,6 +79,13 @@ public class GemifyMojo extends AbstractMojo {
     private boolean                   force;
 
     /**
+     * gemify development depencendies as well.
+     * 
+     * @parameter expression="${gemify.development}" default-value="false"
+     */
+    private boolean                   development;
+
+    /**
      * local repository for internal use.
      * 
      * @parameter default-value="${localRepository}"
@@ -94,6 +102,7 @@ public class GemifyMojo extends AbstractMojo {
      * @readOnly true
      */
     private MavenProject              project;
+
     /**
      * @parameter default-value="${settings.offline}"
      * @required
@@ -132,18 +141,19 @@ public class GemifyMojo extends AbstractMojo {
         do {
             final Artifact artifact;
             if (relocation == null) {
-                artifact = gemify.resolveArtifact(this.gemName,
-                                                  this.version,
-                                                  this.localRepository,
-                                                  this.project.getRemoteArtifactRepositories());
+                artifact = gemify.createArtifact(this.gemName,
+                                                 this.version,
+                                                 this.localRepository,
+                                                 this.project.getRemoteArtifactRepositories());
             }
             else {
-                artifact = gemify.resolveArtifact(relocation.getGroupId()
-                                                          + "."
-                                                          + relocation.getArtifactId(),
-                                                  relocation.getVersion(),
-                                                  this.localRepository,
-                                                  this.project.getRemoteArtifactRepositories());
+                artifact = gemify.createArtifact(relocation.getGroupId(),
+                                                 relocation.getArtifactId(),
+                                                 relocation.getVersion() == null
+                                                         ? this.version
+                                                         : relocation.getVersion(),
+                                                 this.localRepository,
+                                                 this.project.getRemoteArtifactRepositories());
             }
             final ProjectBuildingResult result = buildMavenProject(artifact,
                                                                    true);
@@ -181,8 +191,10 @@ public class GemifyMojo extends AbstractMojo {
             map.put(artifactKey(result.getProject().getArtifact()), gem);
             for (final Artifact a : result.getArtifactResolutionResult()
                     .getArtifacts()) {
-                gem = gemifyArtifact(a);
-                map.put(artifactKey(a), gem);
+                if (inScope(a)) {
+                    gem = gemifyArtifact(a);
+                    map.put(artifactKey(a), gem);
+                }
             }
 
             final List<String> visited = new ArrayList<String>();
@@ -207,7 +219,7 @@ public class GemifyMojo extends AbstractMojo {
             final List<String> visited) {
         while (iter.hasNext()) {
             final ResolutionNode n = iter.next();
-            if (n.isResolved()) {
+            if (n.isResolved() && inScope(n.getArtifact())) {
                 final String key = artifactKey(n.getArtifact());
                 getLog().error(n.getArtifact().toString() + " " + n.getDepth()
                         + " " + visited.contains(key));
@@ -217,6 +229,12 @@ public class GemifyMojo extends AbstractMojo {
                 }
             }
         }
+    }
+
+    private boolean inScope(final Artifact artifact) {
+        getLog().error(artifact + " " + this.development
+                + (this.development || "compile".equals(artifact.getScope())));
+        return this.development || "compile".equals(artifact.getScope());
     }
 
     private File gemifyArtifact(final Artifact artifact)
@@ -269,7 +287,8 @@ public class GemifyMojo extends AbstractMojo {
                     .setResolveDependencies(resolveDependencies)
                     // follow the offline settings
                     .setForceUpdate(!this.offline)
-                    .setOffline(this.offline);
+                    .setOffline(this.offline)
+                    .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
             return this.builder.build(artifact, request);
         }
         catch (final ProjectBuildingException e) {
@@ -281,6 +300,6 @@ public class GemifyMojo extends AbstractMojo {
     private File targetDirectoryFromProject() {
         return new File(this.project.getBuild()
                 .getDirectory()
-                .replaceFirst("${project.basedir}.", ""));
+                .replaceFirst("[$][{]project.basedir[}].", ""));
     }
 }

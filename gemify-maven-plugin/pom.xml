@@ -49,33 +49,29 @@
   </dependencies>
   <build>
     <plugins>
-<!--
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <version>1.5</version>
+        <configuration>
+          <projectsDirectory>src/it</projectsDirectory>
+          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+          <pomIncludes>
+            <pomInclude>*/pom.xml</pomInclude>
+          </pomIncludes>
+          <settingsFile>src/it/settings.xml</settingsFile>
+          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+          <postBuildHookScript>verify.bsh</postBuildHookScript>
+        </configuration>
         <executions>
           <execution>
-            <id>src-dependencies</id>
-            <phase>generate-sources</phase>
+            <id>integration-test</id>
             <goals>
-              <goal>unpack-dependencies</goal>
+              <goal>install</goal>
+              <goal>run</goal>
             </goals>
-            <configuration>
-              <includeGroupIds>de.saumya.mojo</includeGroupIds>
-              <includeArtifactIds>
-		jruby-maven-plugin,gem-maven-plugin
-	      </includeArtifactIds>
-              <includes>
-		de/saumya/mojo/jruby/AbstractJRubyMojo.java,
-		de/saumya/mojo/gem/AbstractGemMojo.java
-	      </includes>
-              <classifier>sources</classifier>
-              <outputDirectory>${project.build.directory}/sources</outputDirectory>
-            </configuration>
           </execution>
         </executions>
       </plugin>
--->
     </plugins>
   </build>
 </project>
