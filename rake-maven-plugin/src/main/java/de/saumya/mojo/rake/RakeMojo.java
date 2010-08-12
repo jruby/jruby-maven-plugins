@@ -12,10 +12,10 @@ import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.Launcher;
-import de.saumya.mojo.LauncherFactory;
-import de.saumya.mojo.RubyScriptException;
 import de.saumya.mojo.gem.AbstractGemMojo;
+import de.saumya.mojo.ruby.EmbeddedLauncherFactory;
+import de.saumya.mojo.ruby.Launcher;
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * maven wrapper around the rake command.
@@ -119,11 +119,11 @@ public class RakeMojo extends AbstractGemMojo {
             args.append(" ").append(this.args);
         }
         try {
-            final Launcher launcher = new LauncherFactory().getEmbeddedLauncher(this.verbose,
+            final Launcher launcher = new EmbeddedLauncherFactory().getLauncher(this.verbose,
                                                                                 NO_CLASSPATH,
                                                                                 setupEnv(),
                                                                                 resolveJRUBYCompleteArtifact().getFile(),
-                                                                                this.classRealm);
+                                                                                null);
 
             launcher.executeScript(launchDirectory(),
                                    binScript("rake").toString(),
