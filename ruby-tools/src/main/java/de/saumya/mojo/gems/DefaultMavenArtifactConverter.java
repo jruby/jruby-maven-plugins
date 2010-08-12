@@ -414,9 +414,12 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
         // support Maven ranges too
         // based on
         // http://blog.zenspider.com/2008/10/rubygems-howto-preventing-cata.html
+        final String version = createGemVersion(getDependencyVersion(artifact,
+                                                                     dependency));
+        final int index = version.length()
+                - version.replaceFirst("^[^.]+[.][^.]+", "").length();
         requirement.addRequirement("~>",
-                                   new GemVersion(createGemVersion(getDependencyVersion(artifact,
-                                                                                        dependency))));
+                                   new GemVersion(version.substring(0, index)));
 
         result.setVersion_requirement(requirement);
 
