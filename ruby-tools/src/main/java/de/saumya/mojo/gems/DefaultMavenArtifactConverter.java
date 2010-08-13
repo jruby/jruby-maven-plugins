@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Developer;
+import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.License;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
@@ -325,6 +326,23 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
         return generateRubyFile("metafile", context, "rubyMetaStub");
     }
 
+    public static class MavenDependency {
+        public String       name;
+        public List<String> exclusions = new ArrayList<String>();
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String getExclusions() {
+            final StringBuilder buf = new StringBuilder();
+            for (final String ex : this.exclusions) {
+                buf.append(",'").append(ex).append("'");
+            }
+            return this.exclusions.size() > 0 ? buf.substring(1) : "";
+        }
+    }
+
     private File generateRubyStub(final GemSpecification gemspec,
             final MavenArtifact artifact, final RubyDependencyType type)
             throws IOException {
@@ -344,13 +362,21 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
                     + ".rb");
             break;
         }
-        final List<String> deps = new ArrayList<String>();
+        final List<MavenDependency> deps = new ArrayList<MavenDependency>();
         for (final Dependency dependency : artifact.getPom().getDependencies()) {
-            if (RubyDependencyType.toRubyDependencyType(dependency.getScope()) == type) {
-                deps.add(createRequireName(dependency.getGroupId(),
-                                           dependency.getArtifactId(),
-                                           dependency.getVersion()));
+            if (RubyDependencyType.toRubyDependencyType(dependency.getScope()) == type
+                    && !dependency.isOptional()) {
+                final MavenDependency mavenDependency = new MavenDependency();
+                mavenDependency.name = createRequireName(dependency.getGroupId(),
+                                                         dependency.getArtifactId(),
+                                                         dependency.getVersion());
+                for (final Exclusion exclusion : dependency.getExclusions()) {
+                    mavenDependency.exclusions.add(exclusion.getGroupId() + "/"
+                            + exclusion.getArtifactId());
+                }
+                deps.add(mavenDependency);
             }
+
         }
         context.put("dependencies", deps);
 
