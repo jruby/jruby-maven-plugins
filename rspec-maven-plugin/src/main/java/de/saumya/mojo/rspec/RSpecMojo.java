@@ -21,155 +21,148 @@ import de.saumya.mojo.gem.AbstractGemMojo;
  */
 public class RSpecMojo extends AbstractGemMojo {
 
-    /**
-     * The project base directory
-     * 
-     * @parameter expression="${basedir}"
-     * @required
-     * @readonly
-     */
-    protected File                   basedir;
+	/**
+	 * The project base directory
+	 * 
+	 * @parameter expression="${basedir}"
+	 * @required
+	 * @readonly
+	 */
+	protected File basedir;
 
-    /**
-     * The classpath elements of the project being tested.
-     * 
-     * @parameter expression="${project.testClasspathElements}"
-     * @required
-     * @readonly
-     */
-    protected List<String>           classpathElements;
+	/**
+	 * The classpath elements of the project being tested.
+	 * 
+	 * @parameter expression="${project.testClasspathElements}"
+	 * @required
+	 * @readonly
+	 */
+	protected List<String> classpathElements;
 
-    /**
-     * The flag to skip tests (optional, defaults to "false")
-     * 
-     * @parameter expression="${maven.test.skip}" default-value="false"
-     */
-    protected boolean                skipTests;
+	/**
+	 * The flag to skip tests (optional, defaults to "false")
+	 * 
+	 * @parameter expression="${maven.test.skip}"
+	 */
+	protected boolean skipTests;
 
-    /**
-     * The flag to skip tests (optional, defaults to "false")
-     * 
-     * @parameter expression="${skipTests}" default-value="false"
-     */
-    protected boolean                skip;
+	/**
+	 * The directory containing the RSpec source files
+	 * 
+	 * @parameter expression="spec"
+	 */
+	protected String specSourceDirectory;
 
-    /**
-     * The directory containing the RSpec source files
-     * 
-     * @parameter expression="spec"
-     */
-    protected String                 specSourceDirectory;
+	/**
+	 * The directory where the RSpec report will be written to
+	 * 
+	 * @parameter expression="${basedir}/target"
+	 * @required
+	 */
+	protected String outputDirectory;
 
-    /**
-     * The directory where the RSpec report will be written to
-     * 
-     * @parameter expression="${basedir}/target"
-     * @required
-     */
-    protected String                 reportDirectory;
+	/**
+	 * The name of the RSpec report (optional, defaults to "rspec-report.html")
+	 * 
+	 * @parameter expression="rspec-report.html"
+	 */
+	protected String reportName;
 
-    /**
-     * The name of the RSpec report (optional, defaults to "rspec-report.html")
-     * 
-     * @parameter expression="rspec-report.html"
-     */
-    protected String                 reportName;
+	/**
+	 * List of system properties to set for the tests.
+	 * 
+	 * @parameter
+	 */
+	protected Properties systemProperties;
 
-    /**
-     * List of system properties to set for the tests.
-     * 
-     * @parameter
-     */
-    protected Properties             systemProperties;
+	private RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
+	private ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
 
-    private final RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
-    private final ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
+	private File specSourceDirectory() {
+		return new File(launchDirectory(), specSourceDirectory);
+	}
+	
+	@Override
+    public void execute() throws MojoExecutionException {
+		if (skipTests) {
+			getLog().info("Skipping RSpec tests");
+			return;
+		}
+		
+		super.execute();
+	}
 
-    private File specSourceDirectory() {
-        return new File(launchDirectory(), this.specSourceDirectory);
-    }
+	@Override
+	public void executeWithGems() throws MojoExecutionException {
 
-    @Override
-    public void executeWithGems() throws MojoExecutionException {
-        if (this.skipTests || this.skip) {
-            getLog().info("Skipping RSpec tests");
-            return;
-        }
+		final File specSourceDirectory = specSourceDirectory();
+		if (!specSourceDirectory.exists()) {
+			getLog().info("Skipping RSpec tests since " + specSourceDirectory + " is missing");
+			return;
+		}
+		getLog().info("Running RSpec tests from " + specSourceDirectory);
 
-        final File specSourceDirectory = specSourceDirectory();
-        if (!specSourceDirectory.exists()) {
-            getLog().info("Skipping RSpec tests since " + specSourceDirectory
-                    + " is missing");
-            return;
-        }
-        getLog().info("Running RSpec tests from " + specSourceDirectory);
+		String reportPath = new File(outputDirectory, reportName).getAbsolutePath();
 
-        final String reportPath = new File(this.reportDirectory,
-                this.reportName).getAbsolutePath();
+		initScriptFactory(rspecScriptFactory, reportPath);
+		initScriptFactory(shellScriptFactory, reportPath);
 
-        initScriptFactory(this.rspecScriptFactory, reportPath);
-        initScriptFactory(this.shellScriptFactory, reportPath);
+		try {
+			rspecScriptFactory.emit();
+		} catch (Exception e) {
+			getLog().error("error emitting .rb", e);
+		}
+		try {
+			shellScriptFactory.emit();
+		} catch (Exception e) {
+			getLog().error("error emitting .sh", e);
+		}
 
-        try {
-            this.rspecScriptFactory.emit();
-        }
-        catch (final Exception e) {
-            getLog().error("error emitting .rb", e);
-        }
-        try {
-            this.shellScriptFactory.emit();
-        }
-        catch (final Exception e) {
-            getLog().error("error emitting .sh", e);
-        }
+		execute(rspecScriptFactory.getScriptFile().getPath());
+		//execute(shellScriptFactory.getScriptFile().getPath());
 
-        execute(this.rspecScriptFactory.getScriptFile().getPath());
+		File reportFile = new File(reportPath);
 
-        final File reportFile = new File(reportPath);
+		Reader in = null;
+		try {
+			in = new FileReader(reportFile);
+			BufferedReader reader = new BufferedReader(in);
 
-        Reader in = null;
-        try {
-            in = new FileReader(reportFile);
-            final BufferedReader reader = new BufferedReader(in);
+			String line = null;
 
-            String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (line.contains("0 failures")) {
+					return;
+				}
+			}
+		} catch (IOException e) {
+			throw new MojoExecutionException("Unable to read test report file: " + reportFile);
+		} finally {
+			if ( in != null ) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					throw new MojoExecutionException( e.getMessage() );
+				}
+			}
+		}
 
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("0 failures")) {
-                    return;
-                }
-            }
-        }
-        catch (final IOException e) {
-            throw new MojoExecutionException("Unable to read test report file: "
-                    + reportFile);
-        }
-        finally {
-            if (in != null) {
-                try {
-                    in.close();
-                }
-                catch (final IOException e) {
-                    throw new MojoExecutionException(e.getMessage());
-                }
-            }
-        }
+		throw new MojoExecutionException("There were test failures");
+	}
 
-        throw new MojoExecutionException("There were test failures");
-    }
-
-    private void initScriptFactory(final ScriptFactory factory,
-            final String reportPath) {
-        factory.setBaseDir(this.basedir.getAbsolutePath());
-        factory.setClasspathElements(this.classpathElements);
-        factory.setOutputDir(new File(this.reportDirectory));
-        factory.setReportPath(reportPath);
-        factory.setSourceDir(specSourceDirectory().getAbsolutePath());
-        Properties props = this.systemProperties;
-        if (props == null) {
-            props = new Properties();
-        }
-        factory.setSystemProperties(props);
-    }
+	private void initScriptFactory(ScriptFactory factory, String reportPath) {
+		factory.setBaseDir(basedir.getAbsolutePath());
+		factory.setClasspathElements(classpathElements);
+		factory.setOutputDir(new File( outputDirectory) );
+		factory.setReportPath(reportPath);
+		factory.setSourceDir(specSourceDirectory().getAbsolutePath());
+		factory.setGemHome( this.gemHome );
+		factory.setGemPath( this.gemPath );
+		Properties props = systemProperties;
+		if (props == null) {
+			props = new Properties();
+		}
+		factory.setSystemProperties(props);
+	}
 
 }
