@@ -8,11 +8,11 @@ import java.util.List;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.GemService;
-import de.saumya.mojo.LauncherFactory;
-import de.saumya.mojo.Log;
-import de.saumya.mojo.RubyScriptException;
+import de.saumya.mojo.gems.GemspecConverter;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import de.saumya.mojo.ruby.EmbeddedLauncherFactory;
+import de.saumya.mojo.ruby.Log;
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * goal to converts a gemspec file into pom.xml.
@@ -70,14 +70,14 @@ public class PomMojo extends AbstractJRubyMojo {
         }
         else {
             try {
-                final GemService gemspec = new GemService(this.log,
-                        new LauncherFactory().getEmbeddedLauncher(this.verbose,
+                final GemspecConverter gemspec = new GemspecConverter(this.log,
+                        new EmbeddedLauncherFactory().getLauncher(this.verbose,
                                                                   NO_CLASSPATH,
                                                                   setupEnv(),
                                                                   resolveJRUBYCompleteArtifact().getFile(),
-                                                                  this.classRealm));
+                                                                  null));
 
-                gemspec.convertGemspec2Pom(this.gemspecFile, this.pom);
+                gemspec.createPom(this.gemspecFile, "0.21.0-TODO", this.pom);
 
             }
             catch (final RubyScriptException e) {

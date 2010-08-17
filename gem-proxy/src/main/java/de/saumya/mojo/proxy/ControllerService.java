@@ -13,7 +13,7 @@ import java.io.Writer;
 
 import org.jruby.embed.ScriptingContainer;
 
-import de.saumya.mojo.ScriptingService;
+import de.saumya.mojo.ruby.ScriptingService;
 
 class ControllerService {
 

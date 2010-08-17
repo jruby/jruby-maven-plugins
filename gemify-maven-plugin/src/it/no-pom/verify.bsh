@@ -1,0 +1,27 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+File target = new File( basedir, "target");
+
+File file = new File( target, "org.slf4j.slf4j-api-1.5.8-java.gem" );
+if ( !file.isFile() )
+{
+    throw new FileNotFoundException( "Could not find generated GEM: " + file );
+}
+
+file = new File( target, "org.slf4j.slf4j-nop-1.5.8-java.gem" );
+if ( !file.isFile() )
+{
+    throw new FileNotFoundException( "Could not find generated GEM: " + file );
+}
+
+if ( target.list().length() > 2 )
+{
+    throw new FileNotFoundException( "target directory has too many files: " + target );
+}
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+if ( !log.contains( "No POM" ) )
+{
+    throw new RuntimeException( "log file does not contain 'No POM'" );
+}

@@ -1,0 +1,14 @@
+import java.io.*;
+
+File target = new File( basedir, "target");
+
+File file = new File( target, "javax.servlet.servlet-api-2.3.0-java.gem" );
+if ( !file.isFile() )
+{
+    throw new FileNotFoundException( "Could not find generated GEM: " + file );
+}
+
+if ( target.list().length() > 1 )
+{
+    throw new FileNotFoundException( "target directory has too many files: " + target );
+}

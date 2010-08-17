@@ -1,0 +1,10 @@
+require File.dirname(__FILE__) + '/$filename'
+
+CHILD_EXCLUSIONS = [] unless defined? CHILD_EXCLUSIONS
+THIS_EXCLUSIONS = [] unless defined? THIS_EXCLUSIONS
+THIS_EXCLUSIONS.replace(CHILD_EXCLUSIONS)
+
+#foreach( $dep in $dependencies )
+CHILD_EXCLUSIONS.replace([$dep.Exclusions])
+require 'maven/$dep.Name' unless THIS_EXCLUSIONS.member?('$dep.Name')
+#end

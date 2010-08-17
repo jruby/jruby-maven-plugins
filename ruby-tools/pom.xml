@@ -19,6 +19,21 @@
       <version>1.5.1</version>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-velocity</artifactId>
+      <version>1.1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-component-annotations</artifactId>
+      <version>${plexus.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-container-default</artifactId>
+      <version>${plexus.version}</version>
+    </dependency>
+    <dependency>
     	<groupId>org.codehaus.plexus</groupId>
     	<artifactId>plexus-classworlds</artifactId>
     	<version>2.2.3</version>
@@ -28,9 +43,25 @@
     	<artifactId>plexus-utils</artifactId>
     	<version>2.0.5</version>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.maven</groupId>
+    	<artifactId>maven-model</artifactId>
+    	<version>3.0-beta-1</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.codehaus.plexus</groupId>
+    	<artifactId>plexus-archiver</artifactId>
+    	<version>1.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.yaml</groupId>
+    	<artifactId>snakeyaml</artifactId>
+    	<version>1.6</version>
+    </dependency>
   </dependencies>
   <properties>
     <skipTests>true</skipTests>
+    <plexus.version>1.5.4</plexus.version>
   </properties>
   <profiles>
     <profile>

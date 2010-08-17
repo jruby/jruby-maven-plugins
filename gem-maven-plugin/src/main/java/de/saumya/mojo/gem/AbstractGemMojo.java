@@ -27,11 +27,11 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 
-import de.saumya.mojo.GemService;
-import de.saumya.mojo.LauncherFactory;
-import de.saumya.mojo.Log;
-import de.saumya.mojo.RubyScriptException;
+import de.saumya.mojo.gems.GemspecConverter;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import de.saumya.mojo.ruby.EmbeddedLauncherFactory;
+import de.saumya.mojo.ruby.Log;
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  */
@@ -114,12 +114,12 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     void updateLocalMetadata() throws MojoExecutionException {
         if (this.update) {
             try {
-                final GemService gemService = new GemService(this.log,
-                        new LauncherFactory().getEmbeddedLauncher(this.verbose,
+                final GemspecConverter gemService = new GemspecConverter(this.log,
+                        new EmbeddedLauncherFactory().getLauncher(this.verbose,
                                                                   NO_CLASSPATH,
                                                                   setupEnv(),
                                                                   resolveJRUBYCompleteArtifact().getFile(),
-                                                                  this.classRealm));
+                                                                  null));
                 final List<String> ids = new ArrayList<String>();
                 for (final ArtifactRepository repo : this.remoteRepositories) {
                     ids.add(repo.getId());

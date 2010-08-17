@@ -28,7 +28,7 @@ public class IRBMojo extends AbstractGemMojo {
     public void execute() throws MojoExecutionException {
         // make sure the whole things run in the same process
         super.fork = false;
-        // TODO jruby-complete can tries to install gems
+        // TODO jruby-complete tries to install gems
         // file:/jruby-complete-1.5.1.jar!/META-INF/jruby.home/lib/ruby/gems/1.8
         // instead of in $HOME/.gem
         this.includeOpenSSL = false;
