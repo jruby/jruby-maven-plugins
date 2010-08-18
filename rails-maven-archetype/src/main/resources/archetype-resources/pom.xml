@@ -249,9 +249,9 @@
 	<plugins>
 #if( !$skipRspec == 'true' )
 #literal()
-      <!--
-	  this plugin has some rspec specific goals.
-      -->
+          <!--
+	      this plugin has some rspec specific goals.
+          -->
 #end
           <plugin>
 	    <groupId>de.saumya.mojo</groupId>
@@ -271,6 +271,7 @@
 	    <executions>
 	      <execution>
 		<id>test</id>
+		<phase>test</phase>
 		<goals><goal>rake</goal></goals>
 		<configuration>
 		  <task>test</task>
