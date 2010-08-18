@@ -5,14 +5,10 @@
 "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
 "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
-  <context-param>
-    <param-name>public.root</param-name>
-    <param-value>/</param-value>
-  </context-param>
-  <context-param>
-    <param-name>rails.env</param-name>
-    <param-value>production</param-value>
-  </context-param>
+  <welcome-file-list>
+    <welcome-file>/index.html</welcome-file>
+  </welcome-file-list>
+
   <context-param>
     <param-name>jruby.max.runtimes</param-name>
     <param-value>1</param-value>
