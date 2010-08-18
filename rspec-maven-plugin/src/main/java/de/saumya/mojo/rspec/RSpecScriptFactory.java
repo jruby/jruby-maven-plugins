@@ -49,7 +49,7 @@ public class RSpecScriptFactory extends AbstractScriptFactory {
     private String getResultsScript() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("if File.new(REPORT_PATH, 'r').read =~ /, 0 failures/ \n");
+        builder.append("if File.exists?(REPORT_PATH) && File.new(REPORT_PATH, 'r').read =~ /, 0 failures/ \n");
         builder.append("  false\n");
         builder.append("else\n");
         builder.append("  true\n");
