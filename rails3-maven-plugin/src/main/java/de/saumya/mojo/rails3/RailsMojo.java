@@ -117,7 +117,10 @@ public class RailsMojo extends AbstractRailsMojo {
         }
         else {
             command = binScript("rails _" + this.railsVersion + "_ new");
-            if (this.appPath != null) {
+            if (this.appPath == null) {
+                throw new MojoExecutionException("no application path given, use '-Dapp_path=....'");
+            }
+            else {
                 command.append(" ").append(this.appPath);
             }
         }
@@ -170,13 +173,18 @@ public class RailsMojo extends AbstractRailsMojo {
             filterContent(app, context, "pom.xml");
 
             // write out a new index.html
-            filterContent(app,
-                          context,
-                          "public/maven.html",
-                          "public/index.html");
+            filterContent(app, context, "src/main/webapp/index.html");
 
             // create web.xml
             filterContent(app, context, "src/main/webapp/WEB-INF/web.xml");
+
+            // create override-xyz-web.xml
+            filterContent(app,
+                          context,
+                          "src/main/jetty/override-development-web.xml");
+            filterContent(app,
+                          context,
+                          "src/main/jetty/override-production-web.xml");
 
             // create Gemfile.maven
             filterContent(app, context, "Gemfile.maven");

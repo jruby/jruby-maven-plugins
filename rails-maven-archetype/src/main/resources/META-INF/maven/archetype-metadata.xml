@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><archetype-descriptor name="rails2 archetype">
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor name="rails archetype">
   <fileSets>
     <fileSet filtered="true" encoding="UTF-8">
       <directory>src/main/webapp</directory>
@@ -7,9 +8,9 @@
       </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-      <directory>public</directory>
+      <directory>src/main/jetty</directory>
       <includes>
-        <include>**/*.html</include>
+        <include>*.xml</include>
       </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
