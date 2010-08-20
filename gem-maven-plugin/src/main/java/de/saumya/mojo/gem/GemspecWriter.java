@@ -55,7 +55,7 @@ class GemspecWriter {
         append("# create by maven - leave it as is");
         append("Gem::Specification.new do |s|");
         append("name", artifact.getGemName());
-        appendRaw("version", gemVersion(project.getVersion()));
+        appendRaw("version", "'" + GemArtifact.getGemVersion(project.getVersion()) + "'" );
         append();
         append("summary", project.getName());
         append("description", project.getDescription());
@@ -81,8 +81,7 @@ class GemspecWriter {
 
     private String gemVersion(String version) {
         version = version.replaceAll("-SNAPSHOT", "")
-                .replace("-", ".")
-                .toLowerCase();
+                .replace("-", ".");
         if (version.matches("^[\\[\\(].*[\\]\\)]$")) {
             final int comma = version.indexOf(",");
             final String first = version.substring(1, comma);
