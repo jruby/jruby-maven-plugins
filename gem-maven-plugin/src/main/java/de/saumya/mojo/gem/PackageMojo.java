@@ -33,398 +33,327 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  */
 public class PackageMojo extends AbstractJRubyMojo {
 
-    /**
-     * @parameter expression="${project.build.directory}"
-     */
-    File                              buildDirectory;
+	/**
+	 * @parameter expression="${project.build.directory}"
+	 */
+	File buildDirectory;
 
-    /**
-     * @parameter default-value="${gemspec}"
-     */
-    File                              gemSpec;
+	/**
+	 * @parameter default-value="${gemspec}"
+	 */
+	File gemSpec;
 
-    /**
-     * @parameter default-value="${gemspec.overwrite}"
-     */
-    boolean                           gemspecOverwrite = false;
+	/**
+	 * @parameter default-value="${gemspec.overwrite}"
+	 */
+	boolean gemspecOverwrite = false;
 
-    /** @parameter */
-    private String                    date;
+	/** @parameter */
+	private String date;
 
-    /** @parameter */
-    private String                    extraRdocFiles;
+	/** @parameter */
+	private String extraRdocFiles;
 
-    /** @parameter */
-    private String                    extraFiles;
+	/** @parameter */
+	private String extraFiles;
 
-    /** @parameter */
-    private String                    rdocOptions;
+	/** @parameter */
+	private String rdocOptions;
 
-    /** @parameter */
-    private String                    requirePaths;
+	/** @parameter */
+	private String requirePaths;
 
-    /** @parameter */
-    private String                    rubyforgeProject;
+	/** @parameter */
+	private String rubyforgeProject;
 
-    /** @parameter */
-    private String                    rubygemsVersion;
+	/** @parameter */
+	private String rubygemsVersion;
 
-    /** @parameter */
-    private String                    requiredRubygemsVersion;
+	/** @parameter */
+	private String requiredRubygemsVersion;
 
-    /** @parameter */
-    private String                    bindir;
+	/** @parameter */
+	private String bindir;
 
-    /** @parameter */
-    private String                    requiredRubyVersion;
+	/** @parameter */
+	private String requiredRubyVersion;
 
-    /** @parameter */
-    private String                    postInstallMessage;
+	/** @parameter */
+	private String postInstallMessage;
 
-    /** @parameter */
-    private String                    executables;
+	/** @parameter */
+	private String executables;
 
-    /** @parameter */
-    private String                    extensions;
+	/** @parameter */
+	private String extensions;
 
-    /** @parameter */
-    private String                    platform;
+	/** @parameter */
+	private String platform;
 
-    private final Map<String, String> relocationMap    = new HashMap<String, String>();
+	/** @parameter default-value="gem_hook.rb"*/
+	private String gemHook;
 
-    /**
-     * @parameter expression="false"
-     */
-    boolean                           includeDependencies;
+	private final Map<String, String> relocationMap = new HashMap<String, String>();
 
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        final MavenProject project = this.project;
-        final GemArtifact artifact = new GemArtifact(project);
-        try {
-            if (this.gemSpec == null && project.getBasedir() != null
-                    && project.getBasedir().exists()) {
-                // TODO generate the gemspec in the prepare-package phase so we
-                // can use it separately
-                build(project, artifact);
-            }
-            else {
-                if (this.project.getBasedir() == null) {
-                    this.gemHome = new File(this.gemHome.getAbsolutePath()
-                            .replace("/${project.basedir}/", "/"));
-                    this.gemPath = new File(this.gemPath.getAbsolutePath()
-                            .replace("/${project.basedir}/", "/"));
-                }
-                if (this.gemSpec == null) {
-                    for (final File f : this.launchDirectory().listFiles()) {
-                        if (f.getName().endsWith(".gemspec")) {
-                            if (this.gemSpec == null) {
-                                this.gemSpec = f;
-                            }
-                            else {
-                                throw new MojoFailureException("more than one gemspec file found, use -Dgemspec=... to specifiy one");
-                            }
-                        }
-                    }
-                    if (this.gemSpec == null) {
-                        throw new MojoFailureException("no gemspec file or pom found, use -Dgemspec=... to specifiy a gemspec file or '-f ...' to use a pom file");
-                    }
-                    else {
-                        getLog().info("use gemspec: " + this.gemSpec);
-                    }
-                }
+	/**
+	 * @parameter expression="false"
+	 */
+	boolean includeDependencies;
 
-                execute("-S gem build " + this.gemSpec.getAbsolutePath(), false);
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		final MavenProject project = this.project;
+		final GemArtifact artifact = new GemArtifact(project);
+		try {
+			if (this.gemSpec == null && project.getBasedir() != null && project.getBasedir().exists()) {
+				// TODO generate the gemspec in the prepare-package phase so we
+				// can use it separately
+				build(project, artifact);
+			} else {
+				if (this.project.getBasedir() == null) {
+					this.gemHome = new File(this.gemHome.getAbsolutePath().replace("/${project.basedir}/", "/"));
+					this.gemPath = new File(this.gemPath.getAbsolutePath().replace("/${project.basedir}/", "/"));
+				}
+				if (this.gemSpec == null) {
+					for (final File f : this.launchDirectory().listFiles()) {
+						if (f.getName().endsWith(".gemspec")) {
+							if (this.gemSpec == null) {
+								this.gemSpec = f;
+							} else {
+								throw new MojoFailureException("more than one gemspec file found, use -Dgemspec=... to specifiy one");
+							}
+						}
+					}
+					if (this.gemSpec == null) {
+						throw new MojoFailureException("no gemspec file or pom found, use -Dgemspec=... to specifiy a gemspec file or '-f ...' to use a pom file");
+					} else {
+						getLog().info("use gemspec: " + this.gemSpec);
+					}
+				}
 
-                File gem = null;
-                for (final File f : launchDirectory().listFiles()) {
-                    if (f.getName().endsWith(".gem")) {
-                        gem = f;
-                        break;
-                    }
-                }
-                if (project.getFile() != null && artifact.isGem()) {
-                    // only when the pom exist there will be an artifact
-                    FileUtils.copyFileIfModified(gem, artifact.getFile());
-                    gem.deleteOnExit();
-                }
-                else {
-                    // keep the gem where it when there is no buildDirectory
-                    if (this.buildDirectory.exists()) {
-                        FileUtils.copyFileIfModified(gem,
-                                                     new File(this.buildDirectory,
-                                                             gem.getName()));
-                        gem.deleteOnExit();
-                    }
-                }
-            }
-        }
-        catch (final IOException e) {
-            throw new MojoExecutionException("error gemifing pom", e);
-        }
-    }
+				execute("-S gem build " + this.gemSpec.getAbsolutePath(), false);
 
-    private MavenProject projectFromArtifact(final Artifact artifact)
-            throws ProjectBuildingException {
-        final MavenProject project = this.builder.buildFromRepository(artifact,
-                                                                      this.remoteRepositories,
-                                                                      this.localRepository);
-        if (project.getDistributionManagement() != null
-                && project.getDistributionManagement().getRelocation() != null) {
-            final Relocation reloc = project.getDistributionManagement()
-                    .getRelocation();
-            final String key = artifact.getGroupId() + ":"
-                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
-                    + artifact.getVersion();
-            artifact.setArtifactId(reloc.getArtifactId());
-            artifact.setGroupId(reloc.getGroupId());
-            if (reloc.getVersion() != null) {
-                artifact.setVersion(reloc.getVersion());
-            }
-            this.relocationMap.put(key, artifact.getGroupId() + ":"
-                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
-                    + artifact.getVersion());
-            return projectFromArtifact(artifact);
-        }
-        else {
-            return project;
-        }
-    }
+				File gem = null;
+				for (final File f : launchDirectory().listFiles()) {
+					if (f.getName().endsWith(".gem")) {
+						gem = f;
+						break;
+					}
+				}
+				if (project.getFile() != null && artifact.isGem()) {
+					// only when the pom exist there will be an artifact
+					FileUtils.copyFileIfModified(gem, artifact.getFile());
+					gem.deleteOnExit();
+				} else {
+					// keep the gem where it when there is no buildDirectory
+					if (this.buildDirectory.exists()) {
+						FileUtils.copyFileIfModified(gem, new File(this.buildDirectory, gem.getName()));
+						gem.deleteOnExit();
+					}
+				}
+			}
+		} catch (final IOException e) {
+			throw new MojoExecutionException("error gemifing pom", e);
+		}
+	}
 
-    @SuppressWarnings( { "unchecked" })
-    private void build(final MavenProject project, final GemArtifact artifact)
-            throws MojoExecutionException, IOException {
+	private MavenProject projectFromArtifact(final Artifact artifact) throws ProjectBuildingException {
+		final MavenProject project = this.builder.buildFromRepository(artifact, this.remoteRepositories, this.localRepository);
+		if (project.getDistributionManagement() != null && project.getDistributionManagement().getRelocation() != null) {
+			final Relocation reloc = project.getDistributionManagement().getRelocation();
+			final String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getVersion();
+			artifact.setArtifactId(reloc.getArtifactId());
+			artifact.setGroupId(reloc.getGroupId());
+			if (reloc.getVersion() != null) {
+				artifact.setVersion(reloc.getVersion());
+			}
+			this.relocationMap.put(key, artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getVersion());
+			return projectFromArtifact(artifact);
+		} else {
+			return project;
+		}
+	}
 
-        getLog().info("building gem for " + artifact + " . . .");
-        getLog().info("include dependencies? " + this.includeDependencies);
-        final File gemDir = new File(this.buildDirectory, artifact.getGemName());
-        final File gemSpec = new File(gemDir, artifact.getGemName()
-                + ".gemspec");
-        final GemspecWriter gemSpecWriter = new GemspecWriter(gemSpec,
-                project,
-                artifact);
+	@SuppressWarnings( { "unchecked" })
+	private void build(final MavenProject project, final GemArtifact artifact) throws MojoExecutionException, IOException {
 
-        if (this.date != null) {
-            gemSpecWriter.append("date", Date.valueOf(this.date).toString());
-        }
-        gemSpecWriter.append("rubygems_version", this.rubygemsVersion);
-        gemSpecWriter.append("required_rubygems_version",
-                             this.requiredRubygemsVersion);
-        gemSpecWriter.append("required_ruby_version", this.requiredRubyVersion);
-        gemSpecWriter.append("bindir", this.bindir);
-        gemSpecWriter.append("post_install_message", this.postInstallMessage);
+		getLog().info("building gem for " + artifact + " . . .");
+		getLog().info("include dependencies? " + this.includeDependencies);
+		final File gemDir = new File(this.buildDirectory, artifact.getGemName());
+		final File gemSpec = new File(gemDir, artifact.getGemName() + ".gemspec");
+		final GemspecWriter gemSpecWriter = new GemspecWriter(gemSpec, project, artifact);
 
-        gemSpecWriter.append("rubyforge_project", this.rubyforgeProject);
-        gemSpecWriter.appendRdocFiles(this.extraRdocFiles);
-        gemSpecWriter.appendFiles(this.extraFiles);
-        gemSpecWriter.appendList("executables", this.executables);
-        gemSpecWriter.appendList("extensions", this.extensions);
-        gemSpecWriter.appendList("rdoc_options", this.rdocOptions);
-        gemSpecWriter.appendList("require_paths", this.requirePaths);
-        final File rubyFile;
-        if (artifact.hasJarFile()) {
-            gemSpecWriter.appendPlatform(this.platform == null
-                    ? "java"
-                    : this.platform);
-            gemSpecWriter.appendJarfile(artifact.getJarFile(),
-                                        artifact.getJarFile().getName());
-            final File lib = new File(gemDir, "lib");
-            lib.mkdirs();
-            // need relative filename here
-            rubyFile = new File(lib.getName(), artifact.getGemName() + ".rb");
-            gemSpecWriter.appendFile(rubyFile);
-        }
-        else {
-            rubyFile = null;
-            gemSpecWriter.appendPlatform(this.platform);
-        }
+		if (this.date != null) {
+			gemSpecWriter.append("date", Date.valueOf(this.date).toString());
+		}
+		gemSpecWriter.append("rubygems_version", this.rubygemsVersion);
+		gemSpecWriter.append("required_rubygems_version", this.requiredRubygemsVersion);
+		gemSpecWriter.append("required_ruby_version", this.requiredRubyVersion);
+		gemSpecWriter.append("bindir", this.bindir);
+		gemSpecWriter.append("post_install_message", this.postInstallMessage);
 
-        ArtifactResolutionResult jarDependencyArtifacts = null;
-        if (this.includeDependencies) {
-            try {
-                jarDependencyArtifacts = this.resolver.resolveTransitively(project.getArtifacts(),
-                                                                           project.getArtifact(),
-                                                                           this.project.getManagedVersionMap(),
-                                                                           this.localRepository,
-                                                                           this.remoteRepositories,
-                                                                           this.metadata,
-                                                                           new ArtifactFilter() {
-                                                                               public boolean include(
-                                                                                       final Artifact candidate) {
-                                                                                   if (candidate == artifact) {
-                                                                                       return true;
-                                                                                   }
-                                                                                   final boolean result = (candidate.getType()
-                                                                                           .equals("jar") && ("compile".equals(candidate.getScope()) || "runtime".equals(candidate.getScope())));
-                                                                                   return result;
-                                                                               }
+		gemSpecWriter.append("rubyforge_project", this.rubyforgeProject);
+		gemSpecWriter.appendRdocFiles(this.extraRdocFiles);
+		gemSpecWriter.appendFiles(this.extraFiles);
+		gemSpecWriter.appendList("executables", this.executables);
+		gemSpecWriter.appendList("extensions", this.extensions);
+		gemSpecWriter.appendList("rdoc_options", this.rdocOptions);
+		gemSpecWriter.appendList("require_paths", this.requirePaths);
+		final File rubyFile;
+		if (artifact.hasJarFile()) {
+			gemSpecWriter.appendPlatform(this.platform == null ? "java" : this.platform);
+			gemSpecWriter.appendJarfile(artifact.getJarFile(), artifact.getJarFile().getName());
+			final File lib = new File(gemDir, "lib");
+			lib.mkdirs();
+			// need relative filename here
+			rubyFile = new File(lib.getName(), artifact.getGemName() + ".rb");
+			gemSpecWriter.appendFile(rubyFile);
+		} else {
+			rubyFile = null;
+			gemSpecWriter.appendPlatform(this.platform);
+		}
 
-                                                                           });
-                for (final Iterator each = jarDependencyArtifacts.getArtifacts()
-                        .iterator(); each.hasNext();) {
-                    final Artifact dependency = (Artifact) each.next();
-                    getLog().info(" -- include -- " + dependency);
-                    gemSpecWriter.appendJarfile(dependency.getFile(),
-                                                dependency.getFile().getName());
-                }
-            }
-            catch (final ArtifactResolutionException e) {
-                e.printStackTrace();
-            }
-            catch (final ArtifactNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
+		ArtifactResolutionResult jarDependencyArtifacts = null;
+		if (this.includeDependencies) {
+			try {
+				jarDependencyArtifacts = this.resolver.resolveTransitively(project.getArtifacts(), project.getArtifact(), this.project.getManagedVersionMap(),
+						this.localRepository, this.remoteRepositories, this.metadata, new ArtifactFilter() {
+							public boolean include(final Artifact candidate) {
+								if (candidate == artifact) {
+									return true;
+								}
+								final boolean result = (candidate.getType().equals("jar") && ("compile".equals(candidate.getScope()) || "runtime".equals(candidate
+										.getScope())));
+								return result;
+							}
 
-        // TODO make it the maven way (src/main/ruby + src/test/ruby) or the
-        // ruby way (lib + spec + test)
-        // TODO make a loop or so ;-)
-        final File libDir = new File(project.getBasedir(), "lib");
-        final File generatorsDir = new File(project.getBasedir(), "generators");
-        final File specDir = new File(project.getBasedir(), "spec");
-        final File testDir = new File(project.getBasedir(), "test");
+						});
+				for (final Iterator each = jarDependencyArtifacts.getArtifacts().iterator(); each.hasNext();) {
+					final Artifact dependency = (Artifact) each.next();
+					getLog().info(" -- include -- " + dependency);
+					gemSpecWriter.appendJarfile(dependency.getFile(), dependency.getFile().getName());
+				}
+			} catch (final ArtifactResolutionException e) {
+				e.printStackTrace();
+			} catch (final ArtifactNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
 
-        if (libDir.exists()) {
-            gemSpecWriter.appendPath("lib");
-        }
-        if (generatorsDir.exists()) {
-            gemSpecWriter.appendPath("generators");
-        }
-        if (specDir.exists()) {
-            gemSpecWriter.appendPath("spec");
-            gemSpecWriter.appendTestPath("spec");
-        }
-        if (testDir.exists()) {
-            gemSpecWriter.appendPath("test");
-            gemSpecWriter.appendTestPath("test");
-        }
+		// TODO make it the maven way (src/main/ruby + src/test/ruby) or the
+		// ruby way (lib + spec + test)
+		// TODO make a loop or so ;-)
+		final File libDir = new File(project.getBasedir(), "lib");
+		final File generatorsDir = new File(project.getBasedir(), "generators");
+		final File specDir = new File(project.getBasedir(), "spec");
+		final File testDir = new File(project.getBasedir(), "test");
 
-        for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
-            if (!dependency.isOptional()
-                    && dependency.getType().contains("gem")) {
-                if (!dependency.getVersion().matches(".*[\\)\\]]$")) {
-                    // it will adjust the artifact as well (in case of
-                    // relocation)
+		if (libDir.exists()) {
+			gemSpecWriter.appendPath("lib");
+		}
+		if (generatorsDir.exists()) {
+			gemSpecWriter.appendPath("generators");
+		}
+		if (specDir.exists()) {
+			gemSpecWriter.appendPath("spec");
+			gemSpecWriter.appendTestPath("spec");
+		}
+		if (testDir.exists()) {
+			gemSpecWriter.appendPath("test");
+			gemSpecWriter.appendTestPath("test");
+		}
 
-                    Artifact arti = null;
-                    try {
-                        arti = this.artifactFactory.createArtifactWithClassifier(dependency.getGroupId(),
-                                                                                 dependency.getArtifactId(),
-                                                                                 dependency.getVersion(),
-                                                                                 dependency.getScope(),
-                                                                                 dependency.getClassifier());
-                        projectFromArtifact(arti);
-                        dependency.setGroupId(arti.getGroupId());
-                        dependency.setArtifactId(arti.getArtifactId());
-                    }
-                    catch (final ProjectBuildingException e) {
-                        throw new MojoExecutionException("error building project for "
-                                + arti,
-                                e);
-                    }
-                }
+		for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
+			if (!dependency.isOptional() && dependency.getType().contains("gem")) {
+				if (!dependency.getVersion().matches(".*[\\)\\]]$")) {
+					// it will adjust the artifact as well (in case of
+					// relocation)
 
-                final String prefix = dependency.getGroupId()
-                        .equals("rubygems") ? "" : dependency.getGroupId()
-                        + ".";
-                if ((Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
-                    gemSpecWriter.appendDependency(prefix
-                                                           + dependency.getArtifactId(),
-                                                   dependency.getVersion());
-                }
-                else if ((Artifact.SCOPE_PROVIDED + Artifact.SCOPE_TEST).contains(dependency.getScope())) {
-                    gemSpecWriter.appendDevelopmentDependency(prefix
-                                                                      + dependency.getArtifactId(),
-                                                              dependency.getVersion());
-                }
-                else {
-                    // TODO put things into "requirements"
-                }
-            }
-        }
+					Artifact arti = null;
+					try {
+						arti = this.artifactFactory.createArtifactWithClassifier(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(), dependency
+								.getScope(), dependency.getClassifier());
+						projectFromArtifact(arti);
+						dependency.setGroupId(arti.getGroupId());
+						dependency.setArtifactId(arti.getArtifactId());
+					} catch (final ProjectBuildingException e) {
+						throw new MojoExecutionException("error building project for " + arti, e);
+					}
+				}
 
-        gemSpecWriter.close();
+				final String prefix = dependency.getGroupId().equals("rubygems") ? "" : dependency.getGroupId() + ".";
+				if ((Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
+					gemSpecWriter.appendDependency(prefix + dependency.getArtifactId(), dependency.getVersion());
+				} else if ((Artifact.SCOPE_PROVIDED + Artifact.SCOPE_TEST).contains(dependency.getScope())) {
+					gemSpecWriter.appendDevelopmentDependency(prefix + dependency.getArtifactId(), dependency.getVersion());
+				} else {
+					// TODO put things into "requirements"
+				}
+			}
+		}
 
-        gemSpecWriter.copy(gemDir);
+		gemSpecWriter.close();
 
-        if (artifact.hasJarFile() && !rubyFile.exists()) {
-            FileWriter writer = null;
-            try {
-                // need absolute filename here
-                writer = new FileWriter(new File(gemDir, rubyFile.getPath()));
+		gemSpecWriter.copy(gemDir);
 
-                writer.append("module ")
-                        .append(titleizedClassname(project.getArtifactId()))
-                        .append("\n");
-                writer.append("  VERSION = '")
-                        .append(artifact.getGemVersion())
-                        .append("'\n");
-                writer.append("  MAVEN_VERSION = '")
-                        .append(project.getVersion())
-                        .append("'\n");
-                writer.append("end\n");
-                writer.append("begin\n");
-                writer.append("  require 'java'\n");
-                writer.append("  require File.dirname(__FILE__) + '/")
-                        .append(artifact.getJarFile().getName())
-                        .append("'\n");
-                if (jarDependencyArtifacts != null) {
-                    for (final Iterator each = jarDependencyArtifacts.getArtifacts()
-                            .iterator(); each.hasNext();) {
-                        final Artifact dependency = (Artifact) each.next();
-                        writer.append("  require File.dirname(__FILE__) + '/")
-                                .append(dependency.getFile().getName())
-                                .append("'\n");
-                    }
+		if (artifact.hasJarFile() && !rubyFile.exists()) {
+			FileWriter writer = null;
+			try {
+				// need absolute filename here
+				writer = new FileWriter(new File(gemDir, rubyFile.getPath()));
 
-                }
-                writer.append("rescue LoadError\n");
-                writer.append("  puts 'JAR-based gems require JRuby to load. Please visit www.jruby.org.'\n");
-                writer.append("  raise\n");
-                writer.append("end\n");
-            }
-            catch (final IOException e) {
-                throw new MojoExecutionException("error writing ruby file", e);
-            }
-            finally {
-                if (writer != null) {
-                    try {
-                        writer.close();
-                    }
-                    catch (final IOException ignore) {
-                    }
-                }
-            }
-        }
+				writer.append("module ").append(titleizedClassname(project.getArtifactId())).append("\n");
+				writer.append("  VERSION = '").append(artifact.getGemVersion()).append("'\n");
+				writer.append("  MAVEN_VERSION = '").append(project.getVersion()).append("'\n");
+				writer.append("end\n");
+				writer.append("begin\n");
+				writer.append("  require 'java'\n");
+				writer.append("  require File.dirname(__FILE__) + '/").append(artifact.getJarFile().getName()).append("'\n");
+				if (jarDependencyArtifacts != null) {
+					for (final Iterator each = jarDependencyArtifacts.getArtifacts().iterator(); each.hasNext();) {
+						final Artifact dependency = (Artifact) each.next();
+						writer.append("  require File.dirname(__FILE__) + '/").append(dependency.getFile().getName()).append("'\n");
+					}
 
-        final File localGemspec = new File(launchDirectory(), gemSpec.getName());
+				}
+				writer.append("rescue LoadError\n");
+				writer.append("  puts 'JAR-based gems require JRuby to load. Please visit www.jruby.org.'\n");
+				writer.append("  raise\n");
+				writer.append("end\n");
+				writer.append("\n");
+				writer.append("load File.dirname(__FILE__) + '/" + this.gemHook + "' if File.exists?( File.dirname(__FILE__) + '/" + this.gemHook +"')\n");
+			} catch (final IOException e) {
+				throw new MojoExecutionException("error writing ruby file", e);
+			} finally {
+				if (writer != null) {
+					try {
+						writer.close();
+					} catch (final IOException ignore) {
+					}
+				}
+			}
+		}
 
-        this.launchDirectory = gemDir;
-        execute("-S gem build " + gemSpec.getAbsolutePath());
+		final File localGemspec = new File(launchDirectory(), gemSpec.getName());
 
-        if ((!localGemspec.exists() || !FileUtils.contentEquals(localGemspec,
-                                                                gemSpec))
-                && this.gemspecOverwrite) {
-            getLog().info("overwrite gemspec '" + localGemspec.getName() + "'");
-            FileUtils.copyFile(gemSpec, localGemspec);
-        }
+		this.launchDirectory = gemDir;
+		execute("-S gem build " + gemSpec.getAbsolutePath());
 
-        final StringBuilder gemFilename = new StringBuilder("rubygems".equals(artifact.getGroupId())
-                ? ""
-                : artifact.getGroupId() + ".").append(artifact.getArtifactId())
-                .append("-")
-                .append(artifact.getGemVersion())
-                .append("java-gem".equals(artifact.getType()) ? "-java" : "")
-                .append(".gem");
+		if ((!localGemspec.exists() || !FileUtils.contentEquals(localGemspec, gemSpec)) && this.gemspecOverwrite) {
+			getLog().info("overwrite gemspec '" + localGemspec.getName() + "'");
+			FileUtils.copyFile(gemSpec, localGemspec);
+		}
 
-        FileUtils.copyFile(new File(gemDir, gemFilename.toString()),
-                           artifact.getFile());
-    }
+		final StringBuilder gemFilename = new StringBuilder("rubygems".equals(artifact.getGroupId()) ? "" : artifact.getGroupId() + ".").append(artifact.getArtifactId())
+				.append("-").append(artifact.getGemVersion()).append("java-gem".equals(artifact.getType()) ? "-java" : "").append(".gem");
 
-    private String titleizedClassname(final String artifactId) {
-        final StringBuilder name = new StringBuilder();
-        for (final String part : artifactId.split("-")) {
-            name.append(StringUtils.capitalise(part));
-        }
-        return name.toString();
-    }
+		FileUtils.copyFile(new File(gemDir, gemFilename.toString()), artifact.getFile());
+	}
+
+	private String titleizedClassname(final String artifactId) {
+		final StringBuilder name = new StringBuilder();
+		for (final String part : artifactId.split("-")) {
+			name.append(StringUtils.capitalise(part));
+		}
+		return name.toString();
+	}
 }
