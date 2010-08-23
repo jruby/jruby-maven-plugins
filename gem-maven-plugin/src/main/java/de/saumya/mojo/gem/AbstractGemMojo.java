@@ -43,6 +43,17 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
     protected boolean           includeOpenSSL;
+    
+    
+    /**
+     * @parameter expression="${gem.installRDoc}" default-value="false"
+     */
+    protected boolean installRDoc;
+    
+    /**
+     * @parameter expression="${gem.installRI}" default-value="false"
+     */
+    protected boolean installRI;
 
     /**
      * allow to overwrite the version by explicitly declaring a dependency in
@@ -212,8 +223,21 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         if (gems.length() > 0) {
-            execute("-S gem install --no-ri --no-rdoc --no-user-install "
-                    + extraFlag + " -l " + gems, false);
+        	StringBuilder command = new StringBuilder();
+        	command.append( "-S gem install -l " );
+        	command.append( extraFlag );
+        	if ( this.installRDoc ) {
+        		command.append( "--rdoc " );
+        	} else {
+        		command.append( "--no-rdoc " );
+        	}
+        	if ( this.installRI ) {
+        		command.append( "--ri " );
+        	} else {
+        		command.append( "--no-ri " );
+        	}
+        	command.append( gems );
+            execute(command.toString(), false );
         }
         else {
             getLog().debug("no gems found to install");
