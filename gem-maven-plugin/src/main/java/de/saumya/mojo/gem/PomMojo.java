@@ -2,16 +2,12 @@ package de.saumya.mojo.gem;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.gems.GemspecConverter;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
-import de.saumya.mojo.ruby.EmbeddedLauncherFactory;
-import de.saumya.mojo.ruby.Log;
 import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
@@ -21,31 +17,28 @@ import de.saumya.mojo.ruby.RubyScriptException;
  */
 public class PomMojo extends AbstractJRubyMojo {
 
-    private static List<String> NO_CLASSPATH = Collections.emptyList();
-
-    protected final Log         log          = new Log() {
-                                                 public void info(
-                                                         final CharSequence content) {
-                                                     getLog().info(content);
-                                                 }
-                                             };
-
     /**
      * @parameter expression="${pom}" default-value="pom.xml"
      */
-    protected File              pom;
+    protected File    pom;
 
     /**
      * @parameter default-value="${pom.force}"
      */
-    protected boolean           force        = false;
+    protected boolean force = false;
 
     /**
      * @parameter default-value="${pom.gemspec}"
      */
-    protected File              gemspecFile;
+    protected File    gemspecFile;
 
-    public void execute() throws MojoExecutionException {
+    /**
+     * @plugin
+     */
+    Plugin            plugin;
+
+    @Override
+    public void executeJRuby() throws MojoExecutionException {
         if (this.pom.exists() && !this.force) {
             getLog().info(this.pom.getName()
                     + " already exists. use '-Dpom.force=true' to overwrite");
@@ -70,21 +63,23 @@ public class PomMojo extends AbstractJRubyMojo {
         }
         else {
             try {
-                final GemspecConverter gemspec = new GemspecConverter(this.log,
-                        new EmbeddedLauncherFactory().getLauncher(this.verbose,
-                                                                  NO_CLASSPATH,
-                                                                  setupEnv(),
-                                                                  resolveJRUBYCompleteArtifact().getFile(),
-                                                                  null));
-
-                gemspec.createPom(this.gemspecFile, "0.21.0-TODO", this.pom);
+                final GemspecConverter gemspec = new GemspecConverter(this.logger,
+                        this.factory);
+                String version = null;
+                for (final Plugin plugin : this.project.getBuild().getPlugins()) {
+                    if (plugin.getArtifactId().equals("gem-maven-plugin")) {
+                        version = plugin.getVersion();
+                        break;
+                    }
+                }
+                if (version == null) {
+                    throw new IllegalArgumentException("did not find gem-maven-plugin in POM");
+                }
+                gemspec.createPom(this.gemspecFile, version, this.pom);
 
             }
             catch (final RubyScriptException e) {
-                throw new MojoExecutionException("error in rake script", e);
-            }
-            catch (final DependencyResolutionRequiredException e) {
-                throw new MojoExecutionException("could not resolve jruby", e);
+                throw new MojoExecutionException("error in script", e);
             }
             catch (final IOException e) {
                 throw new MojoExecutionException("IO error", e);

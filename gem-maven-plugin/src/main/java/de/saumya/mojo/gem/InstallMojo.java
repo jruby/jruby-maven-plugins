@@ -1,12 +1,14 @@
 package de.saumya.mojo.gem;
 
 import java.io.File;
+import java.io.IOException;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.Script;
 
 /**
  * goal to locally install a given gem
@@ -16,31 +18,30 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 public class InstallMojo extends AbstractJRubyMojo {
 
     /**
-     * @parameter expression="${project.artifact}"
-     */
-    private final Artifact artifact = null;
-
-    /**
      * arguments for the "gem install" command.
      * 
-     * @parameter default-value="${gem.install}"
+     * @parameter default-value="${install.orgs}"
      */
-    protected String       args     = null;
+    protected String installArgs = null;
 
     /**
      * gem file to install locally.
      * 
      * @parameter default-value="${gem}"
      */
-    protected File         gem      = null;
+    protected File   gem         = null;
 
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        String commandString = "-S gem install";
+    @Override
+    public void executeJRuby() throws MojoExecutionException,
+            MojoFailureException, RubyScriptException, IOException {
+        final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                .addArg("install");
         // TODO if artifact is set, check on an existing gem in target
-        if (this.artifact != null && this.artifact.getFile() != null
-                && this.artifact.getFile().exists()) {
+        if (this.project.getArtifact() != null
+                && this.project.getArtifact().getFile() != null
+                && this.project.getArtifact().getFile().exists()) {
             final GemArtifact gemArtifact = new GemArtifact(this.project);
-            commandString += " -l " + gemArtifact.getFile();
+            script.addArg("-l", gemArtifact.getFile());
         }
         else {
             if (this.gem == null) {
@@ -56,20 +57,13 @@ public class InstallMojo extends AbstractJRubyMojo {
                 }
                 if (this.gem != null) {
                     getLog().info("use gem: " + this.gem);
-                    commandString += " -l " + this.gem.getAbsolutePath();
+                    script.addArg("-l", this.gem);
+                    // commandString += " -l " + this.gem.getAbsolutePath();
                 }
             }
-            if (this.args != null) {
-                commandString += " " + this.args;
-            }
-            execute(commandString, false);
+            script.addArgs(this.installArgs);
+            script.addArgs(this.args);
+            script.execute();
         }
-
     }
-
-    // @Override
-    // protected File launchDirectory() {
-    // return this.launchDir.getAbsoluteFile();
-    // }
-
 }

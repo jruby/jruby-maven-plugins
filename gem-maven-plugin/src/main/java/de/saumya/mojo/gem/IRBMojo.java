@@ -1,6 +1,11 @@
 package de.saumya.mojo.gem;
 
+import java.io.IOException;
+
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * maven wrpper around IRB.
@@ -10,39 +15,39 @@ import org.apache.maven.plugin.MojoExecutionException;
  */
 public class IRBMojo extends AbstractGemMojo {
 
-    // override super mojo and make this readonly
-    /**
-     * @parameter expression="false"
-     * @readonly
-     */
-    protected boolean fork;
-
     /**
      * arguments for the irb command.
      * 
-     * @parameter default-value="${gem.irb.args}"
+     * @parameter default-value="${irb.args}"
      */
-    protected String  args = null;
+    protected String  irbArgs = null;
+
+    /**
+     * launch IRB in a swing window.
+     * 
+     * @parameter default-value="${irb.swing}"
+     */
+    protected boolean swing   = false;
 
     @Override
-    public void execute() throws MojoExecutionException {
+    public void execute() throws MojoExecutionException, MojoFailureException {
         // make sure the whole things run in the same process
-        super.fork = false;
-        // TODO jruby-complete tries to install gems
+        super.jrubyFork = false;
+        // TODO jruby-complete tries to install gems into
         // file:/jruby-complete-1.5.1.jar!/META-INF/jruby.home/lib/ruby/gems/1.8
-        // instead of in $HOME/.gem
+        // instead of in $HOME/.gem or /usr/lib/ruby/1.8
         this.includeOpenSSL = false;
         super.execute();
     }
 
     @Override
-    public void executeWithGems() throws MojoExecutionException {
-        final StringBuilder args = new StringBuilder("-e ENV['GEM_HOME']='"
-                + this.gemHome + "';ENV['GEM_PATH']='" + this.gemPath
-                + "';$LOAD_PATH<<'./lib' -S irb");
-        if (this.args != null) {
-            args.append(" ").append(this.args);
-        }
-        execute(args.toString());
+    public void executeWithGems() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        this.factory.newScriptFromResource(this.swing
+                ? IRB_SWING_RUBY_COMMAND
+                : IRB_RUBY_COMMAND)
+                .addArgs(this.irbArgs)
+                .addArgs(this.args)
+                .execute();
     }
 }

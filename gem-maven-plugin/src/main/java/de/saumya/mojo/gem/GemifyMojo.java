@@ -22,7 +22,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.StringUtils;
 
-import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * goal to convert that artifact into a gem.
@@ -30,7 +30,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  * @goal gemify
  * @requiresDependencyResolution test
  */
-public class GemifyMojo extends AbstractJRubyMojo {
+public class GemifyMojo extends AbstractGemMojo {
 
     /**
      * @parameter default-value="${artifactId}"
@@ -66,8 +66,9 @@ public class GemifyMojo extends AbstractJRubyMojo {
 
     private final Map<String, String> relocationMap  = new HashMap<String, String>();
 
-    @SuppressWarnings("unchecked")
-    public void execute() throws MojoExecutionException {
+    @Override
+    public void executeJRuby() throws MojoExecutionException, IOException,
+            RubyScriptException {
         if (this.project.getBasedir() == null
                 || !this.project.getBasedir().exists()) {
             if (!this.buildDirectory.exists()) {
@@ -99,7 +100,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                     // request.setLocalRepository(this.localRepository);
                     // request.setRemoteRepostories(this.remoteRepositories);
                     this.resolver.resolve(artifact,
-                                          this.remoteRepositories,
+                                          this.project.getRemoteArtifactRepositories(),
                                           this.localRepository);
                 }
                 catch (final ArtifactResolutionException e) {
@@ -113,15 +114,15 @@ public class GemifyMojo extends AbstractJRubyMojo {
                 try {
                     final MavenProject project = projectFromArtifact(artifact);
                     project.setArtifact(artifact);
-                    final Set artifacts = project.createArtifacts(this.artifactFactory,
-                                                                  null,
-                                                                  null);
+                    final Set<Artifact> artifacts = project.createArtifacts(this.artifactFactory,
+                                                                            null,
+                                                                            null);
                     getLog().info("artifacts=" + artifacts);
                     final ArtifactResolutionResult arr = this.resolver.resolveTransitively(artifacts,
                                                                                            artifact,
                                                                                            this.project.getManagedVersionMap(),
                                                                                            this.localRepository,
-                                                                                           this.remoteRepositories,
+                                                                                           this.project.getRemoteArtifactRepositories(),
                                                                                            this.metadata);
                     gemify(project, arr.getArtifacts());
                 }
@@ -147,12 +148,12 @@ public class GemifyMojo extends AbstractJRubyMojo {
             }
         }
         else {
-            gemify(this.project, this.artifacts);
+            gemify(this.project, this.project.getArtifacts());
         }
     }
 
     private void gemify(MavenProject project, final Set<Artifact> artifacts)
-            throws MojoExecutionException {
+            throws MojoExecutionException, IOException, RubyScriptException {
         getLog().info("gemify( " + project + ", " + artifacts + " )");
         final Map<String, MavenProject> gems = new HashMap<String, MavenProject>();
         try {
@@ -185,7 +186,11 @@ public class GemifyMojo extends AbstractJRubyMojo {
             getLog().info("skip installing gems");
         }
         else {
-            execute("-S gem install -l " + orderInResolvedManner(gems));
+            this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                    .addArg("install")
+                    .addArg("-l")
+                    .addArgs(orderInResolvedManner(gems))
+                    .execute();
         }
 
     }
@@ -194,7 +199,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
             throws ProjectBuildingException {
 
         final MavenProject project = this.builder.buildFromRepository(artifact,
-                                                                      this.remoteRepositories,
+                                                                      this.project.getRemoteArtifactRepositories(),
                                                                       this.localRepository);
         // System.out.println("\n\n ------------> " + artifact + "\n\n");
         if (project.getDistributionManagement() != null
@@ -250,7 +255,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                         // + gem.getValue().getArtifact()
                         // + gem.getValue().getDependencies());
                         boolean isResolved = true;
-                        for (final Dependency dependency : (List<Dependency>) gem.getValue()
+                        for (final Dependency dependency : gem.getValue()
                                 .getDependencies()) {
                             if (!dependency.isOptional()
                                     && (Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
@@ -269,7 +274,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                                     try {
                                         getLog().info("resolving: " + artifact);
                                         this.resolver.resolve(artifact,
-                                                              this.remoteRepositories,
+                                                              this.project.getRemoteArtifactRepositories(),
                                                               this.localRepository);
                                     }
                                     catch (final ArtifactResolutionException e) {
@@ -334,7 +339,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
 
     @SuppressWarnings("unchecked")
     private String build(final MavenProject project, final File jarfile)
-            throws MojoExecutionException, IOException {
+            throws MojoExecutionException, IOException, RubyScriptException {
 
         getLog().info("building gem for " + jarfile + " . . .");
         final String gemName = project.getGroupId() + "."
@@ -353,7 +358,7 @@ public class GemifyMojo extends AbstractJRubyMojo {
                 + "." + project.getArtifactId() + ".rb");
         gemSpecWriter.appendFile(rubyFile);
 
-        for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
+        for (final Dependency dependency : project.getDependencies()) {
             if (!dependency.isOptional() && "jar".equals(dependency.getType())
                     && dependency.getClassifier() == null) {
                 getLog().info("--");
@@ -440,7 +445,10 @@ public class GemifyMojo extends AbstractJRubyMojo {
         }
         this.launchDir = gemDir;
         getLog().info("<gemify> B");
-        execute("-S gem build " + gemSpec.getAbsolutePath());
+        this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                .addArg("build")
+                .addArg(gemSpec)
+                .execute();
         getLog().info("<gemify> C");
 
         return gemSpec.getAbsolutePath().replaceFirst(".gemspec$", "") + "-"
@@ -470,6 +478,13 @@ public class GemifyMojo extends AbstractJRubyMojo {
         else {
             return super.launchDirectory();
         }
+    }
+
+    @Override
+    protected void executeWithGems() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        // TODO Auto-generated method stub
+
     }
 
 }

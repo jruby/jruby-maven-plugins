@@ -1,27 +1,37 @@
 package de.saumya.mojo.gem;
 
+import java.io.IOException;
+
 import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * goal to run "gem spec".
- *
+ * 
  * @goal spec
  */
 public class SpecMojo extends AbstractJRubyMojo {
     /**
      * arguments for the gem command of JRuby.
-     *
-     * @parameter default-value="${gem.spec}"
+     * 
+     * @parameter default-value="${gemfile}"
      */
-    protected String args = null;
+    protected String gemfile = null;
 
-    public void execute() throws MojoExecutionException {
-        String commandString = "-S gem spec";
-        if (this.args != null) {
-            commandString += " " + this.args;
+    @Override
+    public void executeJRuby() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        if (this.gemfile == null) {
+            getLog().warn("please specifiy a gem file, use '-Dgemfile=...'");
         }
-        execute(commandString, false);
+        else {
+            this.factory.newScriptFromResource(AbstractGemMojo.GEM_RUBY_COMMAND)
+                    .addArg("spec")
+                    .addArgs(this.gemfile)
+                    .addArgs(this.args)
+                    .execute();
+        }
     }
 }

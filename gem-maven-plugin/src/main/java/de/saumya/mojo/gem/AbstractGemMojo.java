@@ -23,26 +23,30 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 
 import de.saumya.mojo.gems.GemspecConverter;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
-import de.saumya.mojo.ruby.EmbeddedLauncherFactory;
-import de.saumya.mojo.ruby.Log;
+import de.saumya.mojo.ruby.GemScriptFactory;
+import de.saumya.mojo.ruby.GemService;
+import de.saumya.mojo.ruby.GemException;
+import de.saumya.mojo.ruby.GemifyManager;
 import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.ScriptFactory;
 
 /**
  */
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
-    private static List<String> NO_CLASSPATH = Collections.emptyList();
+    private static Set<Artifact> NO_ARTIFACTS = Collections.emptySet();
 
     /**
      * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
-    protected boolean           includeOpenSSL;
+    protected boolean            includeOpenSSL;
 
     /**
      * allow to overwrite the version by explicitly declaring a dependency in
@@ -50,23 +54,79 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * 
      * @parameter expression="${gem.forceVersion}" default-value="false"
      */
-    private boolean             forceVersion;
+    private boolean              forceVersion;
 
     /**
      * triggers an update of maven metadata for all gems.
      * 
      * @parameter expression="${gem.update}" default-value="false"
      */
-    private boolean             update;
+    private boolean              update;
+    /**
+     * directory of gem home to use when forking JRuby.
+     * 
+     * @parameter expression="${gem.home}"
+     *            default-value="${project.build.directory}/rubygems"
+     */
+    protected File               gemHome;
 
-    protected final Log         log          = new Log() {
-                                                 public void info(
-                                                         final CharSequence content) {
-                                                     getLog().info(content);
-                                                 }
-                                             };
+    /**
+     * directory of JRuby path to use when forking JRuby.
+     * 
+     * @parameter expression="${gem.path}"
+     *            default-value="${project.build.directory}/rubygems"
+     */
+    protected File               gemPath;
 
-    public void execute() throws MojoExecutionException {
+    /**
+     * arguments for the gem command.
+     * 
+     * @parameter default-value="${gem.args}"
+     */
+    protected String             gemArgs;
+
+    /** @component */
+    protected GemifyManager      manager;
+
+    protected GemService         gemService;
+
+    @SuppressWarnings("deprecation")
+    @Override
+    protected ScriptFactory newScriptFactory() throws MojoExecutionException {
+        try {
+            // give preference to the gemHome/gemPath from super
+            if (super.jrubyGemHome != null) {
+                this.gemHome = super.jrubyGemHome;
+            }
+            if (super.jrubyGemPath != null) {
+                this.gemPath = super.jrubyGemPath;
+            }
+            final GemScriptFactory factory = new GemScriptFactory(this.logger,
+                    this.classRealm,
+                    resolveJRUBYCompleteArtifact().getFile(),
+                    this.project.getTestClasspathElements(),
+                    this.jrubyFork,
+                    this.gemHome,
+                    this.gemPath);
+            this.gemService = factory;
+            return factory;
+        }
+        catch (final DependencyResolutionRequiredException e) {
+            throw new MojoExecutionException("could not resolve jruby", e);
+        }
+        catch (final RubyScriptException e) {
+            throw new MojoExecutionException("could not initialize script factory",
+                    e);
+        }
+        catch (final IOException e) {
+            throw new MojoExecutionException("could not initialize script factory",
+                    e);
+        }
+    }
+
+    @Override
+    protected void executeJRuby() throws MojoExecutionException,
+            MojoFailureException, IOException, RubyScriptException {
         if (this.project.getBasedir() == null) {
             this.gemHome = new File(this.gemHome.getAbsolutePath()
                     .replace("/${project.basedir}/", "/"));
@@ -75,21 +135,21 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         }
 
         updateMetadata();
-        if (this.artifacts.size() > 0) {
-            setupGems(this.artifacts, false);
+        if (this.project.getArtifacts().size() > 0) {
+            setupGems(this.project.getArtifacts(), false);
         }
         executeWithGems();
     }
 
     protected void setupGems(final Artifact artifact)
-            throws MojoExecutionException {
+            throws MojoExecutionException, IOException, RubyScriptException {
         setupGems(Arrays.asList(new Artifact[] { artifact }), true);
     }
 
     void updateMetadata() throws MojoExecutionException {
         if (this.update) {
             final List<String> done = new ArrayList<String>();
-            for (final ArtifactRepository repo : this.remoteRepositories) {
+            for (final ArtifactRepository repo : this.project.getRemoteArtifactRepositories()) {
                 if (repo.getId().startsWith("rubygems")) {
                     URL url = null;
                     try {
@@ -114,14 +174,10 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     void updateLocalMetadata() throws MojoExecutionException {
         if (this.update) {
             try {
-                final GemspecConverter gemService = new GemspecConverter(this.log,
-                        new EmbeddedLauncherFactory().getLauncher(this.verbose,
-                                                                  NO_CLASSPATH,
-                                                                  setupEnv(),
-                                                                  resolveJRUBYCompleteArtifact().getFile(),
-                                                                  null));
+                final GemspecConverter gemService = new GemspecConverter(this.logger,
+                        this.factory);
                 final List<String> ids = new ArrayList<String>();
-                for (final ArtifactRepository repo : this.remoteRepositories) {
+                for (final ArtifactRepository repo : this.project.getRemoteArtifactRepositories()) {
                     ids.add(repo.getId());
                 }
                 gemService.updateMetadata(ids,
@@ -130,26 +186,25 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             catch (final RubyScriptException e) {
                 throw new MojoExecutionException("error in rake script", e);
             }
-            catch (final DependencyResolutionRequiredException e) {
-                throw new MojoExecutionException("could not resolve jruby", e);
-            }
             catch (final IOException e) {
                 throw new MojoExecutionException("IO error", e);
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void setupGems(Collection<Artifact> artifacts, final boolean resolve)
-            throws MojoExecutionException {
+            throws MojoExecutionException, IOException, RubyScriptException {
         if (this.includeOpenSSL) {
-            final Artifact openssl = this.artifactFactory.createArtifact("rubygems",
-                                                                         "jruby-openssl",
-                                                                         "0.7",
-                                                                         "runtime",
-                                                                         "gem");
-            artifacts = new HashSet<Artifact>(artifacts);
-            artifacts.add(openssl);
+            Artifact openssl;
+            try {
+                openssl = this.manager.createGemArtifact("jruby-openssl", "0.7");
+                artifacts = new HashSet<Artifact>(artifacts);
+                artifacts.add(openssl);
+            }
+            catch (final GemException e) {
+                throw new MojoExecutionException("error creating artifact coordinate for jruby-openssl",
+                        e);
+            }
         }
         final File gemsDir = new File(this.gemPath, "gems");
 
@@ -165,11 +220,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
         collectedArtifacts.remove(key(this.project.getArtifact()));
 
-        String extraFlag = "";
+        String extraFlag = null;
         if (this.forceVersion) {
             // allow to overwrite resolved version with version of project
             // dependencies
-            for (final Dependency artifact : (List<Dependency>) this.project.getDependencies()) {
+            for (final Dependency artifact : this.project.getDependencies()) {
                 final Artifact a = collectedArtifacts.get(artifact.getGroupId()
                         + ":" + artifact.getArtifactId());
                 if (!a.getVersion().equals(artifact.getVersion())) {
@@ -212,21 +267,30 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         if (gems.length() > 0) {
-            execute("-S gem install --no-ri --no-rdoc --no-user-install "
-                    + extraFlag + " -l " + gems, false);
+            this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                    .addArg("install")
+                    .addArg("--no-ri")
+                    .addArg("--no-rdoc")
+                    .addArg("--no-user-install")
+                    .addArg("-l")
+                    .addArg(extraFlag)
+                    .addArgs(gems.toString())
+                    .execute();
+            // execute("-S gem install --no-ri --no-rdoc --no-user-install "
+            // + " -l " + gems, false);
         }
         else {
             getLog().debug("no gems found to install");
         }
     }
 
-    abstract protected void executeWithGems() throws MojoExecutionException;
+    abstract protected void executeWithGems() throws MojoExecutionException,
+            RubyScriptException, IOException;
 
     private String key(final Artifact artifact) {
         return artifact.getGroupId() + ":" + artifact.getArtifactId();
     }
 
-    @SuppressWarnings("unchecked")
     private void collectArtifacts(final Artifact artifact,
             final Map<String, Artifact> visitedArtifacts, final boolean resolve)
             throws MojoExecutionException {
@@ -235,7 +299,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         try {
             final MavenProject project = artifact != this.project.getArtifact()
                     ? this.builder.buildFromRepository(artifact,
-                                                       this.remoteRepositories,
+                                                       this.project.getRemoteArtifactRepositories(),
                                                        this.localRepository)
                     : this.project;
 
@@ -243,7 +307,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                                                    artifact.getScope(),
                                                                    null));
 
-            project.setRemoteArtifactRepositories(this.remoteRepositories);
+            project.setRemoteArtifactRepositories(this.project.getRemoteArtifactRepositories());
 
             final List<Artifact> artifacts = new ArrayList<Artifact>();
 
@@ -253,10 +317,10 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                                                                               project.getArtifact(),
                                                                                               this.project.getManagedVersionMap(),
                                                                                               this.localRepository,
-                                                                                              this.remoteRepositories,
+                                                                                              this.project.getRemoteArtifactRepositories(),
                                                                                               this.metadata);
                     project.setArtifacts(result.getArtifacts());
-                    for (final Artifact a : (Set<Artifact>) result.getArtifacts()) {
+                    for (final Artifact a : result.getArtifacts()) {
                         artifacts.add(a);
                         this.project.getArtifactMap()
                                 .put(a.getGroupId() + ":" + a.getArtifactId(),
@@ -264,8 +328,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     }
                 }
                 else {
-                    for (final Artifact a : (Set<Artifact>) project.getDependencyArtifacts()) {
-                        artifacts.add((Artifact) this.project.getArtifactMap()
+                    for (final Artifact a : project.getDependencyArtifacts()) {
+                        artifacts.add(this.project.getArtifactMap()
                                 .get(a.getGroupId() + ":" + a.getArtifactId()));
                     }
                 }
@@ -280,7 +344,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                           + "\n\tjust ignored for now . . .",
                                   e);
                 }
-                project.setArtifacts(Collections.emptySet());
+                project.setArtifacts(NO_ARTIFACTS);
             }
 
             for (final Artifact dependencyArtifact : artifacts) {
@@ -309,7 +373,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         if (artifact.getFile() == null || !artifact.getFile().exists()) {
             try {
                 this.resolver.resolveAlways(artifact,
-                                            this.remoteRepositories,
+                                            this.project.getRemoteArtifactRepositories(),
                                             this.localRepository);
             }
             catch (final ArtifactResolutionException e) {

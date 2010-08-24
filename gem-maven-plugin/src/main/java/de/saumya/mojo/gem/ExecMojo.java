@@ -1,10 +1,13 @@
 package de.saumya.mojo.gem;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+
+import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.Script;
 
 /**
  * executes a ruby script in context of the gems from pom. the arguments for
@@ -23,74 +26,48 @@ public class ExecMojo extends AbstractGemMojo {
      * 
      * @parameter default-value="${gem.exec.script}"
      */
-    protected String script    = null;
+    protected String script   = null;
 
     /**
      * ruby file which gets executed in context of the given gems..
      * 
      * @parameter default-value="${gem.exec.file}"
      */
-    protected File   file      = null;
+    protected File   file     = null;
 
     /**
      * arguments for the ruby script given through file parameter.
      * 
      * @parameter default-value="${gem.exec.args}"
      */
-    protected String execArgs  = null;
-
-    /**
-     * arguments for the jruby command.
-     * 
-     * @parameter default-value="${jruby.args}"
-     */
-    protected String jrubyArgs = null;
-
-    /**
-     * shortcut for all arguments.
-     * 
-     * @parameter default-value="${args}"
-     */
-    protected String args      = null;
+    protected String execArgs = null;
 
     @Override
-    public void execute() throws MojoExecutionException {
+    public void execute() throws MojoExecutionException, MojoFailureException {
         // TODO jruby-complete can tries to install gems
         // file:/jruby-complete-1.5.1.jar!/META-INF/jruby.home/lib/ruby/gems/1.8
         // instead of in $HOME/.gem
-        this.includeOpenSSL = this.fork;
+        this.includeOpenSSL = this.jrubyFork;
         super.execute();
     }
 
     @Override
-    public void executeWithGems() throws MojoExecutionException {
-        final List<String> args = new ArrayList<String>();
-        if (this.jrubyArgs != null) {
-            for (final String arg : this.jrubyArgs.split("\\s+")) {
-                args.add(arg);
-            }
-        }
+    public void executeWithGems() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        Script s;
         if (this.script != null && this.script.length() > 0) {
-            args.add("-e");
-            args.add(this.script);
+            s = this.factory.newScript(this.script);
+        }
+        else if (this.file != null) {
+            s = this.factory.newScript(this.file);
         }
         else {
-            if (this.file != null) {
-                args.add(this.file.getAbsolutePath());
-            }
-            if (this.execArgs != null) {
-                for (final String arg : this.execArgs.split("\\s+")) {
-                    args.add(arg);
-                }
-            }
+            s = this.factory.newArguments();
         }
-        if (this.args != null) {
-            for (final String arg : this.args.split("\\s+")) {
-                args.add(arg);
-            }
-        }
-        if (args.size() > 0) {
-            execute(args.toArray(new String[args.size()]));
+        s.addArgs(this.execArgs);
+        s.addArgs(this.args);
+        if (s.isValid()) {
+            s.execute();
         }
         else {
             getLog().warn("no arguments given. use -Djruby.args=... or -Djruby.script=... or -Djruby.file=...");

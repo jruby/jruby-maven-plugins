@@ -5,8 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
@@ -23,7 +21,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 
-import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * goal to convert that artifact into a gem.
@@ -31,7 +29,7 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
  * @goal package
  * @requiresDependencyResolution test
  */
-public class PackageMojo extends AbstractJRubyMojo {
+public class PackageMojo extends AbstractGemMojo {
 
     /**
      * @parameter expression="${project.build.directory}"
@@ -97,7 +95,9 @@ public class PackageMojo extends AbstractJRubyMojo {
      */
     boolean                           includeDependencies;
 
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    @Override
+    public void executeJRuby() throws MojoExecutionException,
+            RubyScriptException, MojoFailureException {
         final MavenProject project = this.project;
         final GemArtifact artifact = new GemArtifact(project);
         try {
@@ -109,6 +109,7 @@ public class PackageMojo extends AbstractJRubyMojo {
             }
             else {
                 if (this.project.getBasedir() == null) {
+                    // TODO use AbstactGemMojo
                     this.gemHome = new File(this.gemHome.getAbsolutePath()
                             .replace("/${project.basedir}/", "/"));
                     this.gemPath = new File(this.gemPath.getAbsolutePath()
@@ -133,7 +134,11 @@ public class PackageMojo extends AbstractJRubyMojo {
                     }
                 }
 
-                execute("-S gem build " + this.gemSpec.getAbsolutePath(), false);
+                this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                        .addArg("build", this.gemSpec)
+                        .executeIn(launchDirectory());
+                // execute("-S gem build " + this.gemSpec.getAbsolutePath(),
+                // false);
 
                 File gem = null;
                 for (final File f : launchDirectory().listFiles()) {
@@ -166,7 +171,7 @@ public class PackageMojo extends AbstractJRubyMojo {
     private MavenProject projectFromArtifact(final Artifact artifact)
             throws ProjectBuildingException {
         final MavenProject project = this.builder.buildFromRepository(artifact,
-                                                                      this.remoteRepositories,
+                                                                      this.project.getRemoteArtifactRepositories(),
                                                                       this.localRepository);
         if (project.getDistributionManagement() != null
                 && project.getDistributionManagement().getRelocation() != null) {
@@ -190,9 +195,8 @@ public class PackageMojo extends AbstractJRubyMojo {
         }
     }
 
-    @SuppressWarnings( { "unchecked" })
     private void build(final MavenProject project, final GemArtifact artifact)
-            throws MojoExecutionException, IOException {
+            throws MojoExecutionException, IOException, RubyScriptException {
 
         getLog().info("building gem for " + artifact + " . . .");
         getLog().info("include dependencies? " + this.includeDependencies);
@@ -245,7 +249,7 @@ public class PackageMojo extends AbstractJRubyMojo {
                                                                            project.getArtifact(),
                                                                            this.project.getManagedVersionMap(),
                                                                            this.localRepository,
-                                                                           this.remoteRepositories,
+                                                                           this.project.getRemoteArtifactRepositories(),
                                                                            this.metadata,
                                                                            new ArtifactFilter() {
                                                                                public boolean include(
@@ -259,9 +263,8 @@ public class PackageMojo extends AbstractJRubyMojo {
                                                                                }
 
                                                                            });
-                for (final Iterator each = jarDependencyArtifacts.getArtifacts()
-                        .iterator(); each.hasNext();) {
-                    final Artifact dependency = (Artifact) each.next();
+                for (final Object element : jarDependencyArtifacts.getArtifacts()) {
+                    final Artifact dependency = (Artifact) element;
                     getLog().info(" -- include -- " + dependency);
                     gemSpecWriter.appendJarfile(dependency.getFile(),
                                                 dependency.getFile().getName());
@@ -298,7 +301,7 @@ public class PackageMojo extends AbstractJRubyMojo {
             gemSpecWriter.appendTestPath("test");
         }
 
-        for (final Dependency dependency : (List<Dependency>) project.getDependencies()) {
+        for (final Dependency dependency : project.getDependencies()) {
             if (!dependency.isOptional()
                     && dependency.getType().contains("gem")) {
                 if (!dependency.getVersion().matches(".*[\\)\\]]$")) {
@@ -368,9 +371,8 @@ public class PackageMojo extends AbstractJRubyMojo {
                         .append(artifact.getJarFile().getName())
                         .append("'\n");
                 if (jarDependencyArtifacts != null) {
-                    for (final Iterator each = jarDependencyArtifacts.getArtifacts()
-                            .iterator(); each.hasNext();) {
-                        final Artifact dependency = (Artifact) each.next();
+                    for (final Object element : jarDependencyArtifacts.getArtifacts()) {
+                        final Artifact dependency = (Artifact) element;
                         writer.append("  require File.dirname(__FILE__) + '/")
                                 .append(dependency.getFile().getName())
                                 .append("'\n");
@@ -398,8 +400,11 @@ public class PackageMojo extends AbstractJRubyMojo {
 
         final File localGemspec = new File(launchDirectory(), gemSpec.getName());
 
-        this.launchDirectory = gemDir;
-        execute("-S gem build " + gemSpec.getAbsolutePath());
+        // this.launchDirectory = gemDir;
+        this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                .addArg("build", gemSpec)
+                .executeIn(gemDir);
+        // ("-S gem build " + gemSpec.getAbsolutePath());
 
         if ((!localGemspec.exists() || !FileUtils.contentEquals(localGemspec,
                                                                 gemSpec))
@@ -426,5 +431,12 @@ public class PackageMojo extends AbstractJRubyMojo {
             name.append(StringUtils.capitalise(part));
         }
         return name.toString();
+    }
+
+    @Override
+    protected void executeWithGems() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        // TODO Auto-generated method stub
+
     }
 }

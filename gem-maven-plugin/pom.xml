@@ -23,11 +23,6 @@
       <artifactId>file-management</artifactId>
       <version>1.2.1</version>
     </dependency>
-    <dependency>
-      <groupId>de.saumya.mojo</groupId>
-      <artifactId>ruby-tools</artifactId>
-      <version>0.2-SNAPSHOT</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>

@@ -17,6 +17,7 @@ import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
 
+@SuppressWarnings("deprecation")
 public class GemArtifact implements Artifact {
 
     // helper to make maven2 behave like maven3
@@ -327,11 +328,6 @@ public class GemArtifact implements Artifact {
     @Override
     public String toString() {
         return this.artifact.toString();
-    }
-
-    // @Override
-    public ArtifactMetadata getMetadata(final Class<?> metadataClass) {
-        return null;
     }
 
     public boolean isGem() {

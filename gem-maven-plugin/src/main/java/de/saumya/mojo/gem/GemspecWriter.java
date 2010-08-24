@@ -42,7 +42,6 @@ class GemspecWriter {
     private boolean         platformAppended = false;
     private boolean         firstTestFile;
 
-    @SuppressWarnings("unchecked")
     GemspecWriter(final File gemspec, final MavenProject project,
             final GemArtifact artifact) throws IOException {
         this.latestModified = project.getFile() == null ? 0 : project.getFile()
@@ -62,15 +61,15 @@ class GemspecWriter {
         append("homepage", project.getUrl());
         append();
 
-        for (final Developer developer : (List<Developer>) project.getDevelopers()) {
+        for (final Developer developer : project.getDevelopers()) {
             appendAuthor(developer.getName(), developer.getEmail());
         }
-        for (final Contributor contributor : (List<Contributor>) project.getContributors()) {
+        for (final Contributor contributor : project.getContributors()) {
             appendAuthor(contributor.getName(), contributor.getEmail());
         }
         append();
 
-        for (final License license : (List<License>) project.getLicenses()) {
+        for (final License license : project.getLicenses()) {
             appendLicense(license.getUrl(), license.getName());
         }
     }
