@@ -1,6 +1,24 @@
 <component-set>
   <components>
     <component>
+      <role>de.saumya.mojo.ruby.GemifyManager</role>
+      <implementation>
+	de.saumya.mojo.ruby.DefaultGemifyManager
+      </implementation>
+      <requirements>
+	<requirement>
+	  <role>org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager</role>
+	  <role-hint>default</role-hint>
+	  <field-name>repositoryMetadataManager</field-name>
+	</requirement>
+	<requirement>
+	  <role>org.apache.maven.artifact.handler.manager.ArtifactHandlerManager</role>
+	  <role-hint>default</role-hint>
+	  <field-name>artifactHandlerManager</field-name>
+	</requirement>
+      </requirements>
+    </component>
+    <component>
       <role>de.saumya.mojo.gems.MavenArtifactConverter</role>
       <implementation>
 	de.saumya.mojo.gems.DefaultMavenArtifactConverter

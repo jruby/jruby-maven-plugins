@@ -2,9 +2,7 @@ package de.saumya.mojo.ruby;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -15,11 +13,6 @@ import org.xml.sax.helpers.XMLReaderAdapter;
 import de.saumya.mojo.gems.GemspecConverter;
 
 public class GemServiceTest extends TestCase {
-
-    private static class NoLog implements Log {
-        public void info(final CharSequence content) {
-        }
-    }
 
     public GemServiceTest(final String testName) {
         super(testName);
@@ -34,27 +27,30 @@ public class GemServiceTest extends TestCase {
 
     @Override
     public void setUp() throws Exception {
-        final LauncherFactory factory = new EmbeddedLauncherFactory();
         final List<String> classpathElements = new ArrayList<String>();
         classpathElements.add(".");
-        final Map<String, String> env = new HashMap<String, String>();
+
         // setup local rubygems repository
         final File rubygems = new File("target/rubygems");
         rubygems.mkdirs();
-        env.put("GEM_PATH", rubygems.getAbsolutePath());
-        env.put("GEM_HOME", rubygems.getAbsolutePath());
-        this.gemspec = new GemspecConverter(new NoLog(),
-                factory.getLauncher(true,
-                                    classpathElements,
-                                    env,
-                                    new File("./pom.xml"),
-                                    null));
+
+        final Logger logger = new NoopLogger();
+        // no classrealm
+        final ScriptFactory factory = new GemScriptFactory(logger,
+                null,
+                new File(""),
+                classpathElements,
+                false,
+                rubygems,
+                rubygems);
+
+        this.gemspec = new GemspecConverter(logger, factory);
 
     }
 
     public void testGemspec() throws Exception {
         final long start = System.currentTimeMillis();
-        this.gemspec.createPom(new File("target/test-classes/test.gemspec"),
+        this.gemspec.createPom(new File("src/test/resources/test.gemspec"),
                                "0.20.0",
                                new File("target/pom.xml"));
         // assume parsing the pom is test enough here !!
@@ -77,7 +73,7 @@ public class GemServiceTest extends TestCase {
         remoteRepos.add("rubygems-test");
         this.gemspec.updateMetadata(remoteRepos, repo.getAbsolutePath());
 
-        assertTrue(cleanupMetadata("rubygems-test", repo) > 0);
+        assertTrue(cleanupMetadata("rubygems-test", repo) > 1000);
     }
 
     private int cleanupMetadata(final String repoId, final File repo) {

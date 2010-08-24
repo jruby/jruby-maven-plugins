@@ -7,27 +7,27 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import de.saumya.mojo.ruby.Launcher;
-import de.saumya.mojo.ruby.Log;
+import de.saumya.mojo.ruby.Logger;
 import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.ScriptFactory;
 
 public class GemspecConverter {
 
-    private final Launcher launcher;
-    private final Log      log;
+    private final ScriptFactory factory;
+    private final Logger        log;
 
-    public GemspecConverter(final Log log, final Launcher launcher) {
-        this.launcher = launcher;
+    public GemspecConverter(final Logger log, final ScriptFactory factory) {
+        this.factory = factory;
         this.log = log;
     }
 
     public void createPom(final File gemspec,
             final String jrubyMavenPluginsVersion, final File pom)
             throws RubyScriptException, IOException {
-        this.launcher.executeScript("gem2pom.rb",
-                                    pom,
-                                    gemspec.getAbsolutePath(),
-                                    jrubyMavenPluginsVersion);
+        this.factory.newScriptFromResource("gem2pom.rb")
+                .addArg(gemspec.getAbsolutePath())
+                .addArg(jrubyMavenPluginsVersion)
+                .execute(pom);
     }
 
     /*
@@ -45,9 +45,10 @@ public class GemspecConverter {
         for (final String id : remoteRepositoryIds) {
             if (id.startsWith("rubygems")) {
                 this.log.info("updating metadata for " + id);
-                this.launcher.executeScript("update_metadata.rb",
-                                            id,
-                                            localRepositoryBasedir);
+                this.factory.newScriptFromResource("update_metadata.rb")
+                        .addArg(id)
+                        .addArg(localRepositoryBasedir)
+                        .execute();
             }
         }
     }

@@ -38,13 +38,11 @@ public class ScriptUtils {
         }
     }
 
-    public static URL getScript(final String name) throws IOException {
-        URL url = ScriptUtils.class.getResource(name);
-        if (url == null) {
-            url = Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResource(name);
-        }
+    public static URL getScriptFromResource(final String name)
+            throws IOException {
+        final URL url = Thread.currentThread()
+                .getContextClassLoader()
+                .getResource(name);
         if (url == null) {
             throw new FileNotFoundException("loading resource from classloader failed: "
                     + name);

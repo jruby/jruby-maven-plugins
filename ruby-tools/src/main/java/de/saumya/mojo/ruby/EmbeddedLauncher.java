@@ -8,56 +8,126 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
 import org.codehaus.classworlds.ClassRealm;
+import org.codehaus.classworlds.DuplicateRealmException;
+import org.codehaus.classworlds.NoSuchRealmException;
 
-class EmbeddedLauncher implements Launcher {
+class EmbeddedLauncher extends AbstractLauncher {
 
-    private static final Class<?>[]   No_ARG_TYPES = new Class[0];
-    private static final Object[]     NO_ARGS      = new Object[0];
+    private static final Class<?>[] No_ARG_TYPES = new Class[0];
+    private static final Object[]   NO_ARGS      = new Object[0];
 
-    // private final ClassRealm classRealm;
-    // private final boolean verbose;
-    private final Map<String, String> env;
+    private final ClassRealm        classRealm;
+    private final ScriptFactory     factory;
+    private final Logger            logger;
 
-    EmbeddedLauncher(final boolean verbose,
-            final List<String> classpathElements,
-            final Map<String, String> env, final File jrubyJarFile,
-            final ClassRealm classRealm) throws RubyScriptException {
-        // this.verbose = verbose;
-        this.env = env;
-        // this.classRealm = classRealm;// cloneClassRealm(jrubyJarFile,
-        // classpathElements,
-        // classRealm);
+    public EmbeddedLauncher(final Logger logger, final ScriptFactory factory)
+            throws RubyScriptException {
+        this.logger = logger;
+        this.factory = factory;
+        if (factory.classRealm != null) {
+            this.classRealm = cloneClassRealm(factory.jrubyJar,
+                                              factory.classpathElements,
+                                              factory.classRealm);
+        }
+        else {
+            this.classRealm = null;
+        }
+    }
+
+    private ClassRealm cloneClassRealm(final File jrubyJar,
+            final List<String> classpathElements, final ClassRealm classRealm)
+            throws RubyScriptException {
+        for (final String classpath : classpathElements) {
+            if (classpath.equals(jrubyJar.getAbsolutePath())) {
+                return null;
+            }
+        }
+        ClassRealm newClassRealm;
+        try {
+            ClassRealm jruby;
+            try {
+                jruby = classRealm.getWorld().getRealm("jruby");
+            }
+            catch (final NoSuchRealmException e) {
+                jruby = classRealm.getParent().createChildRealm("jruby");
+                jruby.addConstituent(jrubyJar.toURI().toURL());
+            }
+            try {
+                jruby.getWorld().disposeRealm("pom");
+            }
+            catch (final NoSuchRealmException e) {
+                // ignored
+            }
+            newClassRealm = jruby.createChildRealm("pom");
+            for (final String classpath : classpathElements) {
+                if (!classpath.contains("jruby-complete")) {
+                    newClassRealm.addConstituent(new File(classpath).toURI()
+                            .toURL());
+                }
+            }
+        }
+        catch (final DuplicateRealmException e) {
+            throw new RubyScriptException("error in naming realms", e);
+        }
+        catch (final MalformedURLException e) {
+            throw new RubyScriptException("hmm. found some malformed URL", e);
+        }
+
+        return newClassRealm;
+    }
+
+    @Override
+    protected void doExecute(final File launchDirectory, final List<String> args,
+            final File outputFile) throws RubyScriptException, IOException {
+        doExecute(launchDirectory, outputFile, args, true);
     }
 
     private void doExecute(final File launchDirectory, final File outputFile,
-            final List<String> args) throws RubyScriptException, IOException {
+            final List<String> args, final boolean warn)
+            throws RubyScriptException, IOException {
         final String currentDir;
         if (launchDirectory != null) {
             currentDir = System.getProperty("user.dir");
+            System.err.println("launch directory: "
+                    + launchDirectory.getAbsolutePath());
             System.setProperty("user.dir", launchDirectory.getAbsolutePath());
         }
         else {
             currentDir = null;
         }
+
+        args.addAll(0, this.factory.switches.list);
+
+        if (warn) {
+            if (this.factory.javaArgs.list.size() > 0) {
+                this.logger.warn("have to ignore java arguments and properties in the current setup");
+            }
+            if (this.factory.env.size() > 0) {
+                this.logger.warn("have to ignore environment settings in the current setup");
+            }
+        }
+
         final PrintStream output = System.out;
+        ClassLoader current = null;
         try {
             if (outputFile != null) {
                 final PrintStream writer = new PrintStream(outputFile);
                 System.setOut(writer);
-                System.err.println("output file: " + outputFile);
+                this.logger.debug("output file: " + outputFile);
             }
-            System.err.println("args: " + args);
+            this.logger.debug("args: " + args);
 
+            if (this.classRealm != null) {
+                current = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread()
+                        .setContextClassLoader(this.classRealm.getClassLoader());
+            }
             // use reflection to avoid having jruby as plugin dependency
-            // Thread.currentThread().setContextClassLoader(
-            // this.classRealm.getClassLoader());
             final Class<?> clazz = Thread.currentThread()
                     .getContextClassLoader()
                     .loadClass("org.jruby.Main");
@@ -68,7 +138,7 @@ class EmbeddedLauncher implements Launcher {
                                            (Object) args.toArray(new String[args.size()]));
             final long end = System.currentTimeMillis();
 
-            System.err.println("time " + (end - start));
+            this.logger.debug("time " + (end - start));
 
             final int status;
             if (result instanceof Integer) {
@@ -77,8 +147,8 @@ class EmbeddedLauncher implements Launcher {
             }
             else {
                 // jruby from version 1.5 onwards
-                // TODO better error handling like error messages and . . . see
-                // org.jruby.Main
+                // TODO better error handling like error messages and . . .
+                // TODO see org.jruby.Main
                 final Method statusMethod = result.getClass()
                         .getMethod("getStatus", No_ARG_TYPES);
                 status = (Integer) statusMethod.invoke(result, NO_ARGS);
@@ -105,129 +175,42 @@ class EmbeddedLauncher implements Launcher {
             throw new RubyScriptException(e);
         }
         finally {
+            if (current != null) {
+                Thread.currentThread().setContextClassLoader(current);
+            }
             System.setOut(output);
             if (currentDir != null) {
                 System.setProperty("user.dir", currentDir);
             }
-            // try {
-            // this.classRealm.getWorld().disposeRealm("pom");
-            // jrubyClassRealm.setParent(null);
-            // }
-            // catch (final NoSuchRealmException e) {
-            // }
+            if (this.classRealm != null) {
+                try {
+                    this.classRealm.getWorld().disposeRealm("pom");
+                    // jrubyClassRealm.setParent(null);
+                }
+                catch (final NoSuchRealmException e) {
+                    // ignore
+                }
+            }
 
         }
     }
 
-    // private ClassRealm cloneClassRealm(final File jrubyJar,
-    // final List<String> classpathElements, final ClassRealm classRealm)
-    // throws RubyScriptException {
-    // ClassRealm newClassRealm;
-    // try {
-    // ClassRealm jruby;
-    // try {
-    // jruby = classRealm.getWorld().getRealm("jruby");
-    // } catch (final NoSuchRealmException e) {
-    // jruby = classRealm.getParent().createChildRealm("jruby");
-    // jruby.addConstituent(jrubyJar.toURI().toURL());
-    // }
-    // newClassRealm = jruby.createChildRealm("pom");
-    // newClassRealm.addConstituent(jrubyJar.toURI().toURL());
-    // for (final String classpath : classpathElements) {
-    // newClassRealm.addConstituent(new File(classpath).toURI()
-    // .toURL());
-    // }
-    // } catch (final DuplicateRealmException e) {
-    // throw new RubyScriptException("error in naming realms", e);
-    // } catch (final MalformedURLException e) {
-    // throw new RubyScriptException("hmm. found some malformed URL", e);
-    // }
-    //
-    // return newClassRealm;
-    // }
-
-    public void execute(final String... args) throws RubyScriptException,
-            IOException {
-        doExecute(null, null, new ArrayList<String>(Arrays.asList(args)));
-    }
-
-    public void execute(final File outputFile, final String... args)
+    public void executeScript(final File launchDirectory, final String script,
+            final List<String> args, final File outputFile)
             throws RubyScriptException, IOException {
-        doExecute(null, outputFile, new ArrayList<String>(Arrays.asList(args)));
-    }
-
-    public void executeScript(final File launchDirectory,
-            final String scriptName, final File outputFile,
-            final String... args) throws RubyScriptException, IOException {
-        final StringBuilder script = new StringBuilder();
-        for (final Map.Entry<String, String> entry : this.env.entrySet()) {
-            script.append("ENV['")
+        final StringBuilder buf = new StringBuilder();
+        for (final Map.Entry<String, String> entry : this.factory.env.entrySet()) {
+            buf.append("ENV['")
                     .append(entry.getKey())
                     .append("']='")
                     .append(entry.getValue())
                     .append("';");
         }
-        final List<String> list = new ArrayList<String>();
-        list.add("-e");
-        script.append("ARGV.clear;ARGV.<<([");
-        boolean first = true;
-        for (final String arg : args) {
-            if (!first) {
-                script.append(",");
-            }
-            else {
-                first = false;
-            }
-            script.append("'").append(arg).append("'");
-        }
-        script.append("]).flatten!;load('")
-                .append(scriptUri(scriptName))
-                .append("');");
-        list.add(script.toString());
-        doExecute(launchDirectory, outputFile, list);
-    }
+        buf.append(script);
 
-    public void executeScript(final String scriptName, final String... args)
-            throws RubyScriptException, IOException {
-        executeScript(scriptName, null, args);
-    }
-
-    private String scriptUri(final String scriptName) throws IOException {
-        final File scriptPath = new File(scriptName);
-        if (scriptPath.exists()) {
-            return scriptPath.getAbsolutePath();
-        }
-        final URL url = ScriptUtils.getScript(scriptName);
-        if (url.getProtocol().equals("file")) {
-            return url.getPath();
-        }
-        else {
-            return url.toString();
-        }
-    }
-
-    public void executeIn(final File launchDirectory, final File outputFile,
-            final String... args) throws RubyScriptException, IOException {
-        doExecute(launchDirectory,
-                  outputFile,
-                  new ArrayList<String>(Arrays.asList(args)));
-    }
-
-    public void executeIn(final File launchDirectory, final String... args)
-            throws RubyScriptException, IOException {
-        doExecute(launchDirectory,
-                  null,
-                  new ArrayList<String>(Arrays.asList(args)));
-    }
-
-    public void executeScript(final String scriptName, final File outputFile,
-            final String... args) throws RubyScriptException, IOException {
-        executeScript(null, scriptName, outputFile, args);
-    }
-
-    public void executeScript(final File launchDirectory,
-            final String scriptName, final String... args)
-            throws RubyScriptException, IOException {
-        executeScript(launchDirectory, scriptName, null, args);
+        args.add(0, "-e");
+        args.add(1, buf.toString());
+        args.add(2, "--");
+        doExecute(launchDirectory, outputFile, args, false);
     }
 }
