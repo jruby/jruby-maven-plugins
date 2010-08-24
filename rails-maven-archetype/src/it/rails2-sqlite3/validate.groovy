@@ -1,8 +1,8 @@
 success2 = false
 success3 = false
 new File(basedir, 'target/Gemfile.maven').eachLine{ 
-  success2 = success2 || (it =~ '^\\s*gem "activerecord-jdbc-adapter"')
-  success3 = success3 || (it =~ '^\\s*gem "jdbc-sqlite3"')
+  success2 = success2 || (it =~ '^\\s*gem .activerecord-jdbc-adapter.')
+  success3 = success3 || (it =~ '^\\s*gem .jdbc-sqlite3.')
   // println "read the following line -> " + it + " " + success2 + success3
 }
 

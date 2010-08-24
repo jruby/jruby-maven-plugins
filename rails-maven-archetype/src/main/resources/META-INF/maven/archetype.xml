@@ -8,7 +8,8 @@
     <resource>.gitignore</resource>
     <resource>lib/tasks/jdbc.rake</resource>
     <resource>Gemfile.maven</resource>
-    <resource>README.maven</resource>
+    <resource>README.maven</resource>  
+    <resource>public/maven.html</resource>
     <resource>config/initializers/jdbc.rb</resource>
     <resource>config/initializers/java_throwable_monkey_patch.rb</resource>
   </resources>

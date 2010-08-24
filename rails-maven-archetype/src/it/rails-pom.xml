@@ -12,15 +12,6 @@
       <url>http://gems.saumya.de/releases</url>
     </repository>
   </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <dependencies>
     <!--
 	this is a version which works properly with having
@@ -48,7 +39,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <jruby.plugins.version>0.20.0-SNAPSHOT</jruby.plugins.version>
+    <jruby.plugins.version>0.21.0-SNAPSHOT</jruby.plugins.version>
     <!--
 	this is needed for the maven-war-plugin configuration
     -->

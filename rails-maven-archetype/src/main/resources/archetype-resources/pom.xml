@@ -43,7 +43,7 @@
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.2</version>
     </dependency>
 #literal()
     <!--
@@ -80,6 +80,7 @@
     </dependencies>
   </dependencyManagement>
   <properties>
+    <rails.env>development</rails.env>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jruby.plugins.version>0.21.0-SNAPSHOT</jruby.plugins.version>
 #literal()
@@ -88,8 +89,8 @@
 	the jetty plugin for the src/main/jetty/override-xyz-web.xml files
     -->
 #end
-    <jruby.gem.home>${symbol_dollar}{project.build.directory}/rubygems-${symbol_dollar}{rails.env}</jruby.gem.home>
-    <jruby.gem.path>${symbol_dollar}{project.build.directory}/rubygems-${symbol_dollar}{rails.env}</jruby.gem.path>
+    <gem.home>${symbol_dollar}{project.build.directory}/rubygems-${symbol_dollar}{rails.env}</gem.home>
+    <gem.path>${symbol_dollar}{project.build.directory}/rubygems-${symbol_dollar}{rails.env}</gem.path>
   </properties>
   <build>
     <plugins>
@@ -189,7 +190,7 @@
         <version>7.0.1.v20091125</version>
 	<configuration>
 	  <webAppConfig>
-	    <overrideDescriptor>src/main/jetty/override-${rails.env}-web.xml</overrideDescriptor>
+	    <overrideDescriptor>src/main/jetty/override-${symbol_dollar}{rails.env}-web.xml</overrideDescriptor>
 	  </webAppConfig>
 	  <systemProperties>
 	    <systemProperty>
@@ -205,11 +206,11 @@
     <profile>
       <id>development</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+	<property>
+          <name>rails.env</name>
+          <value>development</value>
+        </property>
       </activation>
-      <properties>
-	<rails.env>development</rails.env>
-      </properties>
       <dependencies>
 	<dependency>
 	  <groupId>rubygems</groupId>
@@ -220,11 +221,14 @@
     </profile>
     <profile>
       <id>test</id>
-      <properties>
-	<rails.env>test</rails.env>
-      </properties>
+      <activation>
+	<property>
+          <name>rails.env</name>
+          <value>test</value>
+        </property>
+      </activation>
       <dependencies>
-#if( !$skipRspec == 'true' )
+#if( !$skipRspec == true )
 	<dependency>
 	  <groupId>rubygems</groupId>
 	  <artifactId>rspec</artifactId>
@@ -241,13 +245,14 @@
 	<dependency>
 	  <groupId>rubygems</groupId>
 	  <artifactId>jdbc-${database}</artifactId>
+	  <version>[0.0.0,)</version>
 	  <type>gem</type>
 	</dependency>
       </dependencies>
       <build>
 	<defaultGoal>test</defaultGoal>
 	<plugins>
-#if( !$skipRspec == 'true' )
+#if( !$skipRspec == true )
 #literal()
           <!--
 	      this plugin has some rspec specific goals.
@@ -284,13 +289,17 @@
     </profile>
     <profile>
       <id>production</id>
-      <properties>
-	<rails.env>production</rails.env>
-      </properties>
+      <activation>
+	<property>
+          <name>rails.env</name>
+          <value>production</value>
+        </property>
+      </activation>
       <dependencies>
 	<dependency>
 	  <groupId>rubygems</groupId>
 	  <artifactId>jdbc-${database}</artifactId>
+	  <version>[0.0.0,)</version>
 	  <type>gem</type>
 	</dependency>
       </dependencies>
