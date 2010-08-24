@@ -11,6 +11,7 @@ import java.util.Properties;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * executes the jruby command.
@@ -19,7 +20,9 @@ import de.saumya.mojo.gem.AbstractGemMojo;
  * @phase test
  * @requiresDependencyResolution test
  */
-public class RSpecMojo extends AbstractGemMojo {
+public class RSpecMojo
+    extends AbstractGemMojo
+{
 
     /**
      * The project base directory
@@ -28,7 +31,7 @@ public class RSpecMojo extends AbstractGemMojo {
      * @required
      * @readonly
      */
-    protected File                   basedir;
+    protected File basedir;
 
     /**
      * The classpath elements of the project being tested.
@@ -37,28 +40,28 @@ public class RSpecMojo extends AbstractGemMojo {
      * @required
      * @readonly
      */
-    protected List<String>           classpathElements;
+    protected List<String> classpathElements;
 
     /**
      * The flag to skip tests (optional, defaults to "false")
      * 
      * @parameter expression="${maven.test.skip}" default-value="false"
      */
-    protected boolean                skipTests;
+    protected boolean skipTests;
 
     /**
      * The flag to skip tests (optional, defaults to "false")
      * 
      * @parameter expression="${skipTests}" default-value="false"
      */
-    protected boolean                skip;
+    protected boolean skip;
 
     /**
      * The directory containing the RSpec source files
      * 
      * @parameter expression="spec"
      */
-    protected String                 specSourceDirectory;
+    protected String specSourceDirectory;
 
     /**
      * The directory where the RSpec report will be written to
@@ -66,110 +69,125 @@ public class RSpecMojo extends AbstractGemMojo {
      * @parameter expression="${basedir}/target"
      * @required
      */
-    protected String                 reportDirectory;
+    protected String reportDirectory;
 
     /**
      * The name of the RSpec report (optional, defaults to "rspec-report.html")
      * 
      * @parameter expression="rspec-report.html"
      */
-    protected String                 reportName;
+    protected String reportName;
 
     /**
      * List of system properties to set for the tests.
      * 
      * @parameter
      */
-    protected Properties             systemProperties;
+    protected Properties systemProperties;
 
     private final RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
     private final ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
 
-    private File specSourceDirectory() {
-        return new File(launchDirectory(), this.specSourceDirectory);
+    private File specSourceDirectory()
+    {
+        return new File( launchDirectory(), this.specSourceDirectory );
     }
 
     @Override
-    public void executeWithGems() throws MojoExecutionException {
-        if (this.skipTests || this.skip) {
-            getLog().info("Skipping RSpec tests");
+    public void executeWithGems()
+        throws MojoExecutionException, IOException, RubyScriptException
+    {
+        if ( this.skipTests || this.skip )
+        {
+            getLog().info( "Skipping RSpec tests" );
             return;
         }
 
         final File specSourceDirectory = specSourceDirectory();
-        if (!specSourceDirectory.exists()) {
-            getLog().info("Skipping RSpec tests since " + specSourceDirectory
-                    + " is missing");
+        if ( !specSourceDirectory.exists() )
+        {
+            getLog().info( "Skipping RSpec tests since " + specSourceDirectory + " is missing" );
             return;
         }
-        getLog().info("Running RSpec tests from " + specSourceDirectory);
+        getLog().info( "Running RSpec tests from " + specSourceDirectory );
 
-        final String reportPath = new File(this.reportDirectory,
-                this.reportName).getAbsolutePath();
+        final String reportPath = new File( this.reportDirectory, this.reportName ).getAbsolutePath();
 
-        initScriptFactory(this.rspecScriptFactory, reportPath);
-        initScriptFactory(this.shellScriptFactory, reportPath);
+        initScriptFactory( this.rspecScriptFactory, reportPath );
+        initScriptFactory( this.shellScriptFactory, reportPath );
 
-        try {
+        try
+        {
             this.rspecScriptFactory.emit();
         }
-        catch (final Exception e) {
-            getLog().error("error emitting .rb", e);
+        catch ( final Exception e )
+        {
+            getLog().error( "error emitting .rb", e );
         }
-        try {
+        try
+        {
             this.shellScriptFactory.emit();
         }
-        catch (final Exception e) {
-            getLog().error("error emitting .sh", e);
+        catch ( final Exception e )
+        {
+            getLog().error( "error emitting .sh", e );
         }
 
-        execute(this.rspecScriptFactory.getScriptFile().getPath());
+        this.factory.newScript( this.rspecScriptFactory.getScriptFile() ).execute();
 
-        final File reportFile = new File(reportPath);
+        final File reportFile = new File( reportPath );
 
         Reader in = null;
-        try {
-            in = new FileReader(reportFile);
-            final BufferedReader reader = new BufferedReader(in);
+        try
+        {
+            in = new FileReader( reportFile );
+            final BufferedReader reader = new BufferedReader( in );
 
             String line = null;
 
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("0 failures")) {
+            while (( line = reader.readLine() ) != null)
+            {
+                if ( line.contains( "0 failures" ) )
+                {
                     return;
                 }
             }
         }
-        catch (final IOException e) {
-            throw new MojoExecutionException("Unable to read test report file: "
-                    + reportFile);
+        catch ( final IOException e )
+        {
+            throw new MojoExecutionException( "Unable to read test report file: " + reportFile );
         }
-        finally {
-            if (in != null) {
-                try {
+        finally
+        {
+            if ( in != null )
+            {
+                try
+                {
                     in.close();
                 }
-                catch (final IOException e) {
-                    throw new MojoExecutionException(e.getMessage());
+                catch ( final IOException e )
+                {
+                    throw new MojoExecutionException( e.getMessage() );
                 }
             }
         }
 
-        throw new MojoExecutionException("There were test failures");
+        throw new MojoExecutionException( "There were test failures" );
     }
 
-    private void initScriptFactory(final ScriptFactory factory,
-            final String reportPath) {
-        factory.setBaseDir(this.basedir.getAbsolutePath());
-        factory.setClasspathElements(this.classpathElements);
-        factory.setOutputDir(new File(this.reportDirectory));
-        factory.setReportPath(reportPath);
-        factory.setSourceDir(specSourceDirectory().getAbsolutePath());
+    private void initScriptFactory( final ScriptFactory factory, final String reportPath )
+    {
+        factory.setBaseDir( this.basedir.getAbsolutePath() );
+        factory.setClasspathElements( this.classpathElements );
+        factory.setOutputDir( new File( this.reportDirectory ) );
+        factory.setReportPath( reportPath );
+        factory.setSourceDir( specSourceDirectory().getAbsolutePath() );
         Properties props = this.systemProperties;
-        if (props == null) {
+        if ( props == null )
+        {
             props = new Properties();
         }
-        factory.setSystemProperties(props);
+        factory.setSystemProperties( props );
     }
 
 }
