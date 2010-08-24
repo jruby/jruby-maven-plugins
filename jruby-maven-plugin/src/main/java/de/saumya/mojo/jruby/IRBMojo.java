@@ -1,10 +1,14 @@
 package de.saumya.mojo.jruby;
 
+import java.io.IOException;
+
 import org.apache.maven.plugin.MojoExecutionException;
+
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * maven wrpper around IRB.
- *
+ * 
  * @goal irb
  * @requiresDependencyResolution test
  */
@@ -19,20 +23,25 @@ public class IRBMojo extends AbstractJRubyMojo {
 
     /**
      * arguments for the irb command.
-     *
+     * 
      * @parameter default-value="${jruby.irb.args}"
      */
-    protected String  args = null;
+    protected String irbArgs = null;
 
-    public void execute() throws MojoExecutionException {
+    /**
+     * launch IRB in a swing window.
+     * 
+     * @parameter default-value="${gem.irb.swing}"
+     */
+    protected boolean swing = false;
+
+    @Override
+    public void executeJRuby() throws MojoExecutionException,
+            RubyScriptException, IOException {
         // make sure the whole things run in the same process
-        super.fork = false;
-        final StringBuilder args = new StringBuilder("-e ENV['GEM_HOME']='"
-                + this.gemHome + "';ENV['GEM_PATH']='" + this.gemPath
-                + "';$LOAD_PATH<<'./lib' -S irb");
-        if (this.args != null) {
-            args.append(" ").append(this.args);
-        }
-        execute(args.toString());
+        super.jrubyFork = false;
+        this.factory.newScriptFromResource(
+                this.swing ? IRB_SWING_RUBY_COMMAND : IRB_RUBY_COMMAND)
+                .addArgs(this.irbArgs).addArgs(this.args).execute();
     }
 }

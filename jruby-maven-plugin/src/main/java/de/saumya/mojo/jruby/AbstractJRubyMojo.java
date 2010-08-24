@@ -1,13 +1,8 @@
 package de.saumya.mojo.jruby;
 
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -17,17 +12,24 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.classworlds.ClassRealm;
+
+import de.saumya.mojo.ruby.GemException;
+import de.saumya.mojo.ruby.Logger;
+import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.ScriptFactory;
 
 /**
  * Base for all JRuby mojos.
@@ -36,58 +38,75 @@ import org.codehaus.classworlds.ClassRealm;
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String DEFAULT_JRUBY_VERSION = "1.5.1";
+    private static String DEFAULT_JRUBY_VERSION = "1.5.2";
+
+    public static final String GEM_RUBY_COMMAND = "META-INF/jruby.home/bin/gem";
+
+    public static final String IRB_RUBY_COMMAND = "META-INF/jruby.home/bin/jirb";
+
+    public static final String IRB_SWING_RUBY_COMMAND = "META-INF/jruby.home/bin/jirb_swing";
+
+    public static final String RAKE_RUBY_COMMAND = "META-INF/jruby.home/bin/rake";
+
+    /**
+     * common arguments
+     * 
+     * @parameter expression="${args}"
+     */
+    protected String args;
+
+    /**
+     * arguments for the jruby command.
+     * 
+     * @parameter default-value="${jruby.args}"
+     */
+    protected String jrubyArgs = null;
+
+    /**
+     * if the pom.xml has no runtime dependency to a jruby-complete.jar then
+     * this version is used to resolve the jruby-complete dependency from the
+     * local/remote maven repository. defaults to "1.5.2".
+     * 
+     * @parameter default-value="${jruby.version}"
+     */
+    protected String jrubyVersion;
 
     /**
      * fork the JRuby execution.
      * 
      * @parameter expression="${jruby.fork}" default-value="true"
      */
-    protected boolean fork;
+    protected boolean jrubyFork;
 
     /**
      * verbose jruby related output
      * 
      * @parameter expression="${jruby.verbose}" default-value="false"
      */
-    protected boolean verbose;
+    protected boolean jrubyVerbose;
 
     /**
      * the launch directory for the JRuby execution.
      * 
      * @parameter default-value="${launchDirectory}"
      */
-    protected File launchDirectory;
-
-    /**
-     * directory of JRuby home to use when forking JRuby.
-     * 
-     * @parameter default-value="${jruby.home}"
-     */
-    protected File home;
+    private File launchDirectory;
 
     /**
      * directory of gem home to use when forking JRuby.
      * 
      * @parameter expression="${jruby.gem.home}"
-     *            default-value="${project.build.directory}/rubygems"
      */
-    protected File gemHome;
+    @Deprecated
+    protected File jrubyGemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby.
      * 
      * @parameter expression="${jruby.gem.path}"
-     *            default-value="${project.build.directory}/rubygems"
      */
-    protected File gemPath;
-
-    /**
-     * The amount of memory to use when forking JRuby.
-     * 
-     * @parameter expression="${jruby.launch.memory}" default-value="384m"
-     */
-    protected String launchMemory;
+    @Deprecated
+    protected File jrubyGemPath;
 
     /**
      * reference to maven project for internal use.
@@ -97,15 +116,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @readOnly true
      */
     protected MavenProject project;
-
-    /**
-     * The project's artifacts.
-     * 
-     * @parameter default-value="${project.artifacts}"
-     * @required
-     * @readonly
-     */
-    protected Set<Artifact> artifacts;
 
     /**
      * artifact factory for internal use.
@@ -135,41 +145,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected ArtifactRepository localRepository;
 
     /**
-     * list of remote repositories for internal use.
-     * 
-     * @parameter default-value="${project.remoteArtifactRepositories}"
-     * @required
-     * @readonly
-     */
-    protected List<ArtifactRepository> remoteRepositories;
-
-    /**
-     * if the pom.xml has no runtime dependency to a jruby-complete.jar then
-     * this version is used to resolve the jruby-complete dependency from the
-     * local/remote maven repository. defaults to "1.4.1".
-     * 
-     * @parameter default-value="${jruby.version}"
-     */
-    protected String version;
-
-    /**
-     * output file where the stdout will be redirected to
-     * 
-     * @parameter
-     */
-    // TODO move into goals where needed
-    protected File outputFile;
-
-    /**
-     * output directory for internal use.
-     * 
-     * @parameter default-value="${project.build.outputDirectory}"
-     * @required
-     * @readonly
-     */
-    protected File outputDirectory;
-
-    /**
      * classrealm for internal use.
      * 
      * @parameter expression="${dummyExpression}"
@@ -187,6 +162,85 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      */
     protected MavenProjectBuilder builder;
 
+    protected Logger logger;
+
+    protected ScriptFactory factory;
+
+    protected ScriptFactory newScriptFactory() throws MojoExecutionException {
+        try {
+            final ScriptFactory factory = new ScriptFactory(this.logger,
+                    this.classRealm, resolveJRUBYCompleteArtifact().getFile(),
+                    this.project.getTestClasspathElements(), this.jrubyFork);
+            return factory;
+        } catch (final DependencyResolutionRequiredException e) {
+            throw new MojoExecutionException("could not resolve jruby", e);
+        } catch (final RubyScriptException e) {
+            throw new MojoExecutionException(
+                    "could not initialize script factory", e);
+        } catch (final IOException e) {
+            throw new MojoExecutionException(
+                    "could not initialize script factory", e);
+        }
+    }
+
+    protected void preExecute() throws MojoExecutionException,
+            MojoFailureException, IOException, RubyScriptException,
+            GemException {
+
+    }
+
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        this.logger = new MojoLogger(this.jrubyVerbose, getLog());
+        this.factory = newScriptFactory();
+        this.factory.addJavaArgs(this.jrubyArgs);
+        if (this.jrubyGemHome != null) {
+            this.factory.addEnv("GEM_HOME", this.jrubyGemHome.getAbsolutePath()
+                    .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
+        }
+        if (this.jrubyGemPath != null) {
+            this.factory.addEnv("GEM_PATH", this.jrubyGemPath.getAbsolutePath()
+                    .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
+        }
+
+        try {
+
+            preExecute();
+
+        } catch (final IOException e) {
+            throw new MojoExecutionException(
+                    "error running pre execution hook", e);
+        } catch (final RubyScriptException e) {
+            throw new MojoExecutionException(
+                    "error running pre execution hook", e);
+        } catch (final GemException e) {
+            throw new MojoExecutionException(
+                    "error running pre execution hook", e);
+        }
+
+        try {
+
+            executeJRuby();
+
+        } catch (final IOException e) {
+            throw new MojoExecutionException("error in executing jruby", e);
+        } catch (final RubyScriptException e) {
+            throw new MojoExecutionException("error in executing jruby", e);
+        }
+    }
+
+    abstract protected void executeJRuby() throws MojoExecutionException,
+            MojoFailureException, IOException, RubyScriptException;
+
+    protected File launchDirectory() {
+        if (this.launchDirectory == null) {
+            this.launchDirectory = this.project.getBasedir();
+            if (this.launchDirectory == null || !this.launchDirectory.exists()) {
+                this.launchDirectory = new File(System.getProperty("user.dir"));
+            }
+        }
+        return this.launchDirectory;
+    }
+
     private Artifact resolveJRUBYCompleteArtifact(final String version)
             throws DependencyResolutionRequiredException {
         getLog().debug("resolve jruby for verions " + version);
@@ -198,21 +252,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     private Artifact resolveJRUBYCompleteArtifact(final Artifact artifact)
             throws DependencyResolutionRequiredException {
-        try {
-            // final ArtifactResolutionRequest request = new
-            // ArtifactResolutionRequest();
-            // request.setArtifact(artifact);
-            // request.setLocalRepository(this.localRepository);
-            // request.setRemoteRepostories(this.remoteRepositories);
-            this.resolver.resolve(artifact, this.remoteRepositories,
-                    this.localRepository);
-        } catch (final ArtifactResolutionException e) {
-            throw new DependencyResolutionRequiredException(artifact);
-        } catch (final ArtifactNotFoundException e) {
-            throw new DependencyResolutionRequiredException(artifact);
-        }
+        final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+        request.setArtifact(artifact);
+        request.setLocalRepository(this.localRepository);
+        request.setRemoteRepositories(this.project
+                .getRemoteArtifactRepositories());
+        this.resolver.resolve(request);
 
-        if (this.verbose) {
+        if (this.jrubyVerbose) {
             getLog().info("jruby version   : " + artifact.getVersion());
         }
         return artifact;
@@ -221,9 +268,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected Artifact resolveJRUBYCompleteArtifact()
             throws DependencyResolutionRequiredException,
             MojoExecutionException {
-        if (this.version != null) {
+        if (this.jrubyVersion != null) {
             // preference to command line or property version
-            return resolveJRUBYCompleteArtifact(this.version);
+            return resolveJRUBYCompleteArtifact(this.jrubyVersion);
         } else {
             // then take jruby from the dependencies
             for (final Object o : this.project.getDependencies()) {
@@ -242,128 +289,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         return resolveJRUBYCompleteArtifact(DEFAULT_JRUBY_VERSION);
     }
 
-    protected File launchDirectory() {
-        if (this.launchDirectory == null) {
-            this.launchDirectory = this.project.getBasedir();
-            if (this.launchDirectory == null || !this.launchDirectory.exists()) {
-                this.launchDirectory = new File(System.getProperty("user.dir"));
-            }
-        }
-        return this.launchDirectory;
-    }
-
-    protected void execute(final String args, final boolean resolveArtifacts)
-            throws MojoExecutionException {
-        execute(args, resolveArtifacts, new HashMap<String, String>());
-    }
-
-    protected void executeScript(final File script, final String args,
-            final boolean resolveArtifacts, final Map<String, String> env)
-            throws MojoExecutionException {
-        final StringBuilder buf = new StringBuilder("-e ");
-        setupEnv(env);
-        for (final Map.Entry<String, String> entry : env.entrySet()) {
-            buf.append("ENV['").append(entry.getKey()).append("']='").append(
-                    entry.getValue()).append("';");
-        }
-        buf.append("';ARGV<<[").append(args).append("];ARGV.flatten!;load('")
-                .append(script).append("');");
-        execute(buf.toString(), resolveArtifacts, new HashMap<String, String>());
-    }
-
-    protected void execute(final String args, final boolean resolveArtifacts,
-            final Map<String, String> env) throws MojoExecutionException {
-        execute(args.trim().split("\\s+"), this.artifacts, this.outputFile,
-                resolveArtifacts, env);
-    }
-
-    protected void execute(final String args) throws MojoExecutionException {
-        execute(args, true);
-    }
-
-    protected void execute(final String[] args) throws MojoExecutionException {
-        execute(args, this.artifacts, this.outputFile, true,
-                new HashMap<String, String>());
-    }
-
-    protected void execute(final String[] args, final File outputFile)
-            throws MojoExecutionException {
-        execute(args, this.artifacts, outputFile, true,
-                new HashMap<String, String>());
-    }
-
-    protected void execute(final String[] args, final File outputFile,
-            final boolean resolveArtifacts) throws MojoExecutionException {
-        execute(args, this.artifacts, outputFile, resolveArtifacts,
-                new HashMap<String, String>());
-    }
-
-    private void execute(final String[] args, final Set<Artifact> artifacts,
-            final File outputFile, final boolean resolveArtifacts,
-            final Map<String, String> env) throws MojoExecutionException {
-        final Set<Artifact> artis = new HashSet<Artifact>(artifacts);
-        if (resolveArtifacts) {
-            if (this.project.getArtifact().getFile() != null
-                    && this.project.getArtifact().getFile().exists()) {
-                resolveTransitively(artis, this.project.getArtifact());
-            }
-
-            final Iterator<Artifact> iterator = artis.iterator();
-            while (iterator.hasNext()) {
-                final Artifact artifact = iterator.next();
-                if (artifact.getArtifactHandler().getPackaging().equals("gem")) {
-                    // TODO maybe better remove them at the end
-                    iterator.remove();
-                }
-            }
-        }
-        try {
-            if (this.verbose) {
-                getLog().info("jruby fork      : " + this.fork);
-                getLog().info("launch directory: " + launchDirectory());
-                getLog().info("jruby args      : " + Arrays.toString(args));
-            }
-            final Launcher launcher;
-            if (this.fork) {
-                setupEnv(env);
-                launcher = new AntLauncher(getLog(), this.home, env,
-                        this.launchMemory, this.verbose);
-            } else {
-                launcher = new EmbeddedLauncher(getLog(), this.classRealm);
-            }
-            launcher.execute(launchDirectory(), args, artis,
-                    resolveJRUBYCompleteArtifact(), this.outputDirectory,
-                    outputFile);
-        } catch (final DependencyResolutionRequiredException e) {
-            throw new MojoExecutionException("error creating launcher", e);
-        }
-    }
-
-    protected Map<String, String> setupEnv() {
-        final Map<String, String> env = new HashMap<String, String>();
-        setupEnv(env);
-        return env;
-    }
-
-    protected void setupEnv(final Map<String, String> env) {
-        if (this.gemHome != null) {
-            env.put(AntLauncher.GEM_HOME, this.gemHome.getAbsolutePath()
-                    .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
-        }
-        if (this.gemPath != null) {
-            env.put(AntLauncher.GEM_PATH, this.gemPath.getAbsolutePath()
-                    .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
-        }
-    }
-
-    @SuppressWarnings("unchecked")
     protected void resolveTransitively(final Collection<Artifact> artifacts,
             final Artifact artifact) throws MojoExecutionException {
         // System.out.println(artifact + " resolve:");
         // if (artifact.getArtifactHandler().isIncludesDependencies()) {
         try {
             final MavenProject mavenProject = this.builder.buildFromRepository(
-                    artifact, this.remoteRepositories, this.localRepository);
+                    artifact, this.project.getRemoteArtifactRepositories(),
+                    this.localRepository);
 
             final Set<Artifact> moreArtifacts = mavenProject.createArtifacts(
                     this.artifactFactory, null, null);
@@ -371,8 +304,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             final ArtifactResolutionResult arr = this.resolver
                     .resolveTransitively(moreArtifacts, artifact, this.project
                             .getManagedVersionMap(), this.localRepository,
-                            this.remoteRepositories, this.metadata,
-                            new ArtifactFilter() {
+                            this.project.getRemoteArtifactRepositories(),
+                            this.metadata, new ArtifactFilter() {
                                 public boolean include(final Artifact artifact) {
                                     return artifact.getType().equals("gem");
                                 }
@@ -394,29 +327,4 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                     + artifact, e);
         }
     }
-
-    protected String fileFromClassloader(final String file) {
-        return Thread.currentThread().getContextClassLoader().getResource(file)
-                .toExternalForm();
-    }
-
-    protected File binDirectory() {
-        if (this.gemHome == null) {
-            if (System.getenv("GEM_HOME") == null) {
-                // TODO something better is needed
-                // maybe an exception
-                return null;
-            } else {
-                return new File(System.getenv("GEM_HOME"), "bin");
-            }
-        } else {
-            return new File(this.gemHome, "bin");
-        }
-    }
-
-    protected StringBuilder binScript(final String script) {
-        return new StringBuilder(new File(binDirectory(), script)
-                .getAbsolutePath());
-    }
-
 }

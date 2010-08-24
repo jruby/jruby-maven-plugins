@@ -18,6 +18,11 @@
       <artifactId>ant</artifactId>
       <version>1.6.2</version>
     </dependency>
+    <dependency>
+      <groupId>de.saumya.mojo</groupId>
+      <artifactId>ruby-tools</artifactId>
+      <version>0.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

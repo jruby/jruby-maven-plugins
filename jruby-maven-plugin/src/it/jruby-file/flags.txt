@@ -1,1 +1,1 @@
--Djruby.args=file.rb
+-Djruby.file=file.rb
