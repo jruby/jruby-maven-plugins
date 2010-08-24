@@ -1,6 +1,10 @@
 package de.saumya.mojo.rails;
 
+import java.io.IOException;
+
 import org.apache.maven.plugin.MojoExecutionException;
+
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * Goal to run rails console. it will ignore the fork parameter since forking
@@ -19,33 +23,22 @@ public class ConsoleMojo extends AbstractRailsMojo {
     protected String consoleArgs = null;
 
     @Override
-    public void executeWithGems() throws MojoExecutionException {
-        if (this.version != null && this.version.compareTo("1.5.0") < 0) {
+    public void execute() throws MojoExecutionException {
+        if (this.jrubyVersion != null
+                && this.jrubyVersion.compareTo("1.5.0") < 0) {
             throw new MojoExecutionException("does not work with jruby version < 1.5.0");
         }
         // make sure the whole things run in the same process
-        this.fork = false;
-        // no openssl since we are not forking
-        this.includeOpenSSL = false;
-        final StringBuilder commandArgs = new StringBuilder();
-        if (this.args != null) {
-            for (final String arg : this.args.split("\\s+")) {
-                commandArgs.append("'").append(arg).append("',");
-            }
-        }
-        if (this.consoleArgs != null) {
-            for (final String arg : this.consoleArgs.split("\\s+")) {
-                commandArgs.append("'").append(arg).append("',");
-            }
-        }
+        this.jrubyFork = false;
+    }
 
-        if (this.env != null) {
-            commandArgs.append(commandArgs.length() == 0 ? "'" : ",'")
-                    .append(this.env)
-                    .append("'");
-        }
-        execute("-e ENV['GEM_HOME']='" + this.gemHome + "';ENV['GEM_PATH']='"
-                + this.gemPath + "';ARGV<<[" + commandArgs
-                + "];ARGV.flatten!;load('script/console');", false);
+    @Override
+    public void executeWithGems() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        this.factory.newScript(railsScriptFile("console"))
+                .addArgs(this.consoleArgs)
+                .addArgs(this.args)
+                .addArg(this.env)
+                .executeIn(launchDirectory());
     }
 }
