@@ -1,6 +1,11 @@
 package de.saumya.mojo.rails3;
 
+import java.io.IOException;
+
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * goal to run the rails console. it will ignore the fork parameter since
@@ -19,26 +24,24 @@ public class ConsoleMojo extends AbstractRailsMojo {
     protected String consoleArgs = null;
 
     @Override
-    protected void executeWithGems() throws MojoExecutionException {
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        if (this.jrubyVersion != null
+                && this.jrubyVersion.compareTo("1.5.0") < 0) {
+            throw new MojoExecutionException("does not work with jruby version < 1.5.0");
+        }
         // make sure the whole things run in the same process
-        super.fork = false;
-        // no openssl since we are not forking
-        this.includeOpenSSL = false;
-        final StringBuilder commandArgs = new StringBuilder("'console'");
-        if (this.args != null) {
-            for (final String arg : this.args.split("\\s+")) {
-                commandArgs.append(",'").append(arg).append("'");
-            }
-        }
-        if (this.consoleArgs != null) {
-            for (final String arg : this.consoleArgs.split("\\s+")) {
-                commandArgs.append(",'").append(arg).append("'");
-            }
-        }
-        if (this.env != null) {
-            // TODO verify this
-            commandArgs.append(" ").append(this.env);
-        }
-        executeScript(railsScriptFile(), commandArgs.toString(), false);
+        this.jrubyFork = false;
+        super.execute();
+    }
+
+    @Override
+    public void executeRails() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        this.factory.newScript(railsScriptFile())
+                .addArg("console")
+                .addArgs(this.consoleArgs)
+                .addArgs(this.args)
+                .addArg(this.env)
+                .executeIn(launchDirectory());
     }
 }

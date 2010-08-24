@@ -1,10 +1,14 @@
 package de.saumya.mojo.rails3;
 
+import java.io.IOException;
+
 import org.apache.maven.plugin.MojoExecutionException;
+
+import de.saumya.mojo.ruby.RubyScriptException;
 
 /**
  * goal to run the rails server.
- *
+ * 
  * @goal server
  * @requiresDependencyResolution compile
  */
@@ -12,24 +16,19 @@ public class ServerMojo extends AbstractRailsMojo {
 
     /**
      * arguments for the generate command
-     *
+     * 
      * @parameter default-value="${server.args}"
      */
     protected String serverArgs = null;
 
     @Override
-    protected void executeWithGems() throws MojoExecutionException {
-        final StringBuilder command = railsScript("server");
-        if (this.serverArgs != null) {
-            command.append(" ").append(this.serverArgs);
-        }
-        if (this.args != null) {
-            command.append(" ").append(this.args);
-        }
-        // TODO verify this
-        if (this.env != null) {
-            command.append(" -e ").append(this.env);
-        }
-        execute(command.toString(), false);
+    protected void executeRails() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        this.factory.newScript(railsScriptFile())
+                .addArg("server")
+                .addArgs(this.serverArgs)
+                .addArgs(this.args)
+                .addArg("-e", this.env)
+                .executeIn(launchDirectory());
     }
 }

@@ -5,19 +5,19 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.velocity.VelocityComponent;
+
+import de.saumya.mojo.ruby.GemException;
+import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.Script;
 
 /**
  * goal to run rails command with the given arguments. either to generate a
@@ -63,89 +63,78 @@ public class RailsMojo extends AbstractRailsMojo {
      */
     protected String            artifactVersion                = null;
 
-    /**
-     * @component
-     */
+    /** @component */
     private VelocityComponent   velocityComponent;
+
     // needs to be the default in mojo parameter as well
     private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.rc";
 
     @Override
-    public void execute() throws MojoExecutionException {
+    public void preExecute() throws MojoExecutionException,
+            MojoFailureException, IOException, RubyScriptException,
+            GemException {
         if (this.railsVersion.compareTo(SMALLEST_ALLOWED_RAILS_VERSION) < 0) {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
-        final Artifact artifact = this.artifactFactory.createArtifact("rubygems",
-                                                                      "rails",
-                                                                      this.railsVersion,
-                                                                      "runtime",
-                                                                      "gem");
-        final List<String> postfixes = new ArrayList<String>(2);
-        postfixes.add("releases");
-        if (this.railsVersion.matches(".*[a-zA-Z].*")) {
-            postfixes.add("prereleases");
+        if (!this.railsVersion.startsWith("3.")) {
+            throw new MojoExecutionException("given rails version is not rails3: "
+                    + this.railsVersion);
         }
-        for (final String postfix : postfixes) {
-            this.remoteRepositories.add(new DefaultArtifactRepository("rubygems-"
-                    + postfix,
-                    "http://gems.saumya.de/" + postfix,
-                    new DefaultRepositoryLayout()));
-        }
-        setupGems(artifact);
-        super.execute();
-    }
+        if (this.appPath != null) {
 
-    // hmm ignore rails.dir property if set so execute
-    // super.super.lanuchDirectory()
-    @Override
-    protected File launchDirectory() {
-        if (this.launchDirectory == null) {
-            return new File(System.getProperty("user.dir"));
-        }
-        else {
-            this.launchDirectory.mkdirs();
-            return this.launchDirectory;
+            setupGems(this.manager.createGemArtifact("rails", this.railsVersion));
+
+            this.manager.addDefaultGemRepositoryForVersion(this.railsVersion,
+                                                           this.project.getRemoteArtifactRepositories());
         }
     }
 
+    // // hmm ignore rails.dir property if set so execute
+    // // super.super.lanuchDirectory()
+    // @Override
+    // protected File launchDirectory() {
+    // final File launchDirectory = super.launchDirectory();
+    // launchDirectory.mkdirs();
+    // return launchDirectory;
+    // }
+
     @Override
-    public void executeWithGems() throws MojoExecutionException {
-        StringBuilder command;
+    public void executeRails() throws MojoExecutionException,
+            RubyScriptException, IOException {
+        Script script;
         if (railsScriptFile().exists() && this.appPath == null) {
-            command = railsScript("");
+            script = this.factory.newScript(railsScriptFile());
         }
         else {
-            command = binScript("rails _" + this.railsVersion + "_ new");
-            if (this.appPath == null) {
-                throw new MojoExecutionException("no application path given, use '-Dapp_path=....'");
-            }
-            else {
-                command.append(" ").append(this.appPath);
+            script = this.factory.newScript(this.gemService.binScriptFile("rails"))
+                    .addArg("_" + this.railsVersion + "_")
+                    .addArg("new");
+            if (this.appPath != null) {
+                script.addArg(this.appPath.getAbsolutePath());
             }
         }
         if (this.railsArgs != null) {
-            command.append(" ").append(this.railsArgs);
+            script.addArgs(this.railsArgs);
         }
         if (this.args != null) {
-            command.append(" ").append(this.args);
+            script.addArgs(this.args);
         }
-        execute(command.toString(), false);
+
+        script.execute();
         if (this.appPath != null) {
-            final File app = this.appPath;// new File(launchDirectory(),
-            // this.appPath);
-            final File script = new File(app, "script/rails");
             final String database;
             final Pattern pattern = Pattern.compile(".*-d\\s+([a-z0-9]+).*");
-            final Matcher matcher = pattern.matcher(command);
+            final Matcher matcher = pattern.matcher(script.toString());
             if (matcher.matches()) {
                 database = matcher.group(1);
             }
+
             else {
                 database = "sqlite3";
             }
             // rectify the Gemfile to allow both ruby + jruby to work
-            final File gemfile = new File(app, "Gemfile");
+            final File gemfile = new File(this.appPath, "Gemfile");
             try {
                 FileUtils.fileWrite(gemfile.getAbsolutePath(),
                                     FileUtils.fileRead(gemfile)
@@ -165,29 +154,35 @@ public class RailsMojo extends AbstractRailsMojo {
             final VelocityContext context = new VelocityContext();
 
             context.put("groupId", this.groupId);
-            context.put("artifactId", app.getName());
+            context.put("artifactId", this.appPath.getName());
             context.put("version", this.artifactVersion);
             context.put("database", database);
             context.put("railsVersion", this.railsVersion);
 
-            filterContent(app, context, "pom.xml");
+            filterContent(this.appPath, context, "pom.xml");
 
             // write out a new index.html
-            filterContent(app, context, "src/main/webapp/index.html");
+            filterContent(this.appPath, context, "src/main/webapp/index.html");
+            filterContent(this.appPath,
+                          context,
+                          "src/main/webapp/index.html",
+                          "public/index.html");
 
             // create web.xml
-            filterContent(app, context, "src/main/webapp/WEB-INF/web.xml");
+            filterContent(this.appPath,
+                          context,
+                          "src/main/webapp/WEB-INF/web.xml");
 
             // create override-xyz-web.xml
-            filterContent(app,
+            filterContent(this.appPath,
                           context,
                           "src/main/jetty/override-development-web.xml");
-            filterContent(app,
+            filterContent(this.appPath,
                           context,
                           "src/main/jetty/override-production-web.xml");
 
             // create Gemfile.maven
-            filterContent(app, context, "Gemfile.maven");
+            filterContent(this.appPath, context, "Gemfile.maven");
         }
     }
 

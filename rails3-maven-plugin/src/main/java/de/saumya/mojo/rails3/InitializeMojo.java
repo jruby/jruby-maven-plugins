@@ -10,6 +10,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 public class InitializeMojo extends AbstractRailsMojo {
 
     @Override
-    protected void executeWithGems() throws MojoExecutionException {
+    protected void executeRails() throws MojoExecutionException {
     }
 }
