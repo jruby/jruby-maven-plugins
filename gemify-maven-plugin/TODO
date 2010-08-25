@@ -1,0 +1,50 @@
+# optional dependencies shall be omited
+commons-logging.commons-logging-1.0.4
+
+# relocated version
+mvn gemify:gemify -Dgemify.gemname=xml-apis.xml-apis -Dgemify.version=2.0.2
+
+# relocated artifactID
+xerces:xerces:2.4.0
+
+# relocated groupId + artifactId
+mvn gemify:gemify -Dgemify.gemname=servletapi.servletapi -Dgemify.version=2.3
+
+
+# offline and missing jar gives the usual error message
+# run with out net and missing jar
+# next run with net downloads jar
+
+
+--------------------------------------------
+
+exclusions:
+mvn clean gemify:gemify -Dgemify.gemname=org.apache.maven.wagon.wagon-http-shared -Dgemify.version=1.0-beta-6 -Dgemify.developement
+
+# many versions of the same jar
+mvn gemify:gemify -Dgemify.gemname=de.saumya.mojo.jruby-maven-plugins -Dgemify.version=0.12.0
+
+org.codehaus.plexus.plexus-utils:
+version ~> 1.4.2
+version ~> 2.0.1
+version ~> 1.5.15 (<- that the one maven picks)
+
+# more conflicting versions with development deps:
+junit.junit:
+~> 4.7.0
+~> 3.8.1
+  
+
+# same jar as test as well as compile deps:
+commons-httpclient.commons-httpclient-3.0.0-java.gem has compile time dep:
+	commons-httpclient.commons-httpclient requires junit.junit 
+=> maven gives preference to test scope
+
+# big dependency list 50of57 get installed
+mvn clean gemify:gemify -Dgemify.gemname=de.saumya.mojo.jruby-maven-plugins -Dgemify.version=0.12.0 -Dgemify.developement
+
+# more than one relocation 
+mvn clean gemify:gemify -Dgemify.gemname=avalon-framework.avalon-framework-impl -Dgemify.version=4.3 -Dgemify.development=false
+
+# lots of developement deps
+mvn clean gemify:gemify -Dgemify.gemname=org.apache.avalon.framework.avalon-framework-impl -Dgemify.version=4.3.1 -Dgemify.development

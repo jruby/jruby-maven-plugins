@@ -16,12 +16,13 @@ package de.saumya.mojo.gemify;
  * limitations under the License.
  */
 
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+
+import de.saumya.mojo.ruby.GemException;
+import de.saumya.mojo.ruby.GemifyManager;
 
 /**
  * Goal which takes an maven artifact and converts it and its jar dependencies
@@ -38,7 +39,7 @@ public class VersionsMojo extends AbstractMojo {
      * @parameter expression="${gemify.gemname}"
      * @required
      */
-    private String                    gemName;
+    private String               gemName;
 
     /**
      * local repository for internal use.
@@ -47,7 +48,7 @@ public class VersionsMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    protected ArtifactRepository      localRepository;
+    protected ArtifactRepository localRepository;
 
     /**
      * reference to maven project for internal use.
@@ -56,21 +57,10 @@ public class VersionsMojo extends AbstractMojo {
      * @required
      * @readOnly true
      */
-    protected MavenProject            project;
+    protected MavenProject       project;
 
-    /**
-     * for internal use.
-     * 
-     * @component
-     */
-    private RepositoryMetadataManager repositoryMetadataManager;
-
-    /**
-     * for internal use.
-     * 
-     * @component
-     */
-    protected ArtifactHandlerManager  artifactHandlerManager;
+    /** @component */
+    protected GemifyManager      gemify;
 
     public void execute() throws MojoExecutionException {
         if (this.gemName == null) {
@@ -80,16 +70,21 @@ public class VersionsMojo extends AbstractMojo {
             throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
         }
 
-        final DefaultGemifyManager gemify = new DefaultGemifyManager();
-        gemify.artifactHandlerManager = this.artifactHandlerManager;
-        gemify.repositoryMetadataManager = this.repositoryMetadataManager;
+        // final DefaultGemifyManager gemify = new DefaultGemifyManager();
+        // gemify.artifactHandlerManager = this.artifactHandlerManager;
+        // gemify.repositoryMetadataManager = this.repositoryMetadataManager;
 
-        getLog().info("\n\n\t"
-                + this.gemName
-                + " "
-                + gemify.availableVersions(this.gemName,
-                                           this.localRepository,
-                                           this.project.getRemoteArtifactRepositories())
-                + "\n\n");
+        try {
+            getLog().info("\n\n\t"
+                    + this.gemName
+                    + " "
+                    + this.gemify.availableVersions(this.gemName,
+                                                    this.localRepository,
+                                                    this.project.getRemoteArtifactRepositories())
+                    + "\n\n");
+        }
+        catch (final GemException e) {
+            throw new MojoExecutionException("error gemify: " + this.gemName, e);
+        }
     }
 }

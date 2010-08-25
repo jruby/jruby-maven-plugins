@@ -24,9 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
@@ -45,6 +43,8 @@ import de.saumya.mojo.gems.ArtifactCoordinates;
 import de.saumya.mojo.gems.GemArtifact;
 import de.saumya.mojo.gems.MavenArtifact;
 import de.saumya.mojo.gems.MavenArtifactConverter;
+import de.saumya.mojo.ruby.GemException;
+import de.saumya.mojo.ruby.GemifyManager;
 
 /**
  * Goal which takes an maven artifact and converts it and its jar dependencies
@@ -66,7 +66,6 @@ public class GemifyMojo extends AbstractMojo {
      * the version of the maven artifact which gets gemified.
      * 
      * @parameter expression="${gemify.version}"
-     * @required
      */
     private String                          version;
 
@@ -116,15 +115,10 @@ public class GemifyMojo extends AbstractMojo {
     private MavenArtifactConverter          converter;
 
     /** @component */
-    private RepositoryMetadataManager       repositoryMetadataManager;
-
-    /** @component */
-    private ArtifactHandlerManager          artifactHandlerManager;
-
-    /** @component */
     private RepositorySystem                repositorySystem;
 
-    private DefaultGemifyManager            gemify;
+    /** @component */
+    private GemifyManager                   gemify;
 
     private final Map<String, MavenProject> relocations = new HashMap<String, MavenProject>();
 
@@ -136,9 +130,10 @@ public class GemifyMojo extends AbstractMojo {
             throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
         }
 
-        this.gemify = new DefaultGemifyManager();
-        this.gemify.artifactHandlerManager = this.artifactHandlerManager;
-        this.gemify.repositoryMetadataManager = this.repositoryMetadataManager;
+        // this.gemify = new DefaultGemifyManager();
+        // this.gemify.artifactHandlerManager = this.artifactHandlerManager;
+        // this.gemify.repositoryMetadataManager =
+        // this.repositoryMetadataManager;
 
         final Map<String, Node> visited = new HashMap<String, Node>();
 
@@ -191,78 +186,87 @@ public class GemifyMojo extends AbstractMojo {
             throws MojoExecutionException {
         Relocation relocation = null;
         Artifact original = null;
-        ProjectBuildingResult result;
-        do {
-            final Artifact artifact;
-            if (relocation == null) {
-                if (gemName != null) {
-                    artifact = this.gemify.createArtifact(gemName,
-                                                          version,
-                                                          this.localRepository,
-                                                          this.project.getRemoteArtifactRepositories());
+        try {
+            ProjectBuildingResult result;
+            do {
+                Artifact artifact;
+                if (relocation == null) {
+                    if (gemName != null) {
+                        artifact = this.gemify.createArtifact(gemName,
+                                                              version,
+                                                              this.localRepository,
+                                                              this.project.getRemoteArtifactRepositories());
+                    }
+                    else {
+                        artifact = this.gemify.createArtifact(groupId,
+                                                              artifactId,
+                                                              version,
+                                                              this.localRepository,
+                                                              this.project.getRemoteArtifactRepositories());
+                    }
                 }
                 else {
-                    artifact = this.gemify.createArtifact(groupId,
-                                                          artifactId,
-                                                          version,
+                    artifact = this.gemify.createArtifact(relocation.getGroupId(),
+                                                          relocation.getArtifactId(),
+                                                          relocation.getVersion() == null
+                                                                  ? version
+                                                                  : relocation.getVersion(),
                                                           this.localRepository,
                                                           this.project.getRemoteArtifactRepositories());
                 }
-            }
-            else {
-                artifact = this.gemify.createArtifact(relocation.getGroupId(),
-                                                      relocation.getArtifactId(),
-                                                      relocation.getVersion() == null
-                                                              ? version
-                                                              : relocation.getVersion(),
-                                                      this.localRepository,
-                                                      this.project.getRemoteArtifactRepositories());
-            }
-            result = buildMavenProject(artifact, true);
+                result = buildMavenProject(artifact, true);
 
-            if (result.getProject().getDistributionManagement() != null) {
-                relocation = result.getProject()
-                        .getDistributionManagement()
-                        .getRelocation();
-                if (relocation != null) {
-                    if (gemName != null) {
-                        // warning only for the top level gem
-                        getLog().info("\n\n\tartifact is relocated to "
-                                + relocation.getGroupId()
-                                + "."
-                                + relocation.getArtifactId()
-                                + " version="
-                                + relocation.getVersion()
-                                + (relocation.getMessage() == null ? "" : " "
-                                        + relocation.getMessage())
-                                + "\n\tif you need the original gem you can recreate it with '-Dgemify.force'\n\n");
-                    }
-                    if (original == null) {
-                        // remember the original artifact to be used as gem
-                        // coordinate
-                        original = artifact;
+                if (result.getProject().getDistributionManagement() != null) {
+                    relocation = result.getProject()
+                            .getDistributionManagement()
+                            .getRelocation();
+                    if (relocation != null) {
+                        if (gemName != null) {
+                            // warning only for the top level gem
+                            getLog().info("\n\n\tartifact is relocated to "
+                                    + relocation.getGroupId()
+                                    + "."
+                                    + relocation.getArtifactId()
+                                    + " version="
+                                    + relocation.getVersion()
+                                    + (relocation.getMessage() == null
+                                            ? ""
+                                            : " " + relocation.getMessage())
+                                    + "\n\tif you need the original gem you can recreate it with '-Dgemify.force'\n\n");
+                        }
+                        if (original == null) {
+                            // remember the original artifact to be used as gem
+                            // coordinate
+                            original = artifact;
+                        }
                     }
                 }
+                else {
+                    relocation = null;
+                }
             }
-            else {
-                relocation = null;
+            while (relocation != null);
+
+            if (original != null) {
+                if (this.force) {
+                    // use the original artifact coordinates to generate the gem
+                    result.getProject().setGroupId(original.getGroupId());
+                    result.getProject().setArtifactId(original.getArtifactId());
+                    result.getProject().setVersion(original.getVersion());
+                }
+                else {
+                    this.relocations.put(original.getGroupId() + ":"
+                            + original.getArtifactId() + ":"
+                            + original.getVersion(), result.getProject());
+                }
             }
+            return result;
         }
-        while (relocation != null);
-        if (original != null) {
-            if (this.force) {
-                // use the original artifact coordinates to generate the gem
-                result.getProject().setGroupId(original.getGroupId());
-                result.getProject().setArtifactId(original.getArtifactId());
-                result.getProject().setVersion(original.getVersion());
-            }
-            else {
-                this.relocations.put(original.getGroupId() + ":"
-                        + original.getArtifactId() + ":"
-                        + original.getVersion(), result.getProject());
-            }
+        catch (final GemException e) {
+            throw new MojoExecutionException("Error creating artifact when gemifying: "
+                    + gemName,
+                    e);
         }
-        return result;
     }
 
     static class Node {
