@@ -55,7 +55,18 @@ module Maven
       #TODO not sure if this is threadsafe
       @tuples = find(fetcher, dep, false) + find(fetcher, dep, true)
       @fetcher = fetcher
-      @last_update = File.new(@fetcher.cache_dir(URI.parse("http://rubygems.org/gems")) + "/specs.#{Gem.marshal_version}").mtime
+      rubygems_url = URI.parse("http://rubygems.org/gems")
+      puts "URL=#{rubygems_url}"
+      cache_dir = @fetcher.cache_dir( rubygems_url )
+      puts "cache_dir=#{cache_dir}"
+      update_path = cache_dir + "/specs.#{Gem.marshal_version}" 
+      if ( File.exists?( update_path ) )
+        update_file = File.new( cache_dir + "/specs.#{Gem.marshal_version}" )
+        puts "update_file=#{update_file}"
+        @last_update = update_file.mtime
+      else
+        @last_update = 0
+      end
     end
 
     def spec(name, version)

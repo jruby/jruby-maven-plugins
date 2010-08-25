@@ -7,6 +7,7 @@
     <version>0.21.0-SNAPSHOT</version>
     <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
+  <groupId>de.saumya.mojo</groupId>
   <artifactId>rspec-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>RSpec Maven Mojo</name>
@@ -22,6 +23,20 @@
       <artifactId>file-management</artifactId>
       <version>1.2.1</version>
     </dependency> 
+    <dependency>
+      <groupId>de.saumya.mojo</groupId>
+      <artifactId>gem-maven-plugin</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency> 
+<!--
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rspec</artifactId>
+      <version>1.3.0</version>
+      <type>gem</type>
+    </dependency>
+-->
   </dependencies>
   <build>
     <resources>
@@ -36,7 +51,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.4</version>
+	<version>1.4</version>
         <executions>
           <execution>
             <id>add-source</id>
@@ -53,21 +68,33 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
+	<artifactId>maven-source-plugin</artifactId>
+	<version>2.1.1</version>
+	<executions>
+	  <execution>
+	    <id>attach-sources</id>
+	    <goals>
+	      <goal>jar</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin> 
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-dependency-plugin</artifactId>
+         <executions>     
+	   <execution>
             <id>src-dependencies</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
             <configuration>
-              <includeGroupIds>de.saumya.mojo</includeGroupIds>
-              <includeArtifactIds>
+	      <includeGroupIds>de.saumya.mojo</includeGroupIds>
+	      <includeArtifactIds>
 		jruby-maven-plugin,gem-maven-plugin
 	      </includeArtifactIds>
-              <includes>
+	      <includes>
 		de/saumya/mojo/jruby/AbstractJRubyMojo.java,
 		de/saumya/mojo/gem/AbstractGemMojo.java
 	      </includes>
@@ -75,16 +102,17 @@
               <outputDirectory>${project.build.directory}/sources</outputDirectory>
             </configuration>
           </execution>
-        </executions>
+
+         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.3</version>
+        <artifactId>maven-jar-plugin</artifactId> 
+	<version>2.3</version>
         <configuration>
           <excludes>
-            <exclude>de/saumya/mojo/jruby/**</exclude>
-            <exclude>de/saumya/mojo/gem/**</exclude>
-          </excludes>
+	    <exclude>de/saumya/mojo/jruby/**</exclude>
+	    <exclude>de/saumya/mojo/gem/**</exclude>
+	  </excludes>
         </configuration>
       </plugin>
     </plugins>

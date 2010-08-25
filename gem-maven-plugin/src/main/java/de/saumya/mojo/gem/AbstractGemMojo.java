@@ -30,6 +30,7 @@ import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 
 import de.saumya.mojo.gems.GemspecConverter;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
+import de.saumya.mojo.ruby.Script;
 import de.saumya.mojo.ruby.GemScriptFactory;
 import de.saumya.mojo.ruby.GemService;
 import de.saumya.mojo.ruby.GemException;
@@ -46,7 +47,18 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
-    protected boolean            includeOpenSSL;
+    protected boolean           includeOpenSSL;
+    
+    
+    /**
+     * @parameter expression="${gem.installRDoc}" default-value="false"
+     */
+    protected boolean installRDoc;
+    
+    /**
+     * @parameter expression="${gem.installRI}" default-value="false"
+     */
+    protected boolean installRI;
 
     /**
      * allow to overwrite the version by explicitly declaring a dependency in
@@ -267,11 +279,19 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         if (gems.length() > 0) {
-            this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
-                    .addArg("install")
-                    .addArg("--no-ri")
-                    .addArg("--no-rdoc")
-                    .addArg("--no-user-install")
+            Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+		.addArg("install");
+        	if ( this.installRDoc ) {
+        		script.addArg( "--rdoc " );
+        	} else {
+        		script.addArg( "--no-rdoc " );
+        	}
+        	if ( this.installRI ) {
+        		script.addArg( "--ri " );
+        	} else {
+        		script.addArg( "--no-ri " );
+        	}
+                    script.addArg("--no-user-install")
                     .addArg("-l")
                     .addArg(extraFlag)
                     .addArgs(gems.toString())
