@@ -30,12 +30,12 @@ import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 
 import de.saumya.mojo.gems.GemspecConverter;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
-import de.saumya.mojo.ruby.Script;
+import de.saumya.mojo.ruby.GemException;
 import de.saumya.mojo.ruby.GemScriptFactory;
 import de.saumya.mojo.ruby.GemService;
-import de.saumya.mojo.ruby.GemException;
 import de.saumya.mojo.ruby.GemifyManager;
 import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.Script;
 import de.saumya.mojo.ruby.ScriptFactory;
 
 /**
@@ -47,18 +47,17 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
-    protected boolean           includeOpenSSL;
-    
-    
+    protected boolean            includeOpenSSL;
+
     /**
      * @parameter expression="${gem.installRDoc}" default-value="false"
      */
-    protected boolean installRDoc;
-    
+    protected boolean            installRDoc;
+
     /**
      * @parameter expression="${gem.installRI}" default-value="false"
      */
-    protected boolean installRI;
+    protected boolean            installRI;
 
     /**
      * allow to overwrite the version by explicitly declaring a dependency in
@@ -279,25 +278,25 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
         if (gems.length() > 0) {
-            Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
-		.addArg("install");
-        	if ( this.installRDoc ) {
-        		script.addArg( "--rdoc " );
-        	} else {
-        		script.addArg( "--no-rdoc " );
-        	}
-        	if ( this.installRI ) {
-        		script.addArg( "--ri " );
-        	} else {
-        		script.addArg( "--no-ri " );
-        	}
-                    script.addArg("--no-user-install")
+            final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                    .addArg("install");
+            if (this.installRDoc) {
+                script.addArg("--rdoc");
+            }
+            else {
+                script.addArg("--no-rdoc");
+            }
+            if (this.installRI) {
+                script.addArg("--ri");
+            }
+            else {
+                script.addArg("--no-ri");
+            }
+            script.addArg("--no-user-install")
                     .addArg("-l")
                     .addArg(extraFlag)
                     .addArgs(gems.toString())
                     .execute();
-            // execute("-S gem install --no-ri --no-rdoc --no-user-install "
-            // + " -l " + gems, false);
         }
         else {
             getLog().debug("no gems found to install");
