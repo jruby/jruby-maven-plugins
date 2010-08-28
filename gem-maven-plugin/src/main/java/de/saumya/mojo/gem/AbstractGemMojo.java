@@ -304,7 +304,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     }
 
     abstract protected void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException;
+            RubyScriptException, IOException, MojoFailureException;
 
     private String key(final Artifact artifact) {
         return artifact.getGroupId() + ":" + artifact.getArtifactId();

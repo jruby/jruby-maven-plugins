@@ -82,8 +82,21 @@
     <profile>
       <id>integration-test</id>
       <properties>
+	<!-- shitty maven plugin -->
+	<skip>true</skip>
 	<invoker.skip>false</invoker.skip>
       </properties>
+      <build>
+	<plugins>
+	  <plugin>
+	    <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>shitty-maven-plugin</artifactId>
+	    <configuration>
+	      <skip>true</skip>
+	    </configuration>
+	  </plugin>
+	</plugins>
+      </build>
     </profile>
   </profiles>
 </project>
