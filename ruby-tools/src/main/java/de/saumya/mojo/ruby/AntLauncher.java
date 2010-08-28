@@ -52,7 +52,7 @@ class AntLauncher extends AbstractLauncher {
             v.setValue(entry.getValue());
             java.addEnv(v);
         }
-        this.logger.info("java classpath  : "
+        this.logger.debug("java classpath  : "
                 + this.project.getReference(MAVEN_CLASSPATH));
         if (this.factory.env.size() > 0) {
             this.logger.info("environment     :");

@@ -122,8 +122,7 @@ public class RSpecMojo
 			getLog().error("error emitting .sh", e);
 		}
 
-		this.factory.newScript(this.rspecScriptFactory.getScriptFile() ).execute();
-		//this.factory.newScript(shellScriptFactory.getScriptFile().getPath());
+		this.factory.newScript(this.rspecScriptFactory.getScriptFile() ).executeIn(launchDirectory());
 
 		File reportFile = new File(reportPath);
 

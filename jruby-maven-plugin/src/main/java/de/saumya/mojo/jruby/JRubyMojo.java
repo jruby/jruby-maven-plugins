@@ -43,7 +43,7 @@ public class JRubyMojo extends AbstractJRubyMojo {
         }
         s.addArgs(this.args);
         if (s.isValid()) {
-            s.execute();
+            s.executeIn(launchDirectory());
         } else {
             getLog()
                     .warn(
