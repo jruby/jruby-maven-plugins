@@ -89,11 +89,7 @@ class AntLauncher extends AbstractLauncher {
             }
         }
 
-        this.logger.error(classPath.toString());
-
         project.addReference(MAVEN_CLASSPATH, classPath);
-
-        this.logger.error(project.getReference(MAVEN_CLASSPATH).toString());
         project.addBuildListener(new AntLogAdapter(this.logger));
         return project;
     }
