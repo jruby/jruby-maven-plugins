@@ -4,7 +4,7 @@
   <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-maven-plugins</artifactId>
   <packaging>pom</packaging>
-  <version>0.21.0-SNAPSHOT</version>
+  <version>0.21.0</version>
   <name>JRuby Maven Mojos</name>
   <description>
     aggregation project for various jruby related maven plugins
@@ -82,7 +82,9 @@
     <module>rails-maven-archetype</module>
     <module>rails2-maven-plugin</module>
     <module>rails3-maven-plugin</module>
+<!--
     <module>gem-proxy</module>
+-->
     <module>ruby-tools</module>
     <module>rake-maven-plugin</module>
     <module>gemify-maven-plugin</module>
