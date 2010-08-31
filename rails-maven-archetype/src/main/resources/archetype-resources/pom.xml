@@ -27,6 +27,23 @@
       <url>http://gems.saumya.de/prereleases</url>
     </repository>
 #end
+#literal()
+    <!--
+	remove this once there is no more SNAPSHOT of org.jruby.rack:jruby-rack
+    -->
+    <repository>
+      <id>saumya</id>
+      <url>http://mojo.saumya.de/</url>
+      <releases>
+	<enabled>false</enabled>
+      </releases>
+      <snapshots>
+	<enabled>true</enabled>
+	<updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
+#end
+
   </repositories>
 
   <dependencies>

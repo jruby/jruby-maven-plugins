@@ -45,8 +45,9 @@ public class RailsMojo extends AbstractRailsMojo {
     /**
      * the rails version to use
      * 
-     * @parameter default-value="3.0.0.rc" expression="${railsVersion}"
+     * @parameter default-value="3.0.0" expression="${railsVersion}"
      */
+    // TODO use latest version as default like gemify-plugin
     protected String            railsVersion                   = null;
 
     /**
@@ -133,6 +134,21 @@ public class RailsMojo extends AbstractRailsMojo {
             else {
                 database = "sqlite3";
             }
+
+            if ("mysql".equals(database)) {
+
+                final File yaml = new File(new File(this.appPath, "config"),
+                        "database.yml");
+                try {
+                    FileUtils.fileWrite(yaml.getAbsolutePath(),
+                                        FileUtils.fileRead(yaml)
+                                                .replaceAll("mysql2", "mysql"));
+                }
+                catch (final IOException e) {
+                    throw new MojoExecutionException("failed to filter "
+                            + script, e);
+                }
+            }
             // rectify the Gemfile to allow both ruby + jruby to work
             final File gemfile = new File(this.appPath, "Gemfile");
             try {
@@ -140,17 +156,16 @@ public class RailsMojo extends AbstractRailsMojo {
                                     FileUtils.fileRead(gemfile)
                                             .replaceFirst("\ngem (.[^r][a-z0-9-]+.*)\n",
                                                           "\ngem $1 unless defined?(JRUBY_VERSION)\n"
-                                                                  + "gem \"activerecord-jdbc-adapter\", :require =>'jdbc_adapter' if defined?(JRUBY_VERSION)\n"
+                                                                  + "gem \"activerecord-jdbc-adapter\" if defined?(JRUBY_VERSION)\n"
                                                                   + "gem \"jdbc-"
                                                                   + database
-                                                                  + "\", :require => 'jdbc/"
-                                                                  + database
-                                                                  + "' if defined?(JRUBY_VERSION)\n"));
+                                                                  + "\", :require => false if defined?(JRUBY_VERSION)\n"));
             }
             catch (final IOException e) {
                 throw new MojoExecutionException("failed to filter " + script,
                         e);
             }
+
             final VelocityContext context = new VelocityContext();
 
             context.put("groupId", this.groupId);

@@ -6,5 +6,5 @@
 source 'http://rubygems.org'
 
 gem 'rails'
-gem 'activerecord-jdbc-adapter', :require =>'jdbc_adapter'
-gem 'jdbc-${database}', :require => 'jdbc/${database}'
+gem 'activerecord-jdbc-adapter'
+gem 'jdbc-${database}', :require => false
