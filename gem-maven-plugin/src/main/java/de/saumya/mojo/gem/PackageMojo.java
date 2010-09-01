@@ -245,11 +245,20 @@ public class PackageMojo extends AbstractGemMojo {
 		// TODO make it the maven way (src/main/ruby + src/test/ruby) or the
 		// ruby way (lib + spec + test)
 		// TODO make a loop or so ;-)
+		final File binDir = new File(project.getBasedir(), "bin");
 		final File libDir = new File(project.getBasedir(), "lib");
 		final File generatorsDir = new File(project.getBasedir(), "generators");
 		final File specDir = new File(project.getBasedir(), "spec");
 		final File testDir = new File(project.getBasedir(), "test");
 
+		if ( binDir.exists()) {
+			gemSpecWriter.appendPath( "bin" );
+			for ( File file : binDir.listFiles() ) {
+				if ( file.canExecute() ) {
+					gemSpecWriter.appendExecutable( file.getName() );
+				}
+			}
+		}
 		if (libDir.exists()) {
 			gemSpecWriter.appendPath("lib");
 		}
