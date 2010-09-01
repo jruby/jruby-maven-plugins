@@ -1,1 +1,1 @@
-archetype:generate -DrailsVersion=3.0.0.beta4
+archetype:generate

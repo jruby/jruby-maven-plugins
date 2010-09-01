@@ -1,3 +1,4 @@
+-DrailsVersion=3.0.0
 -DarchetypeCatalog=local
 -DarchetypeArtifactId=rails-maven-archetype
 -DarchetypeGroupId=de.saumya.mojo
