@@ -41,6 +41,7 @@ class GemspecWriter {
     private boolean         firstFile        = true;
     private boolean         platformAppended = false;
     private boolean         firstTestFile;
+    private List<String>    executables      = new ArrayList<String>();
 
     GemspecWriter(final File gemspec, final MavenProject project,
             final GemArtifact artifact) throws IOException {
@@ -255,6 +256,10 @@ class GemspecWriter {
         final File f = new File(file);
         appendFile(f);
         this.files.add(f);
+    }
+    
+    void appendExecutable(String executable) throws IOException {
+    	this.writer.append( "  s.executables << '" + executable + "'\n" );
     }
 
     private void appendLicense(final String url, final String name)

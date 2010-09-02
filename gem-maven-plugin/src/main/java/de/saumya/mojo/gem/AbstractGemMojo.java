@@ -95,6 +95,13 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter default-value="${gem.args}"
      */
     protected String             gemArgs;
+    
+    /**
+     * arguments for the gem command during base initialization.
+     * 
+     * @parameter default-value="${gem.initializeArgs}"
+     */
+    protected String             gemInitializeArgs;
 
     /** @component */
     protected GemifyManager      manager;
@@ -295,6 +302,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             script.addArg("--no-user-install")
                     .addArg("-l")
                     .addArg(extraFlag)
+                    .addArgs(gemInitializeArgs)
                     .addArgs(gems.toString())
                     .execute();
         }
