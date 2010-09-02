@@ -40,7 +40,10 @@ public class InstallMojo extends AbstractGemMojo {
                 && this.project.getArtifact().getFile() != null
                 && this.project.getArtifact().getFile().exists()) {
             final GemArtifact gemArtifact = new GemArtifact(this.project);
+            script.addArgs(this.installArgs);
+            script.addArgs(this.args);
             script.addArg("-l", gemArtifact.getFile());
+            script.execute();
         }
         else {
             if (this.gem == null) {

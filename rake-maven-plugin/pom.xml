@@ -21,7 +21,7 @@
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>ruby-tools</artifactId>
-      <version>0.2</version>
+      <version>0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
