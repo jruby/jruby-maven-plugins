@@ -74,7 +74,8 @@ public class RailsMojo extends AbstractRailsMojo {
     public void preExecute() throws MojoExecutionException,
             MojoFailureException, IOException, RubyScriptException,
             GemException {
-        if (this.railsVersion.compareTo(SMALLEST_ALLOWED_RAILS_VERSION) < 0) {
+        if (this.railsVersion.length() >= SMALLEST_ALLOWED_RAILS_VERSION.length()
+                && this.railsVersion.compareTo(SMALLEST_ALLOWED_RAILS_VERSION) < 0) {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
         }
@@ -84,10 +85,10 @@ public class RailsMojo extends AbstractRailsMojo {
         }
         if (this.appPath != null) {
 
-            setupGems(this.manager.createGemArtifact("rails", this.railsVersion));
-
             this.manager.addDefaultGemRepositoryForVersion(this.railsVersion,
                                                            this.project.getRemoteArtifactRepositories());
+
+            setupGems(this.manager.createGemArtifact("rails", this.railsVersion));
         }
     }
 
