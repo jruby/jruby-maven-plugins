@@ -24,7 +24,7 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby-maven-plugin</artifactId>
- <version>0.22.0-SNAPSHOT</version>
+ <version>0.21.1</version>
  <configuration>
    <generateJava>true</generateJava>
  </configuration>
