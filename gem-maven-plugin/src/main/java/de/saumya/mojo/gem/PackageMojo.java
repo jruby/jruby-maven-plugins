@@ -254,9 +254,9 @@ public class PackageMojo extends AbstractGemMojo {
 		if ( binDir.exists()) {
 			gemSpecWriter.appendPath( "bin" );
 			for ( File file : binDir.listFiles() ) {
-				if ( file.canExecute() ) {
+				//if ( file.canExecute() ) { // java1.6 feature which will fail on jre1.5 runtimes
 					gemSpecWriter.appendExecutable( file.getName() );
-				}
+				//}
 			}
 		}
 		if (libDir.exists()) {
