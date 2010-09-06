@@ -13,7 +13,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 import de.saumya.mojo.gems.spec.GemSpecification;
 import de.saumya.mojo.gems.spec.GemSpecificationIO;
-import de.saumya.mojo.ruby.ScriptingService;
+import de.saumya.mojo.ruby.GemScriptingContainer;
 
 /**
  * Unit test for simple App.
@@ -26,13 +26,13 @@ public class MavenArtifactConverterTest extends PlexusTestCase {
         return new TestSuite(MavenArtifactConverterTest.class);
     }
 
-    private ScriptingService scripting;
+    private GemScriptingContainer scripting;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        this.scripting = new ScriptingService();
+        final File gems = new File(new File(getBasedir(), "target"), "rubygems");
+        this.scripting = new GemScriptingContainer(gems, gems);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class MavenArtifactConverterTest extends PlexusTestCase {
                              "1.7.1"));
 
         // load helper script
-        final Object gemTester = this.scripting.rubyObjectFromClassloader("gem_tester.rb",
+        final Object gemTester = this.scripting.runScriptletFromClassloader("gem_tester.rb",
                                                                           getClass());
         // this.scriptingContainer.runScriptlet(getClass().getResourceAsStream("gem_tester.rb"),
         // "gem_tester.rb");
@@ -80,40 +80,37 @@ public class MavenArtifactConverterTest extends PlexusTestCase {
         // setup local rubygems repository
         final File rubygems = new File(getBasedir(), "target/rubygems");
         rubygems.mkdirs();
-        this.scripting.scripting().callMethod(gemTester,
-                                              "setup_gems",
-                                              rubygems.getAbsolutePath(),
-                                              Object.class);
+        this.scripting.callMethod(gemTester,
+                                  "setup_gems",
+                                  rubygems.getAbsolutePath(),
+                                  Object.class);
 
         // install the slf4j gems
-        this.scripting.scripting()
-                .callMethod(gemTester,
-                            "install_gems",
-                            new String[] {
-                                    "target/gems/org.slf4j.slf4j-api-1.5.8-java.gem",
-                                    "target/gems/org.slf4j.slf4j-simple-1.5.8-java.gem" },
-                            Object.class);
+        this.scripting.callMethod(gemTester,
+                                  "install_gems",
+                                  new String[] {
+                                          "target/gems/org.slf4j.slf4j-api-1.5.8-java.gem",
+                                          "target/gems/org.slf4j.slf4j-simple-1.5.8-java.gem" },
+                                  Object.class);
         // TODO do not know why this is needed. but without it the first run
         // fails and any successive runs succeeds !!
-        this.scripting.scripting().callMethod(gemTester,
-                                              "gem",
-                                              "org.slf4j.slf4j-simple",
-                                              Object.class);
+        this.scripting.callMethod(gemTester,
+                                  "gem",
+                                  "org.slf4j.slf4j-simple",
+                                  Object.class);
 
         // load the slf4j-simple
-        Boolean result = this.scripting.scripting()
-                .callMethod(gemTester,
-                            "require_gem",
-                            "maven/org.slf4j/slf4j-simple",
-                            Boolean.class);
+        Boolean result = this.scripting.callMethod(gemTester,
+                                                   "require_gem",
+                                                   "maven/org.slf4j/slf4j-simple",
+                                                   Boolean.class);
         assertTrue(result);
 
         // slf4j-api is already loaded as dependency of slf4j-simple
-        result = this.scripting.scripting()
-                .callMethod(gemTester,
-                            "require_gem",
-                            "maven/org.slf4j/slf4j-api",
-                            Boolean.class);
+        result = this.scripting.callMethod(gemTester,
+                                           "require_gem",
+                                           "maven/org.slf4j/slf4j-api",
+                                           Boolean.class);
         assertFalse(result);
     }
 

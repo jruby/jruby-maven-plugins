@@ -13,7 +13,7 @@ import java.io.Writer;
 
 import org.jruby.embed.ScriptingContainer;
 
-import de.saumya.mojo.ruby.ScriptingService;
+import de.saumya.mojo.ruby.GemScriptingContainer;
 
 class ControllerService {
 
@@ -25,9 +25,9 @@ class ControllerService {
 
     private final Object             mutex             = new Object();
 
-    ControllerService(final ScriptingService scripting) throws IOException {
-        this.rubyObject = scripting.rubyObjectFromClassloader("gem_artifacts.rb");
-        this.scriptingContainer = scripting.scripting();
+    ControllerService(final GemScriptingContainer scripting) throws IOException {
+        this.rubyObject = scripting.runScriptletFromClassloader("gem_artifacts.rb");
+        this.scriptingContainer = scripting;
         update();
     }
 
