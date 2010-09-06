@@ -71,14 +71,21 @@ public class CompileMojo extends AbstractJRubyMojo {
                 "\nrequire 'jruby/jrubyc'\n"
                         + "status=JRubyCompiler::compile_argv(ARGV)\n"
                         + "raise 'compilation-error(s)' if status !=0 && !"
-                        + this.ignoreFailures).addArg("-d", this.rubyDirectory);
+                        + this.ignoreFailures).addArg("-d",
+                fixPathSeparator(this.rubyDirectory));
 
         if (this.generateJava) {
-            script.addArg("--java").addArg("-t", this.generatedJavaDirectory);
+            script.addArg("--java").addArg("-t",
+                    fixPathSeparator(this.generatedJavaDirectory));
         } else {
-            script.addArg("-t", this.outputDirectory);
+            script.addArg("-t", fixPathSeparator(this.outputDirectory));
         }
         script.addArg(this.rubyDirectory);
         script.execute();
+    }
+
+    private String fixPathSeparator(final File f) {
+        // http://jira.codehaus.org/browse/JRUBY-5065
+        return f.getPath().replace(System.getProperty("file.separator"), "/");
     }
 }
