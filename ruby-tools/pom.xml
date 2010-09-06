@@ -9,7 +9,7 @@
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>ruby-tools</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.3-SNAPSHOT</version>
   <name>Ruby Tools</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
   <dependencies>
