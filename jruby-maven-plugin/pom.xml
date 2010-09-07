@@ -22,6 +22,22 @@
       <groupId>de.saumya.mojo</groupId>
       <artifactId>ruby-tools</artifactId>
       <version>0.3-SNAPSHOT</version>
+      <exclusions>
+	<exclusion>
+	  <groupId>org.codehaus.plexus</groupId>
+	  <artifactId>plexus-velocity</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.yaml</groupId>
+	  <artifactId>snakeyaml</artifactId>
+	</exclusion>
+<!-- TODO not sure if wanted
+	<exclusion>
+	  <groupId>org.jruby</groupId>
+	  <artifactId>jruby-complete</artifactId>
+	</exclusion>
+-->
+      </exclusions>
     </dependency>
   </dependencies>
   <build>
