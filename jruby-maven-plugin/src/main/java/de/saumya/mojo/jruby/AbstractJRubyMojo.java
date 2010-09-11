@@ -7,7 +7,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -17,7 +16,6 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.classworlds.ClassRealm;
 
 import de.saumya.mojo.ruby.Logger;
-import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
 
@@ -32,9 +30,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     public static final String GEM_RUBY_COMMAND = "META-INF/jruby.home/bin/gem";
 
-    public static final String IRB_RUBY_COMMAND = "META-INF/jruby.home/bin/jirb";
+    public static final String IRB_RUBY_COMMAND = "jirb";
 
-    public static final String IRB_SWING_RUBY_COMMAND = "META-INF/jruby.home/bin/jirb_swing";
+    public static final String IRB_SWING_RUBY_COMMAND = "jirb_swing";
 
     public static final String RAKE_RUBY_COMMAND = "META-INF/jruby.home/bin/rake";
 
@@ -107,24 +105,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      */
     protected MavenProject project;
 
-    // /**
-    // * artifact factory for internal use.
-    // *
-    // * @component
-    // * @required
-    // * @readonly
-    // */
-    // protected ArtifactFactory artifactFactory;
-
-    /**
-     * artifact resolver for internal use.
-     * 
-     * @component
-     * @required
-     * @readonly
-     */
-    protected ArtifactResolver resolver;
-
     /**
      * local repository for internal use.
      * 
@@ -141,16 +121,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @readonly
      */
     protected ClassRealm classRealm;
-
-    // /**
-    // * @component
-    // */
-    // protected ArtifactMetadataSource metadata;
-    //
-    // /**
-    // * @component
-    // */
-    // protected MavenProjectBuilder builder;
 
     /** @component */
     protected RepositorySystem repositorySystem;
@@ -176,11 +146,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
     }
 
-    protected void preExecute() throws MojoExecutionException,
-            MojoFailureException, IOException, ScriptException, GemException {
-
-    }
-
     public void execute() throws MojoExecutionException, MojoFailureException {
         this.logger = new MojoLogger(this.jrubyVerbose, getLog());
         this.factory = newScriptFactory();
@@ -192,21 +157,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         if (this.jrubyGemPath != null) {
             this.factory.addEnv("GEM_PATH", this.jrubyGemPath.getAbsolutePath()
                     .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
-        }
-
-        try {
-
-            preExecute();
-
-        } catch (final IOException e) {
-            throw new MojoExecutionException(
-                    "error running pre execution hook", e);
-        } catch (final ScriptException e) {
-            throw new MojoExecutionException(
-                    "error running pre execution hook", e);
-        } catch (final GemException e) {
-            throw new MojoExecutionException(
-                    "error running pre execution hook", e);
         }
 
         try {
@@ -248,7 +198,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         request.setLocalRepository(this.localRepository);
         request.setRemoteRepositories(this.project
                 .getRemoteArtifactRepositories());
-        this.resolver.resolve(request);
+        this.repositorySystem.resolve(request);
 
         if (this.jrubyVerbose) {
             getLog().info("jruby version   : " + artifact.getVersion());
