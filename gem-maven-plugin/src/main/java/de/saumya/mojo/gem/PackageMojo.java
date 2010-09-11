@@ -8,18 +8,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -100,15 +100,14 @@ public class PackageMojo extends AbstractGemMojo {
      */
     boolean                           includeDependencies;
 
-    /**
-     * @component
-     */
-    protected ArtifactMetadataSource  metadata;
+    // /**
+    // * @component
+    // */
+    // protected ArtifactMetadataSource metadata;
+    //
 
-    /**
-     * @component
-     */
-    protected MavenProjectBuilder     builder;
+    /** @component */
+    protected ProjectBuilder          builder;
 
     @Override
     public void executeJRuby() throws MojoExecutionException,
@@ -184,9 +183,14 @@ public class PackageMojo extends AbstractGemMojo {
 
     private MavenProject projectFromArtifact(final Artifact artifact)
             throws ProjectBuildingException {
-        final MavenProject project = this.builder.buildFromRepository(artifact,
-                                                                      this.project.getRemoteArtifactRepositories(),
-                                                                      this.localRepository);
+        // final MavenProject project =
+        // this.builder.buildFromRepository(artifact,
+        // this.project.getRemoteArtifactRepositories(),
+        // this.localRepository);
+        final ProjectBuildingRequest request = new DefaultProjectBuildingRequest().setLocalRepository(this.localRepository)
+                .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+        final MavenProject project = this.builder.build(artifact, request)
+                .getProject();
         if (project.getDistributionManagement() != null
                 && project.getDistributionManagement().getRelocation() != null) {
             final Relocation reloc = project.getDistributionManagement()
@@ -209,7 +213,6 @@ public class PackageMojo extends AbstractGemMojo {
         }
     }
 
-    @SuppressWarnings( { "unchecked" })
     private void build(final MavenProject project, final GemArtifact artifact)
             throws MojoExecutionException, IOException, ScriptException {
 
@@ -259,38 +262,58 @@ public class PackageMojo extends AbstractGemMojo {
 
         ArtifactResolutionResult jarDependencyArtifacts = null;
         if (this.includeDependencies) {
-            try {
-                jarDependencyArtifacts = this.resolver.resolveTransitively(project.getArtifacts(),
-                                                                           project.getArtifact(),
-                                                                           this.project.getManagedVersionMap(),
-                                                                           this.localRepository,
-                                                                           this.project.getRemoteArtifactRepositories(),
-                                                                           this.metadata,
-                                                                           new ArtifactFilter() {
-                                                                               public boolean include(
-                                                                                       final Artifact candidate) {
-                                                                                   if (candidate == artifact) {
-                                                                                       return true;
-                                                                                   }
-                                                                                   final boolean result = (candidate.getType()
-                                                                                           .equals("jar") && ("compile".equals(candidate.getScope()) || "runtime".equals(candidate.getScope())));
-                                                                                   return result;
-                                                                               }
-
-                                                                           });
-                for (final Object element : jarDependencyArtifacts.getArtifacts()) {
-                    final Artifact dependency = (Artifact) element;
-                    getLog().info(" -- include -- " + dependency);
-                    gemSpecWriter.appendJarfile(dependency.getFile(),
-                                                dependency.getFile().getName());
+            // try {
+            final ArtifactFilter filter = new ArtifactFilter() {
+                public boolean include(final Artifact candidate) {
+                    if (candidate == artifact) {
+                        return true;
+                    }
+                    final boolean result = (candidate.getType().equals("jar") && ("compile".equals(candidate.getScope()) || "runtime".equals(candidate.getScope())));
+                    return result;
                 }
+
+            };
+
+            final ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(project.getArtifact())
+                    .setLocalRepository(this.localRepository)
+                    .setRemoteRepositories(project.getRemoteArtifactRepositories())
+                    .setCollectionFilter(filter)
+                    .setManagedVersionMap(project.getManagedVersionMap())
+                    .setArtifactDependencies(project.getDependencyArtifacts());
+            jarDependencyArtifacts = this.repositorySystem.resolve(request);
+            // jarDependencyArtifacts =
+            // this.repositorySystem.resolveTransitively(project.getArtifacts(),
+            // project.getArtifact(),
+            // this.project.getManagedVersionMap(),
+            // this.localRepository,
+            // this.project.getRemoteArtifactRepositories(),
+            // this.metadata,
+            // new ArtifactFilter() {
+            // public boolean include(
+            // final Artifact candidate) {
+            // if (candidate == artifact) {
+            // return true;
+            // }
+            // final boolean result = (candidate.getType()
+            // .equals("jar") && ("compile".equals(candidate.getScope()) ||
+            // "runtime".equals(candidate.getScope())));
+            // return result;
+            // }
+            //
+            // });
+            for (final Object element : jarDependencyArtifacts.getArtifacts()) {
+                final Artifact dependency = (Artifact) element;
+                getLog().info(" -- include -- " + dependency);
+                gemSpecWriter.appendJarfile(dependency.getFile(),
+                                            dependency.getFile().getName());
             }
-            catch (final ArtifactResolutionException e) {
-                e.printStackTrace();
-            }
-            catch (final ArtifactNotFoundException e) {
-                e.printStackTrace();
-            }
+            // }
+            // catch (final ArtifactResolutionException e) {
+            // e.printStackTrace();
+            // }
+            // catch (final ArtifactNotFoundException e) {
+            // e.printStackTrace();
+            // }
         }
 
         // TODO make it the maven way (src/main/ruby + src/test/ruby) or the

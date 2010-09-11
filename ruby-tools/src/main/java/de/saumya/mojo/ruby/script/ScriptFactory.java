@@ -5,6 +5,7 @@ package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,33 +38,37 @@ public class ScriptFactory {
             final File jrubyJar, final List<String> classpathElements,
             final boolean fork) throws ScriptException, IOException {
         this.logger = logger;
-        this.classRealm = classRealm;
         this.jrubyJar = jrubyJar;
         this.classpathElements = classpathElements == null
                 ? NO_CLASSPATH
                 : Collections.unmodifiableList(classpathElements);
         this.fork = fork;
+        if (classRealm != null) {
+            ClassRealm jruby;
+            try {
+                jruby = classRealm.getWorld().getRealm("jruby");
+            }
+            catch (final NoSuchRealmException e) {
+                try {
+                    jruby = classRealm.getParent().createChildRealm("jruby");
+                    jruby.addConstituent(jrubyJar.toURI().toURL());
+                }
+                catch (final DuplicateRealmException ee) {
+                    throw new ScriptException("could not setup classrealm for jruby",
+                            ee);
+                }
+            }
+            this.classRealm = jruby;
+        }
+        else {
+            this.classRealm = null;
+        }
+
         if (fork) {
             this.launcher = new AntLauncher(logger, this);
         }
         else {
-            if (classRealm != null) {
-                ClassRealm jruby;
-                try {
-                    jruby = classRealm.getWorld().getRealm("jruby");
-                }
-                catch (final NoSuchRealmException e) {
-                    try {
-                        jruby = classRealm.getParent()
-                                .createChildRealm("jruby");
-                        jruby.addConstituent(jrubyJar.toURI().toURL());
-                    }
-                    catch (final DuplicateRealmException ee) {
-                        throw new ScriptException("could not setup classrealm for jruby",
-                                ee);
-                    }
-                }
-            }
+
             this.launcher = new EmbeddedLauncher(logger, this);
         }
     }
@@ -71,6 +76,13 @@ public class ScriptFactory {
     public Script newScriptFromSearchPath(final String scriptName)
             throws IOException {
         return new Script(this, scriptName, true);
+    }
+
+    public Script newScriptFromJRubyJar(final String scriptName)
+            throws MalformedURLException {
+        return new Script(this, new URL("jar:file:"
+                + this.jrubyJar.getAbsolutePath()
+                + "!/META-INF/jruby.home/bin/" + scriptName));
     }
 
     public Script newScriptFromResource(final String scriptName)
@@ -84,6 +96,7 @@ public class ScriptFactory {
             return new Script(this, url.getPath(), false);
         }
         else {
+            System.out.println(url);
             return new Script(this, url);
         }
     }

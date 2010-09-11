@@ -6,22 +6,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -33,7 +33,6 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal gemify
  * @requiresDependencyResolution test
  */
-@SuppressWarnings("deprecation")
 @Deprecated
 // use gemify mojo instead
 public class GemifyMojo extends AbstractGemMojo {
@@ -68,24 +67,22 @@ public class GemifyMojo extends AbstractGemMojo {
      */
     public boolean                    skipGemInstall = false;
 
-    /**
-     * artifact factory for internal use.
-     * 
-     * @component
-     * @required
-     * @readonly
-     */
-    protected ArtifactFactory         artifactFactory;
+    // /**
+    // * artifact factory for internal use.
+    // *
+    // * @component
+    // * @required
+    // * @readonly
+    // */
+    // protected ArtifactFactory artifactFactory;
+    //
+    // /**
+    // * @component
+    // */
+    // protected ArtifactMetadataSource metadata;
 
-    /**
-     * @component
-     */
-    protected ArtifactMetadataSource  metadata;
-
-    /**
-     * @component
-     */
-    protected MavenProjectBuilder     builder;
+    /** @component */
+    protected ProjectBuilder          builder;
 
     private File                      launchDir;
 
@@ -113,42 +110,47 @@ public class GemifyMojo extends AbstractGemMojo {
                 || this.version != null) {
             if (this.artifactId != null && this.groupId != null
                     && this.version != null) {
-                final Artifact artifact = this.artifactFactory.createArtifactWithClassifier(this.groupId,
-                                                                                            this.artifactId,
-                                                                                            this.version,
-                                                                                            "jar",
-                                                                                            null);
-                try {
-                    // final ArtifactResolutionRequest request = new
-                    // ArtifactResolutionRequest();
-                    // request.setArtifact(artifact);
-                    // request.setLocalRepository(this.localRepository);
-                    // request.setRemoteRepostories(this.remoteRepositories);
-                    this.resolver.resolve(artifact,
-                                          this.project.getRemoteArtifactRepositories(),
-                                          this.localRepository);
-                }
-                catch (final ArtifactResolutionException e) {
-                    throw new MojoExecutionException("can not resolve "
-                            + artifact.toString());
-                }
-                catch (final ArtifactNotFoundException e) {
-                    throw new MojoExecutionException("can not resolve "
-                            + artifact.toString());
-                }
+                final Artifact artifact = this.repositorySystem.createArtifactWithClassifier(this.groupId,
+                                                                                             this.artifactId,
+                                                                                             this.version,
+                                                                                             "jar",
+                                                                                             null);
+                // try {
+                ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(artifact)
+                        .setLocalRepository(this.localRepository)
+                        .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+                this.repositorySystem.resolve(request);
+                // artifact,
+                // this.project.getRemoteArtifactRepositories(),
+                // this.localRepository);
+                // }
+                // catch (final ArtifactResolutionException e) {
+                // throw new MojoExecutionException("can not resolve "
+                // + artifact.toString());
+                // }
+                // catch (final ArtifactNotFoundException e) {
+                // throw new MojoExecutionException("can not resolve "
+                // + artifact.toString());
+                // }
                 try {
                     final MavenProject project = projectFromArtifact(artifact);
                     project.setArtifact(artifact);
-                    final Set<Artifact> artifacts = project.createArtifacts(this.artifactFactory,
-                                                                            null,
-                                                                            null);
+                    final Set<Artifact> artifacts = new LinkedHashSet<Artifact>();
+                    // project.createArtifacts(this.artifactFactory,
+                    // null,
+                    // null);
                     getLog().info("artifacts=" + artifacts);
-                    final ArtifactResolutionResult arr = this.resolver.resolveTransitively(artifacts,
-                                                                                           artifact,
-                                                                                           this.project.getManagedVersionMap(),
-                                                                                           this.localRepository,
-                                                                                           this.project.getRemoteArtifactRepositories(),
-                                                                                           this.metadata);
+                    request = new ArtifactResolutionRequest().setArtifact(artifact)
+                            .setLocalRepository(this.localRepository)
+                            .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
+                            .setManagedVersionMap(project.getManagedVersionMap());
+                    final ArtifactResolutionResult arr = this.repositorySystem.resolve(request);
+                    // this.resolver.resolveTransitively(artifacts,
+                    // artifact,
+                    // this.project.getManagedVersionMap(),
+                    // this.localRepository,
+                    // this.project.getRemoteArtifactRepositories(),
+                    // this.metadata);
                     gemify(project, arr.getArtifacts());
                 }
                 catch (final InvalidDependencyVersionException e) {
@@ -159,14 +161,14 @@ public class GemifyMojo extends AbstractGemMojo {
                     throw new MojoExecutionException("error building project object model",
                             e);
                 }
-                catch (final ArtifactResolutionException e) {
-                    throw new MojoExecutionException("can not resolve "
-                            + artifact.toString(), e);
-                }
-                catch (final ArtifactNotFoundException e) {
-                    throw new MojoExecutionException("can not resolve "
-                            + artifact.toString(), e);
-                }
+                // catch (final ArtifactResolutionException e) {
+                // throw new MojoExecutionException("can not resolve "
+                // + artifact.toString(), e);
+                // }
+                // catch (final ArtifactNotFoundException e) {
+                // throw new MojoExecutionException("can not resolve "
+                // + artifact.toString(), e);
+                // }
             }
             else {
                 throw new MojoExecutionException("not all three artifactId, groupId and version are given");
@@ -223,9 +225,13 @@ public class GemifyMojo extends AbstractGemMojo {
     private MavenProject projectFromArtifact(final Artifact artifact)
             throws ProjectBuildingException {
 
-        final MavenProject project = this.builder.buildFromRepository(artifact,
-                                                                      this.project.getRemoteArtifactRepositories(),
-                                                                      this.localRepository);
+        final ProjectBuildingRequest request = new DefaultProjectBuildingRequest().setLocalRepository(this.localRepository)
+                .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+        final MavenProject project = this.builder.build(artifact, request)
+                .getProject();
+        // this.builder.buildFromRepository(artifact,
+        // this.project.getRemoteArtifactRepositories(),
+        // this.localRepository);
         // System.out.println("\n\n ------------> " + artifact + "\n\n");
         if (project.getDistributionManagement() != null
                 && project.getDistributionManagement().getRelocation() != null) {
@@ -290,25 +296,33 @@ public class GemifyMojo extends AbstractGemMojo {
                                 // System.out.println(id);
                                 if (!resolved.contains(id)) {
 
-                                    final Artifact artifact = this.artifactFactory.createArtifactWithClassifier(dependency.getGroupId(),
-                                                                                                                dependency.getArtifactId(),
-                                                                                                                dependency.getVersion(),
-                                                                                                                dependency.getType(),
-                                                                                                                dependency.getClassifier());
-                                    try {
-                                        getLog().info("resolving: " + artifact);
-                                        this.resolver.resolve(artifact,
-                                                              this.project.getRemoteArtifactRepositories(),
-                                                              this.localRepository);
-                                    }
-                                    catch (final ArtifactResolutionException e) {
-                                        throw new MojoExecutionException("can not resolve "
-                                                + artifact.toString());
-                                    }
-                                    catch (final ArtifactNotFoundException e) {
-                                        throw new MojoExecutionException("can not resolve "
-                                                + artifact.toString());
-                                    }
+                                    final Artifact artifact = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
+                                                                                                                 dependency.getArtifactId(),
+                                                                                                                 dependency.getVersion(),
+                                                                                                                 dependency.getType(),
+                                                                                                                 dependency.getClassifier());
+                                    // try {
+                                    getLog().info("resolving: " + artifact);
+                                    final ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(artifact)
+                                            .setLocalRepository(this.localRepository)
+                                            .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+                                    this.repositorySystem.resolve(request);
+                                    // this.resolver.resolve(artifact,
+                                    // this.project.getRemoteArtifactRepositories(),
+                                    // this.localRepository);
+                                    // }
+                                    // catch (final ArtifactResolutionException
+                                    // e) {
+                                    // throw new
+                                    // MojoExecutionException("can not resolve "
+                                    // + artifact.toString());
+                                    // }
+                                    // catch (final ArtifactNotFoundException e)
+                                    // {
+                                    // throw new
+                                    // MojoExecutionException("can not resolve "
+                                    // + artifact.toString());
+                                    // }
                                     try {
                                         projectFromArtifact(artifact);
                                     }
@@ -389,11 +403,11 @@ public class GemifyMojo extends AbstractGemMojo {
                 // it will adjust the artifact as well (in case of relocation)
                 Artifact arti = null;
                 try {
-                    arti = this.artifactFactory.createArtifactWithClassifier(dependency.getGroupId(),
-                                                                             dependency.getArtifactId(),
-                                                                             dependency.getVersion(),
-                                                                             dependency.getScope(),
-                                                                             dependency.getClassifier());
+                    arti = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
+                                                                              dependency.getArtifactId(),
+                                                                              dependency.getVersion(),
+                                                                              dependency.getScope(),
+                                                                              dependency.getClassifier());
                     getLog().info("arti=" + arti);
                     projectFromArtifact(arti);
                     dependency.setGroupId(arti.getGroupId());

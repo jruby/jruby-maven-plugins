@@ -50,16 +50,18 @@ public class RailsService {
                                this.config,
                                new File(appPath),
                                null,
-                               railsVersion, args);
+                               railsVersion,
+                               args);
     }
 
-    public void rake(final String... tasks) throws IOException,
-            ScriptException, GemException, RailsException {
+    public void rake(final String tasks) throws IOException, ScriptException,
+            GemException, RailsException {
         this.manager.rake(this.installer,
                           this.config,
                           this.state.getLaunchDirectory(),
                           this.state.getRubygemsConfig().getEnvironment(),
-                          tasks);
+                          tasks,
+                          new String[0]);
     }
 
     public void generate(final String generator, final String... args)

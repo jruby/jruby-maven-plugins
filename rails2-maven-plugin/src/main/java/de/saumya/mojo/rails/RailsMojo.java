@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.velocity.VelocityComponent;
@@ -69,12 +68,21 @@ public class RailsMojo extends AbstractRailsMojo {
     /** @component */
     private GemManager          manager;
 
-    // needs to be the default in mojo parameter as welld
+    // needs to be the default in mojo parameter as well
     private static final String SMALLEST_ALLOWED_RAILS_VERSION = "2.3.5";
 
+    // ignore rails.dir property if set and execute
+    // super.super.lanuchDirectory()
     @Override
-    public void preExecute() throws MojoExecutionException,
-            MojoFailureException, IOException, ScriptException, GemException {
+    protected File launchDirectory() {
+        final File launchDirectory = super.launchDirectory();
+        launchDirectory.mkdirs();
+        return launchDirectory;
+    }
+
+    @Override
+    public void executeWithGems() throws MojoExecutionException,
+            ScriptException, IOException, GemException {
         if (this.railsVersion.compareTo(SMALLEST_ALLOWED_RAILS_VERSION) < 0) {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
@@ -90,20 +98,7 @@ public class RailsMojo extends AbstractRailsMojo {
             this.manager.addDefaultGemRepositoryForVersion(this.railsVersion,
                                                            this.project.getRemoteArtifactRepositories());
         }
-    }
 
-    // ignore rails.dir property if set and execute
-    // super.super.lanuchDirectory()
-    @Override
-    protected File launchDirectory() {
-        final File launchDirectory = super.launchDirectory();
-        launchDirectory.mkdirs();
-        return launchDirectory;
-    }
-
-    @Override
-    public void executeWithGems() throws MojoExecutionException,
-            ScriptException, IOException {
         Script script;
         if (railsScriptFile("rails").exists() && this.appPath == null) {
             script = this.factory.newScript(railsScriptFile("rails"));
