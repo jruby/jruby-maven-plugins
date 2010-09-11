@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run "gem spec".
@@ -22,7 +22,7 @@ public class SpecMojo extends AbstractJRubyMojo {
 
     @Override
     public void executeJRuby() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         if (this.gemfile == null) {
             getLog().warn("please specifiy a gem file, use '-Dgemfile=...'");
         }

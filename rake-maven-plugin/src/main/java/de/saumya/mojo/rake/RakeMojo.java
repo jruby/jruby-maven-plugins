@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
-import de.saumya.mojo.ruby.GemException;
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.Script;
+import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.script.Script;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * maven wrapper around the rake command.
@@ -40,10 +39,21 @@ public class RakeMojo extends AbstractGemMojo {
      */
     private final String rakeVersion = null;
 
+    // @Override
+    // public void preExecute() throws MojoExecutionException,
+    // MojoFailureException, IOException, ScriptException, GemException {
+    // if (this.project.getBasedir() == null) {
+    //
+    // setupGems(this.manager.createGemArtifact("rake", this.rakeVersion));
+    //
+    // this.manager.addDefaultGemRepositoryForVersion(this.rakeVersion,
+    // this.project.getRemoteArtifactRepositories());
+    // }
+    // }
+
     @Override
-    public void preExecute() throws MojoExecutionException,
-            MojoFailureException, IOException, RubyScriptException,
-            GemException {
+    public void executeWithGems() throws MojoExecutionException,
+            ScriptException, IOException, GemException {
         if (this.project.getBasedir() == null) {
 
             setupGems(this.manager.createGemArtifact("rake", this.rakeVersion));
@@ -51,11 +61,6 @@ public class RakeMojo extends AbstractGemMojo {
             this.manager.addDefaultGemRepositoryForVersion(this.rakeVersion,
                                                            this.project.getRemoteArtifactRepositories());
         }
-    }
-
-    @Override
-    public void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
         final Script script = this.factory.newScriptFromResource(RAKE_RUBY_COMMAND);
         script.addArg("-f", this.rakefile);
 

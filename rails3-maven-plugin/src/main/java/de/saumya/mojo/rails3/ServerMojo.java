@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run the rails server.
@@ -23,7 +23,7 @@ public class ServerMojo extends AbstractRailsMojo {
 
     @Override
     protected void executeRails() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         this.factory.newScript(railsScriptFile())
                 .addArg("server")
                 .addArgs(this.serverArgs)

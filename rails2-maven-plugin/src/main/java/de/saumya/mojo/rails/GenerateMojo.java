@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * Goal to run rails generator script.
@@ -30,7 +30,7 @@ public class GenerateMojo extends AbstractRailsMojo {
 
     @Override
     protected void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         this.factory.newScript(railsScriptFile("generate"))
                 .addArg(this.generator)
                 .addArgs(this.generateArgs)

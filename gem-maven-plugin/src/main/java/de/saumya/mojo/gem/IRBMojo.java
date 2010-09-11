@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * maven wrpper around IRB.
@@ -42,7 +42,7 @@ public class IRBMojo extends AbstractGemMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         this.factory.newScriptFromResource(this.swing
                 ? IRB_SWING_RUBY_COMMAND
                 : IRB_RUBY_COMMAND)

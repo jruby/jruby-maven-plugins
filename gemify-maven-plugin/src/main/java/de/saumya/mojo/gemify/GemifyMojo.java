@@ -43,8 +43,8 @@ import de.saumya.mojo.gems.ArtifactCoordinates;
 import de.saumya.mojo.gems.GemArtifact;
 import de.saumya.mojo.gems.MavenArtifact;
 import de.saumya.mojo.gems.MavenArtifactConverter;
-import de.saumya.mojo.ruby.GemException;
-import de.saumya.mojo.ruby.GemifyManager;
+import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.gems.GemManager;
 
 /**
  * Goal which takes an maven artifact and converts it and its jar dependencies
@@ -118,7 +118,7 @@ public class GemifyMojo extends AbstractMojo {
     private RepositorySystem                repositorySystem;
 
     /** @component */
-    private GemifyManager                   gemify;
+    private GemManager                      gemify;
 
     private final Map<String, MavenProject> relocations = new HashMap<String, MavenProject>();
 
@@ -192,17 +192,18 @@ public class GemifyMojo extends AbstractMojo {
                 Artifact artifact;
                 if (relocation == null) {
                     if (gemName != null) {
-                        artifact = this.gemify.createArtifact(gemName,
-                                                              version,
-                                                              this.localRepository,
-                                                              this.project.getRemoteArtifactRepositories());
+                        artifact = this.gemify.createJarArtifactForGemname(gemName,
+                                                                           version);
+                        // this.localRepository,
+                        // this.project.getRemoteArtifactRepositories());
                     }
                     else {
                         artifact = this.gemify.createArtifact(groupId,
                                                               artifactId,
                                                               version,
-                                                              this.localRepository,
-                                                              this.project.getRemoteArtifactRepositories());
+                                                              "jar");
+                        // this.localRepository,
+                        // this.project.getRemoteArtifactRepositories());
                     }
                 }
                 else {
@@ -211,8 +212,9 @@ public class GemifyMojo extends AbstractMojo {
                                                           relocation.getVersion() == null
                                                                   ? version
                                                                   : relocation.getVersion(),
-                                                          this.localRepository,
-                                                          this.project.getRemoteArtifactRepositories());
+                                                          "jar");
+                    // this.localRepository,
+                    // this.project.getRemoteArtifactRepositories());
                 }
                 result = buildMavenProject(artifact, true);
 

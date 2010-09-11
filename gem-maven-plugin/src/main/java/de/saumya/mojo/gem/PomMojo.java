@@ -8,7 +8,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.gems.GemspecConverter;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to converts a gemspec file into pom.xml.
@@ -78,7 +78,7 @@ public class PomMojo extends AbstractJRubyMojo {
                 gemspec.createPom(this.gemspecFile, version, this.pom);
 
             }
-            catch (final RubyScriptException e) {
+            catch (final ScriptException e) {
                 throw new MojoExecutionException("error in script", e);
             }
             catch (final IOException e) {

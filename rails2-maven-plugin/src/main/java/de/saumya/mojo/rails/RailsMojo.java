@@ -14,10 +14,10 @@ import org.apache.velocity.VelocityContext;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.velocity.VelocityComponent;
 
-import de.saumya.mojo.ruby.GemException;
-import de.saumya.mojo.ruby.GemifyManager;
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.Script;
+import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.gems.GemManager;
+import de.saumya.mojo.ruby.script.Script;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run rails command with the given arguments. either to generate a
@@ -67,15 +67,14 @@ public class RailsMojo extends AbstractRailsMojo {
     private VelocityComponent   velocityComponent;
 
     /** @component */
-    private GemifyManager       manager;
+    private GemManager          manager;
 
     // needs to be the default in mojo parameter as welld
     private static final String SMALLEST_ALLOWED_RAILS_VERSION = "2.3.5";
 
     @Override
     public void preExecute() throws MojoExecutionException,
-            MojoFailureException, IOException, RubyScriptException,
-            GemException {
+            MojoFailureException, IOException, ScriptException, GemException {
         if (this.railsVersion.compareTo(SMALLEST_ALLOWED_RAILS_VERSION) < 0) {
             getLog().warn("rails version before "
                     + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
@@ -104,13 +103,13 @@ public class RailsMojo extends AbstractRailsMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         Script script;
         if (railsScriptFile("rails").exists() && this.appPath == null) {
             script = this.factory.newScript(railsScriptFile("rails"));
         }
         else {
-            script = this.factory.newScript(this.gemService.binScriptFile("rails"))
+            script = this.factory.newScript(this.gemsConfig.binScriptFile("rails"))
                     .addArg("_" + this.railsVersion + "_");
 
             if (this.appPath != null) {

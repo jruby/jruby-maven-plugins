@@ -21,8 +21,8 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 
-import de.saumya.mojo.ruby.GemException;
-import de.saumya.mojo.ruby.GemifyManager;
+import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.gems.GemManager;
 
 /**
  * Goal which takes an maven artifact and converts it and its jar dependencies
@@ -60,7 +60,7 @@ public class VersionsMojo extends AbstractMojo {
     protected MavenProject       project;
 
     /** @component */
-    protected GemifyManager      gemify;
+    protected GemManager         manager;
 
     public void execute() throws MojoExecutionException {
         if (this.gemName == null) {
@@ -78,9 +78,9 @@ public class VersionsMojo extends AbstractMojo {
             getLog().info("\n\n\t"
                     + this.gemName
                     + " "
-                    + this.gemify.availableVersions(this.gemName,
-                                                    this.localRepository,
-                                                    this.project.getRemoteArtifactRepositories())
+                    + this.manager.availableVersions(this.manager.createGemArtifact(this.gemName),
+                                                     this.localRepository,
+                                                     this.project.getRemoteArtifactRepositories())
                     + "\n\n");
         }
         catch (final GemException e) {

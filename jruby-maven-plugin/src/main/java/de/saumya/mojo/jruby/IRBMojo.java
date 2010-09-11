@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * maven wrpper around IRB.
@@ -37,7 +37,7 @@ public class IRBMojo extends AbstractJRubyMojo {
 
     @Override
     public void executeJRuby() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         // make sure the whole things run in the same process
         super.jrubyFork = false;
         this.factory.newScriptFromResource(

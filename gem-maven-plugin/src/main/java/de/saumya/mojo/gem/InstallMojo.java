@@ -6,8 +6,8 @@ import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.Script;
+import de.saumya.mojo.ruby.script.Script;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to locally install a given gem
@@ -32,7 +32,7 @@ public class InstallMojo extends AbstractGemMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException, MojoFailureException {
+            ScriptException, IOException, MojoFailureException {
         final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                 .addArg("install");
         // TODO if artifact is set, check on an existing gem in target

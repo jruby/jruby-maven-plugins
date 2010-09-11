@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run rails rake with the given arguments.
@@ -30,7 +30,7 @@ public class RakeMojo extends AbstractRailsMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         this.factory.newScriptFromResource(RAKE_RUBY_COMMAND)
                 .addArgs(this.rakeArgs)
                 .addArgs(this.args)

@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run the rails console. it will ignore the fork parameter since
@@ -36,7 +36,7 @@ public class ConsoleMojo extends AbstractRailsMojo {
 
     @Override
     public void executeRails() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         this.factory.newScript(railsScriptFile())
                 .addArg("console")
                 .addArgs(this.consoleArgs)

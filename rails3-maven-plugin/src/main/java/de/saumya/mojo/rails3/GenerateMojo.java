@@ -4,7 +4,9 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.rails.RailsException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run a generator
@@ -30,12 +32,11 @@ public class GenerateMojo extends AbstractRailsMojo {
 
     @Override
     protected void executeRails() throws MojoExecutionException,
-            RubyScriptException, IOException {
-        this.factory.newScript(railsScriptFile())
-                .addArg("generate")
-                .addArg(this.generator)
-                .addArgs(this.generateArgs)
-                .addArgs(this.args)
-                .executeIn(launchDirectory());
+            ScriptException, IOException, GemException, RailsException {
+        this.manager.generate(this.gemsInstaller,
+                              this.config,
+                              launchDirectory(),
+                              this.generator,
+                              joinArgs(this.generateArgs, this.args));
     }
 }

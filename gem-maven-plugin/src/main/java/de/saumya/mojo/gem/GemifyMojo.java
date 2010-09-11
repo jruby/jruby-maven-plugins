@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
@@ -18,11 +20,12 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.StringUtils;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to convert that artifact into a gem.
@@ -30,6 +33,9 @@ import de.saumya.mojo.ruby.RubyScriptException;
  * @goal gemify
  * @requiresDependencyResolution test
  */
+@SuppressWarnings("deprecation")
+@Deprecated
+// use gemify mojo instead
 public class GemifyMojo extends AbstractGemMojo {
 
     /**
@@ -62,13 +68,32 @@ public class GemifyMojo extends AbstractGemMojo {
      */
     public boolean                    skipGemInstall = false;
 
+    /**
+     * artifact factory for internal use.
+     * 
+     * @component
+     * @required
+     * @readonly
+     */
+    protected ArtifactFactory         artifactFactory;
+
+    /**
+     * @component
+     */
+    protected ArtifactMetadataSource  metadata;
+
+    /**
+     * @component
+     */
+    protected MavenProjectBuilder     builder;
+
     private File                      launchDir;
 
     private final Map<String, String> relocationMap  = new HashMap<String, String>();
 
     @Override
     public void executeJRuby() throws MojoExecutionException, IOException,
-            RubyScriptException {
+            ScriptException {
         if (this.project.getBasedir() == null
                 || !this.project.getBasedir().exists()) {
             if (!this.buildDirectory.exists()) {
@@ -153,7 +178,7 @@ public class GemifyMojo extends AbstractGemMojo {
     }
 
     private void gemify(MavenProject project, final Set<Artifact> artifacts)
-            throws MojoExecutionException, IOException, RubyScriptException {
+            throws MojoExecutionException, IOException, ScriptException {
         getLog().info("gemify( " + project + ", " + artifacts + " )");
         final Map<String, MavenProject> gems = new HashMap<String, MavenProject>();
         try {
@@ -224,7 +249,6 @@ public class GemifyMojo extends AbstractGemMojo {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private String orderInResolvedManner(final Map<String, MavenProject> gems)
             throws MojoExecutionException {
         final List<String> result = new ArrayList<String>();
@@ -337,9 +361,8 @@ public class GemifyMojo extends AbstractGemMojo {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private String build(final MavenProject project, final File jarfile)
-            throws MojoExecutionException, IOException, RubyScriptException {
+            throws MojoExecutionException, IOException, ScriptException {
 
         getLog().info("building gem for " + jarfile + " . . .");
         final String gemName = project.getGroupId() + "."
@@ -482,7 +505,7 @@ public class GemifyMojo extends AbstractGemMojo {
 
     @Override
     protected void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         // TODO Auto-generated method stub
 
     }

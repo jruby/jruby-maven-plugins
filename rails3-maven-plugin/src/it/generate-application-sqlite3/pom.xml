@@ -8,7 +8,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <packaging>war</packaging>
-  <artifactId>rails3-app-mysql</artifactId>
+  <artifactId>rails3-app-sqlite3</artifactId>
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>

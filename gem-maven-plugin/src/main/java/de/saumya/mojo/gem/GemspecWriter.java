@@ -41,7 +41,8 @@ class GemspecWriter {
     private boolean         firstFile        = true;
     private boolean         platformAppended = false;
     private boolean         firstTestFile;
-    private List<String>    executables      = new ArrayList<String>();
+
+    // private List<String> executables = new ArrayList<String>();
 
     GemspecWriter(final File gemspec, final MavenProject project,
             final GemArtifact artifact) throws IOException {
@@ -55,7 +56,8 @@ class GemspecWriter {
         append("# create by maven - leave it as is");
         append("Gem::Specification.new do |s|");
         append("name", artifact.getGemName());
-        appendRaw("version", "'" + GemArtifact.getGemVersion(project.getVersion()) + "'" );
+        appendRaw("version", "'"
+                + GemArtifact.getGemVersion(project.getVersion()) + "'");
         append();
         append("summary", project.getName());
         append("description", project.getDescription());
@@ -80,8 +82,7 @@ class GemspecWriter {
     }
 
     private String gemVersion(String version) {
-        version = version.replaceAll("-SNAPSHOT", "")
-                .replace("-", ".");
+        version = version.replaceAll("-SNAPSHOT", "").replace("-", ".");
         if (version.matches("^[\\[\\(].*[\\]\\)]$")) {
             final int comma = version.indexOf(",");
             final String first = version.substring(1, comma);
@@ -257,9 +258,9 @@ class GemspecWriter {
         appendFile(f);
         this.files.add(f);
     }
-    
-    void appendExecutable(String executable) throws IOException {
-    	this.writer.append( "  s.executables << '" + executable + "'\n" );
+
+    void appendExecutable(final String executable) throws IOException {
+        this.writer.append("  s.executables << '" + executable + "'\n");
     }
 
     private void appendLicense(final String url, final String name)

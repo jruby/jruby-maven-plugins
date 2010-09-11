@@ -21,7 +21,7 @@
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>rails</artifactId>
-      <version>3.0.0.beta4</version>
+      <version>3.0.0</version>
       <type>gem</type>
     </dependency>
   </dependencies>
