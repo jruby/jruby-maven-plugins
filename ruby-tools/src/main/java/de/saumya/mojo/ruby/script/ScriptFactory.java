@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.saumya.mojo.ruby;
+package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +14,9 @@ import java.util.Map;
 import org.codehaus.classworlds.ClassRealm;
 import org.codehaus.classworlds.DuplicateRealmException;
 import org.codehaus.classworlds.NoSuchRealmException;
+
+import de.saumya.mojo.ruby.Logger;
+import de.saumya.mojo.ruby.ScriptUtils;
 
 public class ScriptFactory {
 
@@ -32,7 +35,7 @@ public class ScriptFactory {
 
     public ScriptFactory(final Logger logger, final ClassRealm classRealm,
             final File jrubyJar, final List<String> classpathElements,
-            final boolean fork) throws RubyScriptException, IOException {
+            final boolean fork) throws ScriptException, IOException {
         this.logger = logger;
         this.classRealm = classRealm;
         this.jrubyJar = jrubyJar;
@@ -56,7 +59,7 @@ public class ScriptFactory {
                         jruby.addConstituent(jrubyJar.toURI().toURL());
                     }
                     catch (final DuplicateRealmException ee) {
-                        throw new RubyScriptException("could not setup classrealm for jruby",
+                        throw new ScriptException("could not setup classrealm for jruby",
                                 ee);
                     }
                 }
@@ -129,12 +132,13 @@ public class ScriptFactory {
         if (value != null) {
             this.env.put(name, value.getAbsolutePath());
         }
+        else {
+            this.env.put(name, null);
+        }
     }
 
     public void addEnv(final String name, final String value) {
-        if (value != null) {
-            this.env.put(name, value);
-        }
+        this.env.put(name, value);
     }
 
     public void addEnvs(final String environmentVars) {

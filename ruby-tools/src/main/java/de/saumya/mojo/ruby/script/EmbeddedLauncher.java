@@ -1,7 +1,7 @@
 /**
  *
  */
-package de.saumya.mojo.ruby;
+package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +16,8 @@ import org.codehaus.classworlds.ClassRealm;
 import org.codehaus.classworlds.DuplicateRealmException;
 import org.codehaus.classworlds.NoSuchRealmException;
 
+import de.saumya.mojo.ruby.Logger;
+
 class EmbeddedLauncher extends AbstractLauncher {
 
     private static final Class<?>[] No_ARG_TYPES = new Class[0];
@@ -26,7 +28,7 @@ class EmbeddedLauncher extends AbstractLauncher {
     private final Logger            logger;
 
     public EmbeddedLauncher(final Logger logger, final ScriptFactory factory)
-            throws RubyScriptException {
+            throws ScriptException {
         this.logger = logger;
         this.factory = factory;
         if (factory.classRealm != null) {
@@ -41,7 +43,7 @@ class EmbeddedLauncher extends AbstractLauncher {
 
     private ClassRealm cloneClassRealm(final File jrubyJar,
             final List<String> classpathElements, final ClassRealm classRealm)
-            throws RubyScriptException {
+            throws ScriptException {
         for (final String classpath : classpathElements) {
             if (classpath.equals(jrubyJar.getAbsolutePath())) {
                 return null;
@@ -72,24 +74,25 @@ class EmbeddedLauncher extends AbstractLauncher {
             }
         }
         catch (final DuplicateRealmException e) {
-            throw new RubyScriptException("error in naming realms", e);
+            throw new ScriptException("error in naming realms", e);
         }
         catch (final MalformedURLException e) {
-            throw new RubyScriptException("hmm. found some malformed URL", e);
+            throw new ScriptException("hmm. found some malformed URL", e);
         }
 
         return newClassRealm;
     }
 
     @Override
-    protected void doExecute(final File launchDirectory, final List<String> args,
-            final File outputFile) throws RubyScriptException, IOException {
+    protected void doExecute(final File launchDirectory,
+            final List<String> args, final File outputFile)
+            throws ScriptException, IOException {
         doExecute(launchDirectory, outputFile, args, true);
     }
 
     private void doExecute(final File launchDirectory, final File outputFile,
             final List<String> args, final boolean warn)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         final String currentDir;
         if (launchDirectory != null) {
             currentDir = System.getProperty("user.dir");
@@ -154,25 +157,25 @@ class EmbeddedLauncher extends AbstractLauncher {
                 status = (Integer) statusMethod.invoke(result, NO_ARGS);
             }
             if (status != 0) {
-                throw new RubyScriptException("some error in script " + args
+                throw new ScriptException("some error in script " + args
                         + ": " + status);
             }
 
         }
         catch (final InstantiationException e) {
-            throw new RubyScriptException(e);
+            throw new ScriptException(e);
         }
         catch (final IllegalAccessException e) {
-            throw new RubyScriptException(e);
+            throw new ScriptException(e);
         }
         catch (final ClassNotFoundException e) {
-            throw new RubyScriptException(e);
+            throw new ScriptException(e);
         }
         catch (final NoSuchMethodException e) {
-            throw new RubyScriptException(e);
+            throw new ScriptException(e);
         }
         catch (final InvocationTargetException e) {
-            throw new RubyScriptException(e);
+            throw new ScriptException(e);
         }
         finally {
             if (current != null) {
@@ -197,14 +200,16 @@ class EmbeddedLauncher extends AbstractLauncher {
 
     public void executeScript(final File launchDirectory, final String script,
             final List<String> args, final File outputFile)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         final StringBuilder buf = new StringBuilder();
         for (final Map.Entry<String, String> entry : this.factory.env.entrySet()) {
-            buf.append("ENV['")
-                    .append(entry.getKey())
-                    .append("']='")
-                    .append(entry.getValue())
-                    .append("';");
+            if (entry.getValue() != null) {
+                buf.append("ENV['")
+                        .append(entry.getKey())
+                        .append("']='")
+                        .append(entry.getValue())
+                        .append("';");
+            }
         }
         buf.append(script);
 

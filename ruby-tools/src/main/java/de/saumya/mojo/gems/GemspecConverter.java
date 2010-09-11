@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.List;
 
 import de.saumya.mojo.ruby.Logger;
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.ScriptFactory;
+import de.saumya.mojo.ruby.script.ScriptException;
+import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class GemspecConverter {
 
@@ -23,7 +23,7 @@ public class GemspecConverter {
 
     public void createPom(final File gemspec,
             final String jrubyMavenPluginsVersion, final File pom)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         this.factory.newScriptFromResource("gem2pom.rb")
                 .addArg(gemspec.getAbsolutePath())
                 .addArg(jrubyMavenPluginsVersion)
@@ -40,7 +40,7 @@ public class GemspecConverter {
      * rubygems server. . . .
      */
     public void updateMetadata(final List<String> remoteRepositoryIds,
-            final String localRepositoryBasedir) throws RubyScriptException,
+            final String localRepositoryBasedir) throws ScriptException,
             IOException {
         for (final String id : remoteRepositoryIds) {
             if (id.startsWith("rubygems")) {

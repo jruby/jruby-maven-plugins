@@ -16,12 +16,12 @@
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.2</version>
     </dependency>
     <dependency>
       <groupId>ant</groupId>
       <artifactId>ant</artifactId>
-      <version>1.6.2</version>
+      <version>1.6.5</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model</artifactId>
-      <version>3.0-beta-2</version>
+      <version>3.0-beta-3</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
@@ -61,13 +61,14 @@
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.6</version>
+      <version>1.7</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.0-beta-2</version>
-      <scope>provided</scope>
+      <version>3.0-beta-3</version>
+      <optional>true</optional>
+      <!--scope>provided</scope-->
     </dependency>
   </dependencies>
   <properties>

@@ -1,11 +1,13 @@
 /**
  *
  */
-package de.saumya.mojo.ruby;
+package de.saumya.mojo.ruby.script;
 
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.Project;
+
+import de.saumya.mojo.ruby.Logger;
 
 class AntLogAdapter implements BuildListener {
 

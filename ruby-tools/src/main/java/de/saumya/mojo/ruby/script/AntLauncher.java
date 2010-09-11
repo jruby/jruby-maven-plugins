@@ -1,7 +1,7 @@
 /**
  *
  */
-package de.saumya.mojo.ruby;
+package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,8 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Java;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Environment.Variable;
+
+import de.saumya.mojo.ruby.Logger;
 
 class AntLauncher extends AbstractLauncher {
 
@@ -95,50 +97,50 @@ class AntLauncher extends AbstractLauncher {
     }
 
     @Override
-    public void execute(final List<String> args) throws RubyScriptException,
+    public void execute(final List<String> args) throws ScriptException,
             IOException {
         doExecute(null, args, null);
     }
 
     @Override
     public void execute(final List<String> args, final File outputFile)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         doExecute(null, args, outputFile);
     }
 
     @Override
     public void executeIn(final File launchDirectory, final List<String> args)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         doExecute(launchDirectory, args, null);
     }
 
     @Override
     public void executeIn(final File launchDirectory, final List<String> args,
-            final File outputFile) throws RubyScriptException, IOException {
+            final File outputFile) throws ScriptException, IOException {
         doExecute(launchDirectory, args, outputFile);
     }
 
     @Override
     public void executeScript(final String script, final List<String> args)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         executeScript(script, args, null);
     }
 
     @Override
     public void executeScript(final String script, final List<String> args,
-            final File outputFile) throws RubyScriptException, IOException {
+            final File outputFile) throws ScriptException, IOException {
         executeScript(null, script, args, outputFile);
     }
 
     @Override
     public void executeScript(final File launchDirectory, final String script,
-            final List<String> args) throws RubyScriptException, IOException {
+            final List<String> args) throws ScriptException, IOException {
         executeScript(launchDirectory, script, args, null);
     }
 
     public void executeScript(final File launchDirectory, final String script,
             final List<String> args, final File outputFile)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         args.add(0, "-e");
         args.add(1, script);
         args.add(2, "--");

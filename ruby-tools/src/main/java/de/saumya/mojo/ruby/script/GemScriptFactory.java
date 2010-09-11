@@ -1,13 +1,16 @@
 /**
  * 
  */
-package de.saumya.mojo.ruby;
+package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import org.codehaus.classworlds.ClassRealm;
+
+import de.saumya.mojo.ruby.GemService;
+import de.saumya.mojo.ruby.Logger;
 
 public class GemScriptFactory extends ScriptFactory implements GemService {
 
@@ -20,7 +23,7 @@ public class GemScriptFactory extends ScriptFactory implements GemService {
     public GemScriptFactory(final Logger logger, final ClassRealm classRealm,
             final File jrubyJar, final List<String> classpathElements,
             final boolean fork, final File gemHome, final File gemPath)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         super(logger, classRealm, jrubyJar, classpathElements, fork);
         this.gemHome = new File(gemHome.getAbsolutePath()
                 .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
@@ -34,10 +37,10 @@ public class GemScriptFactory extends ScriptFactory implements GemService {
         }
     }
 
-    public File binDirectory() throws RubyScriptException {
+    public File binDirectory() throws ScriptException {
         if (this.gemHome == null) {
             if (System.getenv(GEM_HOME) == null) {
-                throw new RubyScriptException("no GEM_HOME set");
+                throw new ScriptException("no GEM_HOME set");
             }
             else {
                 return new File(System.getenv(GEM_HOME), "bin");
@@ -48,10 +51,10 @@ public class GemScriptFactory extends ScriptFactory implements GemService {
         }
     }
 
-    public File gemDirectory() throws RubyScriptException {
+    public File gemDirectory() throws ScriptException {
         if (this.gemPath == null) {
             if (System.getenv(GEM_PATH) == null) {
-                throw new RubyScriptException("no GEM_PATH set");
+                throw new ScriptException("no GEM_PATH set");
             }
             else {
                 return new File(System.getenv(GEM_PATH), "gems");
@@ -62,11 +65,11 @@ public class GemScriptFactory extends ScriptFactory implements GemService {
         }
     }
 
-    public File binScriptFile(final String script) throws RubyScriptException {
+    public File binScriptFile(final String script) throws ScriptException {
         return new File(binDirectory(), script);
     }
 
-    public String binScript(final String script) throws RubyScriptException {
+    public String binScript(final String script) throws ScriptException {
         return binScriptFile(script).getAbsolutePath();
     }
 }

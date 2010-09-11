@@ -10,6 +10,9 @@ import junit.framework.TestSuite;
 
 import org.codehaus.plexus.util.FileUtils;
 
+import de.saumya.mojo.ruby.script.GemScriptFactory;
+import de.saumya.mojo.ruby.script.ScriptFactory;
+
 public class EmbeddedLauncherTest extends TestCase {
 
     public EmbeddedLauncherTest(final String testName) {

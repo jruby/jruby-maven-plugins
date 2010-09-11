@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.saumya.mojo.ruby;
+package de.saumya.mojo.ruby.script;
 
 import java.util.LinkedList;
 import java.util.List;

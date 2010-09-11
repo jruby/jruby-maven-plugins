@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.saumya.mojo.ruby;
+package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class Script extends Arguments {
         return this;
     }
 
-    public void execute() throws RubyScriptException, IOException {
+    public void execute() throws ScriptException, IOException {
         if (this.script != null) {
             this.scriptFactory.launcher.executeScript(this.script, this.list);
         }
@@ -85,7 +85,7 @@ public class Script extends Arguments {
         }
     }
 
-    public void execute(final File output) throws RubyScriptException,
+    public void execute(final File output) throws ScriptException,
             IOException {
         if (this.script != null) {
             this.scriptFactory.launcher.executeScript(this.script,
@@ -98,7 +98,7 @@ public class Script extends Arguments {
     }
 
     public void executeIn(final File launchDirectory)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         if (this.script != null) {
             this.scriptFactory.launcher.executeScript(launchDirectory,
                                                       this.script,
@@ -110,7 +110,7 @@ public class Script extends Arguments {
     }
 
     public void executeIn(final File launchDirectory, final File output)
-            throws RubyScriptException, IOException {
+            throws ScriptException, IOException {
         if (this.script != null) {
             this.scriptFactory.launcher.executeScript(launchDirectory,
                                                       this.script,
