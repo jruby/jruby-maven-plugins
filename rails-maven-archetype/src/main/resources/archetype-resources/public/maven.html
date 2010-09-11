@@ -272,34 +272,34 @@
             <li>
               <h2>Create your database</h2>
               <p><code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate"</code><br /> will to create your database. If you're not using SQLite (the default), edit <code>config/database.yml</code> with your username and password.</p>
-       <p>For production use <code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate" -Pproduction</code>
+       <p>For production use <code>mvn rails${railsVersion.substring(0,1)}:rake -Dargs="db:create db:migrate" -Drails.env=production</code>
             </li>
 
      <li>
               <h2>Start embedded servlet-engine</h2>
               <p>Run <code>mvn jetty:run</code> and find the generated <a href="http://localhost:8080/users">users resource here</a> - jetty runs on port 8080 !</p>
-	      <p>For production <code>mvn jetty:run -Pproduction</code></p>
+	      <p>For production <code>mvn jetty:run -Drails.env=production</code></p>
      </li>
 
      <li>
               <h2>Start default ruby server (webrick)</h2>
               <p><code>mvn rails${railsVersion.substring(0,1)}:server</code></p>
 	      <p>Find the <a href="http://localhost:3000/users">users resource here</a> - webrick runs on port 3000 !</p>
-	      <p>For production <code>mvn rails${railsVersion.substring(0,1)}:server -Pproduction</code></p>
+	      <p>For production <code>mvn rails${railsVersion.substring(0,1)}:server -Drails.env=production</code></p>
      </li>
 
      <li>
               <h2>Package your war file</h2>
-              <p><code>mvn package -Pproduction</code> will produce a war file for production in the directory <code>target</code>.</p>
+              <p><code>mvn package -Drails.env=production</code> will produce a war file for production in the directory <code>target</code>.</p>
 	      <p>run jetty with the production warfile<br/>
-		<code>mvn jetty:run-war -Pproduction</code></p>
+		<code>mvn jetty:run-war -Drails.env=production</code></p>
      </li>
 
      <li>
               <h2>Running the tests or specs</h2>
-              <p><code>mvn -Ptest</code></p>	      
+              <p><code>mvn -Drails.env=test</code></p>	      
 	      <p>after migrating the new tables with<br/>
-		<code>mvn rails3:rake -Dargs=db:migrate -Ptest</code></p>
+		<code>mvn rails3:rake -Dargs=db:migrate -Drails.env=test</code></p>
      </li>
 
      <li>

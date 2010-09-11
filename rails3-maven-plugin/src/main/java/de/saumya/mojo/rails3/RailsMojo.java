@@ -179,6 +179,7 @@ public class RailsMojo extends AbstractRailsMojo {
 
             // write out a new index.html
             filterContent(this.appPath, context, "src/main/webapp/index.html");
+	    // TODO add public/maven.html instead and make the index a redirect to maven.html - i.e. avoid duplication. if the archetype only warns about existing files then that should be part of the archetype
             filterContent(this.appPath,
                           context,
                           "src/main/webapp/index.html",

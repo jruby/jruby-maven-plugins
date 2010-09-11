@@ -9,7 +9,7 @@
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-proxy</artifactId>
-  <version>0.2</version>
+  <version>0.3-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Rubygems as Maven Repository Webapp</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
