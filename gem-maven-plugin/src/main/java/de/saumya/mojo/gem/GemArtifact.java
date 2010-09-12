@@ -90,13 +90,14 @@ public class GemArtifact implements Artifact {
     }
 
     public String getGemVersion() {
-    	return getGemVersion( getVersion() );
+        return getGemVersion(getVersion());
     }
-    
-    public static String getGemVersion(String artifactVersion) {
+
+    public static String getGemVersion(final String artifactVersion) {
         final StringBuilder version = new StringBuilder();
         boolean first = true;
         for (final String part : artifactVersion.replaceAll("-SNAPSHOT", "")
+                .replace("-", ".")
                 .split("\\.")) {
             if (part.length() > 0) {
                 if (first) {

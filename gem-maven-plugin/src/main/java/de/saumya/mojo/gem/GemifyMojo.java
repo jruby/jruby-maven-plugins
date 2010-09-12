@@ -448,7 +448,7 @@ public class GemifyMojo extends AbstractGemMojo {
         this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                 .addArg("build")
                 .addArg(gemSpec)
-                .execute();
+                .executeIn(gemDir);
         getLog().info("<gemify> C");
 
         return gemSpec.getAbsolutePath().replaceFirst(".gemspec$", "") + "-"
