@@ -56,30 +56,33 @@ import de.saumya.mojo.ruby.GemifyManager;
 public class GemifyMojo extends AbstractMojo {
 
     /**
-     * gemname to identify the maven artifact (format: groupId.artifact).
+     * gemname to identify the maven artifact (format: groupId.artifactId).
      * 
-     * @parameter expression="${gemify.gemname}"
+     * @parameter default-value="${gemify.gemname}"
      * @required
      */
     private String                          gemName;
     /**
      * the version of the maven artifact which gets gemified.
      * 
-     * @parameter expression="${gemify.version}"
+     * @parameter default-value="${gemify.version}"
      */
     private String                          version;
 
     /**
-     * do not follow relocation but use relocated pom for the original
+     * do not follow relocation but use relocated pom for the original.
+     * i.e. using the given gemname with the content of the relocated
+     * artifact. if set to false it will just follow the relocation and
+     * produce a gem with the "relocated" gemname. default: false
      * 
-     * @parameter expression="${gemify.force}" default-value="false"
+     * @parameter default-value="${gemify.force}"
      */
     private boolean                         force;
 
     /**
-     * gemify development depencendies as well.
+     * gemify development depencendies as well. default: false
      * 
-     * @parameter expression="${gemify.development}" default-value="false"
+     * @parameter default-value="${gemify.development}"
      */
     private boolean                         development;
 
@@ -95,9 +98,9 @@ public class GemifyMojo extends AbstractMojo {
     /**
      * reference to maven project for internal use.
      * 
-     * @parameter expression="${project}"
+     * @parameter default-value="${project}"
      * @required
-     * @readOnly true
+     * @readonly true
      */
     private MavenProject                    project;
 
@@ -130,11 +133,6 @@ public class GemifyMojo extends AbstractMojo {
             throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
         }
 
-        // this.gemify = new DefaultGemifyManager();
-        // this.gemify.artifactHandlerManager = this.artifactHandlerManager;
-        // this.gemify.repositoryMetadataManager =
-        // this.repositoryMetadataManager;
-
         final Map<String, Node> visited = new HashMap<String, Node>();
 
         final ProjectBuildingResult result = buildProject(this.gemName,
@@ -155,7 +153,7 @@ public class GemifyMojo extends AbstractMojo {
                     visited.remove(keyOf(artifact));
                 }
                 else {
-                    getLog().info("skip " + artifact);
+                    getLog().info("skip optional " + artifact);
                 }
             }
         }
