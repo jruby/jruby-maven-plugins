@@ -25,8 +25,7 @@ import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.gems.GemManager;
 
 /**
- * Goal which takes an maven artifact and converts it and its jar dependencies
- * to gem.
+ * Goal which list the versions for the given gemname.
  * 
  * @goal versions
  * @requiresProject false
@@ -34,9 +33,9 @@ import de.saumya.mojo.ruby.gems.GemManager;
 public class VersionsMojo extends AbstractMojo {
 
     /**
-     * gemname to identify the maven artifact (format: groupId.artifact).
+     * gemname to identify the maven artifact (format: groupId.artifactId).
      * 
-     * @parameter expression="${gemify.gemname}"
+     * @parameter default-value="${gemify.gemname}"
      * @required
      */
     private String               gemName;
@@ -53,9 +52,9 @@ public class VersionsMojo extends AbstractMojo {
     /**
      * reference to maven project for internal use.
      * 
-     * @parameter expression="${project}"
+     * @parameter default-value="${project}"
      * @required
-     * @readOnly true
+     * @readonly true
      */
     protected MavenProject       project;
 
