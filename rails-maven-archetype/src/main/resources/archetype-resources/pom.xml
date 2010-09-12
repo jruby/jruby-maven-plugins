@@ -195,7 +195,7 @@
      -->
 #end
             <resource>
-              <directory>${symbol_dollar}{jruby.gem.path}</directory>
+              <directory>${symbol_dollar}{gem.path}</directory>
               <targetPath>WEB-INF/gems</targetPath>
             </resource>
           </webResources>
