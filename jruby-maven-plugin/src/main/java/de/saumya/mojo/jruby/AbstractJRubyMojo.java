@@ -203,6 +203,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         if (this.jrubyVerbose) {
             getLog().info("jruby version   : " + artifact.getVersion());
         }
+        // set it so other plugins can retrieve the version in use
+        this.jrubyVersion = artifact.getVersion();
         return artifact;
     }
 
