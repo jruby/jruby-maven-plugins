@@ -64,6 +64,7 @@ public class DefaultRailsManager implements RailsManager {
     public void initInstaller(final GemsInstaller installer,
             final File launchDirectory) throws RailsException {
         patchBootScript(launchDirectory);
+        setupWebXML(launchDirectory);
         setupGemfile(installer, launchDirectory);
         setupGemHomeAndGemPath(installer);
     }
@@ -244,20 +245,33 @@ public class DefaultRailsManager implements RailsManager {
                           "src/main/webapp/index.html",
                           "public/index.html");
 
-            // create web.xml
-            filterContent(appPath, context, "src/main/webapp/WEB-INF/web.xml");
-
-            // create override-xyz-web.xml
-            filterContent(appPath,
-                          context,
-                          "src/main/jetty/override-development-web.xml");
-            filterContent(appPath,
-                          context,
-                          "src/main/jetty/override-production-web.xml");
+            setupWebXML(appPath);
 
             // create Gemfile.maven
             filterContent(appPath, context, "Gemfile.maven");
         }
+    }
+
+    private void setupWebXML(final File launchDirectory) throws RailsException {
+        final VelocityContext context = new VelocityContext();
+        // patch the system only when you find a config/application.rb file
+        if (!new File(new File(launchDirectory, "config"), "application.rb").exists()) {
+            // TODO log this !!
+            return;
+        }
+
+        // create web.xml
+        filterContent(launchDirectory,
+                      context,
+                      "src/main/webapp/WEB-INF/web.xml");
+
+        // create override-xyz-web.xml
+        filterContent(launchDirectory,
+                      context,
+                      "src/main/jetty/override-development-web.xml");
+        filterContent(launchDirectory,
+                      context,
+                      "src/main/jetty/override-production-web.xml");
     }
 
     private void filterContent(final File app, final VelocityContext context,
@@ -269,7 +283,9 @@ public class DefaultRailsManager implements RailsManager {
             final String template, final String targetName)
             throws RailsException {
         final File templateFile = new File(app, targetName);
-
+        if (templateFile.exists()) {
+            return;
+        }
         final InputStream input = getClass().getResourceAsStream("/archetype-resources/"
                 + template);
 

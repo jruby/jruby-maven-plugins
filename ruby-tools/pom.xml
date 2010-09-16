@@ -75,6 +75,13 @@
     <skipTests>true</skipTests>
     <plexus.version>1.5.4</plexus.version>
   </properties>
+  <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/ruby</directory>
+      </resource>
+    </resources>
+  </build>
   <profiles>
     <profile>
       <id>integration-test</id>

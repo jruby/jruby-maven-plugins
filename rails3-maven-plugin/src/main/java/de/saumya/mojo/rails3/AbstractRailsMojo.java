@@ -37,48 +37,6 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
     /** @component */
     protected RailsManager manager;
 
-    // private void patchBootScript() throws MojoExecutionException {
-    // final File boot = new File(new File(launchDirectory(), "config"),
-    // "boot.rb");
-    // if (boot.exists()) {
-    // InputStream bootIn = null;
-    // InputStream bootOrig = null;
-    // InputStream bootPatched = null;
-    // OutputStream bootOut = null;
-    // try {
-    // bootIn = new FileInputStream(boot);
-    // bootOrig = Thread.currentThread()
-    // .getContextClassLoader()
-    // .getResourceAsStream("boot.rb.orig");
-    // if (IOUtil.contentEquals(bootIn, bootOrig)) {
-    // bootIn.close();
-    // bootOut = new FileOutputStream(boot);
-    // bootPatched = Thread.currentThread()
-    // .getContextClassLoader()
-    // .getResourceAsStream("boot.rb");
-    // IOUtil.copy(bootPatched, bootOut);
-    // }
-    // }
-    // catch (final IOException e) {
-    // throw new MojoExecutionException("error patching config/boot.rb",
-    // e);
-    // }
-    // finally {
-    // IOUtil.close(bootIn);
-    // IOUtil.close(bootOrig);
-    // IOUtil.close(bootPatched);
-    // IOUtil.close(bootOut);
-    // }
-    // }
-    // }
-
-    // private void setupEnvironmentVariables() {
-    // final File gemfile = new File(launchDirectory(), "Gemfile.maven");
-    // if (gemfile.exists()) {
-    // this.factory.addEnv("BUNDLE_GEMFILE", gemfile);
-    // }
-    // }
-
     protected String[] joinArgs(final String args1, final String args2) {
         final String args = ((args1 == null ? "" : args1) + " " + (args2 == null
                 ? ""
@@ -95,9 +53,6 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, GemException {
 
-        // setupEnvironmentVariables();
-
-        // patchBootScript();
         try {
             this.manager.initInstaller(this.gemsInstaller, launchDirectory());
             this.config = new MavenConfig();
