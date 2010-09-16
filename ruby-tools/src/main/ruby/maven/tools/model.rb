@@ -109,7 +109,13 @@ module Maven
           elsif args.size == 2 && args.last.is_a?(Hash)
             args = [args[0], "[0.0.0,)", args[1]]
           end
-          super Gem.new(*args)
+          if args[0] =~ /\./
+            super Dependency.new(args[0].sub(/\.[^.]+$/, ''), 
+                                 args[0].sub(/.*\./, ''), 
+                                 args[1])
+          else
+            super Gem.new(*args)
+          end
         when Hash
           super Dependency.new(args)
         else

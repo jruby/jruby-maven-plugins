@@ -68,11 +68,13 @@ module Maven
 
           proj.dependencies do |deps|
             defaultGroup.each do |dep|
-              if dep.type == :gem
-                deps << dep
-              else
-                deps << Dependency.new( dep[0].sub(/\.[^.]+$/, ''), dep[0].sub(/.*\./, ''), dep[1])
-              end
+              deps << dep
+              # if dep.type == :gem
+              #  else
+              #  deps << Dependency.new( dep[0].sub(/\.[^.]+$/, ''), 
+              #                          dep[0].sub(/.*\./, ''), 
+              #                          dep[1])
+              #end
             end
             deps << Dependency.new("org.jruby.rack", "jruby-rack", @versions[:jruby_rack])
             deps << Dependency.new("org.jruby", "jruby-complete", @versions[:jruby_complete])
@@ -169,5 +171,13 @@ module Maven
         end
       end
     end
+  end
+end
+
+if $0 == __FILE__
+  if ARGV[0].nil?
+    Maven::Tools::RailsPom.new()
+  else
+    Maven::Tools::RailsPom.new(eval(ARGV[0]))
   end
 end
