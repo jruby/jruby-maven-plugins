@@ -15,6 +15,7 @@ import org.apache.maven.artifact.repository.metadata.RepositoryMetadata;
 import org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager;
 import org.apache.maven.artifact.repository.metadata.RepositoryMetadataResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.repository.legacy.metadata.DefaultMetadataResolutionRequest;
 import org.apache.maven.repository.legacy.metadata.MetadataResolutionRequest;
@@ -101,6 +102,10 @@ public class DefaultGemManager implements GemManager {
     }
 
     // maven-gem artifacts
+    public Artifact createJarArtifactForGemname(final String gemName)
+            throws GemException {
+        return createJarArtifactForGemname(gemName, null);
+    }
 
     public Artifact createJarArtifactForGemname(final String gemName,
             final String version) throws GemException {
@@ -123,10 +128,12 @@ public class DefaultGemManager implements GemManager {
 
     public Artifact createArtifact(final String groupId,
             final String artifactId, final String version, final String type) {
-        return this.repositorySystem.createArtifact(groupId,
-                                                    artifactId,
-                                                    version,
-                                                    type);
+        final Dependency dep = new Dependency();
+        dep.setGroupId(groupId);
+        dep.setArtifactId(artifactId);
+        dep.setType(type);
+        dep.setVersion(version == null ? "[0,)" : version);
+        return this.repositorySystem.createDependencyArtifact(dep);
     }
 
     public void resolve(final Artifact artifact,
@@ -167,15 +174,18 @@ public class DefaultGemManager implements GemManager {
         request.setLocalRepository(localRepository);
         request.setRemoteRepositories(remoteRepositories);
         final RepositoryMetadata metadata = new ArtifactRepositoryMetadata(request.getArtifact());
-
         try {
             this.repositoryMetadataManager.resolve(metadata, request);
+
         }
         catch (final RepositoryMetadataResolutionException e) {
             throw new GemException("error updateding versions of artifact: "
                     + artifact, e);
         }
-
+        if (metadata.getMetadata().getVersioning() == null) {
+            throw new GemException("no version found - maybe system is offline or wrong <groupId:artifactId>: "
+                    + artifact.getGroupId() + ":" + artifact.getArtifactId());
+        }
         final List<String> versions = metadata.getMetadata()
                 .getVersioning()
                 .getVersions();

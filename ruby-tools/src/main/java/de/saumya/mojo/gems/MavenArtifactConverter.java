@@ -38,6 +38,9 @@ public interface MavenArtifactConverter {
      */
     GemSpecification createSpecification(MavenArtifact artifact);
 
+    File createGemspecFromArtifact(MavenArtifact artifact, File target)
+            throws IOException;
+
     /**
      * Creates a valid Ruby Gem, and returns File pointing to the result.
      * 

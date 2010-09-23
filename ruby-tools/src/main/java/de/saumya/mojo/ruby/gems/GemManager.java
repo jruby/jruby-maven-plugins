@@ -32,6 +32,9 @@ public interface GemManager {
 
     // jar artifacts for GEMNAME (maven-gems)
 
+    public abstract Artifact createJarArtifactForGemname(final String gemName)
+            throws GemException;
+
     public abstract Artifact createJarArtifactForGemname(final String gemName,
             final String version) throws GemException;
 

@@ -63,6 +63,11 @@
 	  <role-hint>default</role-hint>
 	  <field-name>gemPackager</field-name>
 	</requirement>
+	<requirement>
+	  <role>de.saumya.mojo.gems.spec.GemSpecificationIO</role>
+	  <role-hint>yaml</role-hint>
+	  <field-name>gemSpecificationIO</field-name>
+	</requirement>
       </requirements>
     </component>
     <component>

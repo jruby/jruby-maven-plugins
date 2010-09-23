@@ -26,6 +26,7 @@ import de.saumya.mojo.gems.gem.GemPackager;
 import de.saumya.mojo.gems.spec.GemDependency;
 import de.saumya.mojo.gems.spec.GemRequirement;
 import de.saumya.mojo.gems.spec.GemSpecification;
+import de.saumya.mojo.gems.spec.GemSpecificationIO;
 import de.saumya.mojo.gems.spec.GemVersion;
 
 /**
@@ -82,6 +83,9 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
 
     @Requirement
     private VelocityComponent               velocityComponent;
+
+    @Requirement(hints = { "yaml" })
+    private GemSpecificationIO              gemSpecificationIO;
 
     private final Maven2GemVersionConverter maven2GemVersionConverter = new Maven2GemVersionConverter();
 
@@ -467,5 +471,22 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
             // no help here, just interpolated POM
             return "unknown";
         }
+    }
+
+    public File createGemspecFromArtifact(final MavenArtifact artifact,
+            final File target) throws IOException {
+        final GemSpecification gemspec = createSpecification(artifact);
+        final File targetFile = new File(target, getGemFileName(gemspec)
+                + "spec");
+
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(targetFile);
+            writer.append(this.gemSpecificationIO.write(gemspec));
+        }
+        finally {
+            IOUtil.close(writer);
+        }
+        return targetFile;
     }
 }
