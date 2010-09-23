@@ -1,25 +1,10 @@
 package de.saumya.mojo.gemify;
 
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +26,7 @@ import org.apache.maven.repository.RepositorySystem;
 
 import de.saumya.mojo.gems.ArtifactCoordinates;
 import de.saumya.mojo.gems.GemArtifact;
+import de.saumya.mojo.gems.Maven2GemVersionConverter;
 import de.saumya.mojo.gems.MavenArtifact;
 import de.saumya.mojo.gems.MavenArtifactConverter;
 import de.saumya.mojo.ruby.gems.GemException;
@@ -70,10 +56,10 @@ public class GemifyMojo extends AbstractMojo {
     private String                          version;
 
     /**
-     * do not follow relocation but use relocated pom for the original.
-     * i.e. using the given gemname with the content of the relocated
-     * artifact. if set to false it will just follow the relocation and
-     * produce a gem with the "relocated" gemname. default: false
+     * do not follow relocation but use relocated pom for the original. i.e.
+     * using the given gemname with the content of the relocated artifact. if
+     * set to false it will just follow the relocation and produce a gem with
+     * the "relocated" gemname. default: false
      * 
      * @parameter default-value="${gemify.force}"
      */
@@ -85,6 +71,12 @@ public class GemifyMojo extends AbstractMojo {
      * @parameter default-value="${gemify.development}"
      */
     private boolean                         development;
+
+    /** @parameter default-value="${gemify.skipDependencies}" */
+    private boolean                         skipDependencies;
+
+    /** @parameter default-value="${gemify.onlySpecs}" */
+    private boolean                         onlySpecs;
 
     /**
      * local repository for internal use.
@@ -121,7 +113,7 @@ public class GemifyMojo extends AbstractMojo {
     private RepositorySystem                repositorySystem;
 
     /** @component */
-    private GemManager                      gemify;
+    private GemManager                      gemManager;
 
     private final Map<String, MavenProject> relocations = new HashMap<String, MavenProject>();
 
@@ -133,37 +125,46 @@ public class GemifyMojo extends AbstractMojo {
             throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
         }
 
-        final Map<String, Node> visited = new HashMap<String, Node>();
-
         final ProjectBuildingResult result = buildProject(this.gemName,
-                                                          null,
-                                                          null,
-                                                          this.version);
+                                                          this.version,
+                                                          this.onlySpecs);
+
+        // visit all dependencies and follow relocations if needed
+        final Map<String, Node> visited = new HashMap<String, Node>();
         visit(visited,
               result,
               new Node(keyOf(result.getProject().getArtifact()),
                       result.getProject()));
 
-        for (final Artifact artifact : result.getArtifactResolutionResult()
-                .getArtifacts()) {
-            if (inScope(artifact.getScope(), true)) {
-                final Node node = visited.get(keyOf(artifact));
-                if (node != null) {
-                    gemifyMavenProject(visited.get(keyOf(artifact)).project);
-                    visited.remove(keyOf(artifact));
-                }
-                else {
-                    getLog().info("skip optional " + artifact);
+        // gemify all dependencies as desired
+        if (!this.onlySpecs && !this.skipDependencies) {
+            for (final Artifact artifact : result.getArtifactResolutionResult()
+                    .getArtifacts()) {
+                if (inScope(artifact.getScope(), true)) {
+                    final Node node = visited.get(keyOf(artifact));
+                    if (node != null) {
+                        gemifyMavenProject(visited.get(keyOf(artifact)).project);
+                        visited.remove(keyOf(artifact));
+                    }
+                    else {
+                        getLog().info("skip optional " + artifact);
+                    }
                 }
             }
         }
-        gemifyMavenProject(result.getProject());
-        for (final Map.Entry<String, Node> entry : visited.entrySet()) {
-            if (!entry.getValue().isOrphaned()
-                    && entry.getValue().parent != null) {
-                gemifyMavenProject(entry.getValue().project);
-            }
 
+        // gemify actual for given gemname
+        gemifyMavenProject(result.getProject());
+
+        // gemify orphaned dependencies as desired
+        // TODO may be going through the visited map is sufficient ?
+        if (!this.skipDependencies && !this.onlySpecs) {
+            for (final Map.Entry<String, Node> entry : visited.entrySet()) {
+                if (!entry.getValue().isOrphaned()
+                        && entry.getValue().parent != null) {
+                    gemifyMavenProject(entry.getValue().project);
+                }
+            }
         }
     }
 
@@ -171,102 +172,130 @@ public class GemifyMojo extends AbstractMojo {
      * 
      * @param gemName
      *            if given then: groupId == null and artifactId == null
+     * @param version
+     * @param onlyPom
+     *            TODO
      * @param groupId
      *            if given then: gemName == null and artifactId != null
      * @param artifactId
      *            if given then: gemName == null and groupId != null
-     * @param version
      * @return
      * @throws MojoExecutionException
      */
     private ProjectBuildingResult buildProject(final String gemName,
-            final String groupId, final String artifactId, final String version)
+            final String version, final boolean onlyPom)
             throws MojoExecutionException {
-        Relocation relocation = null;
-        Artifact original = null;
         try {
-            ProjectBuildingResult result;
-            do {
-                Artifact artifact;
-                if (relocation == null) {
-                    if (gemName != null) {
-                        artifact = this.gemify.createJarArtifactForGemname(gemName,
+            Artifact artifact = null;
+            if (version == null) {
+                artifact = this.gemManager.createJarArtifactForGemnameWithLatestVersion(this.gemName,
+                                                                                        this.localRepository,
+                                                                                        this.project.getRemoteArtifactRepositories());
+            }
+            else {
+                // find the latest version
+                final List<String> versions = this.gemManager.availableVersions(this.gemManager.createJarArtifactForGemname(this.gemName,
+                                                                                                                            null),
+                                                                                this.localRepository,
+                                                                                this.project.getRemoteArtifactRepositories());
+
+                // the given version is the gem version, so find the respective
+                // maven-version
+                final Maven2GemVersionConverter converter = new Maven2GemVersionConverter();
+                for (final String v : versions) {
+                    if (version.equals(converter.createGemVersion(v))) {
+                        artifact = this.gemManager.createJarArtifactForGemname(this.gemName,
+                                                                               v);
+                        break;
+                    }
+                }
+                // did not find it ? then assume the given version be already
+                // maven-version
+                if (artifact == null) {
+                    artifact = this.gemManager.createJarArtifactForGemname(this.gemName,
                                                                            version);
-                        // this.localRepository,
-                        // this.project.getRemoteArtifactRepositories());
-                    }
-                    else {
-                        artifact = this.gemify.createArtifact(groupId,
-                                                              artifactId,
-                                                              version,
-                                                              "jar");
-                        // this.localRepository,
-                        // this.project.getRemoteArtifactRepositories());
-                    }
-                }
-                else {
-                    artifact = this.gemify.createArtifact(relocation.getGroupId(),
-                                                          relocation.getArtifactId(),
-                                                          relocation.getVersion() == null
-                                                                  ? version
-                                                                  : relocation.getVersion(),
-                                                          "jar");
-                    // this.localRepository,
-                    // this.project.getRemoteArtifactRepositories());
-                }
-                result = buildMavenProject(artifact, true);
-
-                if (result.getProject().getDistributionManagement() != null) {
-                    relocation = result.getProject()
-                            .getDistributionManagement()
-                            .getRelocation();
-                    if (relocation != null) {
-                        if (gemName != null) {
-                            // warning only for the top level gem
-                            getLog().info("\n\n\tartifact is relocated to "
-                                    + relocation.getGroupId()
-                                    + "."
-                                    + relocation.getArtifactId()
-                                    + " version="
-                                    + relocation.getVersion()
-                                    + (relocation.getMessage() == null
-                                            ? ""
-                                            : " " + relocation.getMessage())
-                                    + "\n\tif you need the original gem you can recreate it with '-Dgemify.force'\n\n");
-                        }
-                        if (original == null) {
-                            // remember the original artifact to be used as gem
-                            // coordinate
-                            original = artifact;
-                        }
-                    }
-                }
-                else {
-                    relocation = null;
                 }
             }
-            while (relocation != null);
-
-            if (original != null) {
-                if (this.force) {
-                    // use the original artifact coordinates to generate the gem
-                    result.getProject().setGroupId(original.getGroupId());
-                    result.getProject().setArtifactId(original.getArtifactId());
-                    result.getProject().setVersion(original.getVersion());
-                }
-                else {
-                    this.relocations.put(original.getGroupId() + ":"
-                            + original.getArtifactId() + ":"
-                            + original.getVersion(), result.getProject());
-                }
-            }
-            return result;
+            return buildProject(artifact, onlyPom);
         }
         catch (final GemException e) {
             throw new MojoExecutionException("Error creating artifact when gemifying: "
-                    + gemName,
+                    + this.gemName,
                     e);
         }
+    }
+
+    private ProjectBuildingResult buildProject(final String groupId,
+            final String artifactId, final String version)
+            throws MojoExecutionException {
+        final Artifact artifact = this.gemManager.createArtifact(groupId,
+                                                                 artifactId,
+                                                                 version,
+                                                                 "jar");
+
+        return buildProject(artifact, false);
+    }
+
+    private ProjectBuildingResult buildProject(Artifact artifact,
+            final boolean isPom) throws MojoExecutionException {
+        Relocation relocation = null;
+        Artifact original = null;
+        ProjectBuildingResult result;
+        do {
+            if (relocation != null) {
+                artifact = this.gemManager.createArtifact(relocation.getGroupId(),
+                                                          relocation.getArtifactId(),
+                                                          relocation.getVersion() == null
+                                                                  ? artifact.getVersion()
+                                                                  : relocation.getVersion(),
+                                                          isPom ? "pom" : "jar");
+            }
+            result = buildMavenProject(artifact, !isPom);
+
+            if (result.getProject().getDistributionManagement() != null) {
+                relocation = result.getProject()
+                        .getDistributionManagement()
+                        .getRelocation();
+                if (relocation != null) {
+                    if (this.gemName != null) {
+                        // warning only for the top level gem
+                        getLog().info("\n\n\tartifact is relocated to "
+                                + relocation.getGroupId()
+                                + "."
+                                + relocation.getArtifactId()
+                                + " version="
+                                + relocation.getVersion()
+                                + (relocation.getMessage() == null ? "" : " "
+                                        + relocation.getMessage())
+                                + "\n\tif you need the original gem you can recreate it with '-Dgemify.force'\n\n");
+                    }
+                    if (original == null) {
+                        // remember the original artifact to be used as gem
+                        // coordinate
+                        original = artifact;
+                    }
+                }
+            }
+            else {
+                relocation = null;
+            }
+        }
+        while (relocation != null);
+
+        if (original != null) {
+            if (this.force) {
+                // use the original artifact coordinates to generate the gem
+                result.getProject().setGroupId(original.getGroupId());
+                result.getProject().setArtifactId(original.getArtifactId());
+                result.getProject().setVersion(original.getVersion());
+            }
+            else {
+                this.relocations.put(original.getGroupId() + ":"
+                        + original.getArtifactId() + ":"
+                        + original.getVersion(), result.getProject());
+            }
+        }
+        return result;
     }
 
     static class Node {
@@ -343,8 +372,7 @@ public class GemifyMojo extends AbstractMojo {
                     if (v != null) {
                         v.removeParent();
                     }
-                    final ProjectBuildingResult buildChild = buildProject(null,
-                                                                          dep.getGroupId(),
+                    final ProjectBuildingResult buildChild = buildProject(dep.getGroupId(),
                                                                           dep.getArtifactId(),
                                                                           dep.getVersion());
                     relocated = this.relocations.get(dep.getGroupId() + ":"
@@ -388,10 +416,10 @@ public class GemifyMojo extends AbstractMojo {
             request.setArtifact(pom.getArtifact())
                     .setLocalRepository(this.localRepository)
                     .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
-                    .setResolveRoot(true)
+                    .setResolveRoot(!this.onlySpecs)
                     .setResolveTransitively(false)
                     // follow the offline settings
-                    .setForceUpdate(!this.offline)
+                    // .setForceUpdate(!this.offline)
                     .setOffline(this.offline);
             this.repositorySystem.resolve(request);
         }
@@ -401,10 +429,18 @@ public class GemifyMojo extends AbstractMojo {
                         pom.getVersion()),
                 pom.getArtifact().getFile());
         try {
-            final GemArtifact gemArtifact = this.converter.createGemFromArtifact(mavenArtifact,
-                                                                                 targetDirectoryFromProject());
-            getLog().info("created gem: " + gemArtifact.getGemFile());
-            return gemArtifact.getGemFile();
+            if (this.onlySpecs) {
+                final File gemspec = this.converter.createGemspecFromArtifact(mavenArtifact,
+                                                                              targetDirectoryFromProject());
+                getLog().info("created gemspec: " + gemspec);
+                return gemspec;
+            }
+            else {
+                final GemArtifact gemArtifact = this.converter.createGemFromArtifact(mavenArtifact,
+                                                                                     targetDirectoryFromProject());
+                getLog().info("created gem: " + gemArtifact.getGemFile());
+                return gemArtifact.getGemFile();
+            }
         }
         catch (final IOException e) {
             throw new MojoExecutionException("error converting artifact " + pom,
@@ -420,8 +456,8 @@ public class GemifyMojo extends AbstractMojo {
                     .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
                     .setResolveDependencies(resolveDependencies)
                     // follow the offline settings
-                    .setForceUpdate(!this.offline)
-                    .setOffline(this.offline)
+                    // .setForceUpdate(!this.offline)
+                    // .setOffline(this.offline)
                     .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
             return this.builder.build(artifact, request);
         }

@@ -1,26 +1,20 @@
 package de.saumya.mojo.gemify;
 
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
 
+import de.saumya.mojo.gems.Maven2GemVersionConverter;
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.gems.GemManager;
 
@@ -59,6 +53,9 @@ public class VersionsMojo extends AbstractMojo {
     protected MavenProject       project;
 
     /** @component */
+    private ProjectBuilder       builder;
+
+    /** @component */
     protected GemManager         manager;
 
     public void execute() throws MojoExecutionException {
@@ -69,21 +66,51 @@ public class VersionsMojo extends AbstractMojo {
             throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
         }
 
-        // final DefaultGemifyManager gemify = new DefaultGemifyManager();
-        // gemify.artifactHandlerManager = this.artifactHandlerManager;
-        // gemify.repositoryMetadataManager = this.repositoryMetadataManager;
-
         try {
-            getLog().info("\n\n\t"
-                    + this.gemName
-                    + " "
-                    + this.manager.availableVersions(this.manager.createGemArtifact(this.gemName),
-                                                     this.localRepository,
-                                                     this.project.getRemoteArtifactRepositories())
-                    + "\n\n");
+            // first get all maven-versions
+            final Artifact artifact = this.manager.createJarArtifactForGemname(this.gemName);
+            final List<String> versions = this.manager.availableVersions(this.manager.createJarArtifactForGemname(this.gemName,
+                                                                                                                  null),
+                                                                         this.localRepository,
+                                                                         this.project.getRemoteArtifactRepositories());
+
+            // now convert the maven-versions into gem-versions
+            final List<String> gemVersions = new ArrayList<String>(versions.size());
+            final Maven2GemVersionConverter converter = new Maven2GemVersionConverter();
+            for (final String version : versions) {
+                final ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
+                request.setLocalRepository(this.localRepository)
+                        .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
+                        .setResolveDependencies(false)
+                        // follow the offline settings
+                        // .setForceUpdate(!this.offline)
+                        // .setOffline(this.offline)
+                        .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
+                try {
+                    artifact.setVersion(version);
+                    // build the POM for that artifact to ensure that is
+                    // possible when using
+                    // that version for building a gem - i.e.
+                    // org.slf4j.slf4j:log4j12:1.1.0-RC0
+                    // has no parent-pom in the central repository
+                    this.builder.build(artifact, request);
+                    gemVersions.add(converter.createGemVersion(version));
+                }
+                catch (final ProjectBuildingException e) {
+                    if (getLog().isDebugEnabled()) {
+                        getLog().debug("skip version: " + version, e);
+                    }
+                    else {
+                        getLog().info("skip version: " + version);
+                    }
+                }
+            }
+            // print result for user
+            getLog().info("\n\n\t" + this.gemName + " " + gemVersions + "\n\n");
         }
         catch (final GemException e) {
-            throw new MojoExecutionException("error gemify: " + this.gemName, e);
+            throw new MojoExecutionException("error finding versions for: "
+                    + this.gemName, e);
         }
     }
 }
