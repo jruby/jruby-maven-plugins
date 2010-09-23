@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.model.building.ModelBuildingRequest;
@@ -23,6 +24,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gems.ArtifactCoordinates;
 import de.saumya.mojo.gems.GemArtifact;
@@ -97,11 +99,10 @@ public class GemifyMojo extends AbstractMojo {
     private MavenProject                    project;
 
     /**
-     * @parameter default-value="${settings.offline}"
-     * @required
+     * @parameter default-value="${repositorySystemSession}"
      * @readonly
      */
-    boolean                                 offline;
+    private RepositorySystemSession         repoSession;
 
     /** @component */
     private ProjectBuilder                  builder;
@@ -138,8 +139,8 @@ public class GemifyMojo extends AbstractMojo {
 
         // gemify all dependencies as desired
         if (!this.onlySpecs && !this.skipDependencies) {
-            for (final Artifact artifact : result.getArtifactResolutionResult()
-                    .getArtifacts()) {
+            for (final org.sonatype.aether.graph.Dependency artifact : result.getDependencyResolutionResult()
+                    .getResolvedDependencies()) {
                 if (inScope(artifact.getScope(), true)) {
                     final Node node = visited.get(keyOf(artifact));
                     if (node != null) {
@@ -393,6 +394,11 @@ public class GemifyMojo extends AbstractMojo {
         }
     }
 
+    private String keyOf(final org.sonatype.aether.graph.Dependency depencency) {
+        return depencency.getArtifact().getGroupId() + ":"
+                + depencency.getArtifact().getArtifactId();
+    }
+
     private String keyOf(final Dependency depencency) {
         return depencency.getGroupId() + ":" + depencency.getArtifactId();
     }
@@ -417,11 +423,14 @@ public class GemifyMojo extends AbstractMojo {
                     .setLocalRepository(this.localRepository)
                     .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
                     .setResolveRoot(!this.onlySpecs)
-                    .setResolveTransitively(false)
-                    // follow the offline settings
-                    // .setForceUpdate(!this.offline)
-                    .setOffline(this.offline);
-            this.repositorySystem.resolve(request);
+                    .setResolveTransitively(false);
+            final ArtifactResolutionResult result = this.repositorySystem.resolve(request);
+            if (result.getMissingArtifacts().size() > 0) {
+                throw new MojoExecutionException((this.repoSession.isOffline()
+                        ? "The repository system is offline. "
+                        : "")
+                        + "Missing artifact: " + pom.getArtifact());
+            }
         }
         final MavenArtifact mavenArtifact = new MavenArtifact(pom.getModel(),
                 new ArtifactCoordinates(pom.getGroupId(),
@@ -455,9 +464,7 @@ public class GemifyMojo extends AbstractMojo {
             request.setLocalRepository(this.localRepository)
                     .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
                     .setResolveDependencies(resolveDependencies)
-                    // follow the offline settings
-                    // .setForceUpdate(!this.offline)
-                    // .setOffline(this.offline)
+                    .setRepositorySession(this.repoSession)
                     .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
             return this.builder.build(artifact, request);
         }
