@@ -13,6 +13,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gems.Maven2GemVersionConverter;
 import de.saumya.mojo.ruby.gems.GemException;
@@ -32,7 +33,7 @@ public class VersionsMojo extends AbstractMojo {
      * @parameter default-value="${gemify.gemname}"
      * @required
      */
-    private String               gemName;
+    private String                  gemName;
 
     /**
      * local repository for internal use.
@@ -41,7 +42,7 @@ public class VersionsMojo extends AbstractMojo {
      * @required
      * @readonly
      */
-    protected ArtifactRepository localRepository;
+    protected ArtifactRepository    localRepository;
 
     /**
      * reference to maven project for internal use.
@@ -50,13 +51,19 @@ public class VersionsMojo extends AbstractMojo {
      * @required
      * @readonly true
      */
-    protected MavenProject       project;
+    protected MavenProject          project;
+
+    /**
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    private RepositorySystemSession repositorySession;
 
     /** @component */
-    private ProjectBuilder       builder;
+    private ProjectBuilder          builder;
 
     /** @component */
-    protected GemManager         manager;
+    protected GemManager            manager;
 
     public void execute() throws MojoExecutionException {
         if (this.gemName == null) {
@@ -82,9 +89,7 @@ public class VersionsMojo extends AbstractMojo {
                 request.setLocalRepository(this.localRepository)
                         .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
                         .setResolveDependencies(false)
-                        // follow the offline settings
-                        // .setForceUpdate(!this.offline)
-                        // .setOffline(this.offline)
+                        .setRepositorySession(this.repositorySession)
                         .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
                 try {
                     artifact.setVersion(version);
@@ -98,10 +103,13 @@ public class VersionsMojo extends AbstractMojo {
                 }
                 catch (final ProjectBuildingException e) {
                     if (getLog().isDebugEnabled()) {
-                        getLog().debug("skip version: " + version, e);
+                        getLog().debug("skip version (pom does not load): "
+                                               + version,
+                                       e);
                     }
                     else {
-                        getLog().info("skip version: " + version);
+                        getLog().info("skip version (pom does not load): "
+                                + version);
                     }
                 }
             }
