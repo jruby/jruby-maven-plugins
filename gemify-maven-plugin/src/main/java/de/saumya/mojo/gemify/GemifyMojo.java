@@ -68,6 +68,11 @@ public class GemifyMojo extends AbstractMojo {
     private boolean                         force;
 
     /**
+     * @parameter default-value="${gemify.tempDir}"
+     */
+    private File                            targetDirectory;
+
+    /**
      * gemify development depencendies as well. default: false
      * 
      * @parameter default-value="${gemify.development}"
@@ -475,8 +480,13 @@ public class GemifyMojo extends AbstractMojo {
     }
 
     private File targetDirectoryFromProject() {
-        return new File(this.project.getBuild()
-                .getDirectory()
-                .replaceFirst("[$][{]project.basedir[}].", ""));
+        if (this.targetDirectory == null) {
+            return new File(this.project.getBuild()
+                    .getDirectory()
+                    .replaceFirst("[$][{]project.basedir[}].", ""));
+        }
+        else {
+            return this.targetDirectory;
+        }
     }
 }
