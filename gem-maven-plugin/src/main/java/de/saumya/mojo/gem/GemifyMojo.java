@@ -21,6 +21,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.StringUtils;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -65,24 +66,14 @@ public class GemifyMojo extends AbstractGemMojo {
      */
     public boolean                    skipGemInstall = false;
 
-    // /**
-    // * artifact factory for internal use.
-    // *
-    // * @component
-    // * @required
-    // * @readonly
-    // */
-    // protected ArtifactFactory artifactFactory;
-    //
-    // /**
-    // * @component
-    // */
-    // protected ArtifactMetadataSource metadata;
+    /**
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    private RepositorySystemSession   repositorySession;
 
     /** @component */
     protected ProjectBuilder          builder;
-
-    // private File launchDir;
 
     private final Map<String, String> relocationMap  = new HashMap<String, String>();
 
@@ -228,7 +219,8 @@ public class GemifyMojo extends AbstractGemMojo {
             throws ProjectBuildingException {
 
         final ProjectBuildingRequest request = new DefaultProjectBuildingRequest().setLocalRepository(this.localRepository)
-                .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+                .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
+                .setRepositorySession(this.repositorySession);
         final MavenProject project = this.builder.build(artifact, request)
                 .getProject();
         // this.builder.buildFromRepository(artifact,
