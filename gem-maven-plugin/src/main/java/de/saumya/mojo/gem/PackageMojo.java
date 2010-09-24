@@ -4,24 +4,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuilder;
-import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.project.ProjectBuildingRequest;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -93,21 +87,22 @@ public class PackageMojo extends AbstractGemMojo {
     /** @parameter default-value="gem_hook.rb" */
     private String                    gemHook;
 
-    private final Map<String, String> relocationMap    = new HashMap<String, String>();
+    // private final Map<String, String> relocathionMap = new HashMap<String,
+    // String>();
 
     /**
      * @parameter expression="false"
      */
     boolean                           includeDependencies;
 
-    // /**
-    // * @component
-    // */
-    // protected ArtifactMetadataSource metadata;
-    //
+    /**
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    protected RepositorySystemSession repositorySession;
 
-    /** @component */
-    protected ProjectBuilder          builder;
+    // /** @component */
+    // protected ProjectBuilder builder;
 
     @Override
     public void executeJRuby() throws MojoExecutionException,
@@ -181,37 +176,35 @@ public class PackageMojo extends AbstractGemMojo {
         }
     }
 
-    private MavenProject projectFromArtifact(final Artifact artifact)
-            throws ProjectBuildingException {
-        // final MavenProject project =
-        // this.builder.buildFromRepository(artifact,
-        // this.project.getRemoteArtifactRepositories(),
-        // this.localRepository);
-        final ProjectBuildingRequest request = new DefaultProjectBuildingRequest().setLocalRepository(this.localRepository)
-                .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
-        final MavenProject project = this.builder.build(artifact, request)
-                .getProject();
-        if (project.getDistributionManagement() != null
-                && project.getDistributionManagement().getRelocation() != null) {
-            final Relocation reloc = project.getDistributionManagement()
-                    .getRelocation();
-            final String key = artifact.getGroupId() + ":"
-                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
-                    + artifact.getVersion();
-            artifact.setArtifactId(reloc.getArtifactId());
-            artifact.setGroupId(reloc.getGroupId());
-            if (reloc.getVersion() != null) {
-                artifact.setVersion(reloc.getVersion());
-            }
-            this.relocationMap.put(key, artifact.getGroupId() + ":"
-                    + artifact.getArtifactId() + ":" + artifact.getType() + ":"
-                    + artifact.getVersion());
-            return projectFromArtifact(artifact);
-        }
-        else {
-            return project;
-        }
-    }
+    // private MavenProject projectFromArtifact(final Artifact artifact)
+    // throws ProjectBuildingException {
+    // final ProjectBuildingRequest request = new
+    // DefaultProjectBuildingRequest().setLocalRepository(this.localRepository)
+    // .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
+    // .setRepositorySession(this.repositorySession);
+    // final MavenProject project = this.builder.build(artifact, request)
+    // .getProject();
+    // if (project.getDistributionManagement() != null
+    // && project.getDistributionManagement().getRelocation() != null) {
+    // final Relocation reloc = project.getDistributionManagement()
+    // .getRelocation();
+    // final String key = artifact.getGroupId() + ":"
+    // + artifact.getArtifactId() + ":" + artifact.getType() + ":"
+    // + artifact.getVersion();
+    // artifact.setArtifactId(reloc.getArtifactId());
+    // artifact.setGroupId(reloc.getGroupId());
+    // if (reloc.getVersion() != null) {
+    // artifact.setVersion(reloc.getVersion());
+    // }
+    // this.relocationMap.put(key, artifact.getGroupId() + ":"
+    // + artifact.getArtifactId() + ":" + artifact.getType() + ":"
+    // + artifact.getVersion());
+    // return projectFromArtifact(artifact);
+    // }
+    // else {
+    // return project;
+    // }
+    // }
 
     private void build(final MavenProject project, final GemArtifact artifact)
             throws MojoExecutionException, IOException, ScriptException {
@@ -357,21 +350,24 @@ public class PackageMojo extends AbstractGemMojo {
                     // relocation)
 
                     Artifact arti = null;
-                    try {
-                        arti = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
-                                                                                  dependency.getArtifactId(),
-                                                                                  dependency.getVersion(),
-                                                                                  dependency.getScope(),
-                                                                                  dependency.getClassifier());
-                        projectFromArtifact(arti);
-                        dependency.setGroupId(arti.getGroupId());
-                        dependency.setArtifactId(arti.getArtifactId());
-                    }
-                    catch (final ProjectBuildingException e) {
-                        throw new MojoExecutionException("error building project for "
-                                + arti,
-                                e);
-                    }
+                    // try {
+                    arti = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
+                                                                              dependency.getArtifactId(),
+                                                                              dependency.getVersion(),
+                                                                              dependency.getScope(),
+                                                                              dependency.getClassifier());
+                    // if (!dependency.getGroupId().equals("rubygems")) {
+                    // projectFromArtifact(arti);
+                    // }
+                    dependency.setGroupId(arti.getGroupId());
+                    dependency.setArtifactId(arti.getArtifactId());
+                    // }
+                    // catch (final ProjectBuildingException e) {
+                    // throw new
+                    // MojoExecutionException("error building project for "
+                    // + arti,
+                    // e);
+                    // }
                 }
 
                 final String prefix = dependency.getGroupId()
@@ -488,7 +484,6 @@ public class PackageMojo extends AbstractGemMojo {
     @Override
     protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
-        // TODO Auto-generated method stub
-
+        // nothing to do here since we overide executeJRuby
     }
 }
