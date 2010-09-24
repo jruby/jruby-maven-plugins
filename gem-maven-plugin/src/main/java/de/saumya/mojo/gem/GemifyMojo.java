@@ -3,11 +3,8 @@ package de.saumya.mojo.gem;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,6 +22,7 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.StringUtils;
 
+import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
@@ -84,7 +82,7 @@ public class GemifyMojo extends AbstractGemMojo {
     /** @component */
     protected ProjectBuilder          builder;
 
-    private File                      launchDir;
+    // private File launchDir;
 
     private final Map<String, String> relocationMap  = new HashMap<String, String>();
 
@@ -208,16 +206,20 @@ public class GemifyMojo extends AbstractGemMojo {
                 }
             }
         }
-        this.launchDir = this.launchDirectory();
         if (this.skipGemInstall) {
             getLog().info("skip installing gems");
         }
         else {
-            this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+            // assume we have the dependent gems in place so tell gems to
+            // install them without dependency check
+            final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                     .addArg("install")
-                    .addArg("-l")
-                    .addArgs(orderInResolvedManner(gems))
-                    .execute();
+                    .addArg("--ignore-dependencies")
+                    .addArg("-l");
+            for (final String gem : gems.keySet()) {
+                script.addArg(gem);
+            }
+            script.executeIn(launchDirectory());
         }
 
     }
@@ -255,125 +257,129 @@ public class GemifyMojo extends AbstractGemMojo {
         }
     }
 
-    private String orderInResolvedManner(final Map<String, MavenProject> gems)
-            throws MojoExecutionException {
-        final List<String> result = new ArrayList<String>();
-        final Set<String> resolved = new HashSet<String>();
-        int done = -1;
-        while (result.size() != gems.size() && done != result.size()) {
-            done = result.size();
-            // System.out.println("\n" + result.size() + " ++++++ " +
-            // gems.size()
-            // + " results " + result + " ++++resolved " + resolved
-            // + "\n ++++gems " + gems.keySet() + "\n"
-            // + this.relocationMap);
-            for (final Map.Entry<String, MavenProject> gem : gems.entrySet()) {
-                // System.out.println("\n\tgem "
-                // + gem
-                // + " "
-                // + resolved.contains(gem.getValue()
-                // .getArtifact()
-                // .toString()));
-                if (!resolved.contains(gem.getValue().getArtifact().toString())) {
-                    if (gem.getValue().getDependencies().isEmpty()) {
-                        // System.out.println("\tresolved " + gem.getKey());
-                        result.add(gem.getKey());
-                        addResolved(resolved, gem.getValue());
-                    }
-                    else {
-                        // System.out.println("\ttry "
-                        // + gem.getValue().getArtifact()
-                        // + gem.getValue().getDependencies());
-                        boolean isResolved = true;
-                        for (final Dependency dependency : gem.getValue()
-                                .getDependencies()) {
-                            if (!dependency.isOptional()
-                                    && (Artifact.SCOPE_COMPILE + Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
-                                final String id = dependency.getGroupId() + ":"
-                                        + dependency.getArtifactId() + ":"
-                                        + dependency.getType() + ":"
-                                        + dependency.getVersion();
-                                // System.out.println(id);
-                                if (!resolved.contains(id)) {
+    // private String orderInResolvedManner(final Map<String, MavenProject>
+    // gems)
+    // throws MojoExecutionException {
+    // final List<String> result = new ArrayList<String>();
+    // final Set<String> resolved = new HashSet<String>();
+    // int done = -1;
+    // while (result.size() != gems.size() && done != result.size()) {
+    // done = result.size();
+    // // System.out.println("\n" + result.size() + " ++++++ " +
+    // // gems.size()
+    // // + " results " + result + " ++++resolved " + resolved
+    // // + "\n ++++gems " + gems.keySet() + "\n"
+    // // + this.relocationMap);
+    // for (final Map.Entry<String, MavenProject> gem : gems.entrySet()) {
+    // // System.out.println("\n\tgem "
+    // // + gem
+    // // + " "
+    // // + resolved.contains(gem.getValue()
+    // // .getArtifact()
+    // // .toString()));
+    // if (!resolved.contains(gem.getValue().getArtifact().toString())) {
+    // if (gem.getValue().getDependencies().isEmpty()) {
+    // // System.out.println("\tresolved " + gem.getKey());
+    // result.add(gem.getKey());
+    // addResolved(resolved, gem.getValue());
+    // }
+    // else {
+    // // System.out.println("\ttry "
+    // // + gem.getValue().getArtifact()
+    // // + gem.getValue().getDependencies());
+    // boolean isResolved = true;
+    // for (final Dependency dependency : gem.getValue()
+    // .getDependencies()) {
+    // if (!dependency.isOptional()
+    // && (Artifact.SCOPE_COMPILE +
+    // Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
+    // final String id = dependency.getGroupId() + ":"
+    // + dependency.getArtifactId() + ":"
+    // + dependency.getType() + ":"
+    // + dependency.getVersion();
+    // // System.out.println(id);
+    // if (!resolved.contains(id)) {
+    //
+    // final Artifact artifact =
+    // this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
+    // dependency.getArtifactId(),
+    // dependency.getVersion(),
+    // dependency.getType(),
+    // dependency.getClassifier());
+    // // try {
+    // getLog().info("resolving: " + artifact);
+    // final ArtifactResolutionRequest request = new
+    // ArtifactResolutionRequest().setArtifact(artifact)
+    // .setLocalRepository(this.localRepository)
+    // .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+    // this.repositorySystem.resolve(request);
+    // // this.resolver.resolve(artifact,
+    // // this.project.getRemoteArtifactRepositories(),
+    // // this.localRepository);
+    // // }
+    // // catch (final ArtifactResolutionException
+    // // e) {
+    // // throw new
+    // // MojoExecutionException("can not resolve "
+    // // + artifact.toString());
+    // // }
+    // // catch (final ArtifactNotFoundException e)
+    // // {
+    // // throw new
+    // // MojoExecutionException("can not resolve "
+    // // + artifact.toString());
+    // // }
+    // try {
+    // projectFromArtifact(artifact);
+    // }
+    // catch (final ProjectBuildingException e) {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // }
+    // // System.out.println(this.relocationMap);
+    // isResolved = false;
+    // break;
+    // }
+    // }
+    // }
+    // if (isResolved) {
+    // // System.out.println("\tresolved (with deps) "
+    // // + gem.getKey());
+    // result.add(gem.getKey());
+    // addResolved(resolved, gem.getValue());
+    // }
+    // }
+    // }
+    // }
+    // }
+    // System.out.println("----" + result);
+    // final StringBuilder str = new StringBuilder();
+    // boolean first = true;
+    // for (final String gem : result) {
+    // if (first) {
+    // first = false;
+    // str.append(gem);
+    // }
+    // else {
+    // str.append(' ').append(gem);
+    // }
+    // }
+    // return str.toString();
+    // }
 
-                                    final Artifact artifact = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
-                                                                                                                 dependency.getArtifactId(),
-                                                                                                                 dependency.getVersion(),
-                                                                                                                 dependency.getType(),
-                                                                                                                 dependency.getClassifier());
-                                    // try {
-                                    getLog().info("resolving: " + artifact);
-                                    final ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(artifact)
-                                            .setLocalRepository(this.localRepository)
-                                            .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
-                                    this.repositorySystem.resolve(request);
-                                    // this.resolver.resolve(artifact,
-                                    // this.project.getRemoteArtifactRepositories(),
-                                    // this.localRepository);
-                                    // }
-                                    // catch (final ArtifactResolutionException
-                                    // e) {
-                                    // throw new
-                                    // MojoExecutionException("can not resolve "
-                                    // + artifact.toString());
-                                    // }
-                                    // catch (final ArtifactNotFoundException e)
-                                    // {
-                                    // throw new
-                                    // MojoExecutionException("can not resolve "
-                                    // + artifact.toString());
-                                    // }
-                                    try {
-                                        projectFromArtifact(artifact);
-                                    }
-                                    catch (final ProjectBuildingException e) {
-                                        // TODO Auto-generated catch block
-                                        e.printStackTrace();
-                                    }
-                                    // System.out.println(this.relocationMap);
-                                    isResolved = false;
-                                    break;
-                                }
-                            }
-                        }
-                        if (isResolved) {
-                            // System.out.println("\tresolved (with deps) "
-                            // + gem.getKey());
-                            result.add(gem.getKey());
-                            addResolved(resolved, gem.getValue());
-                        }
-                    }
-                }
-            }
-        }
-        // System.out.println("----" + result);
-        final StringBuilder str = new StringBuilder();
-        boolean first = true;
-        for (final String gem : result) {
-            if (first) {
-                first = false;
-                str.append(gem);
-            }
-            else {
-                str.append(' ').append(gem);
-            }
-        }
-        return str.toString();
-    }
-
-    private void addResolved(final Set<String> resolved,
-            final MavenProject project) {
-        resolved.add(project.getArtifact().toString());
-        if (project.getDistributionManagement() != null
-                && project.getDistributionManagement().getRelocation() != null) {
-            final Relocation dependency = project.getDistributionManagement()
-                    .getRelocation();
-            resolved.add(dependency.getGroupId() + ":"
-                    + dependency.getArtifactId() + ":"
-                    + project.getArtifact().getType() + ":"
-                    + dependency.getVersion());
-        }
-    }
+    // private void addResolved(final Set<String> resolved,
+    // final MavenProject project) {
+    // resolved.add(project.getArtifact().toString());
+    // if (project.getDistributionManagement() != null
+    // && project.getDistributionManagement().getRelocation() != null) {
+    // final Relocation dependency = project.getDistributionManagement()
+    // .getRelocation();
+    // resolved.add(dependency.getGroupId() + ":"
+    // + dependency.getArtifactId() + ":"
+    // + project.getArtifact().getType() + ":"
+    // + dependency.getVersion());
+    // }
+    // }
 
     private String build(final MavenProject project, final File jarfile)
             throws MojoExecutionException, IOException, ScriptException {
@@ -480,12 +486,12 @@ public class GemifyMojo extends AbstractGemMojo {
                 }
             }
         }
-        this.launchDir = gemDir;
+        // this.launchDir = gemDir;
         getLog().info("<gemify> B");
         this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                 .addArg("build")
                 .addArg(gemSpec)
-                .execute();
+                .executeIn(gemDir);
         getLog().info("<gemify> C");
 
         return gemSpec.getAbsolutePath().replaceFirst(".gemspec$", "") + "-"
@@ -507,15 +513,15 @@ public class GemifyMojo extends AbstractGemMojo {
                 .toLowerCase();
     }
 
-    @Override
-    protected File launchDirectory() {
-        if (this.launchDir != null) {
-            return this.launchDir.getAbsoluteFile();
-        }
-        else {
-            return super.launchDirectory();
-        }
-    }
+    // @Override
+    // protected File launchDirectory() {
+    // if (this.launchDir != null) {
+    // return this.launchDir.getAbsoluteFile();
+    // }
+    // else {
+    // return super.launchDirectory();
+    // }
+    // }
 
     @Override
     protected void executeWithGems() throws MojoExecutionException,
