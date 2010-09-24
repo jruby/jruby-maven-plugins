@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
 import de.saumya.mojo.ruby.gems.GemException;
-import de.saumya.mojo.ruby.rails.MavenConfig;
 import de.saumya.mojo.ruby.rails.RailsException;
 import de.saumya.mojo.ruby.rails.RailsManager;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -22,7 +22,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
      * @parameter expression="${rails.dir}"
      *            default-value="${project.basedir}/src/main/rails"
      */
-    protected File         railsDir;
+    protected File                    railsDir;
 
     /**
      * either development or test or production or whatever else is possible
@@ -30,12 +30,16 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
      * 
      * @parameter expression="${rails.env}"
      */
-    protected String       env;
+    protected String                  env;
 
-    protected MavenConfig  config;
+    /**
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    protected RepositorySystemSession repoSession;
 
     /** @component */
-    protected RailsManager manager;
+    protected RailsManager            manager;
 
     protected String[] joinArgs(final String args1, final String args2) {
         final String args = ((args1 == null ? "" : args1) + " " + (args2 == null
@@ -55,8 +59,6 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
 
         try {
             this.manager.initInstaller(this.gemsInstaller, launchDirectory());
-            this.config = new MavenConfig();
-            // TODO set the config
 
             executeRails();
         }

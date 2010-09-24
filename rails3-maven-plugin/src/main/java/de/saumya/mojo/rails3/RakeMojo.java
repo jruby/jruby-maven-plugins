@@ -34,7 +34,7 @@ public class RakeMojo extends AbstractRailsMojo {
     public void executeRails() throws MojoExecutionException, ScriptException,
             IOException, GemException, RailsException {
         this.manager.rake(this.gemsInstaller,
-                          this.config,
+                          this.repoSession,
                           launchDirectory(),
                           this.env,
                           this.task.trim(),

@@ -89,8 +89,6 @@ public class RailsMojo extends AbstractRailsMojo {
         try {
             // this.manager.initInstaller(this.gemsInstaller,
             // launchDirectory());
-            // final MavenConfig config = new MavenConfig();
-            // // TODO set the config
 
             final Pattern pattern = Pattern.compile(".*-d\\s+([a-z0-9]+).*");
             final Matcher matcher = pattern.matcher((this.railsArgs == null
@@ -107,7 +105,7 @@ public class RailsMojo extends AbstractRailsMojo {
             }
 
             this.manager.createNew(this.gemsInstaller,
-                                   this.config,
+                                   this.repoSession,
                                    this.appPath,
                                    database,
                                    this.railsVersion,

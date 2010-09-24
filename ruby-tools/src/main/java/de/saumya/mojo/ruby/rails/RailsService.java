@@ -6,6 +6,8 @@ package de.saumya.mojo.ruby.rails;
 import java.io.File;
 import java.io.IOException;
 
+import org.sonatype.aether.RepositorySystemSession;
+
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.gems.GemManager;
 import de.saumya.mojo.ruby.gems.GemsInstaller;
@@ -13,21 +15,22 @@ import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class RailsService {
-    private final GemsInstaller installer;
-    private final RailsManager  manager;
-    private final RailsState    state;
-    private final MavenConfig   config;
+    private final GemsInstaller           installer;
+    private final RailsManager            manager;
+    private final RailsState              state;
+    private final RepositorySystemSession session;
 
-    public RailsService(final RailsState state, final MavenConfig config,
+    public RailsService(final RailsState state,
+            final RepositorySystemSession repositorySystemSession,
             final ScriptFactory factory, final GemManager gemManager,
             final RailsManager manager) throws RailsException {
         assert state != null;
-        assert config != null;
+        assert this.session != null;
         assert factory != null;
         assert manager != null;
 
         this.state = state;
-        this.config = config;
+        this.session = repositorySystemSession;
         this.installer = new GemsInstaller(state.getRubygemsConfig(),
                 factory,
                 gemManager);
@@ -47,7 +50,7 @@ public class RailsService {
         // TODO check there is no pom here to avoid conflicts
 
         this.manager.createNew(this.installer,
-                               this.config,
+                               this.session,
                                new File(appPath),
                                null,
                                railsVersion,
@@ -57,7 +60,7 @@ public class RailsService {
     public void rake(final String tasks) throws IOException, ScriptException,
             GemException, RailsException {
         this.manager.rake(this.installer,
-                          this.config,
+                          this.session,
                           this.state.getLaunchDirectory(),
                           this.state.getRubygemsConfig().getEnvironment(),
                           tasks,
@@ -67,7 +70,7 @@ public class RailsService {
     public void generate(final String generator, final String... args)
             throws IOException, ScriptException, GemException, RailsException {
         this.manager.generate(this.installer,
-                              this.config,
+                              this.session,
                               this.state.getLaunchDirectory(),
                               generator,
                               args);

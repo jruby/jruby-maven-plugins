@@ -30,6 +30,7 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.velocity.VelocityComponent;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.gems.GemManager;
@@ -128,10 +129,10 @@ public class DefaultRailsManager implements RailsManager {
      * java.lang.String, java.lang.String, java.lang.String)
      */
     public void createNew(final GemsInstaller installer,
-            final MavenConfig config, final File appPath,
-            final String database, final String railsVersion,
-            final String... args) throws RailsException, GemException,
-            IOException, ScriptException
+            final RepositorySystemSession repositorySystemSession,
+            final File appPath, final String database,
+            final String railsVersion, final String... args)
+            throws RailsException, GemException, IOException, ScriptException
 
     {
         final File pomFile = new File(appPath, "pom.xml");
@@ -165,8 +166,8 @@ public class DefaultRailsManager implements RailsManager {
         // build a POM for the rails installer and resolve all gem artifacts
         final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest().setLocalRepository(localRepository)
                 .setRemoteRepositories(remoteRepositories)
-                .setOffline(config.offline)
                 .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
+                .setRepositorySession(repositorySystemSession)
                 .setResolveDependencies(true);
         MavenProject pom;
         try {
@@ -243,7 +244,8 @@ public class DefaultRailsManager implements RailsManager {
             filterContent(appPath,
                           context,
                           "src/main/webapp/index.html",
-                          "public/index.html");
+                          "public/index.html",
+                          true);
 
             setupWebXML(appPath);
 
@@ -276,14 +278,14 @@ public class DefaultRailsManager implements RailsManager {
 
     private void filterContent(final File app, final VelocityContext context,
             final String template) throws RailsException {
-        filterContent(app, context, template, template);
+        filterContent(app, context, template, template, false);
     }
 
     private void filterContent(final File app, final VelocityContext context,
-            final String template, final String targetName)
+            final String template, final String targetName, final boolean force)
             throws RailsException {
         final File templateFile = new File(app, targetName);
-        if (templateFile.exists()) {
+        if (!force && templateFile.exists()) {
             return;
         }
         final InputStream input = getClass().getResourceAsStream("/archetype-resources/"
@@ -314,15 +316,8 @@ public class DefaultRailsManager implements RailsManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.sonatype.maven.rails.commands.RailsManager#rake(de.saumya.mojo.ruby
-     * .gems.GemsInstaller, org.sonatype.maven.rails.commands.JRubyConfig,
-     * java.io.File, java.lang.String, java.lang.String)
-     */
-    public void rake(final GemsInstaller installer, final MavenConfig config,
+    public void rake(final GemsInstaller installer,
+            final RepositorySystemSession repositorySystemSession,
             final File launchDirectory, final String environment,
             final String task, final String... args) throws IOException,
             ScriptException, GemException, RailsException {
@@ -341,18 +336,11 @@ public class DefaultRailsManager implements RailsManager {
         script.executeIn(launchDirectory);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.sonatype.maven.rails.commands.RailsManager#generate(de.saumya.mojo
-     * .ruby.gems.GemsInstaller, org.sonatype.maven.rails.commands.JRubyConfig,
-     * java.io.File, java.lang.String, java.lang.String)
-     */
     public void generate(final GemsInstaller installer,
-            final MavenConfig config, final File launchDirectory,
-            final String generator, final String... args) throws IOException,
-            ScriptException, GemException, RailsException {
+            final RepositorySystemSession repositorySystemSession,
+            final File launchDirectory, final String generator,
+            final String... args) throws IOException, ScriptException,
+            GemException, RailsException {
         final Script script = installer.factory.newScript(new File(new File(launchDirectory,
                 "script"),
                 "rails"))
@@ -365,13 +353,12 @@ public class DefaultRailsManager implements RailsManager {
     }
 
     public void installGems(final GemsInstaller gemsInstaller,
-            final MavenConfig config) throws IOException, ScriptException,
-            GemException, RailsException {
+            final RepositorySystemSession repositorySystemSession)
+            throws IOException, ScriptException, GemException, RailsException {
         final ArtifactRepository localRepository = localRepository();
 
         final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest().setLocalRepository(localRepository)
-                .setOffline(config.offline)
-                .setForceUpdate(config.forceUpdates)
+                .setRepositorySession(repositorySystemSession)
                 .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
                 .setResolveDependencies(true);
 

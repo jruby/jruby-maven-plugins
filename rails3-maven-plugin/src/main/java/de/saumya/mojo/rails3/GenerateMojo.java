@@ -34,7 +34,7 @@ public class GenerateMojo extends AbstractRailsMojo {
     protected void executeRails() throws MojoExecutionException,
             ScriptException, IOException, GemException, RailsException {
         this.manager.generate(this.gemsInstaller,
-                              this.config,
+                              this.repoSession,
                               launchDirectory(),
                               this.generator,
                               joinArgs(this.generateArgs, this.args));
