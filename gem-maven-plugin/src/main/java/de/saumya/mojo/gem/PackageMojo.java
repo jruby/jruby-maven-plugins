@@ -101,9 +101,6 @@ public class PackageMojo extends AbstractGemMojo {
      */
     protected RepositorySystemSession repositorySession;
 
-    // /** @component */
-    // protected ProjectBuilder builder;
-
     @Override
     public void executeJRuby() throws MojoExecutionException,
             MojoFailureException, ScriptException {
@@ -148,25 +145,25 @@ public class PackageMojo extends AbstractGemMojo {
                 // execute("-S gem build " + this.gemSpec.getAbsolutePath(),
                 // false);
 
-                File gem = null;
+                File gemFile = null;
                 for (final File f : launchDirectory().listFiles()) {
                     if (f.getName().endsWith(".gem")) {
-                        gem = f;
+                        gemFile = f;
                         break;
                     }
                 }
                 if (project.getFile() != null && artifact.isGem()) {
                     // only when the pom exist there will be an artifact
-                    FileUtils.copyFileIfModified(gem, artifact.getFile());
-                    gem.deleteOnExit();
+                    FileUtils.copyFileIfModified(gemFile, artifact.getFile());
+                    gemFile.deleteOnExit();
                 }
                 else {
                     // keep the gem where it when there is no buildDirectory
                     if (this.buildDirectory.exists()) {
-                        FileUtils.copyFileIfModified(gem,
+                        FileUtils.copyFileIfModified(gemFile,
                                                      new File(this.buildDirectory,
-                                                             gem.getName()));
-                        gem.deleteOnExit();
+                                                             gemFile.getName()));
+                        gemFile.deleteOnExit();
                     }
                 }
             }
@@ -176,39 +173,8 @@ public class PackageMojo extends AbstractGemMojo {
         }
     }
 
-    // private MavenProject projectFromArtifact(final Artifact artifact)
-    // throws ProjectBuildingException {
-    // final ProjectBuildingRequest request = new
-    // DefaultProjectBuildingRequest().setLocalRepository(this.localRepository)
-    // .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
-    // .setRepositorySession(this.repositorySession);
-    // final MavenProject project = this.builder.build(artifact, request)
-    // .getProject();
-    // if (project.getDistributionManagement() != null
-    // && project.getDistributionManagement().getRelocation() != null) {
-    // final Relocation reloc = project.getDistributionManagement()
-    // .getRelocation();
-    // final String key = artifact.getGroupId() + ":"
-    // + artifact.getArtifactId() + ":" + artifact.getType() + ":"
-    // + artifact.getVersion();
-    // artifact.setArtifactId(reloc.getArtifactId());
-    // artifact.setGroupId(reloc.getGroupId());
-    // if (reloc.getVersion() != null) {
-    // artifact.setVersion(reloc.getVersion());
-    // }
-    // this.relocationMap.put(key, artifact.getGroupId() + ":"
-    // + artifact.getArtifactId() + ":" + artifact.getType() + ":"
-    // + artifact.getVersion());
-    // return projectFromArtifact(artifact);
-    // }
-    // else {
-    // return project;
-    // }
-    // }
-
     private void build(final MavenProject project, final GemArtifact artifact)
             throws MojoExecutionException, IOException, ScriptException {
-
         getLog().info("building gem for " + artifact + " . . .");
         getLog().info("include dependencies? " + this.includeDependencies);
         final File gemDir = new File(this.buildDirectory, artifact.getGemName());
@@ -255,7 +221,6 @@ public class PackageMojo extends AbstractGemMojo {
 
         ArtifactResolutionResult jarDependencyArtifacts = null;
         if (this.includeDependencies) {
-            // try {
             final ArtifactFilter filter = new ArtifactFilter() {
                 public boolean include(final Artifact candidate) {
                     if (candidate == artifact) {
@@ -267,6 +232,9 @@ public class PackageMojo extends AbstractGemMojo {
 
             };
 
+            // remember file location since resolve will set it to
+            // local-repository location
+            final File artifactFile = artifact.getFile();
             final ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(project.getArtifact())
                     .setLocalRepository(this.localRepository)
                     .setRemoteRepositories(project.getRemoteArtifactRepositories())
@@ -274,39 +242,14 @@ public class PackageMojo extends AbstractGemMojo {
                     .setManagedVersionMap(project.getManagedVersionMap())
                     .setArtifactDependencies(project.getDependencyArtifacts());
             jarDependencyArtifacts = this.repositorySystem.resolve(request);
-            // jarDependencyArtifacts =
-            // this.repositorySystem.resolveTransitively(project.getArtifacts(),
-            // project.getArtifact(),
-            // this.project.getManagedVersionMap(),
-            // this.localRepository,
-            // this.project.getRemoteArtifactRepositories(),
-            // this.metadata,
-            // new ArtifactFilter() {
-            // public boolean include(
-            // final Artifact candidate) {
-            // if (candidate == artifact) {
-            // return true;
-            // }
-            // final boolean result = (candidate.getType()
-            // .equals("jar") && ("compile".equals(candidate.getScope()) ||
-            // "runtime".equals(candidate.getScope())));
-            // return result;
-            // }
-            //
-            // });
             for (final Object element : jarDependencyArtifacts.getArtifacts()) {
                 final Artifact dependency = (Artifact) element;
                 getLog().info(" -- include -- " + dependency);
                 gemSpecWriter.appendJarfile(dependency.getFile(),
                                             dependency.getFile().getName());
             }
-            // }
-            // catch (final ArtifactResolutionException e) {
-            // e.printStackTrace();
-            // }
-            // catch (final ArtifactNotFoundException e) {
-            // e.printStackTrace();
-            // }
+            // keep the artifactFile on build directory
+            artifact.setFile(artifactFile);
         }
 
         // TODO make it the maven way (src/main/ruby + src/test/ruby) or the
@@ -346,11 +289,11 @@ public class PackageMojo extends AbstractGemMojo {
             if (!dependency.isOptional()
                     && dependency.getType().contains("gem")) {
                 if (!dependency.getVersion().matches(".*[\\)\\]]$")) {
+                    // TODO maybe skip all this or follow relocations
                     // it will adjust the artifact as well (in case of
                     // relocation)
 
                     Artifact arti = null;
-                    // try {
                     arti = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
                                                                               dependency.getArtifactId(),
                                                                               dependency.getVersion(),
@@ -359,8 +302,8 @@ public class PackageMojo extends AbstractGemMojo {
                     // if (!dependency.getGroupId().equals("rubygems")) {
                     // projectFromArtifact(arti);
                     // }
-                    dependency.setGroupId(arti.getGroupId());
-                    dependency.setArtifactId(arti.getArtifactId());
+                    // dependency.setGroupId(arti.getGroupId());
+                    // dependency.setArtifactId(arti.getArtifactId());
                     // }
                     // catch (final ProjectBuildingException e) {
                     // throw new
@@ -448,8 +391,6 @@ public class PackageMojo extends AbstractGemMojo {
 
         final File localGemspec = new File(launchDirectory(), gemSpec.getName());
 
-        // this.launchDirectory = gemDir;
-        // execute("-S gem build " + gemSpec.getAbsolutePath());
         this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                 .addArg("build", gemSpec)
                 .executeIn(gemDir);
@@ -484,6 +425,6 @@ public class PackageMojo extends AbstractGemMojo {
     @Override
     protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
-        // nothing to do here since we overide executeJRuby
+        // nothing to do here since we override executeJRuby
     }
 }
