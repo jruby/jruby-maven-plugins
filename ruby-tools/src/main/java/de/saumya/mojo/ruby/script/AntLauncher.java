@@ -57,9 +57,9 @@ class AntLauncher extends AbstractLauncher {
         this.logger.debug("java classpath  : "
                 + this.project.getReference(MAVEN_CLASSPATH));
         if (this.factory.env.size() > 0) {
-            this.logger.info("environment     :");
+            this.logger.debug("environment     :");
             for (final Map.Entry<String, String> entry : this.factory.env.entrySet()) {
-                this.logger.info("\t\t" + entry.getKey() + " => "
+                this.logger.debug("\t\t" + entry.getKey() + " => "
                         + entry.getValue());
             }
         }
@@ -71,6 +71,8 @@ class AntLauncher extends AbstractLauncher {
         java.createJvmarg()
                 .setPath((Path) this.project.getReference(MAVEN_CLASSPATH));
         java.createJvmarg().setValue("-client");
+        // TODO make this configurable
+        java.createJvmarg().setValue("-Xmx384m");
         java.createJvmarg().setValue("-Xbootclasspath/a:"
                 + this.factory.jrubyJar.getAbsolutePath());
 

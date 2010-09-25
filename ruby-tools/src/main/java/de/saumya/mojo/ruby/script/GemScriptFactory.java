@@ -11,7 +11,7 @@ import org.codehaus.classworlds.ClassRealm;
 
 import de.saumya.mojo.ruby.Logger;
 
-public class GemScriptFactory extends ScriptFactory {// implements GemService {
+public class GemScriptFactory extends ScriptFactory {
 
     public static final String GEM_HOME = "GEM_HOME";
     public static final String GEM_PATH = "GEM_PATH";
@@ -35,40 +35,4 @@ public class GemScriptFactory extends ScriptFactory {// implements GemService {
             addEnv(GEM_PATH, this.gemPath.getPath());
         }
     }
-    //
-    // public File binDirectory() throws ScriptException {
-    // if (this.gemHome == null) {
-    // if (System.getenv(GEM_HOME) == null) {
-    // throw new ScriptException("no GEM_HOME set");
-    // }
-    // else {
-    // return new File(System.getenv(GEM_HOME), "bin");
-    // }
-    // }
-    // else {
-    // return new File(this.gemHome, "bin");
-    // }
-    // }
-    //
-    // public File gemDirectory() throws ScriptException {
-    // if (this.gemPath == null) {
-    // if (System.getenv(GEM_PATH) == null) {
-    // throw new ScriptException("no GEM_PATH set");
-    // }
-    // else {
-    // return new File(System.getenv(GEM_PATH), "gems");
-    // }
-    // }
-    // else {
-    // return new File(this.gemPath, "gems");
-    // }
-    // }
-    //
-    // public File binScriptFile(final String script) throws ScriptException {
-    // return new File(binDirectory(), script);
-    // }
-    //
-    // public String binScript(final String script) throws ScriptException {
-    // return binScriptFile(script).getAbsolutePath();
-    // }
 }

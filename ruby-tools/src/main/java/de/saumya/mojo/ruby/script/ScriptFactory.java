@@ -96,7 +96,6 @@ public class ScriptFactory {
             return new Script(this, url.getPath(), false);
         }
         else {
-            System.out.println(url);
             return new Script(this, url);
         }
     }
