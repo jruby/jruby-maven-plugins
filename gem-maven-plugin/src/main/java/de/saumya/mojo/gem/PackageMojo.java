@@ -236,6 +236,7 @@ public class PackageMojo extends AbstractGemMojo {
             // local-repository location
             final File artifactFile = artifact.getFile();
             final ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(project.getArtifact())
+                    .setResolveRoot(false)
                     .setLocalRepository(this.localRepository)
                     .setRemoteRepositories(project.getRemoteArtifactRepositories())
                     .setCollectionFilter(filter)
