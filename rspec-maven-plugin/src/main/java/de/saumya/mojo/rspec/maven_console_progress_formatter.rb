@@ -11,7 +11,7 @@ end
 
 MOJO_LOG = MojoLog.new
 
-class MavenProgressFormatter < Spec::Runner::Formatter::BaseFormatter
+class MavenConsoleProgressFormatter < Spec::Runner::Formatter::BaseFormatter
   
   def initialize(options, where)
     super( options, where )
@@ -22,7 +22,7 @@ class MavenProgressFormatter < Spec::Runner::Formatter::BaseFormatter
     @filename = nil
   end
   
-  def add_example_group(example_group)
+  def example_group_started(example_group)
     #MOJO_LOG.info( "spec dir #{SPEC_DIR}")
     #MOJO_LOG.info( "location #{example_group.location}" )
     unless ( @first )
@@ -50,7 +50,7 @@ class MavenProgressFormatter < Spec::Runner::Formatter::BaseFormatter
     @passing << example 
   end
   
-  def example_pending(example, message, pending_caller)
+  def example_pending(example, message)
     @pending << example 
   end
   

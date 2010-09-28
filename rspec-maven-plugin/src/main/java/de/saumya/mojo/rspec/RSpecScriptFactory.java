@@ -59,9 +59,13 @@ public class RSpecScriptFactory extends AbstractScriptFactory {
 
 		builder.append("require %q(rubygems)\n");
 		builder.append("require %q(spec)\n");
-		builder.append("require %q(de/saumya/mojo/rspec/maven_progress_formatter)\n");
+		builder.append("require %q(de/saumya/mojo/rspec/maven_console_progress_formatter)\n");
+		builder.append("require %q(de/saumya/mojo/rspec/maven_surefire_reporter)\n");
 		builder.append("options = ::Spec::Runner::OptionParser.parse([\n");
-		builder.append("  things, '-f', \"html:#{REPORT_PATH}\", '-f', 'MavenProgressFormatter'\n");
+		builder.append("  things,\n");
+		builder.append("  '-f', \"html:#{REPORT_PATH}\",\n");
+		builder.append("  '-f', 'MavenConsoleProgressFormatter',\n");
+		builder.append("  '-f', 'MavenSurefireReporter:target/surefire-reports/',\n");
 		builder.append("].flatten, STDERR, STDOUT)\n");
 		builder.append("::Spec::Runner::CommandLine.run(options)\n");
 
