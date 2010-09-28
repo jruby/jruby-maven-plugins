@@ -163,7 +163,7 @@ class MavenSurefireReporter < Spec::Runner::Formatter::BaseFormatter
   end
   
   def xml_escape(str)
-    str.gsub( /&/, '&amp;' ).gsub!( /"/, '&quot;' )
+    str.gsub( /&/, '&amp;' ).gsub( /"/, '&quot;' )
   end
   
   def start_dump
