@@ -79,6 +79,13 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter default-value="${gem.args}"
      */
     protected String        gemArgs;
+    
+    /**
+     * directory of JRuby bin path to use when forking JRuby.
+     * 
+     * @parameter expression="${gem.binDirectory}"
+     */
+    protected File          binDirectory;
 
     // /**
     // * arguments for the gem command during base initialization.
@@ -142,6 +149,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig.setAddRI(this.installRI);
         this.gemsConfig.setGemHome(this.gemHome);
         this.gemsConfig.setGemPath(this.gemPath);
+        this.gemsConfig.setBinDirectory(this.binDirectory);
         // this.gemsConfig.setUserInstall(userInstall);
         this.gemsConfig.setSkipJRubyOpenSSL(!this.includeOpenSSL);
 

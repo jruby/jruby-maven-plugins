@@ -79,6 +79,11 @@ public class GemsConfig {
         return this.gemsDirectory;
     }
 
+    
+    public void setBinDirectory(File binDirectory) {
+        this.binDirectory = binDirectory;
+    }
+    
     public File getBinDirectory() {
         if (this.binDirectory == null) {
             this.binDirectory = new File(getGemHome(), "bin");
@@ -166,7 +171,9 @@ public class GemsConfig {
         clone.userInstall = this.userInstall;
         clone.verbose = this.verbose;
         clone.skipJRubyOpenSSL = this.skipJRubyOpenSSL;
+        clone.binDirectory = this.binDirectory;
 
         return clone;
     }
+
 }

@@ -96,6 +96,7 @@ public class GemsInstaller {
         }
 
         if (script != null) {
+            script.addArg("--bindir", this.config.getBinDirectory() );
             script.execute();
         }
     }
