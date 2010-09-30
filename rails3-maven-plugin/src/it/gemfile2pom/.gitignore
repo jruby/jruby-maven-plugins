@@ -1,0 +1,6 @@
+.bundle
+db/*.sqlite3
+log/*.log
+tmp/**/*
+src
+config/boot.rb
