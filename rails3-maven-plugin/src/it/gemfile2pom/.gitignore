@@ -4,3 +4,4 @@ log/*.log
 tmp/**/*
 src
 config/boot.rb
+pom*xml
