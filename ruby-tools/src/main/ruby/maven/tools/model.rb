@@ -160,17 +160,6 @@ module Maven
       end
     end
 
-    class JRubyPlugin < Plugin
-      tags :dummy
-      def initialize(name, extensions = nil, &block)
-        super("de.saumya.mojo", "#{name}-maven-plugin", "${jruby.plugins.version}", extensions, &block)
-      end
-
-      def _name
-        "plugin"
-      end
-    end
-
     class Execution < Tag
       tags :id, :phase, :goals, :configuration
 
@@ -213,13 +202,14 @@ module Maven
         @build ||= Build.new
       end
       
-      def activation(args = nil)
-        @activation ||= if args.is_a? Hash 
-                           Activation.new( args ) 
-                         else 
-                           Activation.new
-                         end
+      def activation(name = nil, value = nil)
+        @activation ||= Activation.new
+        @activation.add_property(name, value)
         @activation
+      end
+
+      def default_activation(name = nil, value = nil)
+        activation(name, value).as_default
       end
 
       def dependencies(&block)
@@ -254,46 +244,42 @@ module Maven
 
     class PluginHash < Hash
 
-      def get(group_id, artifact_id, version = nil, &block)
+      def get(*args, &block)
+        case args.size
+        when 3
+          name = args[0] + "." + args[1]
+          version = args[2]
+        when 2
+          name = args[0].to_s
+          version = args[1]
+        else
+          raise "need name and version"
+        end
+        if (name =~ /\./).nil?
+          if [:jruby, :gem, :rspec, :rake, :rails2, :rails3, :gemify].member? name.to_sym
+            group_id = 'de.saumya.mojo'
+            artifact_id = "#{name}-maven-plugin"
+          else
+            group_id = nil
+            artifact_id = "maven-#{name}-plugin"
+          end
+        else
+          group_id = name.sub(/\.[^.]+$/, '')
+          artifact_id = name.sub(/^.+\./, '')
+        end
         k = "#{group_id}:#{artifact_id}".to_sym
         result = self[k]
         if result.nil?
           result = (self[k] = Plugin.new(group_id, artifact_id, version))
         end
-        @version = version if version
+        result.version = version #if version
         if block
           block.call(result)
         end
         result
       end
       alias :new :get
-      
-      def get_maven(artifact_id, version = nil, &block)
-        k = "org.apache.maven.plugins:maven-#{artifact_id}-plugin".to_sym
-        result = self[k]
-        if result.nil?
-          result = (self[k] = Plugin.new(nil, "maven-#{artifact_id}-plugin", version))
-        end
-        @version = version if version
-        if block
-          block.call(result)
-        end
-        result
-      end
-      alias :new :get
-      
-      def get_jruby(key, &block)
-        k = "de.saumya.mojo:#{key}".to_sym
-        result = self[k]
-        if result.nil?
-          result = (self[k] = JRubyPlugin.new(key))
-        end
-        if block
-          block.call(result)
-        end
-        result
-      end
-      alias :new_jruby :get_jruby
+      alias :add :get
       
     end
 
@@ -428,14 +414,20 @@ module Maven
 
     class Activation < Tag
       tags :activeByDefault, :property
-      def initialize(args = {})
+      def initialize(name = nil, value = nil)
         super({})
-        if args.size > 0
-          @property = Property.new(args)
+        add_property(name, value) if name && value
+      end
+
+      def add_property(name, value)
+        if name && value
+          # TODO make more then one property
+          raise "more then one property is not implemented: #{@property.name} => #{@property.value}" if @property
+          @property = Property.new(:name => name, :value => value)
         end
       end
 
-      def default
+      def as_default
         @activeByDefault = true
       end
     end
