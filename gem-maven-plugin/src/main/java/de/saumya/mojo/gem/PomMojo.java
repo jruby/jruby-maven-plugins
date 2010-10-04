@@ -3,8 +3,8 @@ package de.saumya.mojo.gem;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 
 import de.saumya.mojo.gems.GemspecConverter;
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
@@ -16,6 +16,9 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal pom
  */
 public class PomMojo extends AbstractJRubyMojo {
+
+    /** @parameter expression="${plugin}" @readonly */
+    PluginDescriptor  plugin;
 
     /**
      * @parameter expression="${pom}" default-value="pom.xml"
@@ -31,11 +34,6 @@ public class PomMojo extends AbstractJRubyMojo {
      * @parameter default-value="${pom.gemspec}"
      */
     protected File    gemspecFile;
-
-    /**
-     * @plugin
-     */
-    Plugin            plugin;
 
     @Override
     public void executeJRuby() throws MojoExecutionException {
@@ -65,17 +63,7 @@ public class PomMojo extends AbstractJRubyMojo {
             try {
                 final GemspecConverter gemspec = new GemspecConverter(this.logger,
                         this.factory);
-                String version = null;
-                for (final Plugin plugin : this.project.getBuild().getPlugins()) {
-                    if (plugin.getArtifactId().equals("gem-maven-plugin")) {
-                        version = plugin.getVersion();
-                        break;
-                    }
-                }
-                if (version == null) {
-                    throw new IllegalArgumentException("did not find gem-maven-plugin in POM");
-                }
-                gemspec.createPom(this.gemspecFile, version, this.pom);
+                gemspec.createPom(this.gemspecFile, this.plugin.getVersion(), this.pom);
 
             }
             catch (final ScriptException e) {
