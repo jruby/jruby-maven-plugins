@@ -3,6 +3,18 @@ module Maven
   module Tools
     class GemfileReader
 
+      class Group < Array
+
+        def properties(args = nil)
+          if args
+            @properties ||= {}
+            @properties.merge!(args)
+          else
+            @properties ||= {}
+          end
+        end
+      end
+
       attr_reader :groups
 
       def initialize(file)
@@ -10,7 +22,7 @@ module Maven
                   when String
                     file 
                   when File
-                    File.read(file)
+                    File.read(file.path)
                   else
                     raise "input must be either a File or a String. it is '#{file.class}'"
                   end
@@ -22,11 +34,12 @@ module Maven
       end
 
       def self.groups
-        @groups ||= {:default => []}
+        @groups ||= {:default => Group.new}
       end
 
-      def groups
-        self.class.groups
+      def self.in_phase(name, &block)
+        blocks = phases[(name || '-dummy-').to_sym] ||= []
+        blocks << block
       end
 
       def self.gem(*args)
@@ -34,7 +47,7 @@ module Maven
           jar(*args)
         else
           current.last.each do |c|
-            g = (groups[c] ||= [])
+            g = (groups[c] ||= Group.new)
             if args.last.is_a? Hash
               raise "git gems not supported" unless args.last[:git].nil?
             end
@@ -47,9 +60,9 @@ module Maven
       end
 
       def self.jar(*args)
-        raise "name and version must be given" if args.size == 1 || (args.size == 2 && args[1].is_a?(Hash))
+        raise "name and version must be given: #{args.inspect}" if args.size == 1 || (args.size == 2 && args[1].is_a?(Hash))
         current.last.each do |c|
-          g = (groups[c] ||= [])
+          g = (groups[c] ||= Group.new)
           def args.type
             :jar
           end
@@ -57,11 +70,23 @@ module Maven
         end
       end
 
-      # def self.group(*args, &block)
-      #   current << args
-      #   block.call if block
-      #   current.pop
-      # end
+      def self.plugin(*args)
+        raise "name and version must be given" if args.size == 1 || (args.size == 2 && args[1].is_a?(Hash))
+        current.last.each do |c|
+          g = (groups[c] ||= Group.new)
+          def args.type
+            :plugin
+          end
+          g << args
+        end
+      end
+
+      def self.properties(args = {})
+        current.last.each do |c|
+          g = (groups[c] ||= Group.new)
+          g.properties(args)
+        end
+      end
 
       def self.method_missing(method, *args, &block)
         case method
@@ -73,6 +98,34 @@ module Maven
           current.pop
         end
       end
+
+      def phases
+        self.class.phases
+      end
+
+      def groups
+        self.class.groups
+      end
+
+      def group(name)
+        self.class.groups[(name || '-dummy-').to_sym] ||= Group.new
+      end
+
+      def execute_phase(name, project = nil)
+       (self.class.phases[(name || '-dummy-').to_sym] || []).each do |b|
+         b.call(project)
+        end
+      end
+
+      private
+      def self.phases
+        @phases ||= {}
+      end
     end
   end
+end
+
+if $0 == __FILE__
+  gemfile = Maven::Tools::GemfileReader.new(File.new(ARGV[0]))
+  gemfile.execute_phase(ARGV[1])
 end
