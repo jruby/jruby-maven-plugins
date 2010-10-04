@@ -79,7 +79,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter default-value="${gem.args}"
      */
     protected String        gemArgs;
-    
+
     /**
      * directory of JRuby bin path to use when forking JRuby.
      * 
