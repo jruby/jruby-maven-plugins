@@ -15,12 +15,6 @@ if ( !users.isFile() )
      throw new FileNotFoundException( "Could not find: " + users );
 }
 
-File accounts = new File( target, "accounts.html" );
-if ( !accounts.isFile() )
-{
-     throw new FileNotFoundException( "Could not find: " + accounts );
-}
-
 File file = new File( target, "new.html" );
 if ( !file.isFile() )
 {
@@ -44,10 +38,3 @@ if ( !newFile.contains( "value=\"Create" ) )
 {
     throw new RuntimeException( "new file does not contain 'value=\"Create'" );
 }
-
-String accountsFile = FileUtils.fileRead( accounts );
-if ( !accountsFile.contains( "<h1>Listing accounts</h1>" ) )
-{
-    throw new RuntimeException( "accounts file does not contain '<h1>Listing accounts</h1>'" );
-}
-
