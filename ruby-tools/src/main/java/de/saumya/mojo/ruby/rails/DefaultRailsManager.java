@@ -196,7 +196,9 @@ public class DefaultRailsManager implements RailsManager {
         if (database != null) {
             script.addArg("-d", database);
         }
-
+        for (final String arg : args) {
+            script.addArg(arg);
+        }
         script.execute();
 
         if (appPath != null) {
