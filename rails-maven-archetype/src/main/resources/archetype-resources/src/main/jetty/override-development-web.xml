@@ -2,7 +2,7 @@
   <context-param>
     <!-- must match the place where the gems are located -->
     <param-name>gem.path</param-name>
-    <param-value>./target/rubygems-development</param-value>
+    <param-value>./target/rubygems</param-value>
   </context-param>
   <context-param>
     <param-name>rails.env</param-name>
