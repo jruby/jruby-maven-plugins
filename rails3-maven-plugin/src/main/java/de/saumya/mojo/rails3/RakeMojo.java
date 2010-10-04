@@ -37,7 +37,7 @@ public class RakeMojo extends AbstractRailsMojo {
                           this.repoSession,
                           launchDirectory(),
                           this.env,
-                          this.task.trim(),
+                          this.task == null ? null : this.task.trim(),
                           joinArgs(this.rakeArgs, this.args));
     }
 }
