@@ -38,4 +38,3 @@ if ( !newFile.contains( "value=\"Create" ) )
 {
     throw new RuntimeException( "new file does not contain 'value=\"Create'" );
 }
-
