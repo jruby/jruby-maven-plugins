@@ -26,7 +26,7 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String DEFAULT_JRUBY_VERSION = "1.5.2";
+    private static String DEFAULT_JRUBY_VERSION = "1.5.3";
 
     public static final String GEM_RUBY_COMMAND = "META-INF/jruby.home/bin/gem";
 
@@ -53,7 +53,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     /**
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
      * this version is used to resolve the jruby-complete dependency from the
-     * local/remote maven repository. defaults to "1.5.2".
+     * local/remote maven repository. defaults to "1.5.3".
      * 
      * @parameter default-value="${jruby.version}"
      */
