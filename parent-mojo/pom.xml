@@ -30,7 +30,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <maven.version>3.0-beta-3</maven.version>
+    <maven.version>3.0</maven.version>
   </properties>
   <build>
     <plugins>
