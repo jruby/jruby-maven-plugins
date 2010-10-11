@@ -1,20 +1,48 @@
 <component-set>
   <components>
     <component>
-      <role>de.saumya.mojo.ruby.GemifyManager</role>
+      <role>de.saumya.mojo.ruby.gems.GemManager</role>
       <implementation>
-	de.saumya.mojo.ruby.DefaultGemifyManager
+	de.saumya.mojo.ruby.gems.DefaultGemManager
       </implementation>
       <requirements>
+	<requirement>
+	  <role>org.apache.maven.repository.RepositorySystem</role>
+	  <role-hint>default</role-hint>
+	  <field-name>repositorySystem</field-name>
+	</requirement>
 	<requirement>
 	  <role>org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager</role>
 	  <role-hint>default</role-hint>
 	  <field-name>repositoryMetadataManager</field-name>
 	</requirement>
+      </requirements>
+    </component>
+    <component>
+      <role>de.saumya.mojo.ruby.rails.RailsManager</role>
+      <implementation>
+	de.saumya.mojo.ruby.rails.DefaultRailsManager
+      </implementation>
+      <requirements>
 	<requirement>
-	  <role>org.apache.maven.artifact.handler.manager.ArtifactHandlerManager</role>
+	  <role>org.apache.maven.repository.RepositorySystem</role>
 	  <role-hint>default</role-hint>
-	  <field-name>artifactHandlerManager</field-name>
+	  <field-name>repositorySystem</field-name>
+	</requirement>
+	<requirement>
+	  <role>org.apache.maven.project.ProjectBuilder</role>
+	  <role-hint>default</role-hint>
+	  <field-name>builder</field-name>
+	</requirement>
+	<requirement>  
+	  <role>de.saumya.mojo.ruby.gems.GemManager</role>
+	  <role-hint>default</role-hint>
+	  <field-name>gemManager</field-name>
+	</requirement>
+	<requirement>  
+	  <role>org.codehaus.plexus.velocity.VelocityComponent</role>
+	  <role-hint>default</role-hint>
+	  <field-name>velocityComponent</field-name>
 	</requirement>
       </requirements>
     </component>
@@ -26,6 +54,7 @@
       <requirements>
 	<requirement>
 	  <role>org.codehaus.plexus.velocity.VelocityComponent</role>
+
 	  <role-hint>default</role-hint>
 	  <field-name>velocityComponent</field-name>
 	</requirement>
@@ -33,6 +62,11 @@
 	  <role>de.saumya.mojo.gems.gem.GemPackager</role>
 	  <role-hint>default</role-hint>
 	  <field-name>gemPackager</field-name>
+	</requirement>
+	<requirement>
+	  <role>de.saumya.mojo.gems.spec.GemSpecificationIO</role>
+	  <role-hint>yaml</role-hint>
+	  <field-name>gemSpecificationIO</field-name>
 	</requirement>
       </requirements>
     </component>
@@ -69,7 +103,7 @@
 	  </property>
 	  <property>
 	    <name>runtime.log.logsystem.log4j.category</name>
-	    <value>org.codehaus.plexus.velocity.DefaultVelocityComponentTest</value>
+	    <value>org.codehaus.plexus.velocity.DefaultVelocityComponent</value>
 	  </property>
 	  <property>
 	    <name>resource.loader</name>

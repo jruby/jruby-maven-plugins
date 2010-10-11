@@ -12,7 +12,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * executes the jruby command.
@@ -97,7 +97,7 @@ public class RSpecMojo
 	}
 
 	@Override
-	public void executeWithGems() throws MojoExecutionException, RubyScriptException, IOException {
+	public void executeWithGems() throws MojoExecutionException, ScriptException, IOException {
 
 		final File specSourceDirectory = specSourceDirectory();
 		if (!specSourceDirectory.exists()) {

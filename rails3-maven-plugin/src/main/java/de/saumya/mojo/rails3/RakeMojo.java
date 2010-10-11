@@ -1,12 +1,12 @@
 package de.saumya.mojo.rails3;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.Script;
+import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.rails.RailsException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run rails rake with the given arguments.
@@ -31,18 +31,13 @@ public class RakeMojo extends AbstractRailsMojo {
     protected String task     = null;
 
     @Override
-    public void executeRails() throws MojoExecutionException,
-            RubyScriptException, IOException {
-        final Script script = this.factory.newScriptFromResource(RAKE_RUBY_COMMAND)
-                .addArgs(this.rakeArgs)
-                .addArgs(this.args)
-                .addArgs(this.task)
-                .addArg("RAILS_ENV=" + this.env);
-
-        final File gemfile = new File(launchDirectory(), "Gemfile.maven");
-        if (gemfile.exists()) {
-            script.addArg("BUNDLE_GEMFILE=" + gemfile.getAbsolutePath());
-        }
-        script.executeIn(launchDirectory());
+    public void executeRails() throws MojoExecutionException, ScriptException,
+            IOException, GemException, RailsException {
+        this.manager.rake(this.gemsInstaller,
+                          this.repoSession,
+                          launchDirectory(),
+                          this.env,
+                          this.task == null ? null : this.task.trim(),
+                          joinArgs(this.rakeArgs, this.args));
     }
 }

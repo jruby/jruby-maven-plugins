@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run "gem list".
@@ -15,7 +15,7 @@ public class ListMojo extends AbstractGemMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                 .addArg("list")
                 .addArgs(this.args)

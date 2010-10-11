@@ -32,6 +32,14 @@
     <jruby.fork>true</jruby.fork>
   </properties>
   <build>
+    <pluginManagement>
+      <plugins>
+	<plugin>
+	  <artifactId>maven-invoker-plugin</artifactId>
+	  <version>1.5</version>
+	</plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -102,27 +110,59 @@
       <id>integration-test</id>
       <build>
         <defaultGoal>install</defaultGoal>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>shitty-maven-plugin</artifactId>
-            <version>1.0-alpha-3</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>clean</goal>
-                  <goal>install</goal>
-                  <goal>test</goal>
-                </goals>
-                <configuration>
-                  <!-- WORK AROUND: use some version as plugin otherwise test plugin will not work -->
-                  <version>0.22.0-SNAPSHOT</version>
-                  <parallel>false</parallel>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
+	<plugins>
+	  <plugin>
+	    <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>shitty-maven-plugin</artifactId>
+	    <configuration>
+	      <skip>true</skip>
+	    </configuration>
+	  </plugin>
+	  <plugin>
+	    <artifactId>maven-invoker-plugin</artifactId>
+	    <configuration>
+	      <projectsDirectory>src/it</projectsDirectory>
+	      <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+	      <pomIncludes>
+		<pomInclude>*/pom.xml</pomInclude>
+	      </pomIncludes>
+	      <pomExcludes>
+		<pomExclude>*mysql/pom.xml</pomExclude>
+		<pomExclude>*postgres/pom.xml</pomExclude>
+	      </pomExcludes>
+<!--
+	      <settingsFile>src/it/settings.xml</settingsFile>
+	      <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+-->
+	      <preBuildHookScript>setup.bsh</preBuildHookScript>
+	      <postBuildHookScript>verify.bsh</postBuildHookScript>
+	    </configuration>
+	    <executions>
+	      <execution>
+		<id>integration-test</id>
+		<goals>
+		  <goal>install</goal>
+		  <goal>run</goal>
+		</goals>
+	      </execution>
+	    </executions>
+	  </plugin>
         </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>all</id>
+      <build>
+	<plugins>
+	  <plugin>
+	    <artifactId>maven-invoker-plugin</artifactId>
+	    <configuration>
+	      <pomExcludes>
+		<pomExclude>nothing</pomExclude>
+	      </pomExcludes>
+	    </configuration>
+	  </plugin>
+	</plugins>
       </build>
     </profile>
   </profiles>

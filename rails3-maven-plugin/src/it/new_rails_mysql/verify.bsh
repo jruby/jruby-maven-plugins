@@ -1,0 +1,40 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+File target = new File( basedir, "target");
+
+File file = new File( target, "index.html" );
+if ( !file.isFile() )
+{
+     throw new FileNotFoundException( "Could not find: " + file );
+}
+
+File users = new File( target, "users.html" );
+if ( !users.isFile() )
+{
+     throw new FileNotFoundException( "Could not find: " + users );
+}
+
+File file = new File( target, "new.html" );
+if ( !file.isFile() )
+{
+     throw new FileNotFoundException( "Could not find: " + file );
+}
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+if ( !log.contains( "No POM" ) )
+{
+    throw new RuntimeException( "log file does not contain 'No POM'" );
+}
+
+String usersFile = FileUtils.fileRead( users );
+if ( !usersFile.contains( "<h1>Listing users</h1>" ) )
+{
+    throw new RuntimeException( "users file does not contain '<h1>Listing users</h1>'" );
+}
+
+String newFile = FileUtils.fileRead( file );
+if ( !newFile.contains( "value=\"Create" ) )
+{
+    throw new RuntimeException( "new file does not contain 'value=\"Create'" );
+}

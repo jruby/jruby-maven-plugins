@@ -6,7 +6,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import de.saumya.mojo.ruby.ScriptingService;
+import de.saumya.mojo.ruby.GemScriptingContainer;
 
 public class GemProxyServletContextListener implements ServletContextListener {
 
@@ -71,7 +71,8 @@ public class GemProxyServletContextListener implements ServletContextListener {
     }
 
     public void contextInitialized(final ServletContextEvent sce) {
-        final ScriptingService scripting = new ScriptingService();
+        final GemScriptingContainer scripting = new GemScriptingContainer(null,
+                null);
         ControllerService controller;
         sce.getServletContext().log("registering "
                 + ControllerService.class.getName() + " . . .");

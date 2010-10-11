@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.Script;
+import de.saumya.mojo.ruby.script.Script;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * executes the compiles ruby classes to java bytecode (jrubyc).
@@ -56,7 +56,7 @@ public class CompileMojo extends AbstractJRubyMojo {
 
     @Override
     public void executeJRuby() throws MojoExecutionException, IOException,
-            RubyScriptException {
+            ScriptException {
         if (this.generateJava) {
             if (!this.generatedJavaDirectory.exists()) {
                 this.generatedJavaDirectory.mkdirs();

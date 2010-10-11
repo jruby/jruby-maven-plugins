@@ -1,17 +1,16 @@
 package de.saumya.mojo.rails3;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.plexus.util.IOUtil;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
-import de.saumya.mojo.ruby.RubyScriptException;
+import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.rails.RailsException;
+import de.saumya.mojo.ruby.rails.RailsManager;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * abstract rails mojo which provides a few helper methods and the rails.args
@@ -23,7 +22,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
      * @parameter expression="${rails.dir}"
      *            default-value="${project.basedir}/src/main/rails"
      */
-    protected File   railsDir;
+    protected File                    railsDir;
 
     /**
      * either development or test or production or whatever else is possible
@@ -31,63 +30,45 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
      * 
      * @parameter expression="${rails.env}"
      */
-    protected String env;
+    protected String                  env;
 
-    private void patchBootScript() throws MojoExecutionException {
-        final File boot = new File(new File(launchDirectory(), "config"),
-                "boot.rb");
-        if (boot.exists()) {
-            InputStream bootIn = null;
-            InputStream bootOrig = null;
-            InputStream bootPatched = null;
-            OutputStream bootOut = null;
-            try {
-                bootIn = new FileInputStream(boot);
-                bootOrig = Thread.currentThread()
-                        .getContextClassLoader()
-                        .getResourceAsStream("boot.rb.orig");
-                if (IOUtil.contentEquals(bootIn, bootOrig)) {
-                    bootIn.close();
-                    bootOut = new FileOutputStream(boot);
-                    bootPatched = Thread.currentThread()
-                            .getContextClassLoader()
-                            .getResourceAsStream("boot.rb");
-                    IOUtil.copy(bootPatched, bootOut);
-                }
-            }
-            catch (final IOException e) {
-                throw new MojoExecutionException("error patching config/boot.rb",
-                        e);
-            }
-            finally {
-                IOUtil.close(bootIn);
-                IOUtil.close(bootOrig);
-                IOUtil.close(bootPatched);
-                IOUtil.close(bootOut);
-            }
+    /**
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    protected RepositorySystemSession repoSession;
+
+    /** @component */
+    protected RailsManager            manager;
+
+    protected String[] joinArgs(final String args1, final String args2) {
+        final String args = ((args1 == null ? "" : args1) + " " + (args2 == null
+                ? ""
+                : args2)).trim();
+        if ("".equals(args)) {
+            return new String[0];
         }
-    }
-
-    private void setupEnvironmentVariables() {
-        final File gemfile = new File(launchDirectory(), "Gemfile.maven");
-        if (gemfile.exists()) {
-            this.factory.addEnv("BUNDLE_GEMFILE", gemfile);
+        else {
+            return args.split("\\s+");
         }
     }
 
     @Override
-    public final void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
+    public void executeWithGems() throws MojoExecutionException,
+            ScriptException, IOException, GemException {
 
-        setupEnvironmentVariables();
+        try {
+            this.manager.initInstaller(this.gemsInstaller, launchDirectory());
 
-        patchBootScript();
-
-        executeRails();
+            executeRails();
+        }
+        catch (final RailsException e) {
+            throw new MojoExecutionException("error executing rails", e);
+        }
     }
 
     abstract void executeRails() throws MojoExecutionException,
-            RubyScriptException, IOException;
+            ScriptException, IOException, GemException, RailsException;
 
     @Override
     protected File launchDirectory() {

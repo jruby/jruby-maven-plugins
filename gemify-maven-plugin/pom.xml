@@ -11,7 +11,6 @@
   <artifactId>gemify-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Gemify Maven Mojo</name>
-  <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
       <groupId>de.saumya.mojo</groupId>
@@ -21,29 +20,22 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.0-beta-1</version>
+      <version>3.0-beta-3</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
-      <version>3.0-beta-1</version>
+      <version>3.0-beta-3</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.0-beta-1</version>
+      <version>3.0-beta-3</version>
     </dependency>
-<!--
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-compat</artifactId>
-      <version>3.0-alpha-7</version>
-    </dependency>
--->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -58,9 +50,11 @@
           <pomIncludes>
             <pomInclude>*/pom.xml</pomInclude>
           </pomIncludes>
+<!--
           <pomExcludes>
             <pomExclude>with-pom-noversion/pom.xml</pomExclude>
           </pomExcludes>
+-->
           <settingsFile>src/it/settings.xml</settingsFile>
           <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
           <preBuildHookScript>setup.bsh</preBuildHookScript>

@@ -11,6 +11,8 @@ import junit.framework.TestSuite;
 import org.xml.sax.helpers.XMLReaderAdapter;
 
 import de.saumya.mojo.gems.GemspecConverter;
+import de.saumya.mojo.ruby.script.GemScriptFactory;
+import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class GemServiceTest extends TestCase {
 

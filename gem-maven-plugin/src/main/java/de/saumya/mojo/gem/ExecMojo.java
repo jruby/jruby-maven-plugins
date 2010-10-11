@@ -6,8 +6,8 @@ import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.Script;
+import de.saumya.mojo.ruby.script.Script;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * executes a ruby script in context of the gems from pom. the arguments for
@@ -53,7 +53,7 @@ public class ExecMojo extends AbstractGemMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
-            RubyScriptException, IOException {
+            ScriptException, IOException {
         Script s;
         if (this.script != null && this.script.length() > 0) {
             s = this.factory.newScript(this.script);

@@ -22,7 +22,7 @@
 	    <phase>verify</phase>
 	    <goals><goal>install</goal></goals>
 	    <configuration>
-	      <args>-l --ignore-dependencies 
+	      <args>-l --ignore-dependencies --no-user-install
 ${project.build.directory}/commons-codec.commons-codec-1.2.0-java.gem
 ${project.build.directory}/commons-httpclient.commons-httpclient-3.1.0-java.gem
 ${project.build.directory}/commons-logging.commons-logging-1.0.4-java.gem

@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.Script;
+import de.saumya.mojo.ruby.script.Script;
+import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * executes the jruby command.
@@ -32,7 +32,7 @@ public class JRubyMojo extends AbstractJRubyMojo {
 
     @Override
     public void executeJRuby() throws MojoExecutionException, IOException,
-            RubyScriptException {
+            ScriptException {
         Script s;
         if (this.script != null && this.script.length() > 0) {
             s = this.factory.newScript(this.script);

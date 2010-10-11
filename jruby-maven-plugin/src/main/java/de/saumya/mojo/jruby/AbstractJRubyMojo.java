@@ -2,34 +2,22 @@ package de.saumya.mojo.jruby;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
-import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.project.artifact.InvalidDependencyVersionException;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.classworlds.ClassRealm;
 
-import de.saumya.mojo.ruby.GemException;
 import de.saumya.mojo.ruby.Logger;
-import de.saumya.mojo.ruby.RubyScriptException;
-import de.saumya.mojo.ruby.ScriptFactory;
+import de.saumya.mojo.ruby.script.ScriptException;
+import de.saumya.mojo.ruby.script.ScriptFactory;
 
 /**
  * Base for all JRuby mojos.
@@ -42,9 +30,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     public static final String GEM_RUBY_COMMAND = "META-INF/jruby.home/bin/gem";
 
-    public static final String IRB_RUBY_COMMAND = "META-INF/jruby.home/bin/jirb";
+    public static final String IRB_RUBY_COMMAND = "jirb";
 
-    public static final String IRB_SWING_RUBY_COMMAND = "META-INF/jruby.home/bin/jirb_swing";
+    public static final String IRB_SWING_RUBY_COMMAND = "jirb_swing";
 
     public static final String RAKE_RUBY_COMMAND = "META-INF/jruby.home/bin/rake";
 
@@ -118,24 +106,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected MavenProject project;
 
     /**
-     * artifact factory for internal use.
-     * 
-     * @component
-     * @required
-     * @readonly
-     */
-    protected ArtifactFactory artifactFactory;
-
-    /**
-     * artifact resolver for internal use.
-     * 
-     * @component
-     * @required
-     * @readonly
-     */
-    protected ArtifactResolver resolver;
-
-    /**
      * local repository for internal use.
      * 
      * @parameter default-value="${localRepository}"
@@ -152,15 +122,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      */
     protected ClassRealm classRealm;
 
-    /**
-     * @component
-     */
-    protected ArtifactMetadataSource metadata;
-
-    /**
-     * @component
-     */
-    protected MavenProjectBuilder builder;
+    /** @component */
+    protected RepositorySystem repositorySystem;
 
     protected Logger logger;
 
@@ -174,19 +137,13 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             return factory;
         } catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("could not resolve jruby", e);
-        } catch (final RubyScriptException e) {
+        } catch (final ScriptException e) {
             throw new MojoExecutionException(
                     "could not initialize script factory", e);
         } catch (final IOException e) {
             throw new MojoExecutionException(
                     "could not initialize script factory", e);
         }
-    }
-
-    protected void preExecute() throws MojoExecutionException,
-            MojoFailureException, IOException, RubyScriptException,
-            GemException {
-
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -204,32 +161,17 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
         try {
 
-            preExecute();
-
-        } catch (final IOException e) {
-            throw new MojoExecutionException(
-                    "error running pre execution hook", e);
-        } catch (final RubyScriptException e) {
-            throw new MojoExecutionException(
-                    "error running pre execution hook", e);
-        } catch (final GemException e) {
-            throw new MojoExecutionException(
-                    "error running pre execution hook", e);
-        }
-
-        try {
-
             executeJRuby();
 
         } catch (final IOException e) {
             throw new MojoExecutionException("error in executing jruby", e);
-        } catch (final RubyScriptException e) {
+        } catch (final ScriptException e) {
             throw new MojoExecutionException("error in executing jruby", e);
         }
     }
 
     abstract protected void executeJRuby() throws MojoExecutionException,
-            MojoFailureException, IOException, RubyScriptException;
+            MojoFailureException, IOException, ScriptException;
 
     protected File launchDirectory() {
         if (this.launchDirectory == null) {
@@ -244,9 +186,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private Artifact resolveJRUBYCompleteArtifact(final String version)
             throws DependencyResolutionRequiredException {
         getLog().debug("resolve jruby for verions " + version);
-        final Artifact artifact = this.artifactFactory
-                .createArtifactWithClassifier("org.jruby", "jruby-complete",
-                        version, "jar", null);
+        final Artifact artifact = this.repositorySystem.createArtifact(
+                "org.jruby", "jruby-complete", version, "jar");
         return resolveJRUBYCompleteArtifact(artifact);
     }
 
@@ -257,11 +198,13 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         request.setLocalRepository(this.localRepository);
         request.setRemoteRepositories(this.project
                 .getRemoteArtifactRepositories());
-        this.resolver.resolve(request);
+        this.repositorySystem.resolve(request);
 
         if (this.jrubyVerbose) {
             getLog().info("jruby version   : " + artifact.getVersion());
         }
+        // set it so other plugins can retrieve the version in use
+        this.jrubyVersion = artifact.getVersion();
         return artifact;
     }
 
@@ -278,53 +221,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                 if (artifact.getArtifactId().equals("jruby-complete")
                         && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
                         && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
-                    return resolveJRUBYCompleteArtifact(this.artifactFactory
+                    return resolveJRUBYCompleteArtifact(this.repositorySystem
                             .createArtifact(artifact.getGroupId(), artifact
                                     .getArtifactId(), artifact.getVersion(),
-                                    artifact.getScope(), artifact.getType()));
+                                    artifact.getType()));
                 }
             }
         }
         // take the default version of jruby
         return resolveJRUBYCompleteArtifact(DEFAULT_JRUBY_VERSION);
-    }
-
-    protected void resolveTransitively(final Collection<Artifact> artifacts,
-            final Artifact artifact) throws MojoExecutionException {
-        // System.out.println(artifact + " resolve:");
-        // if (artifact.getArtifactHandler().isIncludesDependencies()) {
-        try {
-            final MavenProject mavenProject = this.builder.buildFromRepository(
-                    artifact, this.project.getRemoteArtifactRepositories(),
-                    this.localRepository);
-
-            final Set<Artifact> moreArtifacts = mavenProject.createArtifacts(
-                    this.artifactFactory, null, null);
-
-            final ArtifactResolutionResult arr = this.resolver
-                    .resolveTransitively(moreArtifacts, artifact, this.project
-                            .getManagedVersionMap(), this.localRepository,
-                            this.project.getRemoteArtifactRepositories(),
-                            this.metadata, new ArtifactFilter() {
-                                public boolean include(final Artifact artifact) {
-                                    return artifact.getType().equals("gem");
-                                }
-                            });
-            // System.out.println(artifact + " " + arr);
-            for (final Object artiObject : arr.getArtifacts()) {
-                // allow older api to work
-                final Artifact arti = (Artifact) artiObject;
-                artifacts.add(arti);
-            }
-        } catch (final ArtifactResolutionException e) {
-            throw new MojoExecutionException("error resolving " + artifact, e);
-        } catch (final ArtifactNotFoundException e) {
-            throw new MojoExecutionException("error resolving " + artifact, e);
-        } catch (final InvalidDependencyVersionException e) {
-            throw new MojoExecutionException("error resolving " + artifact, e);
-        } catch (final ProjectBuildingException e) {
-            throw new MojoExecutionException("error building project for "
-                    + artifact, e);
-        }
     }
 }
