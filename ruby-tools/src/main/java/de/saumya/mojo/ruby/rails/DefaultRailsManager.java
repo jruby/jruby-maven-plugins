@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.InvalidRepositoryException;
@@ -41,19 +43,24 @@ import de.saumya.mojo.ruby.script.ScriptException;
 @Component(role = RailsManager.class)
 public class DefaultRailsManager implements RailsManager {
 
-    public static final String RAKE_RUBY_COMMAND = "META-INF/jruby.home/bin/rake";
+    public static final String         RAKE_RUBY_COMMAND = "META-INF/jruby.home/bin/rake";
+    private static Map<String, String> DATABASES         = new HashMap<String, String>();
+    static {
+        DATABASES.put("sqlite", "sqilte3");
+        DATABASES.put("postgres", "postgresql");
+    }
 
     @Requirement
-    private RepositorySystem   repositorySystem;
+    private RepositorySystem           repositorySystem;
 
     @Requirement
-    private ProjectBuilder     builder;
+    private ProjectBuilder             builder;
 
     @Requirement
-    private GemManager         gemManager;
+    private GemManager                 gemManager;
 
     @Requirement
-    private VelocityComponent  velocityComponent;
+    private VelocityComponent          velocityComponent;
 
     /*
      * (non-Javadoc)
@@ -130,9 +137,9 @@ public class DefaultRailsManager implements RailsManager {
      */
     public void createNew(final GemsInstaller installer,
             final RepositorySystemSession repositorySystemSession,
-            final File appPath, final String database,
-            final String railsVersion, final String... args)
-            throws RailsException, GemException, IOException, ScriptException
+            final File appPath, String database, final String railsVersion,
+            final String... args) throws RailsException, GemException,
+            IOException, ScriptException
 
     {
         final File pomFile = new File(appPath, "pom.xml");
@@ -186,6 +193,11 @@ public class DefaultRailsManager implements RailsManager {
         // install the gems into rubygems
         installer.installGems(pom);
 
+        // correct spelling
+        if (DATABASES.containsKey(database)) {
+            database = DATABASES.get(database);
+        }
+
         // run the "rails new"-script
         final Script script = installer.factory.newScript(installer.config.binScriptFile("rails"))
                 .addArg("_" + railsVersion + "_")
@@ -201,6 +213,8 @@ public class DefaultRailsManager implements RailsManager {
         }
         script.execute();
 
+        // correct the database for the jdbc adapter
+        database = database.replace("postgresql", "postgres");
         if (appPath != null) {
             if ("mysql".equals(database)) {
 
