@@ -13,6 +13,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * goal to locally install a given gem
  * 
  * @goal install
+ * @phase install
  */
 public class InstallMojo extends AbstractGemMojo {
 
@@ -35,7 +36,6 @@ public class InstallMojo extends AbstractGemMojo {
             ScriptException, IOException, MojoFailureException {
         final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                 .addArg("install");
-        // TODO if artifact is set, check on an existing gem in target
         if (this.project.getArtifact() != null
                 && this.project.getArtifact().getFile() != null
                 && this.project.getArtifact().getFile().exists()) {
