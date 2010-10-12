@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -26,8 +25,6 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
  */
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
-    // private static Set<Artifact> NO_ARTIFACTS = Collections.emptySet();
-
     /**
      * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
@@ -42,14 +39,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter expression="${gem.installRI}" default-value="false"
      */
     private boolean         installRI;
-
-    // /**
-    // * allow to overwrite the version by explicitly declaring a dependency in
-    // * the pom. will not check any dependencies on gemspecs level.
-    // *
-    // * @parameter expression="${gem.forceVersion}" default-value="false"
-    // */
-    // private boolean forceVersion;
 
     /**
      * triggers an update of maven metadata for all gems.
@@ -87,13 +76,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      */
     protected File          binDirectory;
 
-    // /**
-    // * arguments for the gem command during base initialization.
-    // *
-    // * @parameter default-value="${gem.initializeArgs}"
-    // */
-    // private String gemInitializeArgs;
-
     /** @component */
     protected GemManager    manager;
 
@@ -105,7 +87,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     @Override
     protected ScriptFactory newScriptFactory() throws MojoExecutionException {
         try {
-            // give preference to the gemHome/gemPath from super
+            // give preference to the deprecated gemHome/gemPath from super
             if (super.jrubyGemHome != null) {
                 this.gemHome = super.jrubyGemHome;
             }
@@ -160,7 +142,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         updateMetadata();
 
         try {
-            this.gemsInstaller.installGems(this.project, this.localRepository);
+            this.gemsInstaller.installPom(this.project, this.localRepository);
         }
         catch (final GemException e) {
             throw new MojoExecutionException("error in installing gems", e);
@@ -177,11 +159,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     abstract protected void executeWithGems() throws MojoExecutionException,
             ScriptException, GemException, IOException, MojoFailureException;
-
-    protected void setupGems(final Artifact artifact) throws IOException,
-            ScriptException, GemException {
-        this.gemsInstaller.installGems(artifact, this.localRepository);
-    }
 
     void updateMetadata() throws MojoExecutionException {
         if (this.update) {
