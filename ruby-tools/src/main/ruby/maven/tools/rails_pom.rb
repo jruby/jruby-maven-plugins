@@ -9,7 +9,7 @@ module Maven
         @versions = { :jetty_plugin => "7.1.0.RC1",
                        :jruby_complete => "1.5.3",
                        :jruby_rack => "1.0.4.dev-SNAPSHOT",
-                       :jruby_plugins => "0.23.0-SNAPSHOT",
+                       :jruby_plugins => "0.22.0",
                        :war_plugin => "2.1",
                      }.merge(args)
       end
