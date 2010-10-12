@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
 import de.saumya.mojo.ruby.gems.GemException;
@@ -23,43 +24,38 @@ public class RakeMojo extends AbstractGemMojo {
      * 
      * @parameter default-value="${rake.file}"
      */
-    private final File   rakefile    = null;
+    private final File              rakefile    = null;
 
     /**
      * arguments for the rake command.
      * 
      * @parameter default-value="${rake.args}"
      */
-    private final String rakeArgs    = null;
+    private final String            rakeArgs    = null;
 
     /**
-     * rake version used when there is no pom. defaults to 0.8.7
+     * rake version used when there is no pom. defaults to latest version
      * 
-     * @parameter default-value="0.8.7" expression="${rake.version}"
+     * @parameter default-value="${rake.version}"
      */
-    private final String rakeVersion = null;
+    private final String            rakeVersion = null;
 
-    // @Override
-    // public void preExecute() throws MojoExecutionException,
-    // MojoFailureException, IOException, ScriptException, GemException {
-    // if (this.project.getBasedir() == null) {
-    //
-    // setupGems(this.manager.createGemArtifact("rake", this.rakeVersion));
-    //
-    // this.manager.addDefaultGemRepositoryForVersion(this.rakeVersion,
-    // this.project.getRemoteArtifactRepositories());
-    // }
-    // }
+    /**
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    private RepositorySystemSession repoSession;
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, GemException {
         if (this.project.getBasedir() == null) {
 
-            setupGems(this.manager.createGemArtifact("rake", this.rakeVersion));
+            this.gemsInstaller.installGem("rake",
+                                          this.rakeVersion,
+                                          this.repoSession,
+                                          this.localRepository);
 
-            this.manager.addDefaultGemRepositoryForVersion(this.rakeVersion,
-                                                           this.project.getRemoteArtifactRepositories());
         }
         final Script script = this.factory.newScriptFromResource(RAKE_RUBY_COMMAND);
         script.addArg("-f", this.rakefile);

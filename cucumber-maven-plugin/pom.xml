@@ -5,42 +5,51 @@
   <parent>
     <artifactId>parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.22.0</version>
+    <version>0.23.0-SNAPSHOT</version>
     <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
-  <artifactId>gemify-maven-plugin</artifactId>
+  <artifactId>cucumber-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Gemify Maven Mojo</name>
+  <name>Cucumber Maven Mojo</name>
   <dependencies>
+    <dependency>
+      <groupId>${project.parent.groupId}</groupId>
+      <artifactId>gem-maven-plugin</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>ruby-tools</artifactId>
-      <version>0.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>3.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-artifact</artifactId>
-      <version>3.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>3.0</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.2</version>
-      <scope>test</scope>
+      <version>0.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>src-dependencies</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeGroupIds>de.saumya.mojo</includeGroupIds>
+              <includeArtifactIds>
+		jruby-maven-plugin,gem-maven-plugin
+	      </includeArtifactIds>
+              <includes>
+		de/saumya/mojo/jruby/AbstractJRubyMojo.java,
+		de/saumya/mojo/gem/AbstractGemMojo.java
+	      </includes>
+              <classifier>sources</classifier>
+              <outputDirectory>${project.build.directory}/sources</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-invoker-plugin</artifactId>
         <version>1.5</version>
@@ -50,13 +59,13 @@
           <pomIncludes>
             <pomInclude>*/pom.xml</pomInclude>
           </pomIncludes>
-<!--
           <pomExcludes>
             <pomExclude>with-pom-noversion/pom.xml</pomExclude>
           </pomExcludes>
--->
+<!--
           <settingsFile>src/it/settings.xml</settingsFile>
           <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+-->
           <preBuildHookScript>setup.bsh</preBuildHookScript>
           <postBuildHookScript>verify.bsh</postBuildHookScript>
         </configuration>

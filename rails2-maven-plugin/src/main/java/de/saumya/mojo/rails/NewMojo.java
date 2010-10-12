@@ -12,9 +12,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.velocity.VelocityContext;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.velocity.VelocityComponent;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.gems.GemException;
-import de.saumya.mojo.ruby.gems.GemManager;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -32,44 +32,47 @@ public class NewMojo extends AbstractRailsMojo {
      * 
      * @parameter default-value="${rails.args}"
      */
-    protected String            railsArgs                      = null;
+    protected String                railsArgs                      = null;
 
     /**
      * the path to the application to be generated
      * 
      * @parameter default-value="${app_path}"
      */
-    protected File              appPath                        = null;
+    protected File                  appPath                        = null;
 
     /**
      * the rails version to use
      * 
      * @parameter default-value="2.3.8" expression="${rails.version}"
      */
-    protected String            railsVersion                   = null;
+    protected String                railsVersion                   = null;
 
     /**
      * the groupId of the new pom
      * 
      * @parameter default-value="rails" expression="${groupId}"
      */
-    protected String            groupId                        = null;
+    protected String                groupId                        = null;
 
     /**
      * the version of the new pom
      * 
      * @parameter default-value="1.0-SNAPSHOT" expression="${version}"
      */
-    protected String            artifactVersion                = null;
+    protected String                artifactVersion                = null;
+
+    /**
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    private RepositorySystemSession repoSession;
 
     /** @component */
-    private VelocityComponent   velocityComponent;
-
-    /** @component */
-    private GemManager          manager;
+    private VelocityComponent       velocityComponent;
 
     // needs to be the default in mojo parameter as well
-    private static final String SMALLEST_ALLOWED_RAILS_VERSION = "2.3.5";
+    private static final String     SMALLEST_ALLOWED_RAILS_VERSION = "2.3.5";
 
     // ignore rails.dir property if set and execute
     // super.super.lanuchDirectory()
@@ -93,10 +96,11 @@ public class NewMojo extends AbstractRailsMojo {
         }
         if (this.project.getBasedir() == null) {
 
-            setupGems(this.manager.createGemArtifact("rails", this.railsVersion));
+            this.gemsInstaller.installGem("rails",
+                                          this.railsVersion,
+                                          this.repoSession,
+                                          this.localRepository);
 
-            this.manager.addDefaultGemRepositoryForVersion(this.railsVersion,
-                                                           this.project.getRemoteArtifactRepositories());
         }
 
         Script script;

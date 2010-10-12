@@ -35,7 +35,9 @@ class ControllerService {
         boolean update = false;
         synchronized (this.mutex) {
             if (this.blockUpdatesUntil < System.currentTimeMillis()) {
-                this.blockUpdatesUntil = System.currentTimeMillis() + 5 * 60 * 1000;
+                // next update 12 hours later
+                this.blockUpdatesUntil = System.currentTimeMillis() + 12 * 60
+                        * 60 * 1000;
                 update = true;
             }
         }

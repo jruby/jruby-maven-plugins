@@ -39,7 +39,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
     protected RepositorySystemSession repoSession;
 
     /** @component */
-    protected RailsManager            manager;
+    protected RailsManager            railsManager;
 
     protected String[] joinArgs(final String args1, final String args2) {
         final String args = ((args1 == null ? "" : args1) + " " + (args2 == null
@@ -58,7 +58,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
             ScriptException, IOException, GemException {
 
         try {
-            this.manager.initInstaller(this.gemsInstaller, launchDirectory());
+            this.railsManager.initInstaller(this.gemsInstaller, launchDirectory());
 
             executeRails();
         }

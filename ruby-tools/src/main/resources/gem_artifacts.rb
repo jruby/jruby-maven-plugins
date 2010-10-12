@@ -20,7 +20,7 @@ module Maven
 
     attr_reader :tuples
 
-    def initialize(plugin_version = '0.21.1', repository_id = 'rubygems', source_uri = "rubygems.org", local_repository = nil)
+    def initialize(plugin_version = '0.22.0', repository_id = 'rubygems', source_uri = "rubygems.org", local_repository = nil)
       @plugin_version = plugin_version
       @repository_id = repository_id
       if local_repository.nil?

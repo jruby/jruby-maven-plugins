@@ -9,7 +9,7 @@
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-proxy</artifactId>
-  <version>0.3</version>
+  <version>0.2</version>
   <packaging>war</packaging>
   <name>Rubygems as Maven Repository Webapp</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
@@ -23,6 +23,38 @@
 	  <groupId>org.codehaus.plexus</groupId>
 	  <artifactId>plexus-classworlds</artifactId>
 	</exclusion>
+	<exclusion>
+	  <groupId>ant</groupId>
+	  <artifactId>ant</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.apache.maven</groupId>
+	  <artifactId>maven-model</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.yaml</groupId>
+	  <artifactId>snakeyaml</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.codehaus.plexus</groupId>
+	  <artifactId>plexus-velocity</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.codehaus.plexus</groupId>
+	  <artifactId>plexus-component-annotations</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.codehaus.plexus</groupId>
+	  <artifactId>plexus-container-default</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.codehaus.plexus</groupId>
+	  <artifactId>plexus-utils</artifactId>
+	</exclusion>
+	<exclusion>
+	  <groupId>org.codehaus.plexus</groupId>
+	  <artifactId>plexus-archiver</artifactId>
+	</exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -34,7 +66,7 @@
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.3</version>
     </dependency>
   </dependencies>
   <build>

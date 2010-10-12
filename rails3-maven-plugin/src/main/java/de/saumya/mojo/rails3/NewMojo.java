@@ -92,7 +92,7 @@ public class NewMojo extends AbstractRailsMojo {
                     this.database = "sqlite3";
                 }
             }
-            this.manager.createNew(this.gemsInstaller,
+            this.railsManager.createNew(this.gemsInstaller,
                                    this.repoSession,
                                    this.appPath,
                                    this.database,

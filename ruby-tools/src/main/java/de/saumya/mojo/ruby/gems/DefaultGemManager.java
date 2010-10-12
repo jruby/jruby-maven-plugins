@@ -16,11 +16,18 @@ import org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager;
 import org.apache.maven.artifact.repository.metadata.RepositoryMetadataResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.repository.legacy.metadata.DefaultMetadataResolutionRequest;
 import org.apache.maven.repository.legacy.metadata.MetadataResolutionRequest;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.sonatype.aether.RepositorySystemSession;
 
 @Component(role = GemManager.class)
 public class DefaultGemManager implements GemManager {
@@ -32,6 +39,9 @@ public class DefaultGemManager implements GemManager {
 
     @Requirement
     private RepositoryMetadataManager repositoryMetadataManager;
+
+    @Requirement
+    private ProjectBuilder            builder;
 
     private Artifact setLatestVersionIfMissing(final Artifact artifact,
             final ArtifactRepository localRepository,
@@ -140,7 +150,7 @@ public class DefaultGemManager implements GemManager {
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories)
             throws GemException {
-        if (artifact.getFile() == null) {
+        if (artifact.getFile() == null || !artifact.getFile().exists()) {
             final Set<Artifact> artifacts = this.repositorySystem.resolve(new ArtifactResolutionRequest().setArtifact(artifact)
                     .setLocalRepository(localRepository)
                     .setRemoteRepositories(remoteRepositories))
@@ -151,6 +161,32 @@ public class DefaultGemManager implements GemManager {
             }
             artifact.setFile(artifacts.iterator().next().getFile());
         }
+    }
+
+    public MavenProject buildPom(final Artifact artifact,
+            final RepositorySystemSession repositorySystemSession,
+            final ArtifactRepository localRepository,
+            final List<ArtifactRepository> remoteRepositories)
+            throws GemException {
+        // build a POM and resolve all gem artifacts
+        final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest().setLocalRepository(localRepository)
+                .setRemoteRepositories(remoteRepositories)
+                .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
+                .setRepositorySession(repositorySystemSession)
+                .setResolveDependencies(true);
+        MavenProject pom;
+        try {
+
+            pom = this.builder.build(artifact, pomRequest).getProject();
+
+        }
+        catch (final ProjectBuildingException e) {
+            throw new GemException("error building POM for the rails installer",
+                    e);
+        }
+        resolve(pom.getArtifact(), localRepository, remoteRepositories);
+
+        return pom;
     }
 
     // versions

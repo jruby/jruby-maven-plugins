@@ -11,12 +11,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.InvalidRepositoryException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.building.ModelBuildingRequest;
@@ -35,7 +32,6 @@ import org.codehaus.plexus.velocity.VelocityComponent;
 import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.gems.GemException;
-import de.saumya.mojo.ruby.gems.GemManager;
 import de.saumya.mojo.ruby.gems.GemsInstaller;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -57,18 +53,8 @@ public class DefaultRailsManager implements RailsManager {
     private ProjectBuilder             builder;
 
     @Requirement
-    private GemManager                 gemManager;
-
-    @Requirement
     private VelocityComponent          velocityComponent;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.sonatype.maven.rails.commands.RailsManager#initInstaller(de.saumya
-     * .mojo.ruby.gems.GemsInstaller, java.io.File)
-     */
     public void initInstaller(final GemsInstaller installer,
             final File launchDirectory) throws RailsException {
         patchBootScript(launchDirectory);
@@ -127,14 +113,6 @@ public class DefaultRailsManager implements RailsManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.sonatype.maven.rails.commands.RailsManager#createNew(de.saumya.mojo
-     * .ruby.gems.GemsInstaller, org.sonatype.maven.rails.commands.JRubyConfig,
-     * java.lang.String, java.lang.String, java.lang.String)
-     */
     public void createNew(final GemsInstaller installer,
             final RepositorySystemSession repositorySystemSession,
             final File appPath, String database, final String railsVersion,
@@ -148,50 +126,16 @@ public class DefaultRailsManager implements RailsManager {
                     + " exists - skip installation of rails");
         }
 
-        // setup the rails artifact and use latest version unless specified
-        final ArtifactRepository localRepository = localRepository();
-        final List<ArtifactRepository> remoteRepositories = new ArrayList<ArtifactRepository>();
-        final Artifact rails;
-        if (railsVersion == null) {
-            this.gemManager.addDefaultGemRepository(remoteRepositories);
-            rails = this.gemManager.createGemArtifactWithLatestVersion("rails",
-                                                                       localRepository,
-                                                                       remoteRepositories);
-        }
-        else {
-            this.gemManager.addDefaultGemRepositoryForVersion(railsVersion,
-                                                              remoteRepositories);
-            rails = this.gemManager.createGemArtifact("rails", railsVersion);
-        }
-
         // use a rubygems directory in way that the new application can also use
         // it
         installer.config.setGemBase(new File(new File(appPath, "target"),
                 "rubygems"));
         setupGemHomeAndGemPath(installer);
 
-        // build a POM for the rails installer and resolve all gem artifacts
-        final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest().setLocalRepository(localRepository)
-                .setRemoteRepositories(remoteRepositories)
-                .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
-                .setRepositorySession(repositorySystemSession)
-                .setResolveDependencies(true);
-        MavenProject pom;
-        try {
-
-            pom = this.builder.build(rails, pomRequest).getProject();
-
-        }
-        catch (final ProjectBuildingException e) {
-            throw new RailsException("error building POM for the rails installer",
-                    e);
-        }
-        this.gemManager.resolve(pom.getArtifact(),
-                                localRepository,
-                                remoteRepositories);
-
-        // install the gems into rubygems
-        installer.installGems(pom);
+        installer.installGem("rails",
+                             railsVersion,
+                             repositorySystemSession,
+                             localRepository());
 
         // correct spelling
         if (DATABASES.containsKey(database)) {
@@ -389,7 +333,7 @@ public class DefaultRailsManager implements RailsManager {
             throw new RailsException("error building the POM", e);
         }
 
-        gemsInstaller.installGems(pom);
+        gemsInstaller.installPom(pom);
     }
 
     private ArtifactRepository localRepository() throws RailsException {

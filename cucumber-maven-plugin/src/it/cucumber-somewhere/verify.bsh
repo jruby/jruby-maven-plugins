@@ -1,0 +1,9 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+if ( !log.contains( "2 steps (2 passed)" ) )
+{
+    throw new RuntimeException( "log file does not contain '2 steps (2 passed)'" );
+}

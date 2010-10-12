@@ -33,7 +33,7 @@ public class RakeMojo extends AbstractRailsMojo {
     @Override
     public void executeRails() throws MojoExecutionException, ScriptException,
             IOException, GemException, RailsException {
-        this.manager.rake(this.gemsInstaller,
+        this.railsManager.rake(this.gemsInstaller,
                           this.repoSession,
                           launchDirectory(),
                           this.env,

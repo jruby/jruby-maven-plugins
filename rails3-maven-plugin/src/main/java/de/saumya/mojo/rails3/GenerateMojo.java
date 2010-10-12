@@ -33,7 +33,7 @@ public class GenerateMojo extends AbstractRailsMojo {
     @Override
     protected void executeRails() throws MojoExecutionException,
             ScriptException, IOException, GemException, RailsException {
-        this.manager.generate(this.gemsInstaller,
+        this.railsManager.generate(this.gemsInstaller,
                               this.repoSession,
                               launchDirectory(),
                               this.generator,

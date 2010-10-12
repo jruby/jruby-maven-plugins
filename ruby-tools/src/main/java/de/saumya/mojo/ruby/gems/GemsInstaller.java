@@ -6,10 +6,12 @@ package de.saumya.mojo.ruby.gems;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.MavenProject;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -34,26 +36,38 @@ public class GemsInstaller {
 
     public static final String GEM_RUBY_COMMAND = "META-INF/jruby.home/bin/gem";
 
-    public void installGems(final MavenProject pom) throws IOException,
+    public void installPom(final MavenProject pom) throws IOException,
             ScriptException, GemException {
         installGems(pom, null, null);
     }
 
-    public void installGems(final MavenProject pom,
+    public void installPom(final MavenProject pom,
             final ArtifactRepository localRepository) throws IOException,
             ScriptException, GemException {
         installGems(pom, null, localRepository);
     }
 
-    public void installGems(final Artifact ensureGem,
-            final ArtifactRepository localRepository) throws IOException,
-            ScriptException, GemException {
-        installGems(null, ensureGem, localRepository);
-    }
-
-    public void installGems(final MavenProject pom, final Artifact ensureGem)
-            throws IOException, ScriptException, GemException {
-        installGems(pom, ensureGem, null);
+    public void installGem(final String name, final String version,
+            final RepositorySystemSession repositorySystemSession,
+            final ArtifactRepository localRepository) throws GemException,
+            IOException, ScriptException {
+        final Artifact artifact;
+        final List<ArtifactRepository> remoteRepositories;
+        if (version == null) {
+            remoteRepositories = Collections.singletonList(this.manager.defaultGemArtifactRepository());
+            artifact = this.manager.createGemArtifactWithLatestVersion(name,
+                                                                       localRepository,
+                                                                       remoteRepositories);
+        }
+        else {
+            System.out.println(this.manager);
+            remoteRepositories = Collections.singletonList(this.manager.defaultGemArtifactRepositoryForVersion(version));
+            artifact = this.manager.createGemArtifact(name, version);
+        }
+        installPom(this.manager.buildPom(artifact,
+                                         repositorySystemSession,
+                                         localRepository,
+                                         remoteRepositories));
     }
 
     public void installGems(final MavenProject pom, final Artifact ensureGem,
@@ -75,6 +89,12 @@ public class GemsInstaller {
         if (pom != null) {
             boolean hasAlreadyOpenSSL = false;
             for (final Artifact artifact : pom.getArtifacts()) {
+                if (!artifact.getFile().exists()) {
+                    this.manager.resolve(artifact,
+                                         localRepository,
+                                         pom.getRemoteArtifactRepositories());
+
+                }
                 script = maybeAddArtifact(script, artifact);
                 hasAlreadyOpenSSL = hasAlreadyOpenSSL
                         || artifact.getArtifactId().equals(JRUBY_OPENSSL);
@@ -96,7 +116,7 @@ public class GemsInstaller {
         }
 
         if (script != null) {
-            script.addArg("--bindir", this.config.getBinDirectory() );
+            script.addArg("--bindir", this.config.getBinDirectory());
             script.execute();
         }
     }
