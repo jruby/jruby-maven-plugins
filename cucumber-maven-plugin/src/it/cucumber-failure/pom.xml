@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>cucumber-file</artifactId>
-  <version>testing</version>  
+  <version>testing</version>
   
   <repositories>
     <repository>
