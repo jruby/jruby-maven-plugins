@@ -4,6 +4,14 @@
   <groupId>de.saumya.mojo</groupId>
   <artifactId>rake-task</artifactId>
   <version>testing</version>
+  
+  <repositories>
+    <repository>
+      <id>rubygems-releases</id>
+      <url>http://gems.saumya.de/releases</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>

@@ -60,10 +60,11 @@
             <pomInclude>*/pom.xml</pomInclude>
           </pomIncludes>
           <pomExcludes>
-            <pomExclude>with-pom-noversion/pom.xml</pomExclude>
           </pomExcludes>
+<!--
           <settingsFile>src/it/settings.xml</settingsFile>
           <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+-->
           <preBuildHookScript>setup.bsh</preBuildHookScript>
           <postBuildHookScript>verify.bsh</postBuildHookScript>
         </configuration>
