@@ -35,4 +35,16 @@ public class GemScriptFactory extends ScriptFactory {
             addEnv(GEM_PATH, this.gemPath.getPath());
         }
     }
+
+    @Override
+    public Script newScriptFromSearchPath(final String scriptName)
+            throws IOException {
+        final File script = new File(new File(this.gemHome, "bin"), scriptName);
+        if (script.exists()) {
+            return newScript(script.getAbsoluteFile());
+        }
+        else {
+            return super.newScriptFromSearchPath(scriptName);
+        }
+    }
 }
