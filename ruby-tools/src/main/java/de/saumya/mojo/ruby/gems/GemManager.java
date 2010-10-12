@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.project.MavenProject;
+import org.sonatype.aether.RepositorySystemSession;
 
 public interface GemManager {
 
@@ -51,6 +53,12 @@ public interface GemManager {
 
     public Artifact createArtifact(final String groupId,
             final String artifactId, final String version, final String type);
+
+    public MavenProject buildPom(Artifact artifact,
+            final RepositorySystemSession repositorySystemSession,
+            final ArtifactRepository localRepository,
+            final List<ArtifactRepository> remoteRepositories)
+            throws GemException;
 
     // versions
     public List<String> availableVersions(final Artifact artifact,
