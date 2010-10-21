@@ -1,6 +1,7 @@
 #patched my rail3-maven-plugin to allow custom Gemfile names
 require 'rubygems'
 
+gemfile = ''
 if defined?(JRUBY_VERSION)
   require 'java'
   ENV['BUNDLE_GEMFILE'] ||= java.lang.System.getProperty("bundle.gemfile")
