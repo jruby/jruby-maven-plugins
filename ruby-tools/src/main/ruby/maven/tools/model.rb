@@ -147,6 +147,17 @@ module Maven
         self
       end
 
+      def with(config)
+        self.configuration = config
+      end
+
+      def in_phase(phase)
+        self.executions.get("in_phase_#{phase.gsub(/-/,'_')}") do |exe|
+          exe.phase = phase
+          exe
+        end
+      end
+
       def executions
         @executions ||= ModelHash.new(Execution)
       end
@@ -174,6 +185,16 @@ module Maven
           @configuration = c
         end
       end
+
+      def execute(goals)
+        @goals = goals.is_a?(Array) ? goals: [goals]
+        self
+      end
+
+      def with(config)
+        self.configuration = config
+      end
+
       def goals
         @goals ||= []
       end

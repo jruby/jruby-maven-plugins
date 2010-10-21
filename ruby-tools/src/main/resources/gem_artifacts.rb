@@ -118,6 +118,7 @@ module Maven
 # TODO use spec.requirements << 'A powerful graphics card' to specify
 # the maven plugins: spec.requirements << 'maven-plugin: de.saumya.mojo:gem-maven-plugin:0.20.0' or something or nothing ?
 
+      has_rspec = false
         f.puts <<-POM
 <?xml version="1.0"?>
 <project
@@ -128,7 +129,7 @@ module Maven
   <groupId>rubygems</groupId>
   <artifactId>#{spec.name}</artifactId>
   <version>#{spec.version}</version>
-  <packaging>gem</packaging>
+  <packaging>#{spec.platform.to_s == 'java'? "java-" : ""}gem</packaging>
   <name><![CDATA[#{spec.summary}]]></name>
   <description><![CDATA[#{spec.description}]]></description>
   <url>#{spec.homepage}</url>
@@ -210,6 +211,7 @@ POM
 
           spec_tuples = @fetcher.find_matching dep, true, false, nil
           is_java = spec_tuples.detect { |s| s[0][2] == 'java' }
+        has_rspec = true if dep.name == "rspec"
           # require 'net/http'
           f.puts <<-POM
     <dependency>
@@ -274,6 +276,9 @@ POM
           -->
         </configuration>
       </plugin>
+POM
+      if has_rspec
+  f.puts <<-POM
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>rspec-maven-plugin</artifactId>
@@ -284,6 +289,10 @@ POM
           </execution>
         </executions>
       </plugin>
+POM
+      end
+      if spec.platform.to_s == 'java'
+  f.puts <<-POM
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.0.2</version>
@@ -292,6 +301,9 @@ POM
           <target>1.5</target>
         </configuration>
       </plugin>
+POM
+      end
+  f.puts <<-POM
     </plugins>
   </build>
 </project>

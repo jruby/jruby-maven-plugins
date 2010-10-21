@@ -70,13 +70,14 @@ module Maven
         end
       end
 
-      def self.plugin(*args)
+      def self.plugin(*args, &block)
         raise "name and version must be given" if args.size == 1 || (args.size == 2 && args[1].is_a?(Hash))
         current.last.each do |c|
           g = (groups[c] ||= Group.new)
           def args.type
             :plugin
           end
+          args << block if block
           g << args
         end
       end

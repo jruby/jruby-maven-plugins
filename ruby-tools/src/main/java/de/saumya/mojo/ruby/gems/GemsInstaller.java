@@ -47,7 +47,7 @@ public class GemsInstaller {
         installGems(pom, null, localRepository);
     }
 
-    public void installGem(final String name, final String version,
+    public MavenProject installGem(final String name, final String version,
             final RepositorySystemSession repositorySystemSession,
             final ArtifactRepository localRepository) throws GemException,
             IOException, ScriptException {
@@ -60,14 +60,15 @@ public class GemsInstaller {
                                                                        remoteRepositories);
         }
         else {
-            System.out.println(this.manager);
             remoteRepositories = Collections.singletonList(this.manager.defaultGemArtifactRepositoryForVersion(version));
             artifact = this.manager.createGemArtifact(name, version);
         }
-        installPom(this.manager.buildPom(artifact,
-                                         repositorySystemSession,
-                                         localRepository,
-                                         remoteRepositories));
+        final MavenProject pom = this.manager.buildPom(artifact,
+                                                       repositorySystemSession,
+                                                       localRepository,
+                                                       remoteRepositories);
+        installPom(pom);
+        return pom;
     }
 
     public void installGems(final MavenProject pom, final Artifact ensureGem,

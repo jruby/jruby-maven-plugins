@@ -15,7 +15,7 @@ module Maven
       end
 
       def check_rails(file)
-        raise "it is not rails" unless File.exists?(File.join(File.dirname(file.to_s), "config", "application.rb"))
+        raise "it is not rails" unless File.exists?(File.join(File.dirname(file.path), "config", "application.rb"))
       end
 
       def plugin_version(group, name)
@@ -125,7 +125,7 @@ module Maven
                 if new_plugins.size > 0
                   profile.build.plugins do |plugins|
                     new_plugins.each do |pl|
-                    plugins.add(*pl)
+                      plugins.add(*pl)
                     end
                   end
                 end
@@ -145,7 +145,13 @@ module Maven
           proj.build.plugins do |plugins|
             default.each do |dep|
               if dep.type == :plugin
-                plugin = plugins.add(*dep)
+                if dep.size == 3
+                  block = dep[2]
+                  dep.delete(block) 
+                end
+                plugin = plugins.add(*dep) do |pl|
+                  block.call(pl) if block
+                end
               end
             end
            #  plugins.get_jruby(:gem) do |gem| 
