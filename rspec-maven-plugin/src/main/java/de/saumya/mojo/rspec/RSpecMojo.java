@@ -21,9 +21,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @phase test
  * @requiresDependencyResolution test
  */
-public class RSpecMojo
-    extends AbstractGemMojo
-{
+public class RSpecMojo extends AbstractGemMojo {
 
 	/**
 	 * The project base directory
@@ -49,6 +47,9 @@ public class RSpecMojo
 	 * @parameter expression="${maven.test.skip}"
 	 */
 	protected boolean skipTests;
+
+	/** @parameter default-value="${skipSpecs}" */
+	protected boolean skipSpecs = false;
 
 	/**
 	 * The directory containing the RSpec source files
@@ -79,57 +80,62 @@ public class RSpecMojo
 	 */
 	protected Properties systemProperties;
 
-	private RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
-	private ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
+	private final RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
+	private final ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
 
 	private File specSourceDirectory() {
-		return new File(launchDirectory(), specSourceDirectory);
-	}
-	
-	@Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-		if (skipTests) {
-			getLog().info("Skipping RSpec tests");
-			return;
-		}
-		
-		super.execute();
+		return new File(launchDirectory(), this.specSourceDirectory);
 	}
 
 	@Override
-	public void executeWithGems() throws MojoExecutionException, ScriptException, IOException {
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		if (this.skipTests || this.skipSpecs) {
+			getLog().info("Skipping RSpec tests");
+			return;
+		} else {
+			super.execute();
+		}
+	}
+
+	@Override
+	public void executeWithGems() throws MojoExecutionException,
+			ScriptException, IOException {
 
 		final File specSourceDirectory = specSourceDirectory();
 		if (!specSourceDirectory.exists()) {
-			getLog().info("Skipping RSpec tests since " + specSourceDirectory + " is missing");
+			getLog().info(
+					"Skipping RSpec tests since " + specSourceDirectory
+							+ " is missing");
 			return;
 		}
 		getLog().info("Running RSpec tests from " + specSourceDirectory);
 
-		String reportPath = new File(outputDirectory, reportName).getAbsolutePath();
+		final String reportPath = new File(this.outputDirectory,
+				this.reportName).getAbsolutePath();
 
-		initScriptFactory(rspecScriptFactory, reportPath);
-		initScriptFactory(shellScriptFactory, reportPath);
+		initScriptFactory(this.rspecScriptFactory, reportPath);
+		initScriptFactory(this.shellScriptFactory, reportPath);
 
 		try {
-			rspecScriptFactory.emit();
-		} catch (Exception e) {
+			this.rspecScriptFactory.emit();
+		} catch (final Exception e) {
 			getLog().error("error emitting .rb", e);
 		}
 		try {
-			shellScriptFactory.emit();
-		} catch (Exception e) {
+			this.shellScriptFactory.emit();
+		} catch (final Exception e) {
 			getLog().error("error emitting .sh", e);
 		}
 
-		this.factory.newScript(this.rspecScriptFactory.getScriptFile() ).executeIn(launchDirectory());
+		this.factory.newScript(this.rspecScriptFactory.getScriptFile())
+				.executeIn(launchDirectory());
 
-		File reportFile = new File(reportPath);
+		final File reportFile = new File(reportPath);
 
 		Reader in = null;
 		try {
 			in = new FileReader(reportFile);
-			BufferedReader reader = new BufferedReader(in);
+			final BufferedReader reader = new BufferedReader(in);
 
 			String line = null;
 
@@ -138,14 +144,15 @@ public class RSpecMojo
 					return;
 				}
 			}
-		} catch (IOException e) {
-			throw new MojoExecutionException("Unable to read test report file: " + reportFile);
+		} catch (final IOException e) {
+			throw new MojoExecutionException(
+					"Unable to read test report file: " + reportFile);
 		} finally {
-			if ( in != null ) {
+			if (in != null) {
 				try {
 					in.close();
-				} catch (IOException e) {
-					throw new MojoExecutionException( e.getMessage() );
+				} catch (final IOException e) {
+					throw new MojoExecutionException(e.getMessage());
 				}
 			}
 		}
@@ -153,15 +160,16 @@ public class RSpecMojo
 		throw new MojoExecutionException("There were test failures");
 	}
 
-	private void initScriptFactory(ScriptFactory factory, String reportPath) {
-		factory.setBaseDir(basedir.getAbsolutePath());
-		factory.setClasspathElements(classpathElements);
-		factory.setOutputDir(new File( outputDirectory) );
+	private void initScriptFactory(final ScriptFactory factory,
+			final String reportPath) {
+		factory.setBaseDir(this.basedir.getAbsolutePath());
+		factory.setClasspathElements(this.classpathElements);
+		factory.setOutputDir(new File(this.outputDirectory));
 		factory.setReportPath(reportPath);
 		factory.setSourceDir(specSourceDirectory().getAbsolutePath());
-		factory.setGemHome( this.gemHome );
-		factory.setGemPath( this.gemPath );
-		Properties props = systemProperties;
+		factory.setGemHome(this.gemHome);
+		factory.setGemPath(this.gemPath);
+		Properties props = this.systemProperties;
 		if (props == null) {
 			props = new Properties();
 		}

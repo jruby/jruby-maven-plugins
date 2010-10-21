@@ -45,8 +45,8 @@ public class CucumberMojo extends AbstractGemMojo {
 	/** @parameter default-value="${project.build.directory}/surefire-reports" */
 	private String testReportDirectory;
 
-	/** @parameter default-value="${skipTest}" */
-	protected boolean skipTest = false;
+	/** @parameter default-value="${maven.test.skip}" */
+	protected boolean skipTests = false;
 
 	/** @parameter default-value="${skipCucumber}" */
 	protected boolean skipCucumber = false;
@@ -59,7 +59,8 @@ public class CucumberMojo extends AbstractGemMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		if (this.skipTest || this.skipCucumber) {
+		if (this.skipTests || this.skipCucumber) {
+			getLog().info("Skipping Cucumber tests");
 			return;
 		} else {
 			super.execute();
