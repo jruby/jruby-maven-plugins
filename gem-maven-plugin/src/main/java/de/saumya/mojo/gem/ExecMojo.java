@@ -44,7 +44,7 @@ public class ExecMojo extends AbstractGemMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        // TODO jruby-complete can tries to install gems
+        // TODO jruby-complete tries to install gems
         // file:/jruby-complete-1.5.1.jar!/META-INF/jruby.home/lib/ruby/gems/1.8
         // instead of in $HOME/.gem
         this.includeOpenSSL = this.jrubyFork;
@@ -70,7 +70,7 @@ public class ExecMojo extends AbstractGemMojo {
             s.execute();
         }
         else {
-            getLog().warn("no arguments given. use -Djruby.args=... or -Djruby.script=... or -Djruby.file=...");
+            getLog().warn("no arguments given. use -Dgem.exec.args=... or -Dgem.exec.script=... or -Dgem.exec.file=...");
         }
     }
 }
