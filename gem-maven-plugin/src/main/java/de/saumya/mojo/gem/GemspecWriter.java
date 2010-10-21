@@ -89,12 +89,18 @@ class GemspecWriter {
             final String second = version.substring(comma + 1,
                                                     version.length() - 1);
             if (version.matches("\\[.*99999.99999\\)$")) {
+                // out of '[1.2.0, 1.99999.99999]' make '1.2'
                 final String prefix = second.replaceFirst("99999.99999$", "");
-
                 return "'~> "
                         + prefix
                         + first.substring(prefix.length())
                                 .replaceFirst("[.].*", "") + "'";
+            }
+            else if (version.matches("\\[.*,\\)$")) {
+                final StringBuilder buf = new StringBuilder("'>");
+                buf.append(version.charAt(0) == '[' ? "=" : "");
+                buf.append(first).append("'");
+                return buf.toString();
             }
             else {
                 final StringBuilder buf = new StringBuilder("['>");
