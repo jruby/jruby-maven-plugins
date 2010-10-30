@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><archetype>
   <id>rails_archetype</id>
   <resources>
+    <resource>src/test/resources/server.keystore</resource>
     <resource>src/main/webapp/WEB-INF/web.xml</resource>
     <resource>src/main/webapp/index.html</resource>
     <resource>src/main/jetty/override-development-web.xml</resource>

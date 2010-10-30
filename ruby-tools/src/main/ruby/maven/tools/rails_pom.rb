@@ -216,14 +216,20 @@ module Maven
                                   "${jetty.version}") do |jetty|
               jetty.configuration = {
                 :webAppConfig => {
-                  :overrideDescriptor => 'src/main/jetty/override-${rails.env}-web.xml'
+                  :overrideDescriptor => '${project.build.directory}/jetty/override-${rails.env}-web.xml'
                 },
-                # :systemProperties => {
-                #   :systemProperty => {
-                #     :name => 'bundle.gemfile',
-                #     :value => 'Gemfile.maven'
-                #   }
-                # }
+                :connectors => <<-XML
+
+		<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+		  <port>8080</port>
+		</connector>
+		<connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+		  <port>8443</port>
+		  <keystore>${project.basedir}/src/test/resources/server.keystore</keystore>
+		  <keyPassword>123456</keyPassword>
+		  <password>123456</password>
+		</connector>
+XML
               }
             end
           end

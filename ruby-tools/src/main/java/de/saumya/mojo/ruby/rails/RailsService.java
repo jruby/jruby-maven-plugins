@@ -23,7 +23,7 @@ public class RailsService {
     public RailsService(final RailsState state,
             final RepositorySystemSession repositorySystemSession,
             final ScriptFactory factory, final GemManager gemManager,
-            final RailsManager manager) throws RailsException {
+            final RailsManager manager) throws RailsException, IOException {
         assert state != null;
         assert this.session != null;
         assert factory != null;
@@ -39,7 +39,7 @@ public class RailsService {
         manager.initInstaller(this.installer, state.getLaunchDirectory());
     }
 
-    public void resetState() throws RailsException {
+    public void resetState() throws RailsException, IOException {
         this.manager.initInstaller(this.installer,
                                    this.state.getLaunchDirectory());
     }

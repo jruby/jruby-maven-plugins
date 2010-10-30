@@ -39,6 +39,12 @@
         <include>Gemfile.maven</include>
       </includes>
     </fileSet>
+    <fileSet filtered="false" encoding="UTF-8">
+      <directory>src/test/resources</directory>
+      <includes>
+        <include>server.keystore</include>
+      </includes>
+    </fileSet>
   </fileSets>
   <requiredProperties>
     <requiredProperty key="database">

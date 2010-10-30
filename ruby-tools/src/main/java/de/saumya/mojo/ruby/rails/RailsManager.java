@@ -12,7 +12,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
 public interface RailsManager {
 
     public abstract void initInstaller(final GemsInstaller installer,
-            final File launchDirectory) throws RailsException;
+            final File launchDirectory) throws RailsException, IOException;
 
     public abstract void createNew(final GemsInstaller installer,
             final RepositorySystemSession repositorySystemSession,

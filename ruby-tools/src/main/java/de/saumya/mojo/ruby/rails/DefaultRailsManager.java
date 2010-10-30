@@ -56,7 +56,7 @@ public class DefaultRailsManager implements RailsManager {
     private VelocityComponent          velocityComponent;
 
     public void initInstaller(final GemsInstaller installer,
-            final File launchDirectory) throws RailsException {
+            final File launchDirectory) throws RailsException, IOException {
         patchBootScript(launchDirectory);
         setupWebXML(launchDirectory);
         setupGemfile(installer, launchDirectory);
@@ -149,11 +149,11 @@ public class DefaultRailsManager implements RailsManager {
         if (appPath != null) {
             script.addArg(appPath.getAbsolutePath());
         }
-        if (database != null) {
-            script.addArg("-d", database);
-        }
         for (final String arg : args) {
             script.addArg(arg);
+        }
+        if (database != null) {
+            script.addArg("-d", database);
         }
         script.execute();
 
@@ -214,13 +214,15 @@ public class DefaultRailsManager implements RailsManager {
         }
     }
 
-    private void setupWebXML(final File launchDirectory) throws RailsException {
-        final VelocityContext context = new VelocityContext();
+    private void setupWebXML(final File launchDirectory) throws RailsException,
+            IOException {
         // patch the system only when you find a config/application.rb file
         if (!new File(new File(launchDirectory, "config"), "application.rb").exists()) {
             // TODO log this !!
             return;
         }
+        final VelocityContext context = new VelocityContext();
+        context.put("basedir", launchDirectory);
 
         // create web.xml
         filterContent(launchDirectory,
@@ -230,10 +232,20 @@ public class DefaultRailsManager implements RailsManager {
         // create override-xyz-web.xml
         filterContent(launchDirectory,
                       context,
-                      "src/main/jetty/override-development-web.xml");
+                      "target/jetty/override-development-web.xml");
         filterContent(launchDirectory,
                       context,
-                      "src/main/jetty/override-production-web.xml");
+                      "target/jetty/override-production-web.xml");
+
+        // create the keystore for SSL
+        final String keystore = "src/test/resources/server.keystore";
+        final File keystoreFile = new File(launchDirectory, keystore);
+        if (!keystoreFile.exists()) {
+            FileUtils.copyURLToFile(getClass().getResource("/archetype-resources/"
+                                            + keystore),
+                                    new File(launchDirectory, keystore));
+        }
+
     }
 
     private void filterContent(final File app, final VelocityContext context,

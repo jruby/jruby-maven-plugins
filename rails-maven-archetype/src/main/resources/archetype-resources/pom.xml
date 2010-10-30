@@ -101,7 +101,7 @@
 #literal()
     <!--
 	this is needed for the maven-war-plugin configuration as well by
-	the jetty plugin for the src/main/jetty/override-xyz-web.xml files
+	the jetty plugin for the target/jetty/override-xyz-web.xml files
     -->
 #end
     <gem.home>${symbol_dollar}{project.build.directory}/rubygems</gem.home>
@@ -208,7 +208,7 @@
         <version>7.0.1.v20091125</version>
 	<configuration>
 	  <webAppConfig>
-	    <overrideDescriptor>src/main/jetty/override-${symbol_dollar}{rails.env}-web.xml</overrideDescriptor>
+	    <overrideDescriptor>${symbol_dollar}{project.build.directory}/jetty/override-${symbol_dollar}{rails.env}-web.xml</overrideDescriptor>
 	  </webAppConfig>
 	  <systemProperties>
 	    <systemProperty>
@@ -367,7 +367,7 @@
             <version>${jetty.version}</version>
             <configuration>
               <webAppConfig>
-                <overrideDescriptor>src/main/jetty/override-${rails.env}-web.xml</overrideDescriptor>
+                <overrideDescriptor>${symbol_dollar}{project.build.directory}/jetty/override-${rails.env}-web.xml</overrideDescriptor>
               </webAppConfig>
             </configuration>
           </plugin>

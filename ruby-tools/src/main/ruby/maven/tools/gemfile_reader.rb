@@ -127,6 +127,6 @@ module Maven
 end
 
 if $0 == __FILE__
-  gemfile = Maven::Tools::GemfileReader.new(File.new(ARGV[0]))
-  gemfile.execute_phase(ARGV[1])
+  gemfile = Maven::Tools::GemfileReader.new(File.new(ARGV[0] || 'Gemfile'))
+  gemfile.execute_phase(ARGV[1]) if ARGV[1]
 end
