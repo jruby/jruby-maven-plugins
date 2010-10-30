@@ -25,7 +25,7 @@ public abstract class AbstractRailsMojo extends AbstractGemMojo {
      * either development or test or production or whatever else is possible
      * with your config
      * 
-     * @parameter expression="${rails.env}"
+     * @parameter expression="${rails.env}" default-value="development"
      */
     protected String env;
 
