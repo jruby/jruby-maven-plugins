@@ -92,12 +92,29 @@ public class NewMojo extends AbstractRailsMojo {
                     this.database = "sqlite3";
                 }
             }
+            final String[] combArgs = joinArgs(this.railsArgs, this.args);
+            if (this.appPath == null) {
+                // find appPath
+                int index = 0;
+                for (final String arg : combArgs) {
+                    if (this.appPath == null && !arg.startsWith("-")) {
+                        this.appPath = new File(arg);
+                        break;
+                    }
+                    index++;
+                }
+                // remove found appPath from arg list
+                if (index < combArgs.length) {
+                    combArgs[index] = null;
+                }
+            }
+
             this.railsManager.createNew(this.gemsInstaller,
-                                   this.repoSession,
-                                   this.appPath,
-                                   this.database,
-                                   this.railsVersion,
-                                   joinArgs(this.railsArgs, this.args));
+                                        this.repoSession,
+                                        this.appPath,
+                                        this.database,
+                                        this.railsVersion,
+                                        combArgs);
         }
         catch (final RailsException e) {
             throw new MojoExecutionException("error creating new rails application",
