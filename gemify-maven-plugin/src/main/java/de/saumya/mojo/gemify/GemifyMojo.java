@@ -10,6 +10,8 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.model.Dependency;
@@ -88,6 +90,9 @@ public class GemifyMojo extends AbstractMojo {
     /** @parameter default-value="${gemify.onlySpecs}" */
     private boolean                         onlySpecs;
 
+    /** @parameter default-value="${gemify.repositories}" */
+    private String                         repositories;
+
     /**
      * local repository for internal use.
      * 
@@ -132,6 +137,17 @@ public class GemifyMojo extends AbstractMojo {
         }
         if (!this.gemName.contains(".")) {
             throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
+        }
+
+        if(repositories != null){
+            for(String repoUrl: this.repositories.split(",")){
+                ArtifactRepository repository = this.repositorySystem.createArtifactRepository(repoUrl.replaceFirst("https?://", "").replaceAll("[:\\/&?=.]", "_"),
+                                                                                               repoUrl,
+                                                                                               new DefaultRepositoryLayout(),
+                                                                                               new ArtifactRepositoryPolicy(),
+                                                                                               new ArtifactRepositoryPolicy());
+                this.project.getRemoteArtifactRepositories().add(repository);
+            }
         }
 
         final ProjectBuildingResult result = buildProject(this.gemName,

@@ -1,0 +1,7 @@
+import java.io.*;
+
+// assume default location
+localRepo = new File(java.lang.System.getProperty("user.home"), ".m2/repository");
+new File(localRepo, "org/jboss/logging/jboss-logging/3.0.0.Beta4/jboss-logging-3.0.0.Beta4.pom").delete();
+
+new File(localRepositoryPath, "org/jboss/logging/jboss-logging/3.0.0.Beta4/jboss-logging-3.0.0.Beta4.pom").delete() || true;
