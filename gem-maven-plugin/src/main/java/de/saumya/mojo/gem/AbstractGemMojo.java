@@ -46,6 +46,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter expression="${gem.update}" default-value="false"
      */
     private boolean         update;
+
     /**
      * directory of gem home to use when forking JRuby.
      * 
@@ -83,17 +84,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     protected GemsInstaller gemsInstaller;
 
-    @SuppressWarnings("deprecation")
     @Override
     protected ScriptFactory newScriptFactory() throws MojoExecutionException {
         try {
-            // give preference to the deprecated gemHome/gemPath from super
-            if (super.jrubyGemHome != null) {
-                this.gemHome = super.jrubyGemHome;
-            }
-            if (super.jrubyGemPath != null) {
-                this.gemPath = super.jrubyGemPath;
-            }
             final GemScriptFactory factory = new GemScriptFactory(this.logger,
                     this.classRealm,
                     resolveJRUBYCompleteArtifact().getFile(),
