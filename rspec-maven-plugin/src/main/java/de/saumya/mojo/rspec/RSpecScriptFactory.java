@@ -10,7 +10,6 @@ public class RSpecScriptFactory extends AbstractScriptFactory {
 
 		builder.append(getPrologScript());
 		builder.append(getSystemPropertiesScript());
-		builder.append(getClasspathElementsScript());
 		builder.append(getPluginClasspathScript());
 		builder.append(getConstantsConfigScript());
 		builder.append(getRSpecRunnerScript());
@@ -43,13 +42,6 @@ public class RSpecScriptFactory extends AbstractScriptFactory {
 
 	private String getRSpecRunnerScript() {
 		StringBuilder builder = new StringBuilder();
-
-		if (this.gemHome != null) {
-			builder.append("ENV['GEM_HOME']=%q(" + this.gemHome + ")\n");
-		}
-		if (this.gemPath != null) {
-			builder.append("ENV['GEM_PATH']=%q(" + this.gemPath + ")\n");
-		}
 		
 		builder.append( "things = [ SPEC_DIR ]\n");
 		builder.append( "if ( ! ARGV.empty? )\n" );
@@ -90,21 +82,6 @@ public class RSpecScriptFactory extends AbstractScriptFactory {
 		builder.append("require %(java)\n");
 
 		return builder.toString();
-	}
-
-	private String getClasspathElementsScript() throws MalformedURLException {
-		StringBuilder script = new StringBuilder();
-
-		script.append( "require 'jruby'\n" );
-		
-		for (String path : classpathElements) {
-			if ( ! ( path.endsWith( "jar" ) || path.endsWith("/") ) ) {
-				path = path + "/";
-			}
-			script.append( "JRuby.runtime.jruby_class_loader.addURL( Java::java.net::URL.new( %Q(file://" + path + ") ) )\n" );
-		}
-		
-		return script.toString();
 	}
 
 	private String getPluginClasspathScript() {

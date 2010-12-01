@@ -1,0 +1,1 @@
+de.saumya.mojo:gem-maven-plugin:initialize de.saumya.mojo:rspec-maven-plugin:test

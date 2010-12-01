@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -81,7 +82,6 @@ public class RSpecMojo extends AbstractGemMojo {
 	protected Properties systemProperties;
 
 	private final RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
-	private final ShellScriptFactory shellScriptFactory = new ShellScriptFactory();
 
 	private File specSourceDirectory() {
 		return new File(launchDirectory(), this.specSourceDirectory);
@@ -114,17 +114,11 @@ public class RSpecMojo extends AbstractGemMojo {
 				this.reportName).getAbsolutePath();
 
 		initScriptFactory(this.rspecScriptFactory, reportPath);
-		initScriptFactory(this.shellScriptFactory, reportPath);
 
 		try {
 			this.rspecScriptFactory.emit();
 		} catch (final Exception e) {
 			getLog().error("error emitting .rb", e);
-		}
-		try {
-			this.shellScriptFactory.emit();
-		} catch (final Exception e) {
-			getLog().error("error emitting .sh", e);
 		}
 
 		this.factory.newScript(this.rspecScriptFactory.getScriptFile())
@@ -163,12 +157,9 @@ public class RSpecMojo extends AbstractGemMojo {
 	private void initScriptFactory(final ScriptFactory factory,
 			final String reportPath) {
 		factory.setBaseDir(this.basedir.getAbsolutePath());
-		factory.setClasspathElements(this.classpathElements);
 		factory.setOutputDir(new File(this.outputDirectory));
 		factory.setReportPath(reportPath);
 		factory.setSourceDir(specSourceDirectory().getAbsolutePath());
-		factory.setGemHome(this.gemHome);
-		factory.setGemPath(this.gemPath);
 		Properties props = this.systemProperties;
 		if (props == null) {
 			props = new Properties();
