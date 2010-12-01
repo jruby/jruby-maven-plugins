@@ -163,27 +163,35 @@ public class DefaultGemManager implements GemManager {
         }
     }
 
+    public MavenProject buildModel(final Artifact artifact,
+            final RepositorySystemSession repositorySystemSession,
+            final ArtifactRepository localRepository,
+            final List<ArtifactRepository> remoteRepositories, boolean resolve)
+            throws GemException {
+        // build a POM and resolve all artifacts
+        final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest().setLocalRepository(localRepository)
+                .setRemoteRepositories(remoteRepositories)
+                .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
+                .setRepositorySession(repositorySystemSession)
+                .setResolveDependencies(resolve);
+        try {
+
+            return this.builder.build(artifact, pomRequest).getProject();
+
+        }
+        catch (final ProjectBuildingException e) {
+            throw new GemException("error building POM",
+                    e);
+        }
+    }
+
     public MavenProject buildPom(final Artifact artifact,
             final RepositorySystemSession repositorySystemSession,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories)
             throws GemException {
-        // build a POM and resolve all gem artifacts
-        final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest().setLocalRepository(localRepository)
-                .setRemoteRepositories(remoteRepositories)
-                .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
-                .setRepositorySession(repositorySystemSession)
-                .setResolveDependencies(true);
-        MavenProject pom;
-        try {
+        MavenProject pom = buildModel(artifact, repositorySystemSession, localRepository, remoteRepositories, true);
 
-            pom = this.builder.build(artifact, pomRequest).getProject();
-
-        }
-        catch (final ProjectBuildingException e) {
-            throw new GemException("error building POM for the rails installer",
-                    e);
-        }
         resolve(pom.getArtifact(), localRepository, remoteRepositories);
 
         return pom;

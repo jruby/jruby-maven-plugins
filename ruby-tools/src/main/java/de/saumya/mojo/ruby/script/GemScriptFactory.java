@@ -24,6 +24,7 @@ public class GemScriptFactory extends ScriptFactory {
             final boolean fork, final File gemHome, final File gemPath)
             throws ScriptException, IOException {
         super(logger, classRealm, jrubyJar, classpathElements, fork);
+
         this.gemHome = new File(gemHome.getAbsolutePath()
                 .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
         if (this.gemHome != null) {
