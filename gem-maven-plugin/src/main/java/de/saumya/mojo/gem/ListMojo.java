@@ -7,10 +7,12 @@ import org.apache.maven.plugin.MojoExecutionException;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
+ * Deprecated: just not really needed, use "gem:gem -Dargs=list" instead
  * goal to run "gem list".
  * 
  * @goal list
  */
+@Deprecated
 public class ListMojo extends AbstractGemMojo {
 
     @Override

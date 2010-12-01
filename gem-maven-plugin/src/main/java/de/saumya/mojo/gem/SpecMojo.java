@@ -8,10 +8,12 @@ import de.saumya.mojo.jruby.AbstractJRubyMojo;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
+ * Deprecated: just not really needed, use "gem:gem -Dargs=spec" instead
  * goal to run "gem spec".
  * 
  * @goal spec
  */
+@Deprecated
 public class SpecMojo extends AbstractJRubyMojo {
     /**
      * arguments for the gem command of JRuby.
