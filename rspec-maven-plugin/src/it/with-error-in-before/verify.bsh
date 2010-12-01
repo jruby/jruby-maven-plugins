@@ -1,0 +1,9 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+if ( !log.contains( "TOTAL: -1 passing; 1 failing; 0 pending" ) )
+{
+    throw new RuntimeException( "log file does not contain 'TOTAL: -1 passing; 1 failing; 0 pending'" );
+}

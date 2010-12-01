@@ -151,6 +151,7 @@ class MavenSurefireReporter < Spec::Runner::Formatter::BaseFormatter
   end
   
   def example_failed(example, counter, failure)
+    return unless @current_example_info
     @current_example_info.status = :failing
     @current_example_info.failure = failure
     example_finished
