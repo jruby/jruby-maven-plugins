@@ -15,6 +15,7 @@ class Gem::RemoteFetcher
   end
 end
 
+require 'rubygems/spec_fetcher'
 module Maven
   class LocalRepository
 
