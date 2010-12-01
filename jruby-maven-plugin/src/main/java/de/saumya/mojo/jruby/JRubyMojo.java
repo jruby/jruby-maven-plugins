@@ -19,6 +19,13 @@ public class JRubyMojo extends AbstractJRubyMojo {
     /**
      * ruby code which gets executed.
      * 
+     * @parameter default-value="${jruby.args}"
+     */
+    protected String jrubyArgs = null;
+
+    /**
+     * ruby code which gets executed.
+     * 
      * @parameter default-value="${jruby.script}"
      */
     protected String script = null;
@@ -30,9 +37,29 @@ public class JRubyMojo extends AbstractJRubyMojo {
      */
     protected File file = null;
 
+    /**
+     * directory of gem home to use when forking JRuby.
+     * 
+     * @parameter expression="${gem.home}"
+     */
+    protected File gemHome;
+
+    /**
+     * directory of JRuby path to use when forking JRuby.
+     * 
+     * @parameter expression="${gem.path}"
+     */
+    protected File gemPath;
+
     @Override
     public void executeJRuby() throws MojoExecutionException, IOException,
             ScriptException {
+        if (gemHome != null){
+            factory.addEnv("GEM_HOME", this.gemHome);
+        }
+        if (gemPath != null){
+            factory.addEnv("GEM_PATH", this.gemPath);
+        }
         Script s;
         if (this.script != null && this.script.length() > 0) {
             s = this.factory.newScript(this.script);
@@ -41,6 +68,7 @@ public class JRubyMojo extends AbstractJRubyMojo {
         } else {
             s = this.factory.newArguments();
         }
+        s.addArgs(this.jrubyArgs);
         s.addArgs(this.args);
         if (s.isValid()) {
             s.executeIn(launchDirectory());

@@ -81,22 +81,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     private File launchDirectory;
 
     /**
-     * directory of gem home to use when forking JRuby.
-     * 
-     * @parameter expression="${jruby.gem.home}"
-     */
-    @Deprecated
-    protected File jrubyGemHome;
-
-    /**
-     * directory of JRuby path to use when forking JRuby.
-     * 
-     * @parameter expression="${jruby.gem.path}"
-     */
-    @Deprecated
-    protected File jrubyGemPath;
-
-    /**
      * reference to maven project for internal use.
      * 
      * @parameter expression="${project}"
@@ -150,14 +134,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         this.logger = new MojoLogger(this.jrubyVerbose, getLog());
         this.factory = newScriptFactory();
         this.factory.addJavaArgs(this.jrubyArgs);
-        if (this.jrubyGemHome != null) {
-            this.factory.addEnv("GEM_HOME", this.jrubyGemHome.getAbsolutePath()
-                    .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
-        }
-        if (this.jrubyGemPath != null) {
-            this.factory.addEnv("GEM_PATH", this.jrubyGemPath.getAbsolutePath()
-                    .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
-        }
 
         try {
 

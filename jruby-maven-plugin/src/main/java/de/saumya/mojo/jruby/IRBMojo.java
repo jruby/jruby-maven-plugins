@@ -8,11 +8,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
- * maven wrpper around IRB.
+ * maven wrapper around IRB. deprecated use gem:irb instead
  * 
  * @goal irb
  * @requiresDependencyResolution test
  */
+@Deprecated
 public class IRBMojo extends AbstractJRubyMojo {
 
     // override super mojo and make this readonly
