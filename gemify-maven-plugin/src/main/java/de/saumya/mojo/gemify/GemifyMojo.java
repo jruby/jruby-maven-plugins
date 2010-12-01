@@ -43,6 +43,8 @@ import de.saumya.mojo.ruby.gems.GemManager;
  */
 public class GemifyMojo extends AbstractMojo {
 
+    private static final String SEPARATOR = "------------------------";
+
     /**
      * gemname to identify the maven artifact (format: groupId.artifactId).
      * 
@@ -432,10 +434,40 @@ public class GemifyMojo extends AbstractMojo {
                     .setResolveTransitively(false);
             final ArtifactResolutionResult result = this.repositorySystem.resolve(request);
             if (result.getMissingArtifacts().size() > 0) {
+                // prepare the exception message
+                StringBuilder buf = new StringBuilder();
+                for(Artifact artifact: result.getMissingArtifacts()){
+                    buf.append("\n\nMissing Artifacts:\n").append(SEPARATOR);
+                    try {
+                        MavenProject model = gemManager.buildModel(artifact, this.repoSession, localRepository,
+                                                             this.project.getRemoteArtifactRepositories(), false);
+                        String url = model.getDistributionManagement() == null ?
+                                null :
+                                model.getDistributionManagement().getDownloadUrl();
+                        buf.append("\nArtifact: ").append(artifact).append("\n\n");
+
+                        if(url != null){
+                            buf.append("Try downloading the file manually from:\n\t").append(url);
+                            buf.append("\n\nThen, install it using the command:\n\t");
+                        }
+                        else {
+                            getLog().debug("no download url for " + artifact);
+                        }
+                        buf.append("mvn install:install-file -DgroupId=").append(artifact.getGroupId())
+                            .append(" -DartifactId=").append(artifact.getArtifactId())
+                            .append(" -Dversion=").append(artifact.getVersion())
+                            .append(" -Dpackaging=jar -Dfile=/path/to/file");
+                    }
+                    catch (GemException e) {
+                        getLog().warn("error building pom for " + artifact, e);
+                    }
+                    buf.append("\n\n").append(SEPARATOR).append("\n\n");
+                }
+
                 throw new MojoExecutionException((this.repoSession.isOffline()
                         ? "The repository system is offline. "
                         : "")
-                        + "Missing artifact: " + pom.getArtifact());
+                        + buf);
             }
         }
         final MavenArtifact mavenArtifact = new MavenArtifact(pom.getModel(),
