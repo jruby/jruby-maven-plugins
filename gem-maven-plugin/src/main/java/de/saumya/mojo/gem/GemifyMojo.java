@@ -32,8 +32,6 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal gemify
  * @requiresDependencyResolution test
  */
-@Deprecated
-// use gemify mojo instead
 public class GemifyMojo extends AbstractGemMojo {
 
     /**
@@ -104,42 +102,20 @@ public class GemifyMojo extends AbstractGemMojo {
                                                                                              this.version,
                                                                                              "jar",
                                                                                              null);
-                // try {
                 ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(artifact)
                         .setLocalRepository(this.localRepository)
                         .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
                 this.repositorySystem.resolve(request);
-                // artifact,
-                // this.project.getRemoteArtifactRepositories(),
-                // this.localRepository);
-                // }
-                // catch (final ArtifactResolutionException e) {
-                // throw new MojoExecutionException("can not resolve "
-                // + artifact.toString());
-                // }
-                // catch (final ArtifactNotFoundException e) {
-                // throw new MojoExecutionException("can not resolve "
-                // + artifact.toString());
-                // }
                 try {
                     final MavenProject project = projectFromArtifact(artifact);
                     project.setArtifact(artifact);
                     final Set<Artifact> artifacts = new LinkedHashSet<Artifact>();
-                    // project.createArtifacts(this.artifactFactory,
-                    // null,
-                    // null);
                     getLog().info("artifacts=" + artifacts);
                     request = new ArtifactResolutionRequest().setArtifact(artifact)
                             .setLocalRepository(this.localRepository)
                             .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
                             .setManagedVersionMap(project.getManagedVersionMap());
                     final ArtifactResolutionResult arr = this.repositorySystem.resolve(request);
-                    // this.resolver.resolveTransitively(artifacts,
-                    // artifact,
-                    // this.project.getManagedVersionMap(),
-                    // this.localRepository,
-                    // this.project.getRemoteArtifactRepositories(),
-                    // this.metadata);
                     gemify(project, arr.getArtifacts());
                 }
                 catch (final InvalidDependencyVersionException e) {
@@ -150,14 +126,6 @@ public class GemifyMojo extends AbstractGemMojo {
                     throw new MojoExecutionException("error building project object model",
                             e);
                 }
-                // catch (final ArtifactResolutionException e) {
-                // throw new MojoExecutionException("can not resolve "
-                // + artifact.toString(), e);
-                // }
-                // catch (final ArtifactNotFoundException e) {
-                // throw new MojoExecutionException("can not resolve "
-                // + artifact.toString(), e);
-                // }
             }
             else {
                 throw new MojoExecutionException("not all three artifactId, groupId and version are given");
@@ -223,10 +191,6 @@ public class GemifyMojo extends AbstractGemMojo {
                 .setRepositorySession(this.repositorySession);
         final MavenProject project = this.builder.build(artifact, request)
                 .getProject();
-        // this.builder.buildFromRepository(artifact,
-        // this.project.getRemoteArtifactRepositories(),
-        // this.localRepository);
-        // System.out.println("\n\n ------------> " + artifact + "\n\n");
         if (project.getDistributionManagement() != null
                 && project.getDistributionManagement().getRelocation() != null) {
             final Relocation reloc = project.getDistributionManagement()
@@ -248,130 +212,6 @@ public class GemifyMojo extends AbstractGemMojo {
             return project;
         }
     }
-
-    // private String orderInResolvedManner(final Map<String, MavenProject>
-    // gems)
-    // throws MojoExecutionException {
-    // final List<String> result = new ArrayList<String>();
-    // final Set<String> resolved = new HashSet<String>();
-    // int done = -1;
-    // while (result.size() != gems.size() && done != result.size()) {
-    // done = result.size();
-    // // System.out.println("\n" + result.size() + " ++++++ " +
-    // // gems.size()
-    // // + " results " + result + " ++++resolved " + resolved
-    // // + "\n ++++gems " + gems.keySet() + "\n"
-    // // + this.relocationMap);
-    // for (final Map.Entry<String, MavenProject> gem : gems.entrySet()) {
-    // // System.out.println("\n\tgem "
-    // // + gem
-    // // + " "
-    // // + resolved.contains(gem.getValue()
-    // // .getArtifact()
-    // // .toString()));
-    // if (!resolved.contains(gem.getValue().getArtifact().toString())) {
-    // if (gem.getValue().getDependencies().isEmpty()) {
-    // // System.out.println("\tresolved " + gem.getKey());
-    // result.add(gem.getKey());
-    // addResolved(resolved, gem.getValue());
-    // }
-    // else {
-    // // System.out.println("\ttry "
-    // // + gem.getValue().getArtifact()
-    // // + gem.getValue().getDependencies());
-    // boolean isResolved = true;
-    // for (final Dependency dependency : gem.getValue()
-    // .getDependencies()) {
-    // if (!dependency.isOptional()
-    // && (Artifact.SCOPE_COMPILE +
-    // Artifact.SCOPE_RUNTIME).contains(dependency.getScope())) {
-    // final String id = dependency.getGroupId() + ":"
-    // + dependency.getArtifactId() + ":"
-    // + dependency.getType() + ":"
-    // + dependency.getVersion();
-    // // System.out.println(id);
-    // if (!resolved.contains(id)) {
-    //
-    // final Artifact artifact =
-    // this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
-    // dependency.getArtifactId(),
-    // dependency.getVersion(),
-    // dependency.getType(),
-    // dependency.getClassifier());
-    // // try {
-    // getLog().info("resolving: " + artifact);
-    // final ArtifactResolutionRequest request = new
-    // ArtifactResolutionRequest().setArtifact(artifact)
-    // .setLocalRepository(this.localRepository)
-    // .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
-    // this.repositorySystem.resolve(request);
-    // // this.resolver.resolve(artifact,
-    // // this.project.getRemoteArtifactRepositories(),
-    // // this.localRepository);
-    // // }
-    // // catch (final ArtifactResolutionException
-    // // e) {
-    // // throw new
-    // // MojoExecutionException("can not resolve "
-    // // + artifact.toString());
-    // // }
-    // // catch (final ArtifactNotFoundException e)
-    // // {
-    // // throw new
-    // // MojoExecutionException("can not resolve "
-    // // + artifact.toString());
-    // // }
-    // try {
-    // projectFromArtifact(artifact);
-    // }
-    // catch (final ProjectBuildingException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // // System.out.println(this.relocationMap);
-    // isResolved = false;
-    // break;
-    // }
-    // }
-    // }
-    // if (isResolved) {
-    // // System.out.println("\tresolved (with deps) "
-    // // + gem.getKey());
-    // result.add(gem.getKey());
-    // addResolved(resolved, gem.getValue());
-    // }
-    // }
-    // }
-    // }
-    // }
-    // System.out.println("----" + result);
-    // final StringBuilder str = new StringBuilder();
-    // boolean first = true;
-    // for (final String gem : result) {
-    // if (first) {
-    // first = false;
-    // str.append(gem);
-    // }
-    // else {
-    // str.append(' ').append(gem);
-    // }
-    // }
-    // return str.toString();
-    // }
-
-    // private void addResolved(final Set<String> resolved,
-    // final MavenProject project) {
-    // resolved.add(project.getArtifact().toString());
-    // if (project.getDistributionManagement() != null
-    // && project.getDistributionManagement().getRelocation() != null) {
-    // final Relocation dependency = project.getDistributionManagement()
-    // .getRelocation();
-    // resolved.add(dependency.getGroupId() + ":"
-    // + dependency.getArtifactId() + ":"
-    // + project.getArtifact().getType() + ":"
-    // + dependency.getVersion());
-    // }
-    // }
 
     private String build(final MavenProject project, final File jarfile)
             throws MojoExecutionException, IOException, ScriptException {
