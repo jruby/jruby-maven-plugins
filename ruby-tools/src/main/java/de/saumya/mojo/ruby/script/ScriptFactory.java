@@ -50,7 +50,7 @@ public class ScriptFactory {
             }
             catch (final NoSuchRealmException e) {
                 try {
-                    jruby = classRealm.getParent().createChildRealm("jruby");
+                    jruby = classRealm.getWorld().newRealm("jruby");
                     jruby.addConstituent(jrubyJar.toURI().toURL());
                 }
                 catch (final DuplicateRealmException ee) {

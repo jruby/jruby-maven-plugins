@@ -44,11 +44,12 @@ class EmbeddedLauncher extends AbstractLauncher {
     private ClassRealm cloneClassRealm(final File jrubyJar,
             final List<String> classpathElements, final ClassRealm classRealm)
             throws ScriptException {
-        for (final String classpath : classpathElements) {
-            if (classpath.equals(jrubyJar.getAbsolutePath())) {
-                return null;
-            }
-        }
+        // TODO how to reuse the plugin realm ?
+//        for (final String classpath : classpathElements) {
+//            if (classpath.equals(jrubyJar.getAbsolutePath())) {
+//                return null;
+//            }
+//        }
         ClassRealm newClassRealm;
         try {
             ClassRealm jruby;
@@ -56,7 +57,7 @@ class EmbeddedLauncher extends AbstractLauncher {
                 jruby = classRealm.getWorld().getRealm("jruby");
             }
             catch (final NoSuchRealmException e) {
-                jruby = classRealm.getParent().createChildRealm("jruby");
+                jruby = classRealm.getWorld().newRealm("jruby");
                 jruby.addConstituent(jrubyJar.toURI().toURL());
             }
             try {
@@ -96,7 +97,7 @@ class EmbeddedLauncher extends AbstractLauncher {
         final String currentDir;
         if (launchDirectory != null) {
             currentDir = System.getProperty("user.dir");
-            System.err.println("launch directory: "
+            logger.debug("launch directory: "
                     + launchDirectory.getAbsolutePath());
             System.setProperty("user.dir", launchDirectory.getAbsolutePath());
         }
