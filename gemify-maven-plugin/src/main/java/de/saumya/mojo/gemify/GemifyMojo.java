@@ -53,7 +53,7 @@ public class GemifyMojo extends AbstractMojo {
      * @parameter default-value="${gemify.gemname}"
      * @required
      */
-    private String                          gemName;
+    private String                          gemname;
 
     /**
      * the version of the maven artifact which gets gemified.
@@ -75,7 +75,7 @@ public class GemifyMojo extends AbstractMojo {
     /**
      * @parameter default-value="${gemify.tempDir}"
      */
-    private File                            targetDirectory;
+    private File                            tempDir;
 
     /**
      * gemify development depencendies as well. default: false
@@ -132,10 +132,10 @@ public class GemifyMojo extends AbstractMojo {
     private final Map<String, MavenProject> relocations = new HashMap<String, MavenProject>();
 
     public void execute() throws MojoExecutionException {
-        if (this.gemName == null) {
+        if (this.gemname == null) {
             throw new MojoExecutionException("no gemname given, use '-Dgemify.gemname=...' to specify one");
         }
-        if (!this.gemName.contains(".")) {
+        if (!this.gemname.contains(".")) {
             throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
         }
 
@@ -150,7 +150,7 @@ public class GemifyMojo extends AbstractMojo {
             }
         }
 
-        final ProjectBuildingResult result = buildProject(this.gemName,
+        final ProjectBuildingResult result = buildProject(this.gemname,
                                                           this.version,
                                                           this.onlySpecs);
 
@@ -213,13 +213,13 @@ public class GemifyMojo extends AbstractMojo {
         try {
             Artifact artifact = null;
             if (version == null) {
-                artifact = this.gemManager.createJarArtifactForGemnameWithLatestVersion(this.gemName,
+                artifact = this.gemManager.createJarArtifactForGemnameWithLatestVersion(this.gemname,
                                                                                         this.localRepository,
                                                                                         this.project.getRemoteArtifactRepositories());
             }
             else {
                 // find the latest version
-                final List<String> versions = this.gemManager.availableVersions(this.gemManager.createJarArtifactForGemname(this.gemName,
+                final List<String> versions = this.gemManager.availableVersions(this.gemManager.createJarArtifactForGemname(this.gemname,
                                                                                                                             null),
                                                                                 this.localRepository,
                                                                                 this.project.getRemoteArtifactRepositories());
@@ -229,7 +229,7 @@ public class GemifyMojo extends AbstractMojo {
                 final Maven2GemVersionConverter converter = new Maven2GemVersionConverter();
                 for (final String v : versions) {
                     if (version.equals(converter.createGemVersion(v))) {
-                        artifact = this.gemManager.createJarArtifactForGemname(this.gemName,
+                        artifact = this.gemManager.createJarArtifactForGemname(this.gemname,
                                                                                v);
                         break;
                     }
@@ -237,7 +237,7 @@ public class GemifyMojo extends AbstractMojo {
                 // did not find it ? then assume the given version be already
                 // maven-version
                 if (artifact == null) {
-                    artifact = this.gemManager.createJarArtifactForGemname(this.gemName,
+                    artifact = this.gemManager.createJarArtifactForGemname(this.gemname,
                                                                            version);
                 }
             }
@@ -245,7 +245,7 @@ public class GemifyMojo extends AbstractMojo {
         }
         catch (final GemException e) {
             throw new MojoExecutionException("Error creating artifact when gemifying: "
-                    + this.gemName,
+                    + this.gemname,
                     e);
         }
     }
@@ -282,7 +282,7 @@ public class GemifyMojo extends AbstractMojo {
                         .getDistributionManagement()
                         .getRelocation();
                 if (relocation != null) {
-                    if (this.gemName != null) {
+                    if (this.gemname != null) {
                         // warning only for the top level gem
                         getLog().info("\n\n\tartifact is relocated to "
                                 + relocation.getGroupId()
@@ -494,13 +494,13 @@ public class GemifyMojo extends AbstractMojo {
         try {
             if (this.onlySpecs) {
                 final File gemspec = this.converter.createGemspecFromArtifact(mavenArtifact,
-                                                                              targetDirectoryFromProject());
+                                                                              targetDirectory());
                 getLog().info("created gemspec: " + gemspec);
                 return gemspec;
             }
             else {
                 final GemArtifact gemArtifact = this.converter.createGemFromArtifact(mavenArtifact,
-                                                                                     targetDirectoryFromProject());
+                                                                                     targetDirectory());
                 getLog().info("created gem: " + gemArtifact.getGemFile());
                 return gemArtifact.getGemFile();
             }
@@ -528,14 +528,14 @@ public class GemifyMojo extends AbstractMojo {
         }
     }
 
-    private File targetDirectoryFromProject() {
-        if (this.targetDirectory == null) {
+    private File targetDirectory() {
+        if (this.tempDir == null) {
             return new File(this.project.getBuild()
                     .getDirectory()
                     .replaceFirst("[$][{]project.basedir[}].", ""));
         }
         else {
-            return this.targetDirectory;
+            return this.tempDir;
         }
     }
 }

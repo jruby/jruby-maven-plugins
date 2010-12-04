@@ -33,7 +33,7 @@ public class VersionsMojo extends AbstractMojo {
      * @parameter default-value="${gemify.gemname}"
      * @required
      */
-    private String                  gemName;
+    private String                  gemname;
 
     /**
      * local repository for internal use.
@@ -66,17 +66,17 @@ public class VersionsMojo extends AbstractMojo {
     protected GemManager            manager;
 
     public void execute() throws MojoExecutionException {
-        if (this.gemName == null) {
+        if (this.gemname == null) {
             throw new MojoExecutionException("no gemname given, use '-Dgemify.gemname=...' to specify one");
         }
-        if (!this.gemName.contains(".")) {
+        if (!this.gemname.contains(".")) {
             throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
         }
 
         try {
             // first get all maven-versions
-            final Artifact artifact = this.manager.createJarArtifactForGemname(this.gemName);
-            final List<String> versions = this.manager.availableVersions(this.manager.createJarArtifactForGemname(this.gemName,
+            final Artifact artifact = this.manager.createJarArtifactForGemname(this.gemname);
+            final List<String> versions = this.manager.availableVersions(this.manager.createJarArtifactForGemname(this.gemname,
                                                                                                                   null),
                                                                          this.localRepository,
                                                                          this.project.getRemoteArtifactRepositories());
@@ -114,11 +114,11 @@ public class VersionsMojo extends AbstractMojo {
                 }
             }
             // print result for user
-            getLog().info("\n\n\t" + this.gemName + " " + gemVersions + "\n\n");
+            getLog().info("\n\n\t" + this.gemname + " " + gemVersions + "\n\n");
         }
         catch (final GemException e) {
             throw new MojoExecutionException("error finding versions for: "
-                    + this.gemName, e);
+                    + this.gemname, e);
         }
     }
 }
