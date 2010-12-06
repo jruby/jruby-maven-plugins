@@ -15,14 +15,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @requiresDependencyResolution test
  */
 public class JRubyMojo extends AbstractJRubyMojo {
-
-    /**
-     * ruby code which gets executed.
-     * 
-     * @parameter default-value="${jruby.args}"
-     */
-    protected String jrubyArgs = null;
-
+    
     /**
      * ruby code which gets executed.
      * 
@@ -36,6 +29,13 @@ public class JRubyMojo extends AbstractJRubyMojo {
      * @parameter default-value="${jruby.file}"
      */
     protected File file = null;
+
+    /**
+     * output file where the standard out will be written
+     * 
+     * @parameter default-value="${jruby.outputFile}"
+     */
+    protected File outputFile = null;
 
     /**
      * directory of gem home to use when forking JRuby.
@@ -71,7 +71,12 @@ public class JRubyMojo extends AbstractJRubyMojo {
         s.addArgs(this.jrubyArgs);
         s.addArgs(this.args);
         if (s.isValid()) {
-            s.executeIn(launchDirectory());
+            if(outputFile != null){
+                s.executeIn(launchDirectory(), outputFile);
+            }
+            else {
+                s.executeIn(launchDirectory());
+            }
         } else {
             getLog()
                     .warn(

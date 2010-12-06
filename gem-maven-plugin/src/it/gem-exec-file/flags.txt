@@ -1,1 +1,0 @@
--Dgem.exec.file=file.rb

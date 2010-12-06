@@ -9,11 +9,11 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby-maven-plugin</artifactId>
-        <version>0.23.0-SNAPSHOT</version>
+        <version>@project.version@</version>
         <configuration>
           <file>${basedir}/src/main/ruby/hello.rb</file>
           <args>kristian</args>
-          <outputFile>log</outputFile>
+          <outputFile>${basedir}/log</outputFile>
         </configuration>
       </plugin>
     </plugins>

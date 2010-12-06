@@ -5,14 +5,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
+import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
@@ -80,7 +81,20 @@ public class RSpecMojo extends AbstractGemMojo {
 	 * @parameter
 	 */
 	protected Properties systemProperties;
-
+	
+	/**
+	 * rspec version used when there is no pom. defaults to latest version smaller then 2.0.0.
+	 * 
+	 * @parameter default-value="${rspec.version}"
+	 */
+	private final String rspecVersion = "1.3.1";
+	
+	/**
+	 * @parameter default-value="${repositorySystemSession}"
+	 * @readonly
+	 */
+	private RepositorySystemSession repoSession;
+	
 	private final RSpecScriptFactory rspecScriptFactory = new RSpecScriptFactory();
 
 	private File specSourceDirectory() {
@@ -99,8 +113,13 @@ public class RSpecMojo extends AbstractGemMojo {
 
 	@Override
 	public void executeWithGems() throws MojoExecutionException,
-			ScriptException, IOException {
+			ScriptException, IOException, GemException {
+		if (this.project.getBasedir() == null) {
 
+			this.gemsInstaller.installGem("rspec", this.rspecVersion,
+					this.repoSession, this.localRepository);
+
+		}
 		final File specSourceDirectory = specSourceDirectory();
 		if (!specSourceDirectory.exists()) {
 			getLog().info(

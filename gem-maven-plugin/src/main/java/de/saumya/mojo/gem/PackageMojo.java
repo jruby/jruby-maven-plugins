@@ -35,7 +35,7 @@ public class PackageMojo extends AbstractGemMojo {
     /**
      * @parameter default-value="${gemspec}"
      */
-    File                              gemSpec;
+    File                              gemspec;
 
     /**
      * @parameter default-value="${gemspec.overwrite}"
@@ -107,7 +107,7 @@ public class PackageMojo extends AbstractGemMojo {
         final MavenProject project = this.project;
         final GemArtifact artifact = new GemArtifact(project);
         try {
-            if (this.gemSpec == null && project.getBasedir() != null
+            if (this.gemspec == null && project.getBasedir() != null
                     && project.getBasedir().exists()) {
                 // TODO generate the gemspec in the prepare-package phase so we
                 // can use it separately
@@ -125,36 +125,34 @@ public class PackageMojo extends AbstractGemMojo {
 
             }
             else {
-                if (this.project.getBasedir() == null) {
-                    this.gemHome = new File(this.gemHome.getAbsolutePath()
-                            .replace("/${project.basedir}/", "/"));
-                    this.gemPath = new File(this.gemPath.getAbsolutePath()
-                            .replace("/${project.basedir}/", "/"));
-                }
-                if (this.gemSpec == null) {
-                    for (final File f : this.launchDirectory().listFiles()) {
+//                if (this.project.getBasedir() == null) {
+//                    this.gemHome = new File(this.gemHome.getAbsolutePath()
+//                            .replace("/${project.basedir}/", "/"));
+//                    this.gemPath = new File(this.gemPath.getAbsolutePath()
+//                            .replace("/${project.basedir}/", "/"));
+//                }
+                if (this.gemspec == null) {
+                    for (final File f : launchDirectory().listFiles()) {
                         if (f.getName().endsWith(".gemspec")) {
-                            if (this.gemSpec == null) {
-                                this.gemSpec = f;
+                            if (this.gemspec == null) {
+                                this.gemspec = f;
                             }
                             else {
                                 throw new MojoFailureException("more than one gemspec file found, use -Dgemspec=... to specifiy one");
                             }
                         }
                     }
-                    if (this.gemSpec == null) {
+                    if (this.gemspec == null) {
                         throw new MojoFailureException("no gemspec file or pom found, use -Dgemspec=... to specifiy a gemspec file or '-f ...' to use a pom file");
                     }
                     else {
-                        getLog().info("use gemspec: " + this.gemSpec);
+                        getLog().info("use gemspec: " + this.gemspec);
                     }
                 }
 
                 this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
-                        .addArg("build", this.gemSpec)
+                        .addArg("build", this.gemspec)
                         .executeIn(launchDirectory());
-                // execute("-S gem build " + this.gemSpec.getAbsolutePath(),
-                // false);
 
                 File gemFile = null;
                 for (final File f : launchDirectory().listFiles()) {
@@ -300,30 +298,34 @@ public class PackageMojo extends AbstractGemMojo {
         for (final Dependency dependency : project.getDependencies()) {
             if (!dependency.isOptional()
                     && dependency.getType().contains("gem")) {
-                if (!dependency.getVersion().matches(".*[\\)\\]]$")) {
-                    // TODO maybe skip all this or follow relocations
-                    // it will adjust the artifact as well (in case of
-                    // relocation)
-
-                    Artifact arti = null;
-                    arti = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
-                                                                              dependency.getArtifactId(),
-                                                                              dependency.getVersion(),
-                                                                              dependency.getScope(),
-                                                                              dependency.getClassifier());
-                    // if (!dependency.getGroupId().equals("rubygems")) {
-                    // projectFromArtifact(arti);
-                    // }
-                    // dependency.setGroupId(arti.getGroupId());
-                    // dependency.setArtifactId(arti.getArtifactId());
-                    // }
-                    // catch (final ProjectBuildingException e) {
-                    // throw new
-                    // MojoExecutionException("error building project for "
-                    // + arti,
-                    // e);
-                    // }
-                }
+//                if (!dependency.getVersion().matches(".*[\\)\\]]$")) {
+//                    // TODO maybe skip all this or follow relocations
+//                    // it will adjust the artifact as well (in case of
+//                    // relocation)
+//
+//                    Artifact arti = null;
+//                    arti = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
+//                                                                              dependency.getArtifactId(),
+//                                                                              dependency.getVersion(),
+//                                                                              dependency.getScope(),
+//                                                                              dependency.getClassifier());
+//                    dependency.setGroupId(arti.getGroupId());
+//                    dependency.setArtifactId(arti.getArtifactId());
+//                    dependency.setVersion(arti.getVersion());
+//                    
+//                    // if (!dependency.getGroupId().equals("rubygems")) {
+//                    // projectFromArtifact(arti);
+//                    // }
+//                    // dependency.setGroupId(arti.getGroupId());
+//                    // dependency.setArtifactId(arti.getArtifactId());
+//                    // }
+//                    // catch (final ProjectBuildingException e) {
+//                    // throw new
+//                    // MojoExecutionException("error building project for "
+//                    // + arti,
+//                    // e);
+//                    // }
+//                }
 
                 final String prefix = dependency.getGroupId()
                         .equals("rubygems") ? "" : dependency.getGroupId()

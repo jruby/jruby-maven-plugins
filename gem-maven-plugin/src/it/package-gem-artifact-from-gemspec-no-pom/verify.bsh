@@ -1,0 +1,9 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+
+File f = new File( basedir, "gem_first-0.0.0.gem" );
+if ( !f.exists() )
+{
+    throw new RuntimeException( "file does not exists: " + f );
+}

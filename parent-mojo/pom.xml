@@ -81,26 +81,32 @@
       <build>
         <defaultGoal>install</defaultGoal>
         <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>shitty-maven-plugin</artifactId>
-            <version>1.0-alpha-3</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>clean</goal>
-                  <goal>install</goal>
-                  <goal>test</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <!-- WORK AROUND: use same version as plugin otherwise test plugin will not work -->
-              <version>0.23.0-SNAPSHOT</version>
-              <parallel>true</parallel>
-              <threadCount>2</threadCount>
-            </configuration>
-          </plugin>
+	  <plugin>
+	    <artifactId>maven-invoker-plugin</artifactId>
+	    <version>1.5</version>
+	    <configuration>
+	      <projectsDirectory>src/it</projectsDirectory>
+	      <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+	      <pomIncludes>
+		<pomInclude>*/pom.xml</pomInclude>
+	      </pomIncludes>
+	      <pomExcludes>
+	      </pomExcludes>
+	      <settingsFile>src/it/settings.xml</settingsFile>
+	      <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+	      <preBuildHookScript>setup.bsh</preBuildHookScript>
+	      <postBuildHookScript>verify.bsh</postBuildHookScript>
+	    </configuration>
+	    <executions>
+	      <execution>
+		<id>integration-test</id>
+		<goals>
+		  <goal>install</goal>
+		  <goal>run</goal>
+		</goals>
+	      </execution>
+	    </executions>
+	  </plugin>
         </plugins>
       </build>
     </profile>

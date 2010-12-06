@@ -20,7 +20,7 @@ public class InstallMojo extends AbstractGemMojo {
     /**
      * arguments for the "gem install" command.
      * 
-     * @parameter default-value="${install.orgs}"
+     * @parameter default-value="${install.args}"
      */
     protected String installArgs = null;
 
@@ -40,9 +40,11 @@ public class InstallMojo extends AbstractGemMojo {
                 && this.project.getArtifact().getFile() != null
                 && this.project.getArtifact().getFile().exists()) {
             final GemArtifact gemArtifact = new GemArtifact(this.project);
-            script.addArgs(this.installArgs);
-            script.addArgs(this.args);
-            script.addArg("-l", gemArtifact.getFile());
+            script.addArgs(this.installArgs)
+                .addArgs(this.args)
+                .addArg((installRDoc ? "--" : "--no-") + "rdoc")
+                .addArg((installRI ? "--" : "--no-") + "ri")
+                .addArg("-l", gemArtifact.getFile());
             script.execute();
         }
         else {
@@ -59,8 +61,9 @@ public class InstallMojo extends AbstractGemMojo {
                 }
                 if (this.gem != null) {
                     getLog().info("use gem: " + this.gem);
-                    script.addArg("-l", this.gem);
-                    // commandString += " -l " + this.gem.getAbsolutePath();
+                    script.addArg((installRDoc ? "--" : "--no-") + "rdoc")
+                        .addArg((installRI ? "--" : "--no-") + "ri")
+                        .addArg("-l", this.gem);
                 }
             }
             script.addArgs(this.installArgs);

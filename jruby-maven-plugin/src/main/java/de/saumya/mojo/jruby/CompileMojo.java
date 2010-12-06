@@ -69,7 +69,7 @@ public class CompileMojo extends AbstractJRubyMojo {
 
         final Script script = this.factory.newScript(
                 "\nrequire 'jruby/jrubyc'\n"
-                        + "status=JRubyCompiler::compile_argv(ARGV)\n"
+                        + "status = JRubyCompiler::compile_argv(ARGV)\n"
                         + "raise 'compilation-error(s)' if status !=0 && !"
                         + this.ignoreFailures).addArg("-d",
                 fixPathSeparator(this.rubyDirectory));

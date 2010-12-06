@@ -86,12 +86,13 @@ public class GemifyMojo extends AbstractGemMojo {
             if (!this.gemify.exists()) {
                 this.gemify = new File(this.buildDirectory, "gemify");
             }
-            if (!this.gemHome.exists()) {
-                this.gemHome = new File(this.buildDirectory, "rubygems");
-            }
-            if (!this.gemPath.exists()) {
-                this.gemPath = new File(this.buildDirectory, "rubygems");
-            }
+            // TODO this should be obsolete
+//            if (!this.gemHome.exists()) {
+//                this.gemHome = new File(this.buildDirectory, "rubygems");
+//            }
+//            if (!this.gemPath.exists()) {
+//                this.gemPath = new File(this.buildDirectory, "rubygems");
+//            }
         }
         if (this.artifactId != null || this.groupId != null
                 || this.version != null) {
@@ -141,6 +142,9 @@ public class GemifyMojo extends AbstractGemMojo {
         getLog().info("gemify( " + project + ", " + artifacts + " )");
         final Map<String, MavenProject> gems = new HashMap<String, MavenProject>();
         try {
+            if(project.getArtifact().getFile() == null){
+                throw new MojoExecutionException("no artifact file found: " + project.getArtifact() + "\n\trun 'package' goal first");
+            }
             final String gem = build(project, project.getArtifact().getFile());
             gems.put(gem, project);
         }
@@ -173,6 +177,8 @@ public class GemifyMojo extends AbstractGemMojo {
             // install them without dependency check
             final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                     .addArg("install")
+                    .addArg((installRDoc ? "--" : "--no-") + "rdoc")
+                    .addArg((installRI ? "--" : "--no-") + "ri")
                     .addArg("--ignore-dependencies")
                     .addArg("-l");
             for (final String gem : gems.keySet()) {

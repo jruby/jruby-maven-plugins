@@ -24,21 +24,28 @@ public class ExecMojo extends AbstractGemMojo {
     /**
      * ruby code from the pom configuration part which gets executed.
      * 
-     * @parameter default-value="${gem.exec.script}"
+     * @parameter default-value="${exec.script}"
      */
     protected String script   = null;
 
     /**
      * ruby file which gets executed in context of the given gems..
      * 
-     * @parameter default-value="${gem.exec.file}"
+     * @parameter default-value="${exec.file}"
      */
     protected File   file     = null;
 
     /**
+     * output file where the standard out will be written
+     * 
+     * @parameter default-value="${jruby.outputFile}"
+     */
+    protected File outputFile = null;
+
+    /**
      * arguments for the ruby script given through file parameter.
      * 
-     * @parameter default-value="${gem.exec.args}"
+     * @parameter default-value="${exec.args}"
      */
     protected String execArgs = null;
 
@@ -66,11 +73,16 @@ public class ExecMojo extends AbstractGemMojo {
         }
         s.addArgs(this.execArgs);
         s.addArgs(this.args);
-        if (s.isValid()) {
-            s.execute();
+        if (s.isValid()) { 
+            if(outputFile != null){
+                s.executeIn(launchDirectory(), outputFile);
+            }
+            else {
+                s.executeIn(launchDirectory());
+            }
         }
         else {
-            getLog().warn("no arguments given. use -Dgem.exec.args=... or -Dgem.exec.script=... or -Dgem.exec.file=...");
+            getLog().warn("no arguments given. use -Dexec.args=... or -Dexec.script=... or -Dexec.file=...");
         }
     }
 }

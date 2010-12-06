@@ -33,12 +33,12 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * @parameter expression="${gem.installRDoc}" default-value="false"
      */
-    private boolean         installRDoc;
+    protected boolean         installRDoc;
 
     /**
      * @parameter expression="${gem.installRI}" default-value="false"
      */
-    private boolean         installRI;
+    protected boolean         installRI;
 
     /**
      * triggers an update of maven metadata for all gems.

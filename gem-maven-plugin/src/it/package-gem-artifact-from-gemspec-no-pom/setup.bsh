@@ -1,0 +1,4 @@
+import java.io.*;
+
+new File( basedir, "gem_first-0.0.0.gem").delete();
+new File( basedir, "pom.xml").delete() || true;

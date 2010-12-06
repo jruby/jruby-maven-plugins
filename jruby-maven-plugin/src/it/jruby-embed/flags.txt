@@ -1,1 +1,0 @@
--Djruby.script=puts 'hello world'

@@ -1,1 +1,0 @@
-de.saumya.mojo:gem-maven-plugin:exec

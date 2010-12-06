@@ -1,7 +1,0 @@
-* add jruby.args to allow to add command line switches for jruby
-
-* in case an jar artifact does not exist there is a error about ixtlan cannot be found - something better is needed
-
-* exclude with in dependency tag needs to be obeyed
-
-* make archetype to have jdbc driver as dep and exclude respetive gem

@@ -1,3 +1,0 @@
--DartifactId=avalon-framework-impl
--DgroupId=org.apache.avalon.framework
--Dversion=4.3.1

@@ -1,1 +1,0 @@
--Dgemspec=gem_first.gemspec
