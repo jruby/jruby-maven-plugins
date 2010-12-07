@@ -11,7 +11,6 @@
   <artifactId>jruby-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>JRuby Maven Mojo</name>
-  <url>http://github.com/mkristian/jruby-maven-plugins</url>
   <dependencies>
     <dependency>
       <groupId>de.saumya.mojo</groupId>

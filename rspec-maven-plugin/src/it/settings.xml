@@ -18,7 +18,7 @@
           </snapshots>
         </repository>
         <repository>
-          <id>local.rubygems</id>
+          <id>rubygems-releases</id>
           <url>@localRepositoryUrl@</url>
           <releases>
             <enabled>true</enabled>

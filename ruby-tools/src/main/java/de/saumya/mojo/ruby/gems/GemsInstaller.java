@@ -118,6 +118,9 @@ public class GemsInstaller {
 
         if (script != null) {
             script.addArg("--bindir", this.config.getBinDirectory());
+            if(!this.config.getBinDirectory().exists()){
+                this.config.getBinDirectory().mkdirs();
+            }
             script.execute();
         }
     }

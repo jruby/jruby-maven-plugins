@@ -25,15 +25,22 @@ public class GemScriptFactory extends ScriptFactory {
             throws ScriptException, IOException {
         super(logger, classRealm, jrubyJar, classpathElements, fork);
 
-        this.gemHome = new File(gemHome.getAbsolutePath()
-                .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
-        if (this.gemHome != null) {
-            addEnv(GEM_HOME, this.gemHome.getPath());
+        if (gemHome != null) {
+            this.gemHome = new File(gemHome.getAbsolutePath()
+                                    .replaceFirst("/[$][{]project.basedir[}]/", "/"));
+                                addEnv(GEM_HOME, this.gemHome.getPath());
         }
-        this.gemPath = new File(gemPath.getAbsolutePath()
-                .replaceFirst(".*/[$][{]project.basedir[}]/", ""));
-        if (this.gemPath != null) {
+        else{
+            this.gemHome = null;            
+        }
+        
+        if (gemPath != null) {
+          this.gemPath = new File(gemPath.getAbsolutePath()
+          .replaceFirst("/[$][{]project.basedir[}]/", "/"));
             addEnv(GEM_PATH, this.gemPath.getPath());
+        }
+        else {
+            this.gemPath = null;
         }
     }
 

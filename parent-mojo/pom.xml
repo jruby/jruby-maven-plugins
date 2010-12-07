@@ -33,6 +33,17 @@
     <maven.version>3.0</maven.version>
   </properties>
   <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>${basedir}/src/main/ruby</directory>
+        <includes>
+          <include>**/*.rb</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -47,7 +58,10 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId> 
+	<version>2.3</version>
+      </plugin>
+      <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.1</version>
       </plugin>
@@ -87,13 +101,6 @@
 	    <configuration>
 	      <projectsDirectory>src/it</projectsDirectory>
 	      <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-	      <pomIncludes>
-		<pomInclude>*/pom.xml</pomInclude>
-	      </pomIncludes>
-	      <pomExcludes>
-	      </pomExcludes>
-	      <settingsFile>src/it/settings.xml</settingsFile>
-	      <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
 	      <preBuildHookScript>setup.bsh</preBuildHookScript>
 	      <postBuildHookScript>verify.bsh</postBuildHookScript>
 	    </configuration>
@@ -104,6 +111,27 @@
 		  <goal>install</goal>
 		  <goal>run</goal>
 		</goals>
+		<configuration>
+		  <settingsFile>src/it/settings.xml</settingsFile>
+		  <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+		  <pomIncludes>
+		    <pomInclude>*/pom.xml</pomInclude>
+		  </pomIncludes>
+		  <pomExcludes>
+		    <pomExclude>*-no-pom/pom.xml</pomExclude>
+		  </pomExcludes>
+		</configuration>
+	      </execution>
+	      <execution>
+		<id>integration-test-no-pom</id>
+		<goals>
+		  <goal>run</goal>
+		</goals>
+		<configuration>
+		  <pomIncludes>
+		    <pomInclude>*-no-pom/pom.xml</pomInclude>
+		  </pomIncludes>
+		</configuration>
 	      </execution>
 	    </executions>
 	  </plugin>

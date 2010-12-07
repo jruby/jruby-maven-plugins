@@ -11,7 +11,6 @@
   <artifactId>gem-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Gem Maven Mojo</name>
-  <url>http://github.com/mkristian/jruby-maven-plugins</url>
   <dependencies>
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
@@ -21,25 +20,6 @@
   </dependencies>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/sources</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
         <version>2.1.1</version>
