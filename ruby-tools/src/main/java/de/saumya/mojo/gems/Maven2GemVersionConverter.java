@@ -13,7 +13,7 @@ public class Maven2GemVersionConverter
 {
     public static final String DUMMY_VERSION = "999.0.0";
 
-    public static final String DUMMY_PREFIX = "0.0.0-";
+    public static final String DUMMY_PREFIX = "0.0.1-";
 
     /**
      * This is the pattern we match against. This is actually x.y.z... version format, that RubyGems 1.3.5 support.
