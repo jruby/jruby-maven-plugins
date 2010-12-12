@@ -68,7 +68,6 @@ public class JRubyMojo extends AbstractJRubyMojo {
         } else {
             s = this.factory.newArguments();
         }
-        s.addArgs(this.jrubyArgs);
         s.addArgs(this.args);
         if (s.isValid()) {
             if(outputFile != null){
