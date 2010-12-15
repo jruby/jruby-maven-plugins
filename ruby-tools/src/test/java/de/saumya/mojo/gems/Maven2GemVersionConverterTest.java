@@ -46,9 +46,9 @@ public class Maven2GemVersionConverterTest extends TestCase
         check( "2.0-m5", "2.0.0.m.5", false );
         check( "2.1_3", "2.1.0.3", false );
         check( "1.2beta4", "1.2.b.4", false );
-        check( "R8pre2", "0.0.0.r.8.pre.2", false );
-        check( "R8RC2.3", "0.0.0.r.8.r.2.3", false );
-        check( "Somethin", "0.0.0.somethin", false );
+        check( "R8pre2", "0.0.1.r.8.pre.2", false );
+        check( "R8RC2.3", "0.0.1.r.8.r.2.3", false );
+        check( "Somethin", "0.0.1.somethin", false );
     }
 
     public void testMore()
