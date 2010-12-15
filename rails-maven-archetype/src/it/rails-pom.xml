@@ -39,7 +39,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <jruby.plugins.version>0.23.0</jruby.plugins.version>
+    <jruby.plugins.version>0.24.0-SNAPSHOT</jruby.plugins.version>
     <!--
 	this is needed for the maven-war-plugin configuration
     -->
