@@ -15,6 +15,8 @@ public interface ScriptFactory {
 	void setGemHome(File gemHome);
 	void setGemPath(File gemHome);
 	
+	File getScriptFile();
+	
 	String getScript() throws Exception;
 	void emit() throws Exception;
 
