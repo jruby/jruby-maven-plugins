@@ -222,7 +222,7 @@ public class DefaultRailsManager implements RailsManager {
             return;
         }
         final VelocityContext context = new VelocityContext();
-        context.put("basedir", launchDirectory);
+        context.put("basedir", launchDirectory.getAbsolutePath());
 
         // create web.xml
         filterContent(launchDirectory,

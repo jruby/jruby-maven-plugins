@@ -1,15 +1,6 @@
 <component-set>
   <components>
     <component>
-      <role>
- org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout
-      </role>
-      <role-hint>gem</role-hint>
-      <implementation>
- de.saumya.mojo.gem.GemRepositoryLayout
-      </implementation>
-    </component>
-    <component>
       <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
       <role-hint>gem</role-hint>
       <implementation>
