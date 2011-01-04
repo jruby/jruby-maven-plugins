@@ -52,9 +52,9 @@ public abstract class AbstractRSpecScriptFactory extends AbstractScriptFactory {
         builder.append("# Constants used for configuration and execution\n");
         builder.append("\n");
 
-        builder.append("BASE_DIR=%q(" + baseDir + ")\n");
-        builder.append("SPEC_DIR=%q(" + sourceDir + ")\n");
-        builder.append("REPORT_PATH=%q(" + reportPath + ")\n");
+        builder.append("BASE_DIR=%q(" + sanitize(baseDir) + ")\n");
+        builder.append("SPEC_DIR=%q(" + sanitize(sourceDir) + ")\n");
+        builder.append("REPORT_PATH=%q(" + sanitize(reportPath) + ")\n");
         builder.append("\n");
         builder.append("$: << File.join( BASE_DIR, 'lib' )\n");
         builder.append("$: << SPEC_DIR\n");
@@ -134,12 +134,21 @@ public abstract class AbstractRSpecScriptFactory extends AbstractScriptFactory {
             if (!(path.endsWith("jar") || path.endsWith("/"))) {
                 path = path + "/";
             }
-            builder.append("add_classpath_element(%Q( file://" + path + " ))\n");
+            builder.append("add_classpath_element(%Q( file://" + sanitize(path) + " ))\n");
         }
-
+        
         builder.append("\n");
 
         return builder.toString();
+    }
+    
+    private String sanitize(String path) {
+    	String sanitized = path.replaceAll( "\\\\", "/" );
+    	
+    	if ( sanitized.matches( "^[a-z]:.*" ) ) {
+    		sanitized = sanitized.substring(0,1).toUpperCase() + sanitized.substring(1);
+    	}
+    	return sanitized;
     }
 
     private String getPluginClasspathScript() {
