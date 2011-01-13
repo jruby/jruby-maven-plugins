@@ -11,6 +11,9 @@ import de.saumya.mojo.gems.spec.GemSpecification;
  * @author cstamas
  */
 public interface MavenArtifactConverter {
+
+    public static final String GEMNAME_PREFIX = "mvn:";
+
     /**
      * Returns is the artifact convertable safely into Gem.
      * 

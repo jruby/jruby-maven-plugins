@@ -28,6 +28,7 @@ import de.saumya.mojo.gems.spec.GemRequirement;
 import de.saumya.mojo.gems.spec.GemSpecification;
 import de.saumya.mojo.gems.spec.GemSpecificationIO;
 import de.saumya.mojo.gems.spec.GemVersion;
+import de.saumya.mojo.ruby.gems.GemManager;
 
 /**
  * This is full of "workarounds" here, since for true artifact2gem conversion I
@@ -277,7 +278,7 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
     protected String createGemName(final String groupId,
             final String artifactId, final String version) {
         // TODO: think about this
-        return groupId + "." + artifactId;
+        return GEMNAME_PREFIX + groupId + GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR + artifactId;
     }
 
     protected String getGemFileName(final String groupId,

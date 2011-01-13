@@ -16,6 +16,7 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gems.Maven2GemVersionConverter;
+import de.saumya.mojo.gems.MavenArtifactConverter;
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.gems.GemManager;
 
@@ -117,7 +118,7 @@ public class VersionsMojo extends AbstractMojo {
                 }
             }
             // print result for user
-            getLog().info("\n\n\t" + this.gemname + " " + gemVersions + "\n\n");
+            getLog().info("\n\n\t" + MavenArtifactConverter.GEMNAME_PREFIX + this.gemname + " " + gemVersions + "\n\n");
         }
         catch (final GemException e) {
             throw new MojoExecutionException("error finding versions for: "
