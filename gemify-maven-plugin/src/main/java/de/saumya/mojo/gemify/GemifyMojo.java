@@ -135,8 +135,11 @@ public class GemifyMojo extends AbstractMojo {
         if (this.gemname == null) {
             throw new MojoExecutionException("no gemname given, use '-Dgemify.gemname=...' to specify one");
         }
-        if (!this.gemname.contains(".")) {
-            throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '.'");
+        // remove the mvn:prefix if any
+        this.gemname = this.gemname.replaceFirst("^mvn:", "");
+        if (!this.gemname.contains(GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR)) {
+            throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '" + GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR 
+                                             + "'");
         }
 
         if(repositories != null){
@@ -286,7 +289,7 @@ public class GemifyMojo extends AbstractMojo {
                         // warning only for the top level gem
                         getLog().info("\n\n\tartifact is relocated to "
                                 + relocation.getGroupId()
-                                + "."
+                                + ":"
                                 + relocation.getArtifactId()
                                 + " version="
                                 + relocation.getVersion()

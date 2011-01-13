@@ -119,7 +119,7 @@ public class DefaultGemManager implements GemManager {
 
     public Artifact createJarArtifactForGemname(final String gemName,
             final String version) throws GemException {
-        final int index = gemName.lastIndexOf(".");
+        final int index = gemName.lastIndexOf(GROUP_ID_ARTIFACT_ID_SEPARATOR);
         final String groupId = gemName.substring(0, index);
         final String artifactId = gemName.substring(index + 1);
         return createArtifact(groupId, artifactId, version, "jar");
@@ -228,7 +228,7 @@ public class DefaultGemManager implements GemManager {
         }
         if (metadata.getMetadata().getVersioning() == null) {
             throw new GemException("no version found - maybe system is offline or wrong <groupId:artifactId>: "
-                    + artifact.getGroupId() + ":" + artifact.getArtifactId());
+                    + artifact.getGroupId() + GROUP_ID_ARTIFACT_ID_SEPARATOR + artifact.getArtifactId());
         }
         final List<String> versions = metadata.getMetadata()
                 .getVersioning()
