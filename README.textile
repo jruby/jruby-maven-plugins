@@ -18,7 +18,7 @@ bc. <settings>
   <pluginGroups>
     <pluginGroup>de.saumya.mojo</pluginGroup>
   </pluginGroups>
-  . . . 
+  . . .
 h3. pom.xml config
 
 p. important is to declare the rubygems repository whenever you have gem artifacts as dependencies:
@@ -97,13 +97,13 @@ p. the first name is the system property which can be set either via the command
 
 * jruby.home (home) - default: none
 
-* jruby.version (version) - default: taken from dependency or 1.5.0 
+* jruby.version (version) - default: taken from dependency or 1.5.0
 
-* jruby.launchMemory (launchMemory) - default: 384m
+* jruby.jvmargs (JVM args) - default: -client -Xmx384m
 
-* jruby.gem.home (gemHome) - default: target/rubygems
+* gem.home (gemHome) - default: target/rubygems
 
-* jruby.gem.path (gemPath) - default: target/rubygems
+* gem.path (gemPath) - default: target/rubygems
 
 * (launchDirectory) - default: current-directory when there is no pom, or basedir
 

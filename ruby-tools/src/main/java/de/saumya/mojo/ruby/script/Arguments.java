@@ -31,4 +31,16 @@ class Arguments {
         }
         return this;
     }
+    
+    boolean matches(final String regex) {
+    	boolean matches = false;
+    	for (String arg : list) {
+			if (arg.matches(regex)) {
+				matches = true;
+				break;
+			}
+		}
+    	
+    	return matches;
+    }
 }

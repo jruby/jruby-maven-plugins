@@ -25,6 +25,7 @@ public class ScriptFactory {
 
     final Arguments            switches     = new Arguments();
     final Arguments            javaArgs     = new Arguments();
+    final Arguments            jvmArgs      = new Arguments();
     final Map<String, String>  env          = new HashMap<String, String>();
     final Logger               logger;
     final ClassRealm           classRealm;
@@ -128,6 +129,11 @@ public class ScriptFactory {
         this.javaArgs.parseAndAdd(args);
     }
 
+    public void addJvmArgs(final String args) {
+        this.jvmArgs.parseAndAdd(args);
+    }
+    
+    
     public void addSwitch(final String name) {
         this.switches.add(name);
     }
