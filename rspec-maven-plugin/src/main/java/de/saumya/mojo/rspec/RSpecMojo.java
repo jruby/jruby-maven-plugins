@@ -186,6 +186,16 @@ public class RSpecMojo extends AbstractGemMojo {
         factory.setSystemProperties(props);
     }
 
+    private ScriptFactory scriptFactory4Version(String version){
+        if (version.startsWith("1.")) {
+            return new RSpec1ScriptFactory();
+        } else if (version.startsWith("2.")) {
+            return new RSpec2ScriptFactory();
+        } else {
+        	return null;
+        }
+    }
+
     private ScriptFactory getRSpecScriptFactory() throws MojoExecutionException {
         if (this.rspecScriptFactory != null) {
             return this.rspecScriptFactory;
@@ -195,14 +205,14 @@ public class RSpecMojo extends AbstractGemMojo {
         
         for (Artifact each : dependencyArtifacts ) {
             if (each.getGroupId().equals("rubygems") && each.getArtifactId().equals("rspec") && each.getScope().equals("test")) {
-                String version = each.getVersion();
-                if (version.startsWith("1.")) {
-                    this.rspecScriptFactory = new RSpec1ScriptFactory();
-                } else if (version.startsWith("2.")) {
-                    this.rspecScriptFactory = new RSpec2ScriptFactory();
-                }
+            	this.rspecScriptFactory = scriptFactory4Version(each.getVersion());
                 break;
             }
+        }
+
+        // get the sciptfactory when there is no pom
+        if (this.rspecScriptFactory == null && project.getBasedir() == null) {
+        	this.rspecScriptFactory = scriptFactory4Version(rspecVersion);
         }
 
         if (this.rspecScriptFactory == null) {
