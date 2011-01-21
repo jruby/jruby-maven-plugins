@@ -79,7 +79,7 @@ public class JRubyMojo extends AbstractJRubyMojo {
         } else {
             getLog()
                     .warn(
-                            "no arguments given. use -Djruby.args=... or -Djruby.script=... or -Djruby.file=...");
+                            "no arguments given. use -Dargs=... or -Djruby.script=... or -Djruby.file=...");
         }
     }
 }
