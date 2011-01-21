@@ -1,6 +1,13 @@
 package de.saumya.mojo.gemify;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
@@ -13,6 +20,8 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.plexus.util.IOUtil;
 import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gems.Maven2GemVersionConverter;
@@ -27,6 +36,8 @@ import de.saumya.mojo.ruby.gems.GemManager;
  * @requiresProject false
  */
 public class VersionsMojo extends AbstractMojo {
+
+    private static final List<ArtifactRepository> EMPTY_REPO_LIST = Collections.emptyList();
 
     /**
      * gemname to identify the maven artifact (format: groupId.artifactId).
@@ -80,11 +91,15 @@ public class VersionsMojo extends AbstractMojo {
         try {
             // first get all maven-versions
             final Artifact artifact = this.manager.createJarArtifactForGemname(this.gemname);
-            final List<String> versions = this.manager.availableVersions(this.manager.createJarArtifactForGemname(this.gemname,
-                                                                                                                  null),
-                                                                         this.localRepository,
-                                                                         this.project.getRemoteArtifactRepositories());
-
+            final List<ArtifactRepository> repos;
+            if(repositorySession.isOffline()){
+                repos = EMPTY_REPO_LIST;
+            }
+            else {
+                repos = this.project.getRemoteArtifactRepositories();
+            }
+            final List<String> versions = this.manager.availableVersions(artifact, this.localRepository, repos);
+            getLog().debug("raw versions: " + versions);
             // now convert the maven-versions into gem-versions
             final List<String> gemVersions = new ArrayList<String>(versions.size());
             final Maven2GemVersionConverter converter = new Maven2GemVersionConverter();

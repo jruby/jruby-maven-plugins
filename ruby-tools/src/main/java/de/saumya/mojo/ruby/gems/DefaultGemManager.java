@@ -3,6 +3,12 @@
  */
 package de.saumya.mojo.ruby.gems;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +33,7 @@ import org.apache.maven.repository.legacy.metadata.DefaultMetadataResolutionRequ
 import org.apache.maven.repository.legacy.metadata.MetadataResolutionRequest;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.util.IOUtil;
 import org.sonatype.aether.RepositorySystemSession;
 
 @Component(role = GemManager.class)
@@ -226,13 +233,50 @@ public class DefaultGemManager implements GemManager {
             throw new GemException("error updateding versions of artifact: "
                     + artifact, e);
         }
+        final List<String> versions;
         if (metadata.getMetadata().getVersioning() == null) {
-            throw new GemException("no version found - maybe system is offline or wrong <groupId:artifactId>: "
+            if(remoteRepositories.size() == 0){
+                throw new GemException("no version found - maybe system is offline or wrong <groupId:artifactId>: "
                     + artifact.getGroupId() + GROUP_ID_ARTIFACT_ID_SEPARATOR + artifact.getArtifactId());
+            }
+            versions = new ArrayList<String>();
         }
-        final List<String> versions = metadata.getMetadata()
+        else {
+            versions= metadata.getMetadata()
                 .getVersioning()
                 .getVersions();
+        }
+        for(ArtifactRepository repo : remoteRepositories){
+            BufferedReader reader = null;
+            try {
+                URL url = new URL(repo.getUrl() + "/" + artifact.getGroupId().replace(".", "/") + "/" + artifact.getArtifactId() + "/");
+                reader = new BufferedReader(new InputStreamReader(url.openStream(),
+                        "UTF-8"));
+                String line = reader.readLine();
+                while (line != null) {
+                    //TODO maybe try to be more relax on how the version is embedded
+                    if (line.contains("<a href=")) {
+                        String version = line.replaceFirst(".*<a href=\".*\">",
+                                                           "")
+                                .replaceFirst("/</a>.*", "");
+                        if (!versions.contains(version)) {
+                            versions.add(version);
+                        }
+                    }
+                    line = reader.readLine();
+                }
+            }
+            catch (MalformedURLException e) {
+                // should never happen
+                throw new RuntimeException("error scraping versions from html page", e);
+            }
+            catch (IOException e) {
+                // TODO getLog().warn("error scraping versions from html index page", e);
+            }
+            finally {
+                IOUtil.close(reader);
+            }
+        }
         return versions;
     }
 }

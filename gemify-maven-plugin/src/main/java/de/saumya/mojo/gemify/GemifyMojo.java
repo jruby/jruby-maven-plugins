@@ -2,6 +2,7 @@ package de.saumya.mojo.gemify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,6 +47,8 @@ import de.saumya.mojo.ruby.gems.GemManager;
 public class GemifyMojo extends AbstractMojo {
 
     private static final String SEPARATOR = "------------------------";
+
+    private static final List<ArtifactRepository> EMPTY_REPO_LIST = Collections.emptyList();
 
     /**
      * gemname to identify the maven artifact (format: groupId.artifactId).
@@ -222,10 +225,16 @@ public class GemifyMojo extends AbstractMojo {
             }
             else {
                 // find the latest version
-                final List<String> versions = this.gemManager.availableVersions(this.gemManager.createJarArtifactForGemname(this.gemname,
-                                                                                                                            null),
+                final List<ArtifactRepository> repos;
+                if(repoSession.isOffline()){
+                    repos = EMPTY_REPO_LIST;
+                }
+                else {
+                    repos = this.project.getRemoteArtifactRepositories();
+                }
+                final List<String> versions = this.gemManager.availableVersions(this.gemManager.createJarArtifactForGemname(this.gemname),
                                                                                 this.localRepository,
-                                                                                this.project.getRemoteArtifactRepositories());
+                                                                                repos);
 
                 // the given version is the gem version, so find the respective
                 // maven-version
