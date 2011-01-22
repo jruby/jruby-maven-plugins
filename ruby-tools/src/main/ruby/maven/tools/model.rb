@@ -35,11 +35,12 @@ module Maven
           case val
           when Array
             buf << "#{indent}  <#{var}>\n"
+            val.flatten!
             val.each do |v|
               if v.is_a? Tag
                 v.to_xml(buf, indent + "    ")
               else
-                buf << "#{indent}    <#{var.to_s.sub(/s$/, '')}>#{val}</#{var.to_s.sub(/s$/, '')}>\n"
+                buf << "#{indent}    <#{var.to_s.sub(/s$/, '')}>#{v}</#{var.to_s.sub(/s$/, '')}>\n"
               end
             end
             buf << "#{indent}  </#{var}>\n"
@@ -108,8 +109,30 @@ module Maven
             args << "[0.0.0,)"
           elsif args.size == 2 && args.last.is_a?(Hash)
             args = [args[0], "[0.0.0,)", args[1]]
+          elsif args.size >= 2
+            if args[1] =~ /~>/
+              val = args[1].sub(/.*\ /, '')
+              last = val.sub(/\.[^.]+$/, '.99999')
+              args[1] = "[#{val}, #{last}]"
+            elsif args[1] =~ />=/
+              val = args[1].sub(/.*\ /, '')
+              args[1] = "[#{val},)"
+            elsif args[1] =~ /<=/
+              val = args[1].sub(/.*\ /, '')
+              args[1] = "[0.0.0,#{val}]"
+            elsif args[1] =~ />/
+              val = args[1].sub(/.*\ /, '')
+              args[1] = "(#{val},)"
+            elsif args[1] =~ /</
+              val = args[1].sub(/.*\ /, '')
+              args[1] = "[0.0.0,#{val})"
+            end
           end
-          if args[0] =~ /\./
+          if args[0] =~ /:/
+            super Dependency.new(args[0].sub(/:[^:]+$/, ''), 
+                                 args[0].sub(/.*:/, ''), 
+                                 args[1])
+          elsif args[0] =~ /\./
             super Dependency.new(args[0].sub(/\.[^.]+$/, ''), 
                                  args[0].sub(/.*\./, ''), 
                                  args[1])
@@ -117,7 +140,20 @@ module Maven
             super Gem.new(*args)
           end
         when Hash
-          super Dependency.new(args)
+          raise "hash not allowed"
+#          super Dependency.new(args)
+        when String
+          if args =~  /:/
+            super Dependency.new(args.sub(/:[^:]+$/, ''), 
+                                 args.sub(/.*:/, ''), 
+                                 nil)
+          elsif args =~  /\./
+            super Dependency.new(args.sub(/\.[^.]+$/, ''), 
+                                 args.sub(/.*\./, ''), 
+                                 nil)
+          else
+            super Gem.new(args, nil)
+          end
         else
           super args
         end
@@ -137,10 +173,9 @@ module Maven
 
     class Plugin < Coordinate
       tags :extensions, :configuration, :executions
-      def initialize(group_id, artifact_id, version, extensions = nil, &block)
+      def initialize(group_id, artifact_id, version, &block)
         super(:artifact_id => artifact_id, :version => version)
         @group_id = group_id if group_id
-        @extensions = true if extensions == true
         if block
           block.call(self)
         end
@@ -162,6 +197,14 @@ module Maven
         @executions ||= ModelHash.new(Execution)
       end
 
+      def execution(name = nil, &block)
+        if name
+          executions.get(name, &block)
+        else
+          executions
+        end
+      end
+
       def configuration=(c)
         if c.is_a? Hash
           @configuration = Configuration.new(c)
@@ -174,7 +217,7 @@ module Maven
     class Execution < Tag
       tags :id, :phase, :goals, :configuration
 
-      def initialize(id)
+      def initialize(id = nil)
         super({ :id => id })
       end
 
@@ -201,7 +244,7 @@ module Maven
     end
 
     class Profile < Tag
-      tags :id, :activation, :dependencies, :properties, :build
+      tags :id, :activation, :dependencies, :dependency_management, :properties, :build
 
       def initialize(id, &block)
         super(:id => id)
@@ -211,11 +254,11 @@ module Maven
         self
       end
       
-      def properties=(p)
-        if p.is_a? Hash
-          @properties = Properties.new(p)
+      def properties=(props)
+        if props.is_a? Hash
+          @properties = Properties.new(props)
         else
-          @properties = p
+          @properties = props
         end
       end
 
@@ -223,14 +266,24 @@ module Maven
         @build ||= Build.new
       end
       
-      def activation(name = nil, value = nil)
+      def activation(name = nil, value = nil, &block)
         @activation ||= Activation.new
-        @activation.add_property(name, value)
-        @activation
+         if name || value
+           warn "deprecated, use 'property_activation' instead"
+           @activation.property(name, value)
+         else
+           block.call(@activation) if block
+           @activation
+         end
       end
 
       def default_activation(name = nil, value = nil)
-        activation(name, value).as_default
+        warn "deprecated, use 'activation.by_default.property(name.value)' instead"
+        activation.property(name, value).by_default
+      end
+
+      def plugin(*args, &block)
+        build.plugins.get(*args, &block)
       end
 
       def dependencies(&block)
@@ -239,6 +292,14 @@ module Maven
           block.call(@dependencies)
         end
         @dependencies
+      end
+
+      def dependency_management(&block)
+        @dependency_management ||= DepArray.new
+        if block
+          block.call(@dependency_management)
+        end
+        @dependency_management
       end
     end
 
@@ -261,6 +322,18 @@ module Maven
       end
       alias :new :get
       
+      def default_model
+        @default_model ||= 
+          begin
+            model = @clazz.new
+            self[nil] = model
+            model
+          end
+      end
+
+      def method_missing(method, *args, &block)
+        default_model.send(method, *args, &block)
+      end
     end
 
     class PluginHash < Hash
@@ -273,11 +346,13 @@ module Maven
         when 2
           name = args[0].to_s
           version = args[1]
+        when 1
+          name = args[0].to_s
         else
-          raise "need name and version"
+          raise "need name"
         end
         if (name =~ /\./).nil?
-          if [:jruby, :gem, :rspec, :rake, :rails2, :rails3, :gemify].member? name.to_sym
+          if [:jruby, :gem, :rspec, :rake, :rails2, :rails3, :gemify, :cucmber].member? name.to_sym
             group_id = 'de.saumya.mojo'
             artifact_id = "#{name}-maven-plugin"
           else
@@ -293,7 +368,7 @@ module Maven
         if result.nil?
           result = (self[k] = Plugin.new(group_id, artifact_id, version))
         end
-        result.version = version #if version
+        result.version = version if version
         if block
           block.call(result)
         end
@@ -305,7 +380,7 @@ module Maven
     end
 
     class Project < Tag
-      tags :model_version, :group_id, :artifact_id, :version, :name, :packaging, :repositories, :plugin_repositories, :dependencies, :properties, :build, :profiles
+      tags :model_version, :group_id, :artifact_id, :version, :name, :packaging, :repositories, :plugin_repositories, :dependencies, :dependency_management, :properties, :build, :profiles
 
       def initialize(group_id, artifact_id, version = "0.0.0", &block)
         super(:model_version => "4.0.0", :artifact_id => artifact_id, :group_id => group_id, :version => version)
@@ -313,6 +388,31 @@ module Maven
           block.call(self)
         end
         self
+      end
+
+      def merge(&block)
+        if block
+          block.call(self)
+        end
+        self
+      end
+
+      def mergefile(file)
+        file = file.path if file.is_a?(File)
+        if File.exists? file
+          content = File.read(file)
+          eval "merge do\n#{content}\nend"
+        else
+          self
+        end
+      end
+
+      def plugin(*args, &block)
+        build.plugins.get(*args, &block)
+      end
+
+      def profile(*args, &block)
+        profiles.get(*args, &block)
       end
 
       def build
@@ -325,6 +425,10 @@ module Maven
           block.call(@repositories)
         end
         @repositories
+      end
+
+      def repository(*args, &block)
+        repositories.get(*args,&block)
       end
 
       def plugin_repositories(&block)
@@ -343,6 +447,14 @@ module Maven
         @dependencies
       end
 
+      def dependency_management(&block)
+        @dependency_management ||= DepArray.new
+        if block
+          block.call(@dependency_management)
+        end
+        @dependency_management
+      end
+
       def properties=(p)
         if p.is_a? Hash
           @properties = Properties.new(p)
@@ -351,8 +463,12 @@ module Maven
         end
       end
 
-      def profiles
+      def profiles(&block)
         @profiles ||= ModelHash.new(Profile)
+        if block
+          block.call(@profiles)
+        end
+        @profiles
       end
     end
 
@@ -433,23 +549,75 @@ module Maven
       end
     end
 
+    class ListItems < Tag
+
+      def initialize(name = nil)
+        @name = name
+      end
+
+      def add(item)
+        @items ||= Array.new
+        @items << item
+      end
+      alias :<< :add
+
+      def to_xml(buf = "", indent = "")
+        buf << "#{indent}<#{@name}>\n" if @name 
+        @items.each do |i|
+          i.to_xml(buf, indent)
+        end
+        buf << "#{indent}</#{@name}>\n" if @name
+      end
+      
+    end
+
+    class OS < Tag
+      
+      def initialize(name, value)
+        @name = name
+        @value = value
+      end
+
+      def to_xml(buf = "", indent = "")
+        buf << "#{indent}  <#{@name}>#{@value}</#{@name}>\n"
+      end
+    end
+
     class Activation < Tag
-      tags :activeByDefault, :property
-      def initialize(name = nil, value = nil)
+      tags :activeByDefault, :property, :os
+      def initialize
         super({})
-        add_property(name, value) if name && value
       end
 
       def add_property(name, value)
+        warn "deprecated, use 'property' instead"
+        property(name, value)
+      end
+
+      def property(name, value)
         if name && value
           # TODO make more then one property
           raise "more then one property is not implemented: #{@property.name} => #{@property.value}" if @property
-          @property = Property.new(:name => name, :value => value)
+          @property ||= ListItems.new
+          @property << Property.new(:name => name, :value => value)
         end
+        self
+      end
+
+      def os(name, value)
+        @os ||= ListItems.new("os")
+        @os << OS.new(name, value)
+        self
       end
 
       def as_default
-        @activeByDefault = true
+        warn "deprecated, use 'by_default' instead"
+        by_default
+      end
+      
+      def by_default(value = true)
+        @activeByDefault = value
+        self
       end
     end
 

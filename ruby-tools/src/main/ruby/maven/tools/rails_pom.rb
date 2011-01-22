@@ -6,11 +6,11 @@ module Maven
     class RailsPom
 
       def initialize(args = {})
-        @versions = { :jetty_plugin => "7.1.0.RC1",
-                       :jruby_complete => "1.5.3",
-                       :jruby_rack => "1.0.4.dev-SNAPSHOT",
-                       :jruby_plugins => "0.22.0",
-                       :war_plugin => "2.1",
+        @versions = { :jetty_plugin => "7.2.2.v20101205", #7.1.0.RC1",
+                       :jruby_complete => "1.5.6",
+                       :jruby_rack => "1.0.5",
+                       :jruby_plugins => "0.24.0",
+                       :war_plugin => "2.1.1",
                      }.merge(args)
       end
 
@@ -49,7 +49,7 @@ module Maven
         if file.is_a? File
           check_rails(file) 
           name = File.basename(File.dirname(File.expand_path(file.path)))
-          gemfile = GemfileReader.new(File.read(file.path))
+          gemfile = GemfileReader.new(file)
         else
           gemfile = GemfileReader.new(file)
           file = File.new(filename) if filename
@@ -66,23 +66,19 @@ module Maven
           proj.name = "#{name} - rails application"
           proj.packaging = "war"
           
-          proj.repositories do |repos|
-            repos.new("rubygems-releases") do |r|
-              r.url = "http://gems.saumya.de/releases"
+          proj.repository("rubygems-releases").url = "http://gems.saumya.de/releases"
+          if version(default, "org.jruby.rack.jruby-rack") || @versions[:jruby_rack] =~ /SNAPSHOT/
+            proj.repository("saumya") do |saumya|
+              saumya.url = "http://mojo.saumya.de/"
+              saumya.releases(:enabled => false)
+              saumya.snapshots(:enabled => true, :updatePolicy => :never)
             end
-            if version(default, "org.jruby.rack.jruby-rack") || @versions[:jruby_rack] =~ /SNAPSHOT/
-              repos.new("saumya") do |saumya|
-                saumya.url = "http://mojo.saumya.de/"
-                saumya.releases(:enabled => false)
-                saumya.snapshots(:enabled => true, :updatePolicy => :never)
-              end
-            end
-            if (default.properties["jruby.plugins.version"] || @versions[:jruby_plugins]) =~ /SNAPSHOT/
-              repos.new("sonatype-nexus-snapshots") do |nexus|
-                nexus.url = "http://oss.sonatype.org/content/repositories/snapshots"
-                nexus.releases(:enabled => false)
-                nexus.snapshots(:enabled => true)
-              end
+          end
+          if (default.properties["jruby.plugins.version"] || @versions[:jruby_plugins]) =~ /SNAPSHOT/
+            proj.repository("sonatype-nexus-snapshots") do |nexus|
+              nexus.url = "http://oss.sonatype.org/content/repositories/snapshots"
+              nexus.releases(:enabled => false)
+              nexus.snapshots(:enabled => true)
             end
           end
 
@@ -91,7 +87,9 @@ module Maven
             jruby_rack = false
             jruby_complete = false
             default.each do |dep|
-              if [:gem,:jar].member? dep.type
+              if :gem == dep.type
+                deps << dep[0]
+              elsif :jar == dep.type
                 deps << dep
                 jruby_rack = true if dep[0] == "org.jruby.rack.jruby-rack"
                 jruby_complete = true if dep[0] == "org.jruby.jruby-complete"
@@ -102,8 +100,41 @@ module Maven
             deps << ["org.jruby.jruby-complete", @versions[:jruby_complete]] unless jruby_complete
           end
           
-          proj.profiles.get(:development).default_activation
-          proj.profiles.get(:production) do |prod|
+          proj.profile(:unlocked) do |unlocked|
+            unlocked.activation do |activation|
+              activation.by_default if gemfile.locked_deps.size == 0
+              activation.property("gem.locked", "false")
+            end
+            unlocked.dependency_management do |deps|
+              default.each do |dep|
+                if [:gem].member? dep.type
+                  deps << dep
+                end
+              end
+            end
+          end
+
+          if gemfile.locked_deps.size > 0
+            proj.profiles.get(:locked) do |locked|
+              locked.activation.by_default.property("gem.locked", "true")
+              locked.dependency_management do |deps|
+                gemfile.locked_deps.each do |dep, version|
+                  deps << [dep, version]
+                end
+              end
+              locked.dependencies do |deps|
+                ref = default.collect { |d| d[0] }
+                gemfile.locked_deps.each do |dep, version|
+                  unless ref.member? dep
+                    deps << dep
+                  end
+                end
+              end
+            end
+          end
+
+          proj.profile(:development).activation.by_default
+          proj.profile(:production) do |prod|
             prod.properties = { 
               "gem.home" => "${project.build.directory}/rubygems-production", 
               "gem.path" => "${project.build.directory}/rubygems-production" 
@@ -112,11 +143,12 @@ module Maven
              
           groups.each do |n, g|
             unless [:run, :war].member? n
-              proj.profiles.get(n.to_s) do |profile|
-                profile.activation("rails.env", n.to_s)
+              proj.profile(n.to_s) do |profile|
+                profile.activation.property("rails.env", n.to_s)
                 g.each do |gem|
                   if [:gem,:jar].member? gem.type
-                    profile.dependencies << gem
+                    profile.dependencies << gem[0]
+                    profile.dependecy_management << gem
                   end
                 end
                 new_plugins = g.select do |dep|
@@ -139,21 +171,21 @@ module Maven
             "gem.path" => "${project.build.directory}/rubygems", 
             "jruby.plugins.version" => "#{@versions[:jruby_plugins]}", 
             "jetty.version" => "#{@versions[:jetty_plugin]}",
-            "rails.env" => "development"
+            "rails.env" => "development",
+            "gem.locked" => "true"
           }.merge(default.properties)
 
-          proj.build.plugins do |plugins|
-            default.each do |dep|
-              if dep.type == :plugin
-                if dep.size == 3
-                  block = dep[2]
-                  dep.delete(block) 
-                end
-                plugin = plugins.add(*dep) do |pl|
-                  block.call(pl) if block
-                end
+          default.each do |dep|
+            if dep.type == :plugin
+              if dep.size == 3
+                block = dep[2]
+                dep.delete(block) 
+              end
+              plugin = proj.plugin(*dep) do |pl|
+                block.call(pl) if block
               end
             end
+          end
            #  plugins.get_jruby(:gem) do |gem| 
 #               gem.extensions = true
 #               gem.executions.get("gemfile")do |gemfile|
@@ -172,49 +204,44 @@ module Maven
 #               gemfile.phase = 'prepare-package'
 #               gemfile.goals << 'exec'
 #             end
-            plugins.get(:rails3, plugin_version(default, :rails3) || @versions[:jruby_plugins]) do |rails|
-              rails.extensions = true
-              rails.executions.get(:initialize) do |e|
-                e.goals = ["initialize"]
-              end
-            end
-            plugins.add(:war, plugin_version(default, :war)) do |war|
-              war.configuration = {
-                :webResources => NamedArray.new(:resource) do |l|
-                  l << { :directory => "public" }
-                  l << { 
-                    :directory => ".",
-                    :targetPath => "WEB-INF",
-                    :includes => ['app/**', 'config/**', 'lib/**', 'vendor/**', 'Gemfile']
-                  }
-                  l << {
-                    :directory => '${gem.path}',
-                    :targetPath => 'WEB-INF/gems'
-                  }
-                end
+          proj.plugin(:rails3, plugin_version(default, :rails3) || @versions[:jruby_plugins]) do |rails|
+            rails.extensions = true
+            rails.execution(:initialize).goals << "initialize"
+          end
+          proj.plugin(:war, plugin_version(default, :war)).with({
+            :webResources => NamedArray.new(:resource) do |l|
+              l << { :directory => "public" }
+              l << { 
+                :directory => ".",
+                :targetPath => "WEB-INF",
+                :includes => ['app/**', 'config/**', 'lib/**', 'vendor/**', 'Gemfile']
+              }
+              l << {
+                :directory => '${gem.path}',
+                :targetPath => 'WEB-INF/gems'
               }
             end
-            if gemfile.phases.size > 0
-              gemfile.phases.each do |name, v|
-                plugins.get(:gem, plugin_version(default, :gem) || @versions[:jruby_plugins]) do |gem|
-                  gem.executions.get("gemfile_#{name}") do |exec|
-                    exec.phase = name
-                    exec.goals = [:gemfile]
-                    config = { :phase => name }
-                    config[:gemfile] = file.path if file.is_a? File
-                    exec.configuration = config
-                  end
+          })
+          if gemfile.phases.size > 0
+            warn "phases is deprected at the place, use it in maven.rb instead"
+            gemfile.phases.each do |name, v|
+              proj.plugin(:gem, plugin_version(default, :gem) || @versions[:jruby_plugins]) do |gem|
+                gem.execution("gemfile_#{name}") do |exec|
+                  exec.phase = name
+                  exec.goals = [:gemfile]
+                  exec.configuration = { :phase => name }
+                  exec.configuration[:gemfile] = file.path if file.is_a? File
                 end
               end
             end
           end
-          proj.profiles.new(:war).build.plugins.add("org.mortbay.jetty.jetty-maven-plugin",
-                                                    "${jetty.version}")
-          proj.profiles.new(:run) do |run|
-            run.default_activation
-            run.build.plugins.add("org.mortbay.jetty.jetty-maven-plugin", 
-                                  "${jetty.version}") do |jetty|
-              jetty.configuration = {
+          
+          proj.profile(:war).plugin("org.mortbay.jetty.jetty-maven-plugin",
+                                    "${jetty.version}")
+          proj.profile(:run) do |run|
+            run.activation.by_default
+            run.plugin("org.mortbay.jetty.jetty-maven-plugin", 
+                       "${jetty.version}").with({
                 :webAppConfig => {
                   :overrideDescriptor => '${project.build.directory}/jetty/override-${rails.env}-web.xml'
                 },
@@ -230,10 +257,9 @@ module Maven
 		  <password>123456</password>
 		</connector>
 XML
-              }
-            end
+              })
           end
-        end
+        end.mergefile("maven.rb")
       end
     end
   end
