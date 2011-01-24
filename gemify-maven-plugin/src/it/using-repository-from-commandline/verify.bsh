@@ -2,7 +2,7 @@ import java.io.*;
 
 File target = new File( basedir, "target");
 
-File file = new File( target, "org.jboss.logging.jboss-logging-3.0.0.b.4-java.gem" );
+File file = new File( target, "mvn:org.jboss.logging:jboss-logging-3.0.0.b.4-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );

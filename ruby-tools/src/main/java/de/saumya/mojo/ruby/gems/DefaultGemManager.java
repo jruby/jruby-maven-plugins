@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -256,11 +257,13 @@ public class DefaultGemManager implements GemManager {
                 while (line != null) {
                     //TODO maybe try to be more relax on how the version is embedded
                     if (line.contains("<a href=")) {
-                        String version = line.replaceFirst(".*<a href=\".*\">",
-                                                           "")
-                                .replaceFirst("/</a>.*", "");
-                        if (!versions.contains(version)) {
-                            versions.add(version);
+                        String version = line.replaceFirst(".*<a href=\".*\">", "")
+                                .replaceFirst("</a>.*", "");
+                        if(version.endsWith("/")){
+                            version = version.substring(0, version.length() - 1);
+                            if (!versions.contains(version)) {
+                                versions.add(version);
+                            }
                         }
                     }
                     line = reader.readLine();
@@ -277,6 +280,7 @@ public class DefaultGemManager implements GemManager {
                 IOUtil.close(reader);
             }
         }
+        Collections.sort(versions);
         return versions;
     }
 }

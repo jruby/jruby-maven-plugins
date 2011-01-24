@@ -9,7 +9,7 @@ if ( target.exists() )
 }
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-if ( !log.contains( "The repository system is offline" ) )
+if ( !log.contains( "system is offline" ) )
 {
     throw new RuntimeException( "log file does not contain 'The repository system is offline'" );
 }

@@ -23,16 +23,16 @@
 	    <goals><goal>install</goal></goals>
 	    <configuration>
 	      <args>-l --ignore-dependencies --no-user-install
-${project.build.directory}/commons-codec.commons-codec-1.2.0-java.gem
-${project.build.directory}/commons-httpclient.commons-httpclient-3.1.0-java.gem
-${project.build.directory}/commons-logging.commons-logging-1.0.4-java.gem
-${project.build.directory}/nekohtml.nekohtml-1.9.6.2-java.gem
-${project.build.directory}/nekohtml.xercesMinimal-1.9.6.2-java.gem
-${project.build.directory}/org.apache.maven.wagon.wagon-http-shared-1.0.0.b.6-java.gem
-${project.build.directory}/org.apache.maven.wagon.wagon-provider-api-1.0.0.b.6-java.gem
-${project.build.directory}/org.codehaus.plexus.plexus-utils-1.4.2-java.gem
-${project.build.directory}/xerces.xercesImpl-2.8.1-java.gem
-${project.build.directory}/xml-apis.xml-apis-1.3.03-java.gem
+${project.build.directory}/mvn:commons-codec:commons-codec-1.2.0-java.gem
+${project.build.directory}/mvn:commons-httpclient:commons-httpclient-3.1.0-java.gem
+${project.build.directory}/mvn:commons-logging:commons-logging-1.0.4-java.gem
+${project.build.directory}/mvn:nekohtml:nekohtml-1.9.6.2-java.gem
+${project.build.directory}/mvn:nekohtml:xercesMinimal-1.9.6.2-java.gem
+${project.build.directory}/mvn:org.apache.maven.wagon:wagon-http-shared-1.0.0.b.6-java.gem
+${project.build.directory}/mvn:org.apache.maven.wagon:wagon-provider-api-1.0.0.b.6-java.gem
+${project.build.directory}/mvn:org.codehaus.plexus:plexus-utils-1.4.2-java.gem
+${project.build.directory}/mvn:xerces:xercesImpl-2.8.1-java.gem
+${project.build.directory}/mvn:xml-apis:xml-apis-1.3.03-java.gem
 	      </args>
 	    </configuration>
 	  </execution>
