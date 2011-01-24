@@ -19,6 +19,8 @@ class AntLauncher extends AbstractLauncher {
 
     private static final String MAVEN_CLASSPATH = "maven.classpath";
 
+    private static final String DEFAULT_XMX = "-Xmx384m";
+
     private final Logger        logger;
 
     private final ScriptFactory factory;
@@ -70,9 +72,19 @@ class AntLauncher extends AbstractLauncher {
         java.createJvmarg().setValue("-cp");
         java.createJvmarg()
                 .setPath((Path) this.project.getReference(MAVEN_CLASSPATH));
-        java.createJvmarg().setValue("-client");
-        // TODO make this configurable
-        java.createJvmarg().setValue("-Xmx384m");
+
+        if (!factory.jvmArgs.matches("(-client|-server)")) {
+        	java.createJvmarg().setValue("-client");	
+        } 
+        
+        if (!factory.jvmArgs.matches("-Xmx\\d+m")) {
+        	java.createJvmarg().setValue(DEFAULT_XMX);	
+        } 
+        
+        for (String arg : factory.jvmArgs.list) {
+        	java.createJvmarg().setValue(arg);	
+        }
+        
         java.createJvmarg().setValue("-Xbootclasspath/a:"
                 + this.factory.jrubyJar.getAbsolutePath());
 
