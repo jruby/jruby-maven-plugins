@@ -22,31 +22,11 @@ module Maven
                   when String
                     file 
                   when File
-                    self.class.load_lock_file(file.path + ".lock")
                     File.read(file.path)
                   else
                     raise "input must be either a File or a String. it is '#{file.class}'"
                   end
         eval "class ::#{self.class}\n#{gemfile}\nend"
-      end
-
-      def self.load_lock_file(file)
-        deps = File.readlines(file).select { |f| f =~ /\)\n$/ }.collect { |f| f.strip }.sort.uniq
-        indirect = deps.select do |dep|
-          dep =~ /\(=/ || dep =~ /\(</ || dep =~ />/
-        end
-        direct = deps - indirect
-        direct.each do |dep|
-          locked_deps[dep.sub(/\ .*/,'')] = dep.sub(/.*\(/, '').sub(/\).*/, '')
-        end
-        indirect.each do |dep| 
-          locked_deps[dep.sub(/\ .*/,'')] = dep.sub(/.*\(/, '').sub(/\).*/, '') unless locked_deps[dep.sub(/\ .*/, '')]
-        end
-        raise "error parsing #{file}" if deps.select { |d| !locked_deps[d.sub(/\ .*/, '')] }.size > 0
-      end
-
-      def self.locked_deps
-        @locked ||= {}
       end
 
       def self.current
@@ -130,10 +110,6 @@ module Maven
 
       def groups
         self.class.groups
-      end
-
-      def locked_deps
-        self.class.locked_deps
       end
 
       def group(name)

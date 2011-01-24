@@ -34,26 +34,30 @@ module Maven
           var = var.to_s.gsub(/_(.)/) { $1.upcase }
           case val
           when Array
-            buf << "#{indent}  <#{var}>\n"
             val.flatten!
-            val.each do |v|
-              if v.is_a? Tag
-                v.to_xml(buf, indent + "    ")
-              else
-                buf << "#{indent}    <#{var.to_s.sub(/s$/, '')}>#{v}</#{var.to_s.sub(/s$/, '')}>\n"
+            if val.size > 0
+              buf << "#{indent}  <#{var}>\n"
+              val.each do |v|
+                if v.is_a? Tag
+                  v.to_xml(buf, indent + "    ")
+                else
+                  buf << "#{indent}    <#{var.to_s.sub(/s$/, '')}>#{v}</#{var.to_s.sub(/s$/, '')}>\n"
+                end
               end
+              buf << "#{indent}  </#{var}>\n"
             end
-            buf << "#{indent}  </#{var}>\n"
           when Hash
-            buf << "#{indent}  <#{var}>\n"
-            val.each do |k, v|
-              if v.is_a? Tag
-                v.to_xml(buf, indent + "    ")
-              else
-                buf << "#{indent}    <#{k}>#{v}</#{k}>\n"
+            if val.size > 0
+              buf << "#{indent}  <#{var}>\n"
+              val.each do |k, v|
+                if v.is_a? Tag
+                  v.to_xml(buf, indent + "    ")
+                else
+                  buf << "#{indent}    <#{k}>#{v}</#{k}>\n"
+                end
               end
+              buf << "#{indent}  </#{var}>\n"
             end
-            buf << "#{indent}  </#{var}>\n"
           when Tag
             val.to_xml(buf, indent + "  ")
           else
@@ -71,18 +75,23 @@ module Maven
       def initialize(args = {})
         super
       end
+
+      def ==(other)
+        group_id == other.group_id && artifact_id == other.artifact_id
+      end
     end
+
     class Dependency < Coordinate
-      tags :scope, :type
-      def initialize(group_id, artifact_id, version, type = nil)
+      tags :type, :scope
+      def initialize(group_id, artifact_id, version = nil, type = nil)
         super(:group_id => group_id, :artifact_id => artifact_id, :version => version, :type => type)
       end
     end
 
     class Gem < Dependency
       tags :dummy
-      def initialize(*args)
-        super("rubygems", args[0], args[1], "gem")
+      def initialize(gemname, version = nil)
+        super("rubygems", gemname, version, "gem")
       end
 
       def _name
@@ -103,61 +112,61 @@ module Maven
 
     class DepArray < Array
       def <<(args)
-        case args
-        when Array
-          if args.size == 1
-            args << "[0.0.0,)"
-          elsif args.size == 2 && args.last.is_a?(Hash)
-            args = [args[0], "[0.0.0,)", args[1]]
-          elsif args.size >= 2
-            if args[1] =~ /~>/
-              val = args[1].sub(/.*\ /, '')
-              last = val.sub(/\.[^.]+$/, '.99999')
-              args[1] = "[#{val}, #{last}]"
-            elsif args[1] =~ />=/
-              val = args[1].sub(/.*\ /, '')
-              args[1] = "[#{val},)"
-            elsif args[1] =~ /<=/
-              val = args[1].sub(/.*\ /, '')
-              args[1] = "[0.0.0,#{val}]"
-            elsif args[1] =~ />/
-              val = args[1].sub(/.*\ /, '')
-              args[1] = "(#{val},)"
-            elsif args[1] =~ /</
-              val = args[1].sub(/.*\ /, '')
-              args[1] = "[0.0.0,#{val})"
+        item = 
+          case args
+          when Array
+            if args.size == 1
+              args << "[0.0.0,)"
+            elsif args.size == 2 && args.last.is_a?(Hash)
+              args = [args[0], "[0.0.0,)", args[1]]
+            elsif args.size >= 2
+              if args[1] =~ /~>/
+                val = args[1].sub(/.*\ /, '')
+                last = val.sub(/\.[^.]+$/, '.99999')
+                args[1] = "[#{val}, #{last}]"
+              elsif args[1] =~ />=/
+                val = args[1].sub(/.*\ /, '')
+                args[1] = "[#{val},)"
+              elsif args[1] =~ /<=/
+                val = args[1].sub(/.*\ /, '')
+                args[1] = "[0.0.0,#{val}]"
+              elsif args[1] =~ />/
+                val = args[1].sub(/.*\ /, '')
+                args[1] = "(#{val},)"
+              elsif args[1] =~ /</
+                val = args[1].sub(/.*\ /, '')
+                args[1] = "[0.0.0,#{val})"
+              end
             end
-          end
-          if args[0] =~ /:/
-            super Dependency.new(args[0].sub(/:[^:]+$/, ''), 
-                                 args[0].sub(/.*:/, ''), 
-                                 args[1])
-          elsif args[0] =~ /\./
-            super Dependency.new(args[0].sub(/\.[^.]+$/, ''), 
-                                 args[0].sub(/.*\./, ''), 
-                                 args[1])
+            if args[0] =~ /:/
+              Dependency.new(args[0].sub(/:[^:]+$/, ''), 
+                             args[0].sub(/.*:/, ''), 
+                             args[1])
+            elsif args[0] =~ /\./
+              Dependency.new(args[0].sub(/\.[^.]+$/, ''), 
+                             args[0].sub(/.*\./, ''), 
+                             args[1])
+            else
+              args = args.delete(2) if args[2]
+              Gem.new(*args)
+            end
+          when String
+            if args =~  /:/
+              Dependency.new(args.sub(/:[^:]+$/, ''), 
+                             args.sub(/.*:/, ''))
+            elsif args =~  /\./
+              Dependency.new(args.sub(/\.[^.]+$/, ''), 
+                             args.sub(/.*\./, ''))
+            else
+              Gem.new(args)
+            end
           else
-            super Gem.new(*args)
+            args
           end
-        when Hash
-          raise "hash not allowed"
-#          super Dependency.new(args)
-        when String
-          if args =~  /:/
-            super Dependency.new(args.sub(/:[^:]+$/, ''), 
-                                 args.sub(/.*:/, ''), 
-                                 nil)
-          elsif args =~  /\./
-            super Dependency.new(args.sub(/\.[^.]+$/, ''), 
-                                 args.sub(/.*\./, ''), 
-                                 nil)
-          else
-            super Gem.new(args, nil)
-          end
-        else
-          super args
-        end
+        super item unless member? item
+        item
       end
+
     end
 
     class Build < Tag
@@ -168,6 +177,14 @@ module Maven
           block.call(@plugins)
         end
         @plugins
+      end
+
+      def to_xml(buf = "", indent = "")
+        if @finalName.nil? && (@plugins.nil? || @plugins.size == 0)
+          ""
+        else
+          super
+        end
       end
     end
 
@@ -254,6 +271,10 @@ module Maven
         self
       end
       
+      def properties
+        (@properties || Properties.new).map
+      end
+
       def properties=(props)
         if props.is_a? Hash
           @properties = Properties.new(props)
@@ -341,7 +362,7 @@ module Maven
       def get(*args, &block)
         case args.size
         when 3
-          name = args[0] + "." + args[1]
+          name = args[0] + ":" + args[1]
           version = args[2]
         when 2
           name = args[0].to_s
@@ -390,21 +411,15 @@ module Maven
         self
       end
 
+      def _name
+        "project"
+      end
+
       def merge(&block)
         if block
           block.call(self)
         end
         self
-      end
-
-      def mergefile(file)
-        file = file.path if file.is_a?(File)
-        if File.exists? file
-          content = File.read(file)
-          eval "merge do\n#{content}\nend"
-        else
-          self
-        end
       end
 
       def plugin(*args, &block)
@@ -455,11 +470,15 @@ module Maven
         @dependency_management
       end
 
-      def properties=(p)
-        if p.is_a? Hash
-          @properties = Properties.new(p)
+      def properties
+        (@properties || Properties.new).map
+      end
+
+      def properties=(props)
+        if props.is_a? Hash
+          @properties = Properties.new(props)
         else
-          @properties = p
+          @properties = props
         end
       end
 
@@ -469,16 +488,6 @@ module Maven
           block.call(@profiles)
         end
         @profiles
-      end
-    end
-
-    class GemProject < Project
-      tags :dummy
-      def initialize(artifact_id, version = "0.0.0", &block)
-        super("rubygems", artifact_id, version, &block)
-      end
-      def _name
-        "project"
       end
     end
 
@@ -501,7 +510,8 @@ module Maven
       end
       
       def map_to_xml(buf, indent, map)
-        map.each do |k,v|
+        # sort the hash over the keys
+        map.collect { |k,v| [k.to_s, v]}.sort.each do |k,v|
           case v
           when Hash
             buf << "#{indent}  <#{k}>\n"
@@ -547,6 +557,10 @@ module Maven
       def initialize(args = {})
         super("properties", args)
       end
+
+      def map
+        @props
+      end
     end
 
     class ListItems < Tag
@@ -572,7 +586,6 @@ module Maven
     end
 
     class OS < Tag
-      
       def initialize(name, value)
         @name = name
         @value = value

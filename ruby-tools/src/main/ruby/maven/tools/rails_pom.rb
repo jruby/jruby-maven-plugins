@@ -3,6 +3,20 @@ require File.join(File.dirname(__FILE__), 'gemfile_reader.rb')
 
 module Maven
   module Tools
+
+    class GemProject < Project
+      tags :dummy
+
+      def initialize(artifact_id, version = "0.0.0", &block)
+        super("rubygems", artifact_id, version, &block)
+      end
+
+      def _name
+        "project"
+      end
+
+    end
+
     class RailsPom
 
       def initialize(args = {})
@@ -99,39 +113,6 @@ module Maven
             deps << ["org.jruby.rack.jruby-rack", @versions[:jruby_rack]] unless jruby_rack
             deps << ["org.jruby.jruby-complete", @versions[:jruby_complete]] unless jruby_complete
           end
-          
-          proj.profile(:unlocked) do |unlocked|
-            unlocked.activation do |activation|
-              activation.by_default if gemfile.locked_deps.size == 0
-              activation.property("gem.locked", "false")
-            end
-            unlocked.dependency_management do |deps|
-              default.each do |dep|
-                if [:gem].member? dep.type
-                  deps << dep
-                end
-              end
-            end
-          end
-
-          if gemfile.locked_deps.size > 0
-            proj.profiles.get(:locked) do |locked|
-              locked.activation.by_default.property("gem.locked", "true")
-              locked.dependency_management do |deps|
-                gemfile.locked_deps.each do |dep, version|
-                  deps << [dep, version]
-                end
-              end
-              locked.dependencies do |deps|
-                ref = default.collect { |d| d[0] }
-                gemfile.locked_deps.each do |dep, version|
-                  unless ref.member? dep
-                    deps << dep
-                  end
-                end
-              end
-            end
-          end
 
           proj.profile(:development).activation.by_default
           proj.profile(:production) do |prod|
@@ -147,8 +128,7 @@ module Maven
                 profile.activation.property("rails.env", n.to_s)
                 g.each do |gem|
                   if [:gem,:jar].member? gem.type
-                    profile.dependencies << gem[0]
-                    profile.dependecy_management << gem
+                    profile.dependencies << gem
                   end
                 end
                 new_plugins = g.select do |dep|
@@ -171,8 +151,7 @@ module Maven
             "gem.path" => "${project.build.directory}/rubygems", 
             "jruby.plugins.version" => "#{@versions[:jruby_plugins]}", 
             "jetty.version" => "#{@versions[:jetty_plugin]}",
-            "rails.env" => "development",
-            "gem.locked" => "true"
+            "rails.env" => "development"
           }.merge(default.properties)
 
           default.each do |dep|
@@ -259,7 +238,7 @@ module Maven
 XML
               })
           end
-        end.mergefile("maven.rb")
+        end#.mergefile("maven.rb")
       end
     end
   end
