@@ -63,7 +63,7 @@ public class GemServiceTest extends TestCase {
 
     public void notestGemspecAgain() throws Exception {
         final long oldTime = time;
-        testGemspec();
+        notestGemspec();
         assertTrue(time + " < " + (oldTime), time < oldTime);
     }
 
