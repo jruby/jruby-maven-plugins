@@ -3,13 +3,13 @@ import org.codehaus.plexus.util.FileUtils;
 
 File target = new File( basedir, "target");
 
-File file = new File( target, "org.slf4j.slf4j-api-1.5.8-java.gem" );
+File file = new File( target, "mvn:org.slf4j:slf4j-api-1.5.8-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );
 }
 
-file = new File( target, "org.slf4j.slf4j-nop-1.5.8-java.gem" );
+file = new File( target, "mvn:org.slf4j:slf4j-nop-1.5.8-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );

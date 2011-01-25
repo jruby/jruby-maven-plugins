@@ -3,7 +3,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 File target = new File( basedir, "target");
 
-File file = new File( target, "javax.servlet.servlet-api-2.3.0-java.gem" );
+File file = new File( target, "mvn:javax.servlet:servlet-api-2.3.0-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );

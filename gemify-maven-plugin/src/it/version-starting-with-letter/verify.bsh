@@ -2,7 +2,7 @@ import java.io.*;
 
 File target = new File( basedir, "target");
 
-File file = new File( target, "mvn:logkit:logkit-20020529.0.0-java.gem" );
+File file = new File( target, "mvn:com.google.guava:guava-0.0.1.r.07-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );

@@ -23,8 +23,8 @@
 	    <goals><goal>install</goal></goals>
 	    <configuration>
 	      <args>-l --ignore-dependencies --no-user-install
-${project.build.directory}/org.slf4j.slf4j-api-1.5.10-java.gem
-${project.build.directory}/org.slf4j.slf4j-nop-1.5.10-java.gem
+${project.build.directory}/mvn:org.slf4j:slf4j-api-1.5.10-java.gem
+${project.build.directory}/mvn:org.slf4j:slf4j-nop-1.5.10-java.gem
 	      </args>
 	    </configuration>
 	  </execution>

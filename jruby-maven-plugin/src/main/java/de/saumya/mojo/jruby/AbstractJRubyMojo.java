@@ -50,6 +50,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      */
     protected String jrubyArgs = null;
 
+ 
+    /**
+     * arguments for the jruby command.
+     * 
+     * @parameter expression="${jruby.jvmargs}"
+     */
+    protected String jrubyJvmArgs;
+   
     /**
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
      * this version is used to resolve the jruby-complete dependency from the
@@ -134,6 +142,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         this.logger = new MojoLogger(this.jrubyVerbose, getLog());
         this.factory = newScriptFactory();
         this.factory.addJavaArgs(this.jrubyArgs);
+        this.factory.addJvmArgs(this.jrubyJvmArgs);
 
         try {
 

@@ -2,19 +2,19 @@ import java.io.*;
 
 File target = new File( basedir, "target");
 
-File file = new File( target, "org.slf4j.slf4j-api-1.5.10-java.gem" );
+File file = new File( target, "mvn:org.slf4j:slf4j-api-1.5.10-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );
 }
 
-file = new File( target, "org.slf4j.slf4j-nop-1.5.10-java.gem" );
+file = new File( target, "mvn:org.slf4j:slf4j-nop-1.5.10-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );
 }
 
-file = new File( target, "junit.junit-3.8.1-java.gem" );
+file = new File( target, "mvn:junit:junit-3.8.1-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );

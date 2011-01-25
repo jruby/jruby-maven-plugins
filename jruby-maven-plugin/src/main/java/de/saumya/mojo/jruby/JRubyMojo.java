@@ -41,15 +41,17 @@ public class JRubyMojo extends AbstractJRubyMojo {
      * directory of gem home to use when forking JRuby.
      * 
      * @parameter expression="${gem.home}"
+     *            default-value="${project.build.directory}/rubygems"
      */
-    protected File gemHome;
+    protected File          gemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby.
      * 
      * @parameter expression="${gem.path}"
+     *            default-value="${project.build.directory}/rubygems"
      */
-    protected File gemPath;
+    protected File          gemPath;
 
     @Override
     public void executeJRuby() throws MojoExecutionException, IOException,

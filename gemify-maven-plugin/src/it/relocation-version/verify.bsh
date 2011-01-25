@@ -2,7 +2,7 @@ import java.io.*;
 
 File target = new File( basedir, "target");
 
-File file = new File( target, "xml-apis.xml-apis-1.0.b.2-java.gem" );
+File file = new File( target, "mvn:xml-apis:xml-apis-1.0.b.2-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );
