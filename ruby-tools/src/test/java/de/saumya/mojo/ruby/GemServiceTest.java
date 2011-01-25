@@ -50,7 +50,7 @@ public class GemServiceTest extends TestCase {
 
     }
 
-    public void testGemspec() throws Exception {
+    public void notestGemspec() throws Exception {
         final long start = System.currentTimeMillis();
         this.gemspec.createPom(new File("src/test/resources/test.gemspec"),
                                "0.20.0",
@@ -61,13 +61,13 @@ public class GemServiceTest extends TestCase {
         time = end - start;
     }
 
-    public void testGemspecAgain() throws Exception {
+    public void notestGemspecAgain() throws Exception {
         final long oldTime = time;
         testGemspec();
         assertTrue(time + " < " + (oldTime), time < oldTime);
     }
 
-    public void testUpdateMetadata() throws Exception {
+    public void notestUpdateMetadata() throws Exception {
         final File repo = new File(System.getProperty("user.home")
                 + "/.m2/repository/rubygems");
         cleanupMetadata("rubygems-test", repo);
