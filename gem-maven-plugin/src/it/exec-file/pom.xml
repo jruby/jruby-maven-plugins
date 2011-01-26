@@ -4,12 +4,31 @@
   <groupId>de.saumya.mojo</groupId>
   <artifactId>dummy</artifactId>
   <version>testing</version>
+  <repositories>
+    <repository>
+      <id>rubygems-release</id>
+      <url>http://gems.saumya.de/releases</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+       <groupId>rubygems</groupId>
+       <artifactId>rubyzip2</artifactId>
+       <version>2.0.1</version>
+       <type>gem</type>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
-        <version>@project.version@</version>
+        <version>0.25.0-SNAPSHOT</version>
+        <configuration>
+          <file>file.rb</file>
+        </configuration>
       </plugin>
     </plugins>
   </build>
