@@ -30,7 +30,18 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
     end
     
     def relative_file
-      Pathname.new( @file ).relative_path_from( Pathname.new( BASE_DIR ) )
+      #return "unknown" if ( @file.nil? || @file == '' )
+      #return @file if ( BASE_DIR.nil? || BASE_DIR == '' )
+      
+      #puts "file==[#{@file}]"
+      #puts "BASE_DIR==[#{BASE_DIR}]"
+      
+      
+      #file_pathname = Pathname.new( @file )
+      #base_pathname = Pathname.new( BASE_DIR )
+      
+      #Pathname.new( @file ).relative_path_from( Pathname.new( BASE_DIR ) ) 
+      @file
     end
   end
   
