@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.rails.RailsException;
@@ -43,9 +44,8 @@ public class NewMojo extends AbstractRailsMojo {
     /**
      * the rails version to use
      * 
-     * @parameter default-value="3.0.0" expression="${railsVersion}"
+     * @parameter expression="${rails.version}"
      */
-    // TODO use latest version as default like gemify-plugin
     protected String            railsVersion                   = null;
 
     /**
@@ -62,20 +62,19 @@ public class NewMojo extends AbstractRailsMojo {
      */
     protected String            artifactVersion                = null;
 
-    // needs to be the default in mojo parameter as well
-    private static final String SMALLEST_ALLOWED_RAILS_VERSION = "3.0.0.rc";
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        // make sure the whole things run in the same process
+        this.jrubyFork = false;
+        super.execute();
+    }
 
     @Override
     void executeRails() throws MojoExecutionException, ScriptException,
             IOException, GemException, RailsException {
-        if (this.railsVersion.length() >= SMALLEST_ALLOWED_RAILS_VERSION.length()
-                && this.railsVersion.compareTo(SMALLEST_ALLOWED_RAILS_VERSION) < 0) {
-            getLog().warn("rails version before "
-                    + SMALLEST_ALLOWED_RAILS_VERSION + " might not work");
-        }
-        if (!this.railsVersion.startsWith("3.")) {
-            throw new MojoExecutionException("given rails version is not rails3: "
-                    + this.railsVersion);
+        if(railsVersion != null && !this.railsVersion.startsWith("3.0.")) {
+            throw new MojoExecutionException("given rails version is not rails-3.0.x : "
+                                             + this.railsVersion);
         }
         try {
             if (this.database == null) {
