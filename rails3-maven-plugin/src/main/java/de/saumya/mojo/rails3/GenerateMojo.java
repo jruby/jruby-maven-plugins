@@ -3,6 +3,7 @@ package de.saumya.mojo.rails3;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.rails.RailsException;
@@ -29,6 +30,13 @@ public class GenerateMojo extends AbstractRailsMojo {
      * @parameter default-value="${generator}"
      */
     protected String generator    = null;
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        // make sure the whole things run in the same process
+        this.jrubyFork = false;
+        super.execute();
+    }
 
     @Override
     protected void executeRails() throws MojoExecutionException,
