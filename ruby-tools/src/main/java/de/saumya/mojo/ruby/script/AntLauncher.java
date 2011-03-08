@@ -66,9 +66,13 @@ class AntLauncher extends AbstractLauncher {
             }
         }
 
+        for (final String arg : factory.switches.list) {
+            java.createArg().setValue(arg);
+        }
         for (final String arg : args) {
             java.createArg().setValue(arg);
         }
+
         java.createJvmarg().setValue("-cp");
         java.createJvmarg()
                 .setPath((Path) this.project.getReference(MAVEN_CLASSPATH));
