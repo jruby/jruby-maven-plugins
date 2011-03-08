@@ -43,8 +43,12 @@ public class InstallMojo extends AbstractGemMojo {
             script.addArgs(this.installArgs)
                 .addArgs(this.args)
                 .addArg((installRDoc ? "--" : "--no-") + "rdoc")
-                .addArg((installRI ? "--" : "--no-") + "ri")
-                .addArg("-l", gemArtifact.getFile());
+                .addArg((installRI ? "--" : "--no-") + "ri");
+            // skip artifact unless it is a gem.
+            // this allows to use this mojo for installing arbitrary gems
+            if (gemArtifact.isGem()) {
+                script.addArg("-l", gemArtifact.getFile());
+            }
             script.execute();
         }
         else {
