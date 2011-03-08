@@ -57,6 +57,13 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @parameter expression="${jruby.jvmargs}"
      */
     protected String jrubyJvmArgs;
+
+    /**
+     * switches for the jruby command.
+     *
+     * @parameter expression="${jruby.switches}"
+     */
+    protected String jrubySwitches;
    
     /**
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
@@ -143,6 +150,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         this.factory = newScriptFactory();
         this.factory.addJavaArgs(this.jrubyArgs);
         this.factory.addJvmArgs(this.jrubyJvmArgs);
+        this.factory.addSwitches(this.jrubySwitches);
 
         try {
 
