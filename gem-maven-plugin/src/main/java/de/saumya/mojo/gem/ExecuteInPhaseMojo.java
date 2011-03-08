@@ -12,21 +12,21 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * it during the specified phase. this primary meant for the Gemfile DSL
  * extension for polyglot maven which can use a Gemfile as POM.
  * 
- * @goal gemfile
+ * @goal execute_in_phase
  */
-public class GemfileMojo extends AbstractGemMojo {
+public class ExecuteInPhaseMojo extends AbstractGemMojo {
 
-    /** @parameter expression="${gem.file}" default-value="Gemfile" */
-    protected File   gemFile = null;
+    /** @parameter expression="${phase.file}" default-value="Mavenfile" */
+    protected File   file = null;
 
-    /** @parameter default-value="${gem.phase}" */
+    /** @parameter default-value="${phase.name}" */
     protected String phase   = null;
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
-        this.factory.newScriptFromResource("maven/tools/gemfile_execute_phase.rb")
-                .addArg(this.gemFile.getAbsolutePath())
+        this.factory.newScriptFromResource("maven/tools/execute_in_phase.rb")
+                .addArg(this.file.getAbsolutePath())
                 .addArg(this.phase)
                 .executeIn(launchDirectory());
     }
