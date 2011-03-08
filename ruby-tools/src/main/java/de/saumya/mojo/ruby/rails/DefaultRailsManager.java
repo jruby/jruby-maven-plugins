@@ -63,11 +63,12 @@ public class DefaultRailsManager implements RailsManager {
         setupGemHomeAndGemPath(installer);
     }
 
+    @Deprecated
     private void patchBootScript(final File launchDirectory)
             throws RailsException {
         final File boot = new File(new File(launchDirectory, "config"),
                 "boot.rb");
-        if (boot.exists()) {
+        if (boot.exists() && new File(launchDirectory, "Gemfile.maven").exists()) {
             InputStream bootIn = null;
             InputStream bootOrig = null;
             InputStream bootPatched = null;
@@ -98,6 +99,7 @@ public class DefaultRailsManager implements RailsManager {
         }
     }
 
+    @Deprecated
     private void setupGemfile(final GemsInstaller installer,
             final File launchDirectory) {
         final File gemfile = new File(launchDirectory, "Gemfile.maven");
@@ -115,7 +117,7 @@ public class DefaultRailsManager implements RailsManager {
 
     public void createNew(final GemsInstaller installer,
             final RepositorySystemSession repositorySystemSession,
-            final File appPath, String database, final String railsVersion,
+            final File appPath, String database, String railsVersion,
             final String... args) throws RailsException, GemException,
             IOException, ScriptException
 
@@ -132,10 +134,10 @@ public class DefaultRailsManager implements RailsManager {
                 "rubygems"));
         setupGemHomeAndGemPath(installer);
 
-        installer.installGem("rails",
-                             railsVersion,
-                             repositorySystemSession,
-                             localRepository());
+        railsVersion = installer.installGem("rails",
+                                            railsVersion,
+                                            repositorySystemSession,
+                                            localRepository()).getVersion();
 
         // correct spelling
         if (DATABASES.containsKey(database)) {
@@ -144,7 +146,6 @@ public class DefaultRailsManager implements RailsManager {
 
         // run the "rails new"-script
         final Script script = installer.factory.newScript(installer.config.binScriptFile("rails"))
-                .addArg("_" + railsVersion + "_")
                 .addArg("new");
         if (appPath != null) {
             script.addArg(appPath.getAbsolutePath());
@@ -208,9 +209,6 @@ public class DefaultRailsManager implements RailsManager {
                           true);
 
             setupWebXML(appPath);
-
-            // create Gemfile.maven
-            filterContent(appPath, context, "Gemfile.maven");
         }
     }
 
