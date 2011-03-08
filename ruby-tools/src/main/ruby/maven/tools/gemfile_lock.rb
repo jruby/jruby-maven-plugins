@@ -6,7 +6,7 @@ module Maven
         attr_accessor :name, :version, :dependencies
         def initialize(line, deps = {})
           @name = line.sub(/\ .*/,'')
-          @version =  line.sub(/.*\(/, '').sub(/\).*/, '')
+          @version =  line.sub(/.*\(/, '').sub(/\).*/, '').sub(/-java$/, '')
           @dependencies = deps
         end
         
@@ -33,7 +33,8 @@ module Maven
       end
 
       def recurse(result, dep)
-        if d= self[dep]
+        result[dep] = self[dep].version if self[dep] && !result.key?(dep)
+        if d = self[dep]
           d.dependencies.each do |name, version|
             unless result.key? name
               result[name] = self[name].nil?? version : self[name].version

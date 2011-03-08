@@ -13,13 +13,11 @@ module Maven
         self.name = "#{dir_name} - rails application" unless name
         self.packaging = "war" unless packaging
 
-        super
+        s_args = args.dup
+        s_args.delete(:jruy_plugins)
+        super(s_args)
 
-        versions = { 
-          :jetty_plugin => "7.2.2.v20101205", #7.1.0.RC1",
-          :jruby_rack => "1.0.5",
-          :war_plugin => "2.1.1",
-        }.merge(args)
+        versions = VERSIONS.merge(args)
                 
         jar("org.jruby.rack:jruby-rack", versions[:jruby_rack]) unless jar?("org.jruby.rack:jruby-rack")
 
@@ -91,8 +89,8 @@ end
 
 if $0 == __FILE__
   proj = Maven::Tools::RailsProject.new
-  proj.load(File.new(ARGV[0] || 'Gemfile'))
-  proj.load(File.new(ARGV[1] || 'maven.rb'))
+  proj.load(ARGV[0] || 'Gemfile')
+  proj.load(ARGV[1] || 'Mavenfile')
   proj.add_defaults
   puts proj.to_xml
 end

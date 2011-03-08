@@ -1,10 +1,9 @@
-require File.join(File.dirname(__FILE__), 'model.rb')
+require File.join(File.dirname(__FILE__), 'gem_project.rb')
 
-# TODO usage
+proj = Maven::Tools::GemProject.new("in_phase_execution")
 
-proj = GemProject.new("in_phase_execution")
+proj.load(ARGV[0])
 
-eval "proj.mergefile(File.new('#{ARGV[0]}'))"
-
-proj.execute_in_phase(ARGV[1])
+block = proj.executions_in_phase[ARGV[1]]
+block.call if block
 

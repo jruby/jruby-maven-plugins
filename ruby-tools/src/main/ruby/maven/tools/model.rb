@@ -6,7 +6,21 @@ module Maven
         if tags.size == 0
           @tags
         else
-          attr_accessor *tags
+          #self.send :attr_accessor, *tags
+          tags.each do |tag|
+          eval <<-EOF
+            def #{tag.to_s}(val = nil)
+              if val
+                @#{tag.to_s} = val
+              else
+                @#{tag.to_s}
+              end
+            end
+            def #{tag.to_s}=(val)
+              @#{tag.to_s} = val
+            end
+EOF
+          end
           @tags ||= []
           if self.superclass.respond_to?:tags
             @tags = self.superclass.tags || []
@@ -82,7 +96,7 @@ module Maven
     end
 
     class Dependency < Coordinate
-      tags :type, :scope
+      tags :type, :scope, :classifier
       def initialize(group_id, artifact_id, version = nil, type = nil)
         super(:group_id => group_id, :artifact_id => artifact_id, :version => version, :type => type)
       end
@@ -114,6 +128,8 @@ module Maven
       def <<(args)
         item = 
           case args
+          when Dependency
+            args
           when Array
             if args.size == 1
               args << "[0.0.0,)"
@@ -203,9 +219,11 @@ module Maven
         self.configuration = config
       end
 
-      def in_phase(phase)
-        self.executions.get("in_phase_#{phase.gsub(/-/,'_')}") do |exe|
+      def in_phase(phase, name = nil, &block)
+        name = "in_phase_#{phase.gsub(/-/,'_')}" unless name
+        self.executions.get(name) do |exe|
           exe.phase = phase
+          block.call(exe) if block
           exe
         end
       end
@@ -215,11 +233,7 @@ module Maven
       end
 
       def execution(name = nil, &block)
-        if name
-          executions.get(name, &block)
-        else
-          executions
-        end
+        executions.get(name, &block)
       end
 
       def configuration=(c)
@@ -232,7 +246,7 @@ module Maven
     end
 
     class Execution < Tag
-      tags :id, :phase, :goals, :configuration
+      tags :id, :phase, :goals, :inherited, :configuration
 
       def initialize(id = nil)
         super({ :id => id })
@@ -246,8 +260,8 @@ module Maven
         end
       end
 
-      def execute(goals)
-        @goals = goals.is_a?(Array) ? goals: [goals]
+      def execute_goal(g)
+        self.goals = g
         self
       end
 
@@ -257,6 +271,26 @@ module Maven
 
       def goals
         @goals ||= []
+      end
+
+      def goals=(goals)
+        @goals = goals.is_a?(Array) ? goals: [goals]
+      end
+    end
+
+    class DependencyManagement < Tag
+      tags :dependencies
+
+      def _name
+        "dependencyManagement"
+      end
+
+      def dependencies(&block)
+        @dependencies ||= DepArray.new
+        if block
+          block.call(@dependencies)
+        end
+        @dependencies
       end
     end
 
@@ -316,11 +350,11 @@ module Maven
       end
 
       def dependency_management(&block)
-        @dependency_management ||= DepArray.new
+        @dependency_management ||= DependencyManagement.new
         if block
-          block.call(@dependency_management)
+          block.call(@dependency_management.dependencies)
         end
-        @dependency_management
+        @dependency_management.dependencies
       end
     end
 
@@ -356,6 +390,42 @@ module Maven
         default_model.send(method, *args, &block)
       end
     end
+    
+    class DeveloperHash < Hash
+
+      def get(*args, &block)
+        developer = if args.size == 1 && args[0].is_a?(Developer)
+                      args[0] 
+                    else 
+                      Developer.new(*args)
+                    end
+        self[developer.id] = developer
+        if block
+          block.call(developer)
+        end
+        developer
+      end
+      alias :new :get
+      alias :add :get
+    end
+
+    class LicenseHash < Hash
+
+      def get(*args, &block)
+        license = if args.size == 1 && args[0].is_a?(License)
+                      args[0] 
+                    else 
+                      License.new(*args)
+                    end
+        self[license.name] = license
+        if block
+          block.call(license)
+        end
+        license
+      end
+      alias :new :get
+      alias :add :get
+    end
 
     class PluginHash < Hash
 
@@ -373,7 +443,7 @@ module Maven
           raise "need name"
         end
         if (name =~ /\./).nil?
-          if [:jruby, :gem, :rspec, :rake, :rails2, :rails3, :gemify, :cucmber].member? name.to_sym
+          if [:jruby, :gem, :rspec, :rake, :rails2, :rails3, :gemify, :cucumber, :runit].member? name.to_sym
             group_id = 'de.saumya.mojo'
             artifact_id = "#{name}-maven-plugin"
           else
@@ -381,8 +451,8 @@ module Maven
             artifact_id = "maven-#{name}-plugin"
           end
         else
-          group_id = name.sub(/\.[^.]+$/, '')
-          artifact_id = name.sub(/^.+\./, '')
+          group_id = name.sub(/:.+$/, '')
+          artifact_id = name.sub(/^.+:/, '')
         end
         k = "#{group_id}:#{artifact_id}".to_sym
         result = self[k]
@@ -400,8 +470,51 @@ module Maven
       
     end
 
+    class Developer < Tag
+      tags :id, :name, :email
+
+      def initialize(*args)
+        case args.size
+        when 1
+          @email = args[0].sub(/.*</, '').sub(/>.*/, '')
+          @name = args[0].sub(/\s*<.*/, '')
+        when 2
+          @name = args[0]
+          @email = args[1]
+        when 3
+          @id = args[0]
+          @name = args[1]
+          @email = args[2]
+        end
+        @id = @email.sub(/@/, '_at_').gsub(/\./, '_dot_') unless @id
+        self
+      end
+    end
+
+    class License < Tag
+      tags :name, :url, :distribution
+
+      def initialize(*args)
+        case args.size
+        when 1
+          @url = args[0]
+          @name = args[0].sub(/.*\//, '').sub(/\.\w+/, '')
+        when 2
+          @url = args[0]
+          @name = args[1]
+        when 3
+          @url = args[0]
+          @name = args[1]
+          @distribution = args[2]
+        end
+        @url = "./#{url}" unless @url =~ /^\.\//
+        @distribution = "repo" unless @distribution
+        self
+      end
+    end
+
     class Project < Tag
-      tags :model_version, :group_id, :artifact_id, :version, :name, :packaging, :repositories, :plugin_repositories, :dependencies, :dependency_management, :properties, :build, :profiles
+      tags :model_version, :group_id, :artifact_id, :version, :name, :packaging, :description, :url, :developers, :licenses, :repositories, :plugin_repositories, :dependencies, :dependency_management, :properties, :build, :profiles
 
       def initialize(group_id, artifact_id, version = "0.0.0", &block)
         super(:model_version => "4.0.0", :artifact_id => artifact_id, :group_id => group_id, :version => version)
@@ -415,11 +528,13 @@ module Maven
         "project"
       end
 
-      def merge(&block)
-        if block
-          block.call(self)
-        end
-        self
+      def execute_in_phase(phase, name = nil, &block)
+        plugin("gem").in_phase(phase, name).execute_goal("execute_in_phase").with(:file => current_file, :phase => phase)
+        executions_in_phase[phase] = block
+      end
+
+      def executions_in_phase
+        @executions_in_phase ||= {}
       end
 
       def plugin(*args, &block)
@@ -434,6 +549,22 @@ module Maven
         @build ||= Build.new
       end
 
+      def developers(&block)
+        @developers ||= DeveloperHash.new
+        if block
+          block.call(@developers)
+        end
+        @developers
+      end
+
+      def licenses(&block)
+        @licenses ||= LicenseHash.new
+        if block
+          block.call(@licenses)
+        end
+        @licenses
+      end
+
       def repositories(&block)
         @repositories ||= ModelHash.new(Repository)
         if block
@@ -443,7 +574,7 @@ module Maven
       end
 
       def repository(*args, &block)
-        repositories.get(*args,&block)
+        repositories.get(*args, &block)
       end
 
       def plugin_repositories(&block)
@@ -452,6 +583,10 @@ module Maven
           block.call(@plugin_repositories)
         end
         @plugin_repositories
+      end
+
+      def plugin_repository(*args, &block)
+        plugin_repositories.get(*args, &block)
       end
 
       def dependencies(&block)
@@ -463,15 +598,16 @@ module Maven
       end
 
       def dependency_management(&block)
-        @dependency_management ||= DepArray.new
+        @dependency_management ||= DependencyManagement.new
         if block
-          block.call(@dependency_management)
+          block.call(@dependency_management.dependencies)
         end
-        @dependency_management
+        @dependency_management.dependencies
       end
 
       def properties
-        (@properties || Properties.new).map
+        @properties ||= Properties.new
+        @properties.map
       end
 
       def properties=(props)
@@ -586,14 +722,7 @@ module Maven
     end
 
     class OS < Tag
-      def initialize(name, value)
-        @name = name
-        @value = value
-      end
-
-      def to_xml(buf = "", indent = "")
-        buf << "#{indent}  <#{@name}>#{@value}</#{@name}>\n"
-      end
+      tags :name, :family, :arch, :version
     end
 
     class Activation < Tag
@@ -617,10 +746,10 @@ module Maven
         self
       end
 
-      def os(name, value)
-        @os ||= ListItems.new("os")
-        @os << OS.new(name, value)
-        self
+      def os(&block)
+        @os ||= OS.new
+        block.call(@os) if block
+        @os
       end
 
       def as_default

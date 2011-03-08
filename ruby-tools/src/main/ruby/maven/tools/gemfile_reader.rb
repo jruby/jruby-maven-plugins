@@ -38,7 +38,7 @@ module Maven
       end
 
       def self.in_phase(name, &block)
-        warn "in_phase is deprecated, use it inside 'maven.rb'"
+        warn "in_phase is deprecated, use it inside 'Mavenfile'"
         blocks = phases[(name || '-dummy-').to_sym] ||= []
         blocks << block
       end
