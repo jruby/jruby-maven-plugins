@@ -280,11 +280,18 @@ public class GemifyMojo extends AbstractMojo {
         ProjectBuildingResult result;
         do {
             if (relocation != null) {
-                artifact = this.gemManager.createArtifact(relocation.getGroupId(),
-                                                          relocation.getArtifactId(),
-                                                          relocation.getVersion() == null
-                                                                  ? artifact.getVersion()
-                                                                  : relocation.getVersion(),
+                String newGroupId = relocation.getGroupId() == null
+                        ? artifact.getGroupId()
+                        : relocation.getGroupId();
+                String newArtifactId = relocation.getArtifactId() == null
+                        ? artifact.getArtifactId()
+                        : relocation.getArtifactId();
+                String newVersion = relocation.getVersion() == null
+                        ? artifact.getVersion()
+                        : relocation.getVersion();
+                artifact = this.gemManager.createArtifact(newGroupId,
+                                                          newArtifactId,
+                                                          newVersion,
                                                           isPom ? "pom" : "jar");
             }
             result = buildMavenProject(artifact, !isPom);
@@ -295,13 +302,22 @@ public class GemifyMojo extends AbstractMojo {
                         .getRelocation();
                 if (relocation != null) {
                     if (this.gemname != null) {
+                String newGroupId = relocation.getGroupId() == null
+                        ? artifact.getGroupId()
+                        : relocation.getGroupId();
+                String newArtifactId = relocation.getArtifactId() == null
+                        ? artifact.getArtifactId()
+                        : relocation.getArtifactId();
+                String newVersion = relocation.getVersion() == null
+                        ? artifact.getVersion()
+                        : relocation.getVersion();
                         // warning only for the top level gem
                         getLog().info("\n\n\tartifact is relocated to "
-                                + relocation.getGroupId()
+                                + newGroupId
                                 + ":"
-                                + relocation.getArtifactId()
+                                + newArtifactId
                                 + " version="
-                                + relocation.getVersion()
+                                + newVersion
                                 + (relocation.getMessage() == null ? "" : " "
                                         + relocation.getMessage())
                                 + "\n\tif you need the original gem you can recreate it with '-Dgemify.force'\n\n");
