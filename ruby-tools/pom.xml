@@ -73,7 +73,6 @@
     </dependency>
   </dependencies>
   <properties>
-    <skipTests>true</skipTests>
     <plexus.version>1.5.4</plexus.version>
   </properties>
   <build>
@@ -86,12 +85,4 @@
       </resource>
     </resources>
   </build>
-  <profiles>
-    <profile>
-      <id>integration-test</id>
-      <properties>
-	<skipTests>false</skipTests>
-      </properties>
-    </profile>
-  </profiles>
 </project>

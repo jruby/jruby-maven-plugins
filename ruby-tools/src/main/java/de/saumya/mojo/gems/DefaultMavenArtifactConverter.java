@@ -13,6 +13,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Developer;
 import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.License;
+import org.apache.maven.model.Relocation;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import org.codehaus.plexus.component.annotations.Component;
@@ -39,7 +40,8 @@ import de.saumya.mojo.ruby.gems.GemManager;
  */
 @Component(role = MavenArtifactConverter.class)
 public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
-    private static final String LIB_MAVEN_PATH = "lib/maven/";
+    private static final String LIB_PATH = "lib/";
+    private static final String LIB_MAVEN_PATH = LIB_PATH + "maven/";
 
     enum RubyDependencyType {
 
@@ -155,6 +157,33 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
             }
         }
 
+        // if this is a relocated artifact then use the relocated coordinate as dependency
+        if (artifact.getPom().getDistributionManagement() != null) {
+            Relocation relocation = artifact.getPom()
+                .getDistributionManagement()
+                .getRelocation();
+            if(relocation != null){
+                // there will be only one dependency !!
+                result.getDependencies().clear();
+                Dependency dep = new Dependency();
+                dep.setVersion(relocation.getVersion() == null
+                               ? artifact.getPom().getVersion()
+                               : relocation.getVersion());
+                dep.setArtifactId(relocation.getArtifactId() == null
+                                  ? artifact.getPom().getArtifactId()
+                                  : relocation.getArtifactId());
+                dep.setGroupId(relocation.getGroupId() == null
+                               ? artifact.getPom().getGroupId()
+                               : relocation.getGroupId());
+                result.getDependencies().add(convertDependency(artifact,
+                                                               dep));
+                result.setPost_install_message("this gem has a new name: "
+                        + createGemName(dep.getGroupId(),
+                                        dep.getArtifactId(),
+                                        dep.getVersion()));
+            }
+        }
+
         // and other stuff "nice to have"
         result.setDate(new Date()); // now
         result.setDescription(sanitizeStringValue(artifact.getPom()
@@ -214,8 +243,7 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
 
         // create "meta" ruby file
         final String rubyStubMetaPath = createLibFileName(artifact,
-                                                          "-maven-meta.rb");
-        // System.err.println( rubyStubMetaPath );
+                                                          "-maven.rb");
         final File rubyStubMetaFile = generateRubyMetaStub(gemspec, artifact);
         gem.addFile(rubyStubMetaFile, rubyStubMetaPath);
 
@@ -231,11 +259,13 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
         // create development ruby file
         final String rubyDevelopmentStubPath = createLibFileName(artifact,
                                                                  "-dev.rb");
-        // System.err.println( rubyDevelopmentStubPath );
         final File rubyDevelopmentStubFile = generateRubyStub(gemspec,
                                                               artifact,
                                                               RubyDependencyType.DEVELOPMENT);
         gem.addFile(rubyDevelopmentStubFile, rubyDevelopmentStubPath);
+
+        final File rubyMainStubFile = generateMainStub(artifact);
+        gem.addFile(rubyMainStubFile, LIB_PATH + gemspec.getName() + ".rb" );
 
         // write file
         final File gemfile = this.gemPackager.createGem(gem, target);
@@ -301,6 +331,14 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
     }
 
     // ==
+
+    private File generateMainStub(MavenArtifact artifact) throws IOException {
+        final VelocityContext context = new VelocityContext();
+        context.put("groupId", artifact.getCoordinates().getGroupId());
+        context.put("artifactId", artifact.getCoordinates().getArtifactId());
+
+        return generateRubyFile("main", context, "rubyMainStub");
+    }
 
     private File generateRubyMetaStub(final GemSpecification gemspec,
             final MavenArtifact artifact) throws IOException {
