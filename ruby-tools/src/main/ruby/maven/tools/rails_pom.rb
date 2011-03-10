@@ -8,6 +8,7 @@ module Maven
       tags :dummy
 
       def initialize(artifact_id, version = "0.0.0", &block)
+        warn "deprecated, use rails_project instead"
         super("rubygems", artifact_id, version, &block)
       end
 

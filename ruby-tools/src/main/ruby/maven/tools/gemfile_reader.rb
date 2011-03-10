@@ -18,6 +18,7 @@ module Maven
       attr_reader :groups
 
       def initialize(file)
+        warn "deprecated, use gem_project instead"
         gemfile = case file
                   when String
                     file 
