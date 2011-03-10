@@ -5,7 +5,7 @@
       :jruby_rack => "1.0.5",
       :war_plugin => "2.1.1",
       :jruby_plugins => "0.24.0",
-      :jruby_complete => "1.6.0.RC2",
+      :jruby_complete => "1.6.0.RC3",
     }.freeze
   end
 end
