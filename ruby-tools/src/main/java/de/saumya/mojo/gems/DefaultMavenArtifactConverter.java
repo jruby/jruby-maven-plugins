@@ -180,7 +180,7 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
                 result.setPost_install_message("this gem has a new name: "
                         + createGemName(dep.getGroupId(),
                                         dep.getArtifactId(),
-                                        dep.getVersion()));
+                                        dep.getVersion()) + " version: " + dep.getVersion());
             }
         }
 
@@ -485,10 +485,8 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
         // http://blog.zenspider.com/2008/10/rubygems-howto-preventing-cata.html
         final String version = createGemVersion(getDependencyVersion(artifact,
                                                                      dependency));
-        final int index = version.length()
-                - version.replaceFirst("^[^.]+[.][^.]+", "").length();
         requirement.addRequirement("~>",
-                                   new GemVersion(version.substring(0, index)));
+                                   new GemVersion(version.substring(0, version.lastIndexOf("."))));
 
         result.setVersion_requirement(requirement);
 

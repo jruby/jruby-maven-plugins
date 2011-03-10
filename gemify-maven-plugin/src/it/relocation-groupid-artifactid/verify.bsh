@@ -2,13 +2,13 @@ import java.io.*;
 
 File target = new File( basedir, "target");
 
-File file = new File( target, "mvn:javax.servlet:servlet-api-2.3.0-java.gem" );
+File file = new File( target, "mvn:servletapi:servletapi-2.3.0-java.gem" );
 if ( !file.isFile() )
 {
     throw new FileNotFoundException( "Could not find generated GEM: " + file );
 }
 
-if ( target.list().length() > 1 )
+if ( target.list().length() > 2 )
 {
     throw new FileNotFoundException( "target directory has too many files: " + target );
 }

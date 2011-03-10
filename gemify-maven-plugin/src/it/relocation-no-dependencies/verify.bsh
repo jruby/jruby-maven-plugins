@@ -8,7 +8,7 @@ if ( !file.isFile() )
     throw new FileNotFoundException( "Could not find generated GEM: " + file );
 }
 
-if ( target.list().length() > 4 )
+if ( target.list().length() > 1 )
 {
     throw new FileNotFoundException( "target directory has too many files: " + target );
 }
