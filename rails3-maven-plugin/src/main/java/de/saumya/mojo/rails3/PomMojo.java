@@ -16,11 +16,16 @@ public class PomMojo extends AbstractRailsMojo {
     /** @parameter expression="${plugin}" @readonly */
     PluginDescriptor plugin;
 
-    /** @parameter expression="${rails.pom.force}" default-value="false" */
+    /**
+     * @parameter expression="${pom}" default-value="pom.xml"
+     */
+    File    pom;
+
+    /** @parameter expression="${pom.force}" default-value="false" */
     boolean          force;
 
     /**
-     * @parameter expression="${rails.gemfile}"
+     * @parameter expression="${pom.gemfile}"
      *            default-value="${basedir}/Gemfile"
      */
     File             gemfile;
@@ -28,10 +33,14 @@ public class PomMojo extends AbstractRailsMojo {
     @Override
     protected void executeRails() throws MojoExecutionException, IOException,
             ScriptException {
-        final File pomfile = new File(launchDirectory(), "pom.xml");
+        if (this.pom.exists() && !this.force) {
+            getLog().info(this.pom.getName()
+                    + " already exists. use '-Dpom.force=true' to overwrite");
+            return;
+        }
 
         if (this.gemfile.exists()) {
-            if (!(pomfile.exists() && this.gemfile.lastModified() > pomfile.lastModified())
+            if (!(this.pom.exists() && this.gemfile.lastModified() > this.pom.lastModified())
                     || this.force) {
                 if (this.jrubyVerbose) {
                     getLog().info("create pom using following versions:");
@@ -40,13 +49,12 @@ public class PomMojo extends AbstractRailsMojo {
                     getLog().info("\tjruby-version: " + this.jrubyVersion);
                 }
 
-                // the actual execution of the script
-                this.factory.newScriptFromResource("maven/tools/rails_pom_mojo.rb")
-                        .addArg("{:jruby_complete => '" + this.jrubyVersion
-                                + "', :jruby_plugins => '"
-                                + this.plugin.getVersion() + "'}")
-                        .addArg(this.gemfile.getAbsoluteFile())
-                        .executeIn(launchDirectory(), pomfile);
+                this.factory.newScriptFromResource("maven/tools/pom_generator.rb")
+                    .addArg("rails")
+                    .addArg(this.gemfile.getAbsoluteFile())
+                    .addArg(this.plugin.getVersion())
+                    .addArg(this.jrubyVersion)
+                    .executeIn(launchDirectory(), this.pom);
             }
             else {
                 if (this.jrubyVerbose) {
