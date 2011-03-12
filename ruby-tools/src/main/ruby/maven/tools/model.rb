@@ -10,11 +10,8 @@ module Maven
           tags.each do |tag|
           eval <<-EOF
             def #{tag.to_s}(val = nil)
-              if val
-                @#{tag.to_s} = val
-              else
-                @#{tag.to_s}
-              end
+              @#{tag.to_s} = val if val
+              @#{tag.to_s}
             end
             def #{tag.to_s}=(val)
               @#{tag.to_s} = val
@@ -528,9 +525,27 @@ EOF
         "project"
       end
 
+      def name(val = nil)
+        @name = val if val
+        @name
+      end
+
+      def name=(val)
+        @name = "<![CDATA[#{val}]]>"
+      end
+
+      def description(val = nil)
+        @description = val if val
+        @description
+      end
+
+      def description=(val)
+        @description = "<![CDATA[#{val}]]>"
+      end
+
       def execute_in_phase(phase, name = nil, &block)
-        plugin("gem").in_phase(phase, name).execute_goal("execute_in_phase").with(:file => current_file, :phase => phase)
-        executions_in_phase[phase] = block
+        plugin("gem").in_phase(phase.to_s, name).execute_goal("execute_in_phase").with(:file => current_file, :phase => phase)
+        executions_in_phase[phase.to_s] = block
       end
 
       def executions_in_phase

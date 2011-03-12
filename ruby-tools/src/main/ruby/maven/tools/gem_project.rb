@@ -6,7 +6,7 @@ module Maven
     class GemProject < Project
       tags :dummy
 
-      def initialize(artifact_id, version = "0.0.0", &block)
+      def initialize(artifact_id = dir_name, version = "0.0.0", &block)
         super("rubygems", artifact_id, version, &block)
       end
 
@@ -38,6 +38,7 @@ module Maven
       def load_gemspec(specfile)
         require 'rubygems'
         spec = ::Gem::Specification.load(specfile)
+        loaded_files << File.expand_path(specfile)
         self.artifact_id = spec.name
         self.version = spec.version
         self.packaging = spec.platform.to_s == 'java'? "java-gem" : "gem"
@@ -70,7 +71,7 @@ module Maven
           add_param(config, "requiredRubygemsVersion", spec.required_rubygems_version, ">= 0")
           add_param(config, "bindir", spec.bindir, "bin")
           add_param(config, "requiredRubyVersion", spec.required_ruby_version, ">= 0")
-          add_param(config, "postInstallMessage", spec.post_install_message)
+          add_param(config, "postInstallMessage", spec.post_install_message ? "<![CDATA[#{spec.post_install_message}]]>\n" : nil)
           add_param(config, "executables", spec.executables)
           add_param(config, "extensions", spec.extensions)
           add_param(config, "platform", spec.platform, 'ruby')
@@ -170,7 +171,7 @@ module Maven
 
       def add_defaults(args = {})
         versions = VERSIONS
-        versions.merge(args) if args
+        versions = versions.merge(args) if args
 
         self.name = "#{dir_name} - gem" unless name
         
@@ -178,11 +179,11 @@ module Maven
 
         repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless repository("rubygems-releases").url
         
-        jar("org.jruby:jruby-complete", versions[:jruby_complete]) unless jar?("org.jruby:jruby-complete")
+        jar("org.jruby:jruby-complete", versions[:jruby_version]) unless jar?("org.jruby:jruby-complete")
 
-        # TODO go through all plugins to find outany SNAPSHOT version !!
-        if versions[:jruby_plugins] =~ /SNAPSHOT/
-          plugin_repository("sonatype-nexus-snapshots") do |nexus|
+        # TODO go through all plugins to find out any SNAPSHOT version !!
+        if versions[:jruby_plugins] =~ /-SNAPSHOT$/ || properties['jruby.plugins.version'] =~ /-SNAPSHOT$/
+          plugin_repository("sonatype-snapshots") do |nexus|
             nexus.url = "http://oss.sonatype.org/content/repositories/snapshots"
             nexus.releases(:enabled => false)
             nexus.snapshots(:enabled => true)
@@ -249,6 +250,10 @@ module Maven
         stack << args
         block.call if block
         stack.pop
+      end
+
+      def gemspec(name)
+        load_gemspec(name)
       end
 
       def source(*args)

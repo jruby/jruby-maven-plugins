@@ -14,7 +14,7 @@ module Maven
         self.packaging = "war" unless packaging
 
         s_args = args.dup
-        s_args.delete(:jruy_plugins)
+        s_args.delete(:jruby_plugins)
         super(s_args)
 
         versions = VERSIONS.merge(args)
