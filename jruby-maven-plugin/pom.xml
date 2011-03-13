@@ -15,7 +15,7 @@
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>ruby-tools</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>${project.parent.version}</version>
       <exclusions>
 	<exclusion>
 	  <groupId>org.codehaus.plexus</groupId>

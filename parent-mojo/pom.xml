@@ -29,9 +29,6 @@
       <version>${maven.version}</version>
     </dependency>
   </dependencies>
-  <properties>
-    <maven.version>3.0</maven.version>
-  </properties>
   <build>
     <resources>
       <resource>
