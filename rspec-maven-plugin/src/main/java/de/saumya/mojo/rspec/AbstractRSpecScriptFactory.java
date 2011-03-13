@@ -54,6 +54,7 @@ public abstract class AbstractRSpecScriptFactory extends AbstractScriptFactory {
 
         builder.append("BASE_DIR=%q(" + sanitize(baseDir) + ")\n");
         builder.append("SPEC_DIR=%q(" + sanitize(sourceDir) + ")\n");
+        builder.append("TARGET_DIR=%q(" + sanitize(outputDir.getAbsolutePath()) + ")\n");
         builder.append("REPORT_PATH=%q(" + sanitize(reportPath) + ")\n");
         builder.append("\n");
         builder.append("$: << File.join( BASE_DIR, 'lib' )\n");

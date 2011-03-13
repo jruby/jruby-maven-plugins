@@ -65,10 +65,10 @@ public class RSpecMojo extends AbstractGemMojo {
     /**
      * The directory where the RSpec report will be written to
      * 
-     * @parameter expression="${basedir}/target"
+     * @parameter expression="target"
      * @required
      */
-    protected String outputDirectory;
+    protected File outputDirectory;
 
     /**
      * The name of the RSpec report (optional, defaults to "rspec-report.html")
@@ -171,7 +171,7 @@ public class RSpecMojo extends AbstractGemMojo {
 
     private void initScriptFactory(final ScriptFactory factory, final String reportPath) {
         factory.setBaseDir(this.basedir.getAbsolutePath());
-        factory.setOutputDir(new File(this.outputDirectory));
+        factory.setOutputDir(this.outputDirectory);
         factory.setReportPath(reportPath);
         factory.setSourceDir(specSourceDirectory().getAbsolutePath());
         factory.setClasspathElements(this.classpathElements);

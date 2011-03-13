@@ -22,10 +22,12 @@ public class RSpec2ScriptFactory extends AbstractRSpecScriptFactory {
         builder.append("\n");
         builder.append("require %q(de/saumya/mojo/rspec/rspec2/multi_formatter)\n");
         builder.append("require %q(de/saumya/mojo/rspec/rspec2/maven_console_progress_formatter)\n");
+//        builder.append("require %q(de/saumya/mojo/rspec/rspec2/maven_surefire_reporter)\n");
         builder.append("require %q(de/saumya/mojo/rspec/rspec2/monkey_patch)\n");
         builder.append("\n");
         builder.append("::MultiFormatter.formatters << [ MavenConsoleProgressFormatter, nil ]\n");
-        builder.append("::MultiFormatter.formatters << [ RSpec::Core::Formatters::HtmlFormatter, File.open( 'target/rspec-report.html', 'w' ) ] \n");
+//        builder.append("::MultiFormatter.formatters << [ MavenSurefireReporter, \"#{TARGET_DIR}\" ] \n");
+        builder.append("::MultiFormatter.formatters << [ RSpec::Core::Formatters::HtmlFormatter, File.open( \"#{REPORT_PATH}\", 'w' ) ] \n");
         builder.append("\n");
         builder.append("::RSpec.configure do |config|\n");
         builder.append("  config.formatter = ::MultiFormatter\n");

@@ -1,7 +1,5 @@
 package de.saumya.mojo.rspec;
 
-import java.net.URL;
-
 public class RSpec1ScriptFactory extends AbstractRSpecScriptFactory {
 
 
@@ -22,7 +20,7 @@ public class RSpec1ScriptFactory extends AbstractRSpecScriptFactory {
 		builder.append("  things,\n");
 		builder.append("  '-f', \"html:#{REPORT_PATH}\",\n");
 		builder.append("  '-f', 'MavenConsoleProgressFormatter',\n");
-		builder.append("  '-f', 'MavenSurefireReporter:target/surefire-reports/',\n");
+		builder.append("  '-f', \"MavenSurefireReporter:#{TARGET_DIR}/surefire-reports/\",\n");
 		builder.append("].flatten, STDERR, STDOUT)\n");
 		builder.append("::Spec::Runner::CommandLine.run(options)\n");
 
