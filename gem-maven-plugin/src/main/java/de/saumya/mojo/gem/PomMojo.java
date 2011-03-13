@@ -70,23 +70,23 @@ public class PomMojo extends AbstractJRubyMojo {
             return;
         }
         else {
-            if (!(this.pom.exists() && this.gemfile.lastModified() > this.pom.lastModified())
+            File file;
+            String type;
+            if (this.gemspec == null) {
+                file = this.gemfile;
+                type = "gemfile";
+            }
+            else {
+                file = this.gemspec;
+                type = "gemspec";
+            }
+            if (!(this.pom.exists() && file.lastModified() > this.pom.lastModified())
                     || this.force) {
                 if (this.jrubyVerbose) {
                     getLog().info("create pom using following versions:");
                     getLog().info("\tjruby-plugins-version: "
                             + this.plugin.getVersion());
                     getLog().info("\tjruby-version: " + this.jrubyVersion);
-                }
-                String file;
-                String type;
-                if (this.gemspec == null) {
-                    file = this.gemfile.getAbsolutePath();
-                    type = "gemfile";
-                }
-                else {
-                    file = this.gemspec.getAbsolutePath();
-                    type = "gemspec";
                 }
                 this.factory.newScriptFromResource("maven/tools/pom_generator.rb")
                         .addArg(type)
