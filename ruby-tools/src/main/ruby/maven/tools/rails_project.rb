@@ -58,12 +58,12 @@ module Maven
           }.merge(prod.properties)
         end
 
-        profile(:war).plugin("org.mortbay.jetty.jetty-maven-plugin",
+        profile(:war).plugin("org.mortbay.jetty:jetty-maven-plugin",
                              "${jetty.version}")
          
         profile(:run) do |run|
             run.activation.by_default
-            run.plugin("org.mortbay.jetty.jetty-maven-plugin", 
+            run.plugin("org.mortbay.jetty:jetty-maven-plugin",
                        "${jetty.version}").with({
                 :webAppConfig => {
                   :overrideDescriptor => '${project.build.directory}/jetty/override-${rails.env}-web.xml'

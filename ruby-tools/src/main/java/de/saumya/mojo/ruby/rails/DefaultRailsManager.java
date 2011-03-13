@@ -192,13 +192,10 @@ public class DefaultRailsManager implements RailsManager {
 
             final VelocityContext context = new VelocityContext();
 
-            context.put("groupId", "rails");
-            context.put("artifactId", appPath.getName());
-            context.put("version", "1.0-SNAPSHOT");
-            context.put("database", database);
-            context.put("railsVersion", railsVersion);
-
-            filterContent(appPath, context, "pom.xml");
+            installer.factory.newScriptFromResource("maven/tools/pom_generator.rb")
+                .addArg("rails")
+                .addArg("Gemfile")
+                .executeIn(appPath, new File(appPath, "pom.xml"));
 
             // write out a new index.html
             filterContent(appPath, context, "src/main/webapp/index.html");
