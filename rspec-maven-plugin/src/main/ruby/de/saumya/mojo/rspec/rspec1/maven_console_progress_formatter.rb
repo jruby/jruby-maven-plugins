@@ -65,6 +65,32 @@ class MavenConsoleProgressFormatter < Spec::Runner::Formatter::BaseFormatter
     pass_count = example_count - ( failure_count + pending_count ) 
     MOJO_LOG.info( "=========================================" )
     MOJO_LOG.info( "TOTAL: #{pass_count} passing; #{failure_count} failing; #{pending_count} pending")
+
+	# Creating the XML report
+	report_dir = "#{BASE_DIR}/target"
+    FileUtils.mkdir_p report_dir
+    report_filename = "#{report_dir}/TEST-Ruby.xml"
+    content = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+<testsuite failures=\"#{failure_count}\" time=\"#{duration}\" errors=\"0\" skipped=\"#{pending_count}\" tests=\"#{example_count}\" name=\"Ruby\">\n"
+
+	# Passing
+	@passing.each { |test|
+		content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"/>\n"
+	}
+	
+	# Pending - considering as failures
+	@pending.each { |test|
+		content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"><failure></failure></testcase>\n"
+	}
+	
+	# Failures
+	@failing.each { |test|
+		content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"><failure></failure></testcase>\n"
+	}
+	
+	content = content + "</testsuite>"
+
+    File.open(report_filename, 'w+') {|f| f.write(content) }
   end
   
 end
