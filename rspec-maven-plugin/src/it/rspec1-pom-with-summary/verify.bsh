@@ -13,9 +13,8 @@ if ( !f.exists() )
 {
     throw new RuntimeException( "file does not exists: " + f );
 }
-
 f = new File( new File( basedir, "target" ), "TEST-Ruby.xml" );
-if ( f.exists() )
+if ( !f.exists() )
 {
-    throw new RuntimeException( "file does exists: " + f );
+    throw new RuntimeException( "file does not exists: " + f );
 }

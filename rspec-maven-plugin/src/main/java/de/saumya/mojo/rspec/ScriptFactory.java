@@ -7,6 +7,7 @@ import java.util.Properties;
 public interface ScriptFactory {
 	
 	void setBaseDir(String baseDir);
+	void setSummaryReport(File summaryReport);
 	void setOutputDir(File outputDir);
 	void setSourceDir(String sourceDir);
 	void setReportPath(String reportPath);

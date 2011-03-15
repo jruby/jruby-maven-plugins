@@ -157,33 +157,34 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
     
     puts ""
 
-	# Creating the XML report
-	report_dir = "#{BASE_DIR}/target"
-    FileUtils.mkdir_p report_dir
-    report_filename = "#{report_dir}/TEST-Ruby.xml"
-    content = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+    if SUMMARY_REPORT
+
+      # Creating the XML report
+      FileUtils.mkdir_p File.dirname SUMMARY_REPORT
+      content = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
 <testsuite failures=\"#{failure_count}\" time=\"#{duration}\" errors=\"0\" skipped=\"#{pending_count}\" tests=\"#{example_count}\" name=\"Ruby\">\n"
 
-    @batches.each do |batch|
-      # Passing
-      batch.passing.each { |test|
-        content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"/>\n"
+      @batches.each do |batch|
+        # Passing
+        batch.passing.each { |test|
+          content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"/>\n"
       }
 
-      # Pending - considering as failures
-      batch.pending.each { |test|
-        content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"><failure></failure></testcase>\n"
-      }
+        # Pending - considering as failures
+        batch.pending.each { |test|
+          content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"><failure></failure></testcase>\n"
+        }
+        
+        # Failures
+        batch.failing.each { |test|
+          content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"><failure></failure></testcase>\n"
+        }
+      end
+      
+      content = content + "</testsuite>"
 
-      # Failures
-      batch.failing.each { |test|
-        content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"><failure></failure></testcase>\n"
-      }
+      File.open(SUMMARY_REPORT, 'w+') {|f| f.write(content) }
     end
-
-	content = content + "</testsuite>"
-
-    File.open(report_filename, 'w+') {|f| f.write(content) }
   end
   
 =begin

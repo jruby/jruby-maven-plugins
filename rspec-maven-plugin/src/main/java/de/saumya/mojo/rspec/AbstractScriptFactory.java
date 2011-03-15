@@ -8,6 +8,7 @@ import java.util.Properties;
 public abstract class AbstractScriptFactory implements ScriptFactory {
 
 	protected List<String> classpathElements;
+	protected File summaryReport;
 	protected File outputDir;
 	protected String baseDir;
 	protected String sourceDir;
@@ -20,6 +21,10 @@ public abstract class AbstractScriptFactory implements ScriptFactory {
 		this.classpathElements = classpathElements;
 	}
 
+	public void setSummaryReport(File summaryReport) {
+		this.summaryReport = summaryReport;
+	}
+	
 	public void setOutputDir(File outputDir) {
 		this.outputDir = outputDir;
 	}

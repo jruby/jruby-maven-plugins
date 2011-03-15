@@ -78,6 +78,13 @@ public class RSpecMojo extends AbstractGemMojo {
     protected String reportName;
 
     /**
+     * The name of the summary (xml-)report which can be used by TeamCity and Co. default is null.
+     * 
+     * @parameter
+     */
+    protected File summaryReport;
+
+    /**
      * List of system properties to set for the tests.
      * 
      * @parameter
@@ -171,6 +178,7 @@ public class RSpecMojo extends AbstractGemMojo {
 
     private void initScriptFactory(final ScriptFactory factory, final String reportPath) {
         factory.setBaseDir(this.basedir.getAbsolutePath());
+        factory.setSummaryReport(this.summaryReport);
         factory.setOutputDir(this.outputDirectory);
         factory.setReportPath(reportPath);
         factory.setSourceDir(specSourceDirectory().getAbsolutePath());
