@@ -155,21 +155,14 @@ EOF
               Dependency.new(args[0].sub(/:[^:]+$/, ''), 
                              args[0].sub(/.*:/, ''), 
                              args[1])
-            elsif args[0] =~ /\./
-              Dependency.new(args[0].sub(/\.[^.]+$/, ''), 
-                             args[0].sub(/.*\./, ''), 
-                             args[1])
             else
               args = args.delete(2) if args[2]
               Gem.new(*args)
             end
           when String
-            if args =~  /:/
+            if args =~ /:/
               Dependency.new(args.sub(/:[^:]+$/, ''), 
                              args.sub(/.*:/, ''))
-            elsif args =~  /\./
-              Dependency.new(args.sub(/\.[^.]+$/, ''), 
-                             args.sub(/.*\./, ''))
             else
               Gem.new(args)
             end
@@ -190,6 +183,10 @@ EOF
           block.call(@plugins)
         end
         @plugins
+      end
+
+      def plugin?(name)
+        plugins.key?(name)
       end
 
       def to_xml(buf = "", indent = "")
@@ -426,6 +423,23 @@ EOF
 
     class PluginHash < Hash
 
+      def adjust_key(name)
+        name = name.to_s
+        if (name =~ /\:/).nil?
+          if [:jruby, :gem, :rspec, :rake, :rails2, :rails3, :gemify, :cucumber, :runit, :bundler].member? name.to_sym
+            "de.saumya.mojo:#{name}-maven-plugin"
+          else
+            "maven-#{name}-plugin"
+          end
+        else
+          name
+        end
+      end
+
+      def key?(k)
+        super( adjust_key(k).to_sym )
+      end
+
       def get(*args, &block)
         case args.size
         when 3
@@ -439,18 +453,11 @@ EOF
         else
           raise "need name"
         end
-        if (name =~ /\./).nil?
-          if [:jruby, :gem, :rspec, :rake, :rails2, :rails3, :gemify, :cucumber, :runit].member? name.to_sym
-            group_id = 'de.saumya.mojo'
-            artifact_id = "#{name}-maven-plugin"
-          else
-            group_id = nil
-            artifact_id = "maven-#{name}-plugin"
-          end
-        else
-          group_id = name.sub(/:.+$/, '')
-          artifact_id = name.sub(/^.+:/, '')
-        end
+
+        name = adjust_key(name)
+        group_id = name =~ /\:/ ? name.sub(/:.+$/, '') : nil
+        artifact_id = name.sub(/^.+:/, '')
+
         k = "#{group_id}:#{artifact_id}".to_sym
         result = self[k]
         if result.nil?
@@ -544,7 +551,7 @@ EOF
       end
 
       def execute_in_phase(phase, name = nil, &block)
-        plugin("gem").in_phase(phase.to_s, name).execute_goal("execute_in_phase").with(:file => current_file, :phase => phase)
+        plugin("gem").in_phase(phase.to_s, name).execute_goal("execute_in_phase").with(:file => File.basename(current_file), :phase => phase)
         executions_in_phase[phase.to_s] = block
       end
 
@@ -554,6 +561,10 @@ EOF
 
       def plugin(*args, &block)
         build.plugins.get(*args, &block)
+      end
+
+      def plugin?(name)
+        build.plugin?(name)
       end
 
       def profile(*args, &block)
@@ -783,7 +794,7 @@ EOF
     end
 
     class Repository < Tag
-      tags :id, :url, :releases, :snapshots
+      tags :id, :name, :url, :releases, :snapshots
       def initialize(id, &block)
         super({:id => id, :url => url})
         if block

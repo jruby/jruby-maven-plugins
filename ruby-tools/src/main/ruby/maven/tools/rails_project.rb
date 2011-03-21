@@ -28,7 +28,6 @@ module Maven
 
         plugin(:rails3) do |rails|
           rails.version = "${jruby.plugins.version}" unless rails.version
-          rails.extensions = true if rails.extensions.nil?
           rails.execution(:initialize).goals << "initialize"
         end
 

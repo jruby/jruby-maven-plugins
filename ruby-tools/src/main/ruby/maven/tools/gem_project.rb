@@ -1,6 +1,7 @@
 require File.join(File.dirname(__FILE__), 'model.rb')
 require File.join(File.dirname(__FILE__), 'gemfile_lock.rb')
 require File.join(File.dirname(__FILE__), 'versions.rb')
+
 module Maven
   module Tools
     class GemProject < Project
@@ -20,8 +21,9 @@ module Maven
 
       def dump_loaded_file_list
         if loaded_files.size > 0
+          basedir = File.dirname(loaded_files[0])
           File.open(loaded_files[0] + ".files", 'w') do |f|
-            loaded_files.each { |i| f.puts i }
+            loaded_files.each { |i| f.puts i.sub(/^#{basedir}./, '') }
           end
         end
       end
@@ -38,13 +40,14 @@ module Maven
       def load_gemspec(specfile)
         require 'rubygems'
         spec = ::Gem::Specification.load(specfile)
+        @skip_bundler = true if loaded_files.size == 0
         loaded_files << File.expand_path(specfile)
-        self.artifact_id = spec.name
-        self.version = spec.version
-        self.packaging = spec.platform.to_s == 'java'? "java-gem" : "gem"
-        self.name = spec.summary || "#{self.artifact_id} - gem"
-        self.description = spec.description if spec.description
-        self.url = spec.homepage if spec.homepage
+        artifact_id spec.name
+        version spec.version
+        packaging (spec.platform.to_s == 'java'? "java-gem" : "gem")
+        name spec.summary || "#{self.artifact_id} - gem"
+        description spec.description if spec.description
+        url spec.homepage if spec.homepage
         (spec.email || []).zip(spec.authors || []).map do |email, author|
           self.developers.new(author, email)
         end
@@ -190,9 +193,21 @@ module Maven
           end
         end
 
-        unless plugin?("gem")
+        if !plugin?(:gem) || plugin(:gem).version.nil?
           if versions[:jruby_plugins] 
-            plugin("gem", "${jruby.plugins.version}").extensions = true
+            gem = plugin(:gem, "${jruby.plugins.version}")
+            gem.extensions = true if packaging =~ /gem/
+          end
+        end
+
+        unless @skip_bundler
+          if !plugin?(:bundler) || plugin(:bundler).version.nil?
+            if versions[:jruby_plugins] 
+              plugin(:bundler, "${jruby.plugins.version}").executions.goals << "install"
+              unless gem?(:bundler)
+                gem("bundler")
+              end
+            end
           end
         end
 
@@ -216,15 +231,12 @@ module Maven
           if !has_gem && File.exists?(test_dir)
             gem(name, "[0.0.0,)").scope = :test
           end
+        else
+          pl = plugin(name || 'runit')
+          pl.version = "${jruby.plugins.version}" unless pl.version
         end
       end
 
-      def plugin?(name)
-        build.plugins.keys.member?(name) || profiles.detect do |id, profile|
-          profile.build.plugins.keys.member?(name)
-        end
-      end
-      protected :plugin?
 
       def jar?(name)
         artifact_id, group_id = name.sub(/:[^:]+$/, ''), name.sub(/.*:/, '')
@@ -232,14 +244,12 @@ module Maven
           profile.dependencies.member?(Dependency.new(artifact_id, group_id))
         end
       end
-      protected :jar?
 
       def gem?(gemname)
         dependencies.member?(Gem.new(gemname)) || profiles.detect do |id, profile|
           profile.dependencies.member?(Gem.new(gemname))
         end
       end
-      protected :gem?
 
       def stack
         @stack ||= [[:default]]

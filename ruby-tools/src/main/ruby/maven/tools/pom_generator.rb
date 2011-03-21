@@ -12,7 +12,13 @@ module Maven
       end
 
       def read_gemfile(filename, plugin_version = nil, jruby_version = nil)
-        proj = Maven::Tools::GemProject.new
+        dir = File.dirname(filename)
+        proj = 
+          if File.exists? File.join( dir, 'config', 'application.rb' )
+            Maven::Tools::RailsProject.new
+          else
+            Maven::Tools::GemProject.new
+          end
         proj.load(filename.to_s)
         proj.load(File.join(File.dirname(filename.to_s), 'Mavenfile'))
         proj.add_defaults(versions(plugin_version, jruby_version))

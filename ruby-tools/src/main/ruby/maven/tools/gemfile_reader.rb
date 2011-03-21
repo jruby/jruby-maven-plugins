@@ -1,4 +1,5 @@
 ::MAVEN = "maven3"
+warn "deprecated - use GemProject instead"
 module Maven
   module Tools
     class GemfileReader
