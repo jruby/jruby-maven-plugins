@@ -24,6 +24,8 @@ public class Maven2GemVersionConverterTest extends TestCase
         check( "1", "1.0.0", false );
         check( "1.2", "1.2.0", false );
         check( "1.2.3", "1.2.3", true );
+        check( "1.2-SNAPSHOT", "1.2.0.snapshot", false );
+        check( "1.2.3-SNAPSHOT", "1.2.3.snapshot", false );
         check( "1.2-3", "1.2.0.3", false );
         check( "1_2_3", "1.0.0.2.3", false );
         check( "1-2-3", "1.0.0.2.3", false );
