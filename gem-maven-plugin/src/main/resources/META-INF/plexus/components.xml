@@ -24,7 +24,7 @@
             org.apache.maven.plugins:maven-install-plugin:install
    </install>
    <deploy>
-            org.apache.maven.plugins:maven-deploy-plugin:deploy
+     de.saumya.mojo:gem-maven-plugin:push
           </deploy>
         </phases>
       </configuration>
@@ -70,7 +70,7 @@
             org.apache.maven.plugins:maven-install-plugin:install
    </install>
    <deploy>
-            org.apache.maven.plugins:maven-deploy-plugin:deploy
+     de.saumya.mojo:gem-maven-plugin:push
           </deploy>
         </phases>
       </configuration>
