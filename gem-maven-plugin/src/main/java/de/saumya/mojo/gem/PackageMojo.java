@@ -298,34 +298,6 @@ public class PackageMojo extends AbstractGemMojo {
         for (final Dependency dependency : project.getDependencies()) {
             if (!dependency.isOptional()
                     && dependency.getType().contains("gem")) {
-//                if (!dependency.getVersion().matches(".*[\\)\\]]$")) {
-//                    // TODO maybe skip all this or follow relocations
-//                    // it will adjust the artifact as well (in case of
-//                    // relocation)
-//
-//                    Artifact arti = null;
-//                    arti = this.repositorySystem.createArtifactWithClassifier(dependency.getGroupId(),
-//                                                                              dependency.getArtifactId(),
-//                                                                              dependency.getVersion(),
-//                                                                              dependency.getScope(),
-//                                                                              dependency.getClassifier());
-//                    dependency.setGroupId(arti.getGroupId());
-//                    dependency.setArtifactId(arti.getArtifactId());
-//                    dependency.setVersion(arti.getVersion());
-//                    
-//                    // if (!dependency.getGroupId().equals("rubygems")) {
-//                    // projectFromArtifact(arti);
-//                    // }
-//                    // dependency.setGroupId(arti.getGroupId());
-//                    // dependency.setArtifactId(arti.getArtifactId());
-//                    // }
-//                    // catch (final ProjectBuildingException e) {
-//                    // throw new
-//                    // MojoExecutionException("error building project for "
-//                    // + arti,
-//                    // e);
-//                    // }
-//                }
 
                 final String prefix = dependency.getGroupId()
                         .equals("rubygems") ? "" : dependency.getGroupId()
