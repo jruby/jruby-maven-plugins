@@ -130,8 +130,10 @@ public class DefaultRailsManager implements RailsManager {
 
         // use a rubygems directory in way that the new application can also use
         // it
-        installer.config.setGemBase(new File(new File(appPath, "target"),
-                "rubygems"));
+        if(!installer.config.getGemHome().exists()){
+            installer.config.setGemBase(new File(new File(appPath, "target"),
+                    "rubygems"));
+        }
         setupGemHomeAndGemPath(installer);
 
         railsVersion = installer.installGem("rails",
