@@ -486,7 +486,7 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
         final String version = createGemVersion(getDependencyVersion(artifact,
                                                                      dependency));
         requirement.addRequirement("~>",
-                                   new GemVersion(version.substring(0, version.lastIndexOf("."))));
+                                   new GemVersion(version));//.substring(0, version.lastIndexOf("."))));
 
         result.setVersion_requirement(requirement);
 

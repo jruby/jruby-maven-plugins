@@ -74,6 +74,8 @@ public class Maven2GemVersionConverter
         String mainPart = mavenVersion.replaceAll( "[\\-_].*", "" );
         String extraPart = mavenVersion.substring( mainPart.length() ).replaceAll( "[_-][_-]", "-" );
         StringBuilder version = new StringBuilder( mainPart );
+
+        // TODO maybe it is better to stick to what is given instead of padding it to three parts
         if ( majorOnlyPattern.matcher( mainPart ).matches() )
         {
             version.append( ".0.0" );
@@ -82,6 +84,7 @@ public class Maven2GemVersionConverter
         {
             version.append( ".0" );
         }
+
         version.append( extraPart );
 
         // now the remaining transformations
