@@ -82,7 +82,7 @@ public class ExecMojo extends AbstractGemMojo {
             }
         }
         else {
-            getLog().warn("no arguments given. use -Dexec.args=... or -Dexec.script=... or -Dexec.file=...");
+            getLog().warn("no arguments given. use -Dexec.script=... or -Dexec.file=...");
         }
     }
 }
