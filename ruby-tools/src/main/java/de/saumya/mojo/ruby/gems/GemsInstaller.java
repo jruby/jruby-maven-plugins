@@ -105,7 +105,7 @@ public class GemsInstaller {
                     && pom.getArtifact().getFile().isFile()) {
                 script = maybeAddArtifact(script, pom.getArtifact());
             }
-            if (this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL) {
+            if (!this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL) {
                 final Artifact openssl = this.manager.createGemArtifact(JRUBY_OPENSSL,
                                                                         "0.7");
 
