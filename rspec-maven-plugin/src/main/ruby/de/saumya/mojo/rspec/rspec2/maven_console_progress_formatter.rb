@@ -1,6 +1,7 @@
 
 require 'rspec/core/formatters/base_formatter'
 require 'pp'
+require 'stringio'
 
 class MojoLog
 
