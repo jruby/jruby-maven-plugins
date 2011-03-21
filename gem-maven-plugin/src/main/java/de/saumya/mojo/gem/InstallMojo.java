@@ -36,22 +36,20 @@ public class InstallMojo extends AbstractGemMojo {
             ScriptException, IOException, MojoFailureException {
         final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
                 .addArg("install");
-        if (this.project.getArtifact() != null
+        // no given gem and pom artifact in place
+        if (this.gem == null && this.project.getArtifact() != null
                 && this.project.getArtifact().getFile() != null
                 && this.project.getArtifact().getFile().exists()) {
             final GemArtifact gemArtifact = new GemArtifact(this.project);
-            script.addArgs(this.installArgs)
-                .addArgs(this.args)
-                .addArg((installRDoc ? "--" : "--no-") + "rdoc")
-                .addArg((installRI ? "--" : "--no-") + "ri");
             // skip artifact unless it is a gem.
-            // this allows to use this mojo for installing arbitrary gems
+            // this allows to use this mojo for installing arbitrary gems 
+            // via the args parameter
             if (gemArtifact.isGem()) {
                 script.addArg("-l", gemArtifact.getFile());
             }
-            script.execute();
         }
         else {
+            // no pom artifact and no given gem so search for a gem
             if (this.gem == null) {
                 for (final File f : this.launchDirectory().listFiles()) {
                     if (f.getName().endsWith(".gem")) {
@@ -63,16 +61,16 @@ public class InstallMojo extends AbstractGemMojo {
                         }
                     }
                 }
-                if (this.gem != null) {
-                    getLog().info("use gem: " + this.gem);
-                    script.addArg((installRDoc ? "--" : "--no-") + "rdoc")
-                        .addArg((installRI ? "--" : "--no-") + "ri")
-                        .addArg("-l", this.gem);
-                }
             }
-            script.addArgs(this.installArgs);
-            script.addArgs(this.args);
-            script.execute();
+            if (this.gem != null) {
+                getLog().info("use gem: " + this.gem);
+                script.addArg("-l", this.gem);
+            }
         }
+        script.addArg((installRDoc ? "--" : "--no-") + "rdoc")
+                .addArg((installRI ? "--" : "--no-") + "ri")
+                .addArgs(this.installArgs)
+                .addArgs(this.args)
+                .execute();
     }
 }
