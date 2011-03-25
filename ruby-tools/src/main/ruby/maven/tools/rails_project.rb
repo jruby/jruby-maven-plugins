@@ -7,6 +7,7 @@ module Maven
       def initialize(&block)
         super(dir_name, &block)
         self.group_id = "rails"
+        @skip_bundler = true
       end
       
       def add_defaults(args = {})

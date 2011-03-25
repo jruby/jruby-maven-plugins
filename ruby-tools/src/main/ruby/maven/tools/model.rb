@@ -134,20 +134,20 @@ EOF
               args = [args[0], "[0.0.0,)", args[1]]
             elsif args.size >= 2
               if args[1] =~ /~>/
-                val = args[1].sub(/.*\ /, '')
+                val = args[1].sub(/~>\s*/, '')
                 last = val.sub(/\.[^.]+$/, '.99999')
                 args[1] = "[#{val}, #{last}]"
               elsif args[1] =~ />=/
-                val = args[1].sub(/.*\ /, '')
+                val = args[1].sub(/>=\s*/, '')
                 args[1] = "[#{val},)"
               elsif args[1] =~ /<=/
-                val = args[1].sub(/.*\ /, '')
+                val = args[1].sub(/<=\s*/, '')
                 args[1] = "[0.0.0,#{val}]"
               elsif args[1] =~ />/
-                val = args[1].sub(/.*\ /, '')
+                val = args[1].sub(/>\s*/, '')
                 args[1] = "(#{val},)"
               elsif args[1] =~ /</
-                val = args[1].sub(/.*\ /, '')
+                val = args[1].sub(/<\s*/, '')
                 args[1] = "[0.0.0,#{val})"
               end
             end
@@ -199,7 +199,7 @@ EOF
     end
 
     class Plugin < Coordinate
-      tags :extensions, :configuration, :executions
+      tags :extensions, :configuration, :executions, :dependencies
       def initialize(group_id, artifact_id, version, &block)
         super(:artifact_id => artifact_id, :version => version)
         @group_id = group_id if group_id
@@ -207,6 +207,14 @@ EOF
           block.call(self)
         end
         self
+      end
+
+      def dependencies(&block)
+        @dependencies ||= DepArray.new
+        if block
+          block.call(@dependencies)
+        end
+        @dependencies
       end
 
       def with(config)
@@ -533,7 +541,7 @@ EOF
       end
 
       def name(val = nil)
-        @name = val if val
+        self.name = val if val
         @name
       end
 
@@ -542,7 +550,7 @@ EOF
       end
 
       def description(val = nil)
-        @description = val if val
+        self.description = val if val
         @description
       end
 
@@ -551,8 +559,10 @@ EOF
       end
 
       def execute_in_phase(phase, name = nil, &block)
-        plugin("gem").in_phase(phase.to_s, name).execute_goal("execute_in_phase").with(:file => File.basename(current_file), :phase => phase)
+        gem_plugin = plugin("gem")
+        gem_plugin.in_phase(phase.to_s, name).execute_goal("execute_in_phase").with(:file => File.basename(current_file), :phase => phase)
         executions_in_phase[phase.to_s] = block
+        gem_plugin
       end
 
       def executions_in_phase

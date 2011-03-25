@@ -227,9 +227,8 @@ module Maven
       def add_test_plugin(name, test_dir)
         unless plugin?(name)
           has_gem = name.nil? ? true : gem?(name)
-          plugin(name || 'runit', "${jruby.plugins.version}").execution.goals << "test" if has_gem || File.exists?(test_dir)
-          if !has_gem && File.exists?(test_dir)
-            gem(name, "[0.0.0,)").scope = :test
+          if has_gem && File.exists?(test_dir)
+            plugin(name || 'runit', "${jruby.plugins.version}").execution.goals << "test" 
           end
         else
           pl = plugin(name || 'runit')
@@ -262,12 +261,27 @@ module Maven
         stack.pop
       end
 
-      def gemspec(name)
-        load_gemspec(name)
+      def gemspec(name = nil)
+        if name
+          load_gemspec(name)
+        else
+          Dir["*.gemspec"].each do |file|
+            load_gemspec(file)
+          end
+        end
       end
 
       def source(*args)
-        warn "ignore source #{args}" if args[0] != 'http://rubygems.org'
+        warn "ignore source #{args}" if args[0].to_s != 'http://rubygems.org' && args[0] != :rubygems
+      end
+
+      def path(*args)
+      end
+
+      def platforms(*args, &block)
+        if args.detect { |a| a.to_s == 'jruby' }
+          block.call
+        end
       end
 
       def jar(*args)
