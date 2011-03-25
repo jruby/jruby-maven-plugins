@@ -60,7 +60,6 @@ public class DefaultRailsManager implements RailsManager {
         patchBootScript(launchDirectory);
         setupWebXML(launchDirectory);
         setupGemfile(installer, launchDirectory);
-        setupGemHomeAndGemPath(installer);
     }
 
     @Deprecated
@@ -108,13 +107,6 @@ public class DefaultRailsManager implements RailsManager {
         }
     }
 
-    private void setupGemHomeAndGemPath(final GemsInstaller installer) {
-        if (installer.config.hasGemBase()) {
-            installer.factory.addEnv("GEM_HOME", installer.config.getGemHome());
-            installer.factory.addEnv("GEM_PATH", installer.config.getGemPath());
-        }
-    }
-
     public void createNew(final GemsInstaller installer,
             final RepositorySystemSession repositorySystemSession,
             final File appPath, String database, String railsVersion,
@@ -134,7 +126,7 @@ public class DefaultRailsManager implements RailsManager {
             installer.config.setGemBase(new File(new File(appPath, "target"),
                     "rubygems"));
         }
-        setupGemHomeAndGemPath(installer);
+       // setupGemHomeAndGemPath(installer);
 
         railsVersion = installer.installGem("rails",
                                             railsVersion,

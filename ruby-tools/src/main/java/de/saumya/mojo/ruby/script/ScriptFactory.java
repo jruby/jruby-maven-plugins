@@ -26,7 +26,7 @@ public class ScriptFactory {
     final Arguments            switches     = new Arguments();
     final Arguments            javaArgs     = new Arguments();
     final Arguments            jvmArgs      = new Arguments();
-    final Map<String, String>  env          = new HashMap<String, String>();
+    private final Map<String, String>  env          = new HashMap<String, String>();
     final Logger               logger;
     final ClassRealm           classRealm;
     final File                 jrubyJar;
@@ -153,6 +153,10 @@ public class ScriptFactory {
         else {
             this.env.put(name, null);
         }
+    }
+    
+    public Map<String, String> environment(){
+        return env;
     }
 
     public void addEnv(final String name, final String value) {

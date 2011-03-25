@@ -44,23 +44,18 @@ class AntLauncher extends AbstractLauncher {
         java.setFork(true);
         java.setDir(launchDirectory);
 
-        // if (this.jrubyHome != null) {
-        // final Variable v = new Variable();
-        // v.setKey("jruby.home");
-        // v.setValue(this.jrubyHome.getAbsolutePath());
-        // java.addSysproperty(v);
-        // }
-        for (final Map.Entry<String, String> entry : this.factory.env.entrySet()) {
+        for (final Map.Entry<String, String> entry : this.factory.environment().entrySet()) {
             final Variable v = new Variable();
             v.setKey(entry.getKey());
             v.setValue(entry.getValue());
             java.addEnv(v);
         }
+        // TODO add isDebugable to the logger and log only when debug is needed
         this.logger.debug("java classpath  : "
                 + this.project.getReference(MAVEN_CLASSPATH));
-        if (this.factory.env.size() > 0) {
+        if (this.factory.environment().size() > 0) {
             this.logger.debug("environment     :");
-            for (final Map.Entry<String, String> entry : this.factory.env.entrySet()) {
+            for (final Map.Entry<String, String> entry : this.factory.environment().entrySet()) {
                 this.logger.debug("\t\t" + entry.getKey() + " => "
                         + entry.getValue());
             }

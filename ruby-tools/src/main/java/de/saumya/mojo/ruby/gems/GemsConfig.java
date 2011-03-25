@@ -4,6 +4,8 @@
 package de.saumya.mojo.ruby.gems;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GemsConfig {
 
@@ -16,9 +18,9 @@ public class GemsConfig {
 
     private File                gemHome;
 
-    private File                gemPath;
+    private List<File>          gemPaths         = new ArrayList<File>();
 
-    private File                gemsDirectory;
+    private File[]              gemsDirectory;
 
     private File                binDirectory;
 
@@ -29,6 +31,8 @@ public class GemsConfig {
     private boolean             verbose          = false;
 
     private boolean             userInstall      = false;
+
+    private boolean             systemInstall    = false;
 
     private boolean             skipJRubyOpenSSL = false;
 
@@ -67,14 +71,27 @@ public class GemsConfig {
     public void setUserInstall(final boolean userInstall) {
         this.userInstall = userInstall;
     }
+    
+    public void setSystemInstall(final boolean systemInstall) {
+        this.systemInstall = systemInstall;
+    }
 
     public boolean isUserInstall() {
         return this.userInstall;
     }
 
-    public File getGemsDirectory() {
+    public boolean isSystemInstall() {
+        return this.systemInstall;
+    }
+
+    public File[] getGemsDirectory() {
         if (this.gemsDirectory == null) {
-            this.gemsDirectory = new File(getGemPath(), "gems");
+            File[] paths = getGemPath();
+            this.gemsDirectory = new File[paths.length];
+            int index = 0;
+            for(File path: paths){
+                this.gemsDirectory[index++] = new File(path, "gems"); 
+            }
         }
         return this.gemsDirectory;
     }
@@ -86,13 +103,24 @@ public class GemsConfig {
     
     public File getBinDirectory() {
         if (this.binDirectory == null) {
-            this.binDirectory = new File(getGemHome(), "bin");
+            if(getGemHome() != null){
+                return new File(getGemHome(), "bin");
+            }
+            else {
+                return null;
+            }
         }
         return this.binDirectory;
     }
 
     public File binScriptFile(final String scriptName) {
-        return new File(getBinDirectory(), scriptName);
+        if (getBinDirectory() == null){
+            // TODO something better
+            return new File(scriptName);          
+        }
+        else {
+            return new File(getBinDirectory(), scriptName);
+        }
     }
 
     public String getEnvironment() {
@@ -109,7 +137,7 @@ public class GemsConfig {
         if (this.gemBase != null) {
             final String postfix = this.env == null ? "" : "-" + this.env;
             this.gemHome = new File(this.gemBase.getPath() + postfix);
-            this.gemPath = new File(this.gemBase.getPath() + postfix);
+            this.gemPaths.set(0, new File(this.gemBase.getPath() + postfix));
         }
     }
 
@@ -122,13 +150,15 @@ public class GemsConfig {
         this.gemBase = null;
     }
 
-    public void setGemPath(final File base) {
-        this.gemPath = base;
-        this.gemBase = null;
+    public void addGemPath(final File path) {
+        if( path != null ){
+            this.gemPaths.add(path);
+            this.gemBase = null;
+        }
     }
 
     public File getGemHome() {
-        if (this.gemHome == null) {
+        if (this.gemHome == null || systemInstall) {
             if (System.getenv(GEM_HOME) == null) {
                 return null;
             }
@@ -141,17 +171,17 @@ public class GemsConfig {
         }
     }
 
-    public File getGemPath() {
-        if (this.gemPath == null) {
+    public File[] getGemPath() {
+        if (this.gemPaths.size() == 0 || systemInstall) {
             if (System.getenv(GEM_PATH) == null) {
                 return null;
             }
             else {
-                return new File(System.getenv(GEM_PATH));
+                return new File[] {new File(System.getenv(GEM_PATH))};
             }
         }
         else {
-            return this.gemPath;
+            return this.gemPaths.toArray(new File[this.gemPaths.size()]);
         }
     }
 
@@ -164,11 +194,14 @@ public class GemsConfig {
         }
         else {
             clone.setGemHome(this.gemHome);
-            clone.setGemPath(this.gemPath);
+            for(File path: this.gemPaths){
+                clone.addGemPath(path);
+            }
         }
         clone.addRdoc = this.addRdoc;
         clone.addRI = this.addRI;
         clone.userInstall = this.userInstall;
+        clone.systemInstall = this.systemInstall;
         clone.verbose = this.verbose;
         clone.skipJRubyOpenSSL = this.skipJRubyOpenSSL;
         clone.binDirectory = this.binDirectory;

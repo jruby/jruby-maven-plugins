@@ -111,7 +111,7 @@ class EmbeddedLauncher extends AbstractLauncher {
             if (this.factory.javaArgs.list.size() > 0) {
                 this.logger.warn("have to ignore java arguments and properties in the current setup");
             }
-            if (this.factory.env.size() > 0) {
+            if (this.factory.environment().size() > 0) {
                 this.logger.warn("have to ignore environment settings in the current setup");
             }
         }
@@ -203,7 +203,7 @@ class EmbeddedLauncher extends AbstractLauncher {
             final List<String> args, final File outputFile)
             throws ScriptException, IOException {
         final StringBuilder buf = new StringBuilder();
-        for (final Map.Entry<String, String> entry : this.factory.env.entrySet()) {
+        for (final Map.Entry<String, String> entry : this.factory.environment().entrySet()) {
             if (entry.getValue() != null) {
                 buf.append("ENV['")
                         .append(entry.getKey())

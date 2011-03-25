@@ -5,11 +5,14 @@ package de.saumya.mojo.ruby.gems;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.sonatype.aether.RepositorySystemSession;
 
@@ -38,13 +41,13 @@ public class GemsInstaller {
 
     public void installPom(final MavenProject pom) throws IOException,
             ScriptException, GemException {
-        installGems(pom, null, null);
+        installGems(pom, null);
     }
 
     public void installPom(final MavenProject pom,
             final ArtifactRepository localRepository) throws IOException,
             ScriptException, GemException {
-        installGems(pom, null, localRepository);
+        installGems(pom, localRepository);
     }
 
     public MavenProject installGem(final String name, final String version,
@@ -71,22 +74,23 @@ public class GemsInstaller {
         return pom;
     }
 
-    public void installGems(final MavenProject pom, final Artifact ensureGem,
+    public void installGems(final MavenProject pom, final ArtifactRepository localRepository) 
+        throws IOException, ScriptException, GemException {
+        installGems(pom, (Collection<Artifact>)null, localRepository);
+    }
+    
+    public void installGems(final MavenProject pom, PluginDescriptor plugin,
             final ArtifactRepository localRepository) throws IOException,
             ScriptException, GemException {
+        installGems(pom, plugin.getArtifacts(), localRepository);
+    }
+
+    public void installGems(final MavenProject pom, final Collection<Artifact> artifacts,
+                final ArtifactRepository localRepository) throws IOException,
+                ScriptException, GemException {
         // start with empty script which will be create when first
         // un-installed gem is found
-
         Script script = null;
-        if (ensureGem != null) {
-            if (ensureGem.getFile() == null) {
-                this.manager.resolve(ensureGem,
-                                     localRepository,
-                                     Collections.singletonList(this.manager.defaultGemArtifactRepositoryForVersion(ensureGem.getVersion())));
-            }
-            script = maybeAddArtifact(script, ensureGem);
-        }
-
         if (pom != null) {
             boolean hasAlreadyOpenSSL = false;
             for (final Artifact artifact : pom.getArtifacts()) {
@@ -99,6 +103,19 @@ public class GemsInstaller {
                 script = maybeAddArtifact(script, artifact);
                 hasAlreadyOpenSSL = hasAlreadyOpenSSL
                         || artifact.getArtifactId().equals(JRUBY_OPENSSL);
+            }
+            if (artifacts != null) {
+                for (final Artifact artifact : artifacts) {
+                    if (!artifact.getFile().exists()) {
+                        this.manager.resolve(artifact,
+                                             localRepository,
+                                             pom.getRemoteArtifactRepositories());
+
+                    }
+                    script = maybeAddArtifact(script, artifact);
+                    hasAlreadyOpenSSL = hasAlreadyOpenSSL
+                            || artifact.getArtifactId().equals(JRUBY_OPENSSL);
+                }
             }
             if (pom.getArtifact().getFile() != null
             // to filter out target/classes
@@ -125,24 +142,37 @@ public class GemsInstaller {
         }
     }
 
+    private boolean exists(Artifact artifact) {
+        String basename = artifact.getArtifactId() + "-"
+                + artifact.getVersion();
+        String javaBasename = basename + "-java";
+
+        for (File dir : this.config.getGemsDirectory()) {
+            if (new File(dir, basename).exists()
+                    || new File(dir, javaBasename).exists()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     private Script maybeAddArtifact(Script script, final Artifact artifact)
             throws IOException, GemException {
-        final File gemDir = new File(this.config.getGemsDirectory(),
-                artifact.getArtifactId() + "-" + artifact.getVersion());
-        final File javaGemDir = new File(gemDir.getPath() + "-java");
-        if (artifact.getType().contains("gem")
-                && !(gemDir.exists() || javaGemDir.exists())) {
-            if (script == null) {
-                script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
-                        .addArg("install")
-                        .addArg("--ignore-dependencies")
-                        .addArg(booleanArg(this.config.isAddRdoc(), "rdoc"))
-                        .addArg(booleanArg(this.config.isAddRI(), "ri"))
-                        .addArg(booleanArg(this.config.isUserInstall(),
-                                           "user-install"))
-                        .addArg(booleanArg(this.config.isVerbose(), "verbose"));
+        if (artifact.getType().contains("gem")) {
+            if (!exists(artifact)) {
+                if (script == null) {
+                    script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                            .addArg("install")
+                            .addArg("--ignore-dependencies")
+                            .addArg(booleanArg(this.config.isAddRdoc(), "rdoc"))
+                            .addArg(booleanArg(this.config.isAddRI(), "ri"))
+                            .addArg(booleanArg(this.config.isUserInstall(),
+                                               "user-install"))
+                            .addArg(booleanArg(this.config.isVerbose(),
+                                               "verbose"));
+                }
+                script.addArg(artifact.getFile());
             }
-            script.addArg(artifact.getFile());
         }
         return script;
     }

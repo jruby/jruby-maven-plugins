@@ -10,6 +10,7 @@ import junit.framework.TestSuite;
 
 import org.codehaus.plexus.util.FileUtils;
 
+import de.saumya.mojo.ruby.gems.GemsConfig;
 import de.saumya.mojo.ruby.script.GemScriptFactory;
 import de.saumya.mojo.ruby.script.ScriptFactory;
 
@@ -36,6 +37,10 @@ public class EmbeddedLauncherTest extends TestCase {
         // setup local rubygems repository
         this.home = new File("target");
         this.path = new File("target/rubygems");
+        GemsConfig config = new GemsConfig();
+        config.setGemHome(home);
+        config.addGemPath(path);
+        
         this.path.mkdirs();
         this.expected = "onetwothree\n" + this.home.getAbsolutePath() + "\n"
                 + this.path.getAbsolutePath() + "\n";
@@ -47,8 +52,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 new File(""),
                 classpathElements,
                 false,
-                this.home,
-                this.path);
+                config);
 
         // for eclipse
         final File output = new File("target/test-classes");
