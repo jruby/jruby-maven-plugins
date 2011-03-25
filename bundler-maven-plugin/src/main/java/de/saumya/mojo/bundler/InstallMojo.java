@@ -1,10 +1,8 @@
-package de.saumya.mojo.cucumber;
+package de.saumya.mojo.bundler;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
@@ -58,6 +56,7 @@ public class InstallMojo extends AbstractGemMojo {
 	}
 	else {
 	    script.addArg("--quiet");
+	    script.addArg("--local");
 	}
 	if (this.bundlerArgs != null) {
 	    script.addArgs(this.bundlerArgs);
