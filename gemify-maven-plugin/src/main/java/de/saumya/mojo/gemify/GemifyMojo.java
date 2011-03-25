@@ -2,7 +2,6 @@ package de.saumya.mojo.gemify;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,15 +9,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -26,8 +21,6 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
-import org.apache.maven.repository.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gems.ArtifactCoordinates;
 import de.saumya.mojo.gems.GemArtifact;
@@ -44,19 +37,9 @@ import de.saumya.mojo.ruby.gems.GemManager;
  * @goal gemify
  * @requiresProject false
  */
-public class GemifyMojo extends AbstractMojo {
+public class GemifyMojo extends AbstractGemifyMojo {
 
     private static final String SEPARATOR = "------------------------";
-
-    private static final List<ArtifactRepository> EMPTY_REPO_LIST = Collections.emptyList();
-
-    /**
-     * gemname to identify the maven artifact (format: groupId.artifactId).
-     * 
-     * @parameter default-value="${gemify.gemname}"
-     * @required
-     */
-    private String                          gemname;
 
     /**
      * the version of the maven artifact which gets gemified.
@@ -83,33 +66,6 @@ public class GemifyMojo extends AbstractMojo {
     /** @parameter default-value="${gemify.onlySpecs}" */
     private boolean                         onlySpecs;
 
-    /** @parameter default-value="${gemify.repositories}" */
-    private String                         repositories;
-
-    /**
-     * local repository for internal use.
-     * 
-     * @parameter default-value="${localRepository}"
-     * @required
-     * @readonly
-     */
-    private ArtifactRepository              localRepository;
-
-    /**
-     * reference to maven project for internal use.
-     * 
-     * @parameter default-value="${project}"
-     * @required
-     * @readonly true
-     */
-    private MavenProject                    project;
-
-    /**
-     * @parameter default-value="${repositorySystemSession}"
-     * @readonly
-     */
-    private RepositorySystemSession         repoSession;
-
     /** @component */
     private ProjectBuilder                  builder;
 
@@ -117,32 +73,9 @@ public class GemifyMojo extends AbstractMojo {
     private MavenArtifactConverter          converter;
 
     /** @component */
-    private RepositorySystem                repositorySystem;
+    private GemManager            manager;
 
-    /** @component */
-    private GemManager                      gemManager;
-
-    public void execute() throws MojoExecutionException {
-        if (this.gemname == null) {
-            throw new MojoExecutionException("no gemname given, use '-Dgemify.gemname=...' to specify one");
-        }
-        // remove the "mvn:"-prefix if any
-        this.gemname = this.gemname.replaceFirst("^" + MavenArtifactConverter.GEMNAME_PREFIX, "");
-        if (!this.gemname.contains(GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR)) {
-            throw new MojoExecutionException("not valid name for a maven-gem, it needs a at least one '" + GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR 
-                                             + "'");
-        }
-
-        if(repositories != null){
-            for(String repoUrl: this.repositories.split(",")){
-                ArtifactRepository repository = this.repositorySystem.createArtifactRepository(repoUrl.replaceFirst("https?://", "").replaceAll("[:\\/&?=.]", "_"),
-                                                                                               repoUrl,
-                                                                                               new DefaultRepositoryLayout(),
-                                                                                               new ArtifactRepositoryPolicy(),
-                                                                                               new ArtifactRepositoryPolicy());
-                this.project.getRemoteArtifactRepositories().add(repository);
-            }
-        }
+    public void executeGemify() throws MojoExecutionException {
 
         ProjectBuildingResult result = buildProject(this.gemname,
                                                     this.version,
@@ -200,14 +133,10 @@ public class GemifyMojo extends AbstractMojo {
         }
         gemifyMavenProject(origin);
 
-        // gemify orphaned dependencies as desired
-        // TODO may be going through the visited map is sufficient ?
+        // gemify orphaned dependencies
         if (!this.skipDependencies && !this.onlySpecs) {
             for (final Map.Entry<String, Node> entry : visited.entrySet()) {
-                if (!entry.getValue().isOrphaned()
-                        && entry.getValue().parent != null) {
-                    gemifyMavenProject(entry.getValue().project);
-                }
+                gemifyMavenProject(entry.getValue().project);
             }
         }
     }
@@ -232,37 +161,30 @@ public class GemifyMojo extends AbstractMojo {
         try {
             Artifact artifact = null;
             if (version == null) {
-                artifact = this.gemManager.createJarArtifactForGemnameWithLatestVersion(gemname,
-                                                                                        this.localRepository,
-                                                                                        this.project.getRemoteArtifactRepositories());
+                // use the remoteRepositories list from parent since that list obeys offline mode
+                artifact = this.manager.createJarArtifactForGemnameWithLatestVersion(gemname,
+                                                                                     this.localRepository,
+                                                                                     this.remoteRepositories);
             }
             else {
                 // find the latest version
-                final List<ArtifactRepository> repos;
-                if(repoSession.isOffline()){
-                    repos = EMPTY_REPO_LIST;
-                }
-                else {
-                    repos = this.project.getRemoteArtifactRepositories();
-                }
-                final List<String> versions = this.gemManager.availableVersions(this.gemManager.createJarArtifactForGemname(this.gemname),
-                                                                                this.localRepository,
-                                                                                repos);
+                // use the remoteRepositories list from parent since that list obeys offline mode
+                final List<String> versions = this.manager.availableVersions(this.manager.createJarArtifactForGemname(this.gemname),
+                                                                             this.localRepository,
+                                                                             this.remoteRepositories);
 
                 // the given version is the gem version, so find the respective
                 // maven-version
                 final Maven2GemVersionConverter converter = new Maven2GemVersionConverter();
                 for (final String v : versions) {
                     if (version.equals(converter.createGemVersion(v))) {
-                        artifact = this.gemManager.createJarArtifactForGemname(gemname,
-                                                                               v);
+                        artifact = this.manager.createJarArtifactForGemname(gemname, v);
                         break;
                     }
                 }
-                // did not find it ? then assume the given version be already
-                // maven-version
+                // did not find it ? then assume the given version is a maven-version
                 if (artifact == null) {
-                    artifact = this.gemManager.createJarArtifactForGemname(gemname,
+                    artifact = this.manager.createJarArtifactForGemname(gemname,
                                                                            version);
                 }
             }
@@ -278,7 +200,7 @@ public class GemifyMojo extends AbstractMojo {
     private ProjectBuildingResult buildProject(final String groupId,
             final String artifactId, final String version)
             throws MojoExecutionException {
-        final Artifact artifact = this.gemManager.createArtifact(groupId,
+        final Artifact artifact = this.manager.createArtifact(groupId,
                                                                  artifactId,
                                                                  version,
                                                                  "jar");
@@ -305,7 +227,7 @@ public class GemifyMojo extends AbstractMojo {
                     String newVersion = relocation.getVersion() == null
                             ? artifact.getVersion()
                             : relocation.getVersion();
-                    artifact = this.gemManager.createArtifact(newGroupId,
+                    artifact = this.manager.createArtifact(newGroupId,
                                                               newArtifactId,
                                                               newVersion,
                                                               isPom
@@ -315,7 +237,7 @@ public class GemifyMojo extends AbstractMojo {
                     result.getProject().setPackaging("pom");
                     Artifact a = result.getProject().getArtifact();
                     result.getProject()
-                            .setArtifact(this.gemManager.createArtifact(a.getGroupId(),
+                            .setArtifact(this.manager.createArtifact(a.getGroupId(),
                                                                         a.getArtifactId(),
                                                                         a.getVersion(),
                                                                         "pom"));
@@ -438,7 +360,8 @@ public class GemifyMojo extends AbstractMojo {
                     .setLocalRepository(this.localRepository)
                     .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
                     .setResolveRoot(!this.onlySpecs)
-                    .setResolveTransitively(false);
+                    .setResolveTransitively(false)
+                    .setOffline(repositorySession.isOffline());
             final ArtifactResolutionResult result = this.repositorySystem.resolve(request);
             if (result.getMissingArtifacts().size() > 0) {
                 // prepare the exception message
@@ -446,8 +369,11 @@ public class GemifyMojo extends AbstractMojo {
                 for(Artifact artifact: result.getMissingArtifacts()){
                     buf.append("\n\nMissing Artifacts:\n").append(SEPARATOR);
                     try {
-                        MavenProject model = gemManager.buildModel(artifact, this.repoSession, localRepository,
-                                                             this.project.getRemoteArtifactRepositories(), false);
+                        MavenProject model = manager.buildModel(artifact,
+                                                                this.repositorySession,
+                                                                this.localRepository,
+                                                                this.project.getRemoteArtifactRepositories(),
+                                                                false);
                         String url = model.getDistributionManagement() == null ?
                                 null :
                                 model.getDistributionManagement().getDownloadUrl();
@@ -471,7 +397,7 @@ public class GemifyMojo extends AbstractMojo {
                     buf.append("\n\n").append(SEPARATOR).append("\n\n");
                 }
 
-                throw new MojoExecutionException((this.repoSession.isOffline()
+                throw new MojoExecutionException((this.repositorySession.isOffline()
                         ? "The repository system is offline. "
                         : "")
                         + buf);
@@ -509,7 +435,7 @@ public class GemifyMojo extends AbstractMojo {
             request.setLocalRepository(this.localRepository)
                     .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
                     .setResolveDependencies(resolveDependencies)
-                    .setRepositorySession(this.repoSession)
+                    .setRepositorySession(this.repositorySession)
                     .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
             return this.builder.build(artifact, request);
         }
