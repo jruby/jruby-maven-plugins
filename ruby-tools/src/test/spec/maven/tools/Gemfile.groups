@@ -1,0 +1,15 @@
+group :test, :production do
+  gem 'rspec', :platforms => :mri 
+  gem 'dm-core', :platforms => :ruby
+  gem 'ixtlan-core', :platforms => :jruby
+  gem 'ixtlan-error-handler', :platforms => :mswin
+end
+
+group :development do
+  gem 'dm-sqlite-adapter', '~> 1.0.0'
+end
+
+group :production do
+  gem 'dm-mysql-adapter', ['~> 1.0.0', '< 1.0.3']
+  gem 'dm-postgres-adapter', ['<= 1.0.0']
+end

@@ -1,0 +1,7 @@
+source 'http://rubygems.org'
+
+gem 'rails', '3.0.1'
+
+gem 'sqlite3' unless defined?(JRUBY_VERSION)
+gem "activerecord-jdbc-adapter" if defined?(JRUBY_VERSION)
+gem "jdbc-sqlite3", :require => false if defined?(JRUBY_VERSION)

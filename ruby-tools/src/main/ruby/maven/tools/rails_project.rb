@@ -4,16 +4,15 @@ module Maven
     class RailsProject < GemProject
       tags :dummy
 
-      def initialize(&block)
-        super(dir_name, &block)
-        self.group_id = "rails"
-        @skip_bundler = true
+      def initialize(name = dir_name, &block)
+        super(name, &block)
+        group_id "rails"
+        packaging "war"
       end
       
       def add_defaults(args = {})
         self.name = "#{dir_name} - rails application" unless name
-        self.packaging = "war" unless packaging
-
+        
         s_args = args.dup
         s_args.delete(:jruby_plugins)
         super(s_args)
@@ -34,7 +33,7 @@ module Maven
 
         plugin(:war, versions[:war_plugin]) unless plugin?(:war)
         plugin(:war).with({
-            :webResources => NamedArray.new(:resource) do |l|
+            :webResources => Maven::Model::NamedArray.new(:resource) do |l|
               l << { :directory => "public" }
               l << { 
                 :directory => ".",

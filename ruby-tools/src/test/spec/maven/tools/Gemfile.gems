@@ -1,0 +1,11 @@
+gem 'rspec', :platforms => :mri 
+gem 'dm-core', :platforms => :ruby
+gem 'ixtlan-core', :platforms => :jruby
+gem 'ixtlan-error-handler', :platforms => :mswin
+gem 'facest', :path => "../facets"
+gem 'rails', :git =>"git://github.com/rails/rails.git" , :platforms => :jruby, :group => :integration
+
+gem 'dm-sqlite3-adapter', '~> 0.10.0', :group => :test
+gem 'dm-mysql-adapter', ['~> 0.10.0', '< 0.10.3'], :group => [:development, :production]
+gem 'dm-oracle-adapter', ['~> 0.10.0'], :group => :test, :platforms => :mswin
+gem 'dm-hsqldb-adapter', '= 0.10.0', :group => :development, :platforms => [:ruby, :jruby]

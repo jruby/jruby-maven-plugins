@@ -345,6 +345,10 @@ module Maven
         end
       end
 
+      def profile(id, &block)
+        profiles.get(id, &block)
+      end
+
       def profiles(&block)
         @profiles ||= ModelHash.new(Profile)
         if block

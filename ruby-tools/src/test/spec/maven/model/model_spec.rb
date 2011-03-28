@@ -8,17 +8,6 @@ describe Maven::Model do
       @project = Maven::Model::Project.new("test:project")
     end
 
-    it 'should setup a project' do
-      @project.to_xml.should == <<-XML
-<project>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>test</groupId>
-  <artifactId>project</artifactId>
-  <version>0.0.0</version>
-</project>
-XML
-    end
-
     it 'should setup a project with split args' do
       Maven::Model::Project.new("test", "project", "1.0.0").to_xml.should == <<-XML
 <project>
