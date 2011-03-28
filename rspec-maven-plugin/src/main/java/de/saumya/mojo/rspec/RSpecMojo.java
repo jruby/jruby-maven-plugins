@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -95,7 +95,7 @@ public class RSpecMojo extends AbstractGemMojo {
      * rspec version used when there is no pom. defaults to latest version
      * smaller then 2.0.0.
      * 
-     * @parameter default-value="${rspec.version}"
+     * @parameter default-value="${rspec.version}" expression="1.3.1"
      */
     private final String rspecVersion = "1.3.1";
 
@@ -129,7 +129,7 @@ public class RSpecMojo extends AbstractGemMojo {
 
         }
         final File specSourceDirectory = specSourceDirectory();
-        if (!specSourceDirectory.exists()) {
+        if (!specSourceDirectory.exists() && this.args == null) {
             getLog().info("Skipping RSpec tests since " + specSourceDirectory + " is missing");
             return;
         }
@@ -184,7 +184,7 @@ public class RSpecMojo extends AbstractGemMojo {
         factory.setSourceDir(specSourceDirectory().getAbsolutePath());
         factory.setClasspathElements(this.classpathElements);
         factory.setGemHome(this.gemHome);
-        factory.setGemPath(this.gemPath);
+        factory.setGemPaths(new File[] { this.gemPath, new File(this.gemPath.getParentFile(),  this.gemPath.getName() + "-rspec-maven-plugin")});
         Properties props = this.systemProperties;
         if (props == null) {
             props = new Properties();
@@ -207,18 +207,14 @@ public class RSpecMojo extends AbstractGemMojo {
             return this.rspecScriptFactory;
         }
         
-        Set<Artifact> dependencyArtifacts = project.getDependencyArtifacts();
-        
-        for (Artifact each : dependencyArtifacts ) {
-            if (each.getGroupId().equals("rubygems") && each.getArtifactId().equals("rspec") && each.getScope().equals("test")) {
-            	this.rspecScriptFactory = scriptFactory4Version(each.getVersion());
-                break;
-            }
+        this.rspecScriptFactory = getRSpecScriptFactory(project.getDependencyArtifacts());
+        if (this.rspecScriptFactory == null) {
+            this.rspecScriptFactory = getRSpecScriptFactory(plugin.getArtifacts());
         }
-
+        
         // get the sciptfactory when there is no pom
-        if (this.rspecScriptFactory == null && project.getBasedir() == null) {
-        	this.rspecScriptFactory = scriptFactory4Version(rspecVersion);
+        if (this.rspecScriptFactory == null) {
+        	this.rspecScriptFactory = scriptFactory4Version(this.rspecVersion);
         }
 
         if (this.rspecScriptFactory == null) {
@@ -226,6 +222,16 @@ public class RSpecMojo extends AbstractGemMojo {
         }
 
         return this.rspecScriptFactory;
+    }
+
+    private ScriptFactory getRSpecScriptFactory(Collection<Artifact> dependencyArtifacts) {
+        for (Artifact each : dependencyArtifacts ) {
+            // allow all scope, since with deps within plugins the scope is less important
+            if (each.getGroupId().equals("rubygems") && each.getArtifactId().equals("rspec")) {
+            	return scriptFactory4Version(each.getVersion());
+            }
+        }
+        return null;
     }
 
 }

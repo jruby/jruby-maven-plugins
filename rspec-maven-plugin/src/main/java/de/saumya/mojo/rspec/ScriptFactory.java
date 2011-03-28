@@ -14,7 +14,7 @@ public interface ScriptFactory {
 	void setClasspathElements(List<String> classpathElements);
 	void setSystemProperties(Properties systemProperties);
 	void setGemHome(File gemHome);
-	void setGemPath(File gemHome);
+	void setGemPaths(File[] gemPaths);
 	
 	File getScriptFile();
 	

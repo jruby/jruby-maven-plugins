@@ -15,7 +15,7 @@ public abstract class AbstractScriptFactory implements ScriptFactory {
 	protected String reportPath;
 	protected Properties systemProperties;
 	protected File gemHome;
-	protected File gemPath;
+	protected File[] gemPaths;
 
 	public void setClasspathElements(List<String> classpathElements) {
 		this.classpathElements = classpathElements;
@@ -49,8 +49,8 @@ public abstract class AbstractScriptFactory implements ScriptFactory {
 		this.gemHome = gemHome;
 	}
 	
-	public void setGemPath(File gemPath) {
-		this.gemPath = gemPath;
+	public void setGemPaths(File[] gemPaths) {
+		this.gemPaths = gemPaths;
 	}
 	
 	protected abstract String getScriptName();

@@ -1,9 +1,8 @@
 package de.saumya.mojo.rspec;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import de.saumya.mojo.rspec.AbstractScriptFactory;
 
 public abstract class AbstractRSpecScriptFactory extends AbstractScriptFactory {
 
@@ -104,7 +103,7 @@ public abstract class AbstractRSpecScriptFactory extends AbstractScriptFactory {
     }
 
     private String getRubygemsSetupScript() {
-        if (gemHome == null && gemPath == null) {
+        if (gemHome == null && gemPaths == null) {
             return "";
         }
 
@@ -117,8 +116,12 @@ public abstract class AbstractRSpecScriptFactory extends AbstractScriptFactory {
             builder.append("ENV['GEM_HOME']='" + gemHome + "'\n");
         }
 
-        if (gemPath != null) {
-            builder.append("ENV['GEM_PATH']='" + gemPath + "'\n");
+        if (gemPaths != null) {
+            builder.append("ENV['GEM_PATH']='");
+            for(File path: gemPaths) {
+                builder.append(System.getProperty("path.separator") + path);
+            }
+            builder.append("'\n");
         }
 
         builder.append("\n");
