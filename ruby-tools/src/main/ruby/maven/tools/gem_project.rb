@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '..', 'model', 'model.rb')
+require File.join(File.dirname(File.dirname(__FILE__)), 'model', 'model.rb')
 require File.join(File.dirname(__FILE__), 'gemfile_lock.rb')
 require File.join(File.dirname(__FILE__), 'versions.rb')
 
