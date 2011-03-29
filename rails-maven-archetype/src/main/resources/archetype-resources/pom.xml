@@ -27,22 +27,6 @@
       <url>http://gems.saumya.de/prereleases</url>
     </repository>
 #end
-#literal()
-    <!--
-	remove this once there is no more SNAPSHOT of org.jruby.rack:jruby-rack
-    -->
-    <repository>
-      <id>saumya</id>
-      <url>http://mojo.saumya.de/</url>
-      <releases>
-	<enabled>false</enabled>
-      </releases>
-      <snapshots>
-	<enabled>true</enabled>
-	<updatePolicy>never</updatePolicy>
-      </snapshots>
-    </repository>
-#end
 
   </repositories>
 
@@ -55,7 +39,7 @@
     <dependency>
       <groupId>org.jruby.rack</groupId>
       <artifactId>jruby-rack</artifactId>
-      <version>1.0.4.dev-SNAPSHOT</version>
+      <version>1.0.7</version>
     </dependency>
     <dependency>
       <groupId>org.jruby</groupId>
@@ -106,7 +90,7 @@
 #end
     <gem.home>${symbol_dollar}{project.build.directory}/rubygems</gem.home>
     <gem.path>${symbol_dollar}{project.build.directory}/rubygems</gem.path>
-    <jruby.plugins.version>0.26.0-SNAPSHOT</jruby.plugins.version>
+    <jruby.plugins.version>0.26.0</jruby.plugins.version>
     <jetty.version>7.1.0.RC1</jetty.version>
     <rails.env>development</rails.env>
   </properties>
