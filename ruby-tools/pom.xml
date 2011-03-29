@@ -81,6 +81,9 @@
       </resource>
       <resource>
         <directory>${basedir}/src/main/ruby</directory>
+      </resource>
+      <resource>
+        <directory>${basedir}/src/main/ruby</directory>
 	<filtering>true</filtering>
         <includes>
           <include>**/versions.rb</include>
