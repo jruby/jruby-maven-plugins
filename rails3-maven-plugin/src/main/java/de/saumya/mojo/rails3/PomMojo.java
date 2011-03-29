@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.descriptor.PluginDescriptor;
 
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -12,9 +11,6 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal pom
  */
 public class PomMojo extends AbstractRailsMojo {
-
-    /** @parameter expression="${plugin}" @readonly */
-    PluginDescriptor plugin;
 
     /**
      * @parameter expression="${pom}" default-value="pom.xml"
