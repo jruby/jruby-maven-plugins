@@ -82,12 +82,15 @@
       <resource>
         <directory>${basedir}/src/main/ruby</directory>
 	<filtering>true</filtering>
+        <includes>
+          <include>**/versions.rb</include>
+        </includes>
       </resource>
     </resources>
   </build>
   <profiles>
     <profile>
-      <id>integration-tests</id>
+      <id>integration-test</id>
       <pluginRepositories>
 	<pluginRepository>
 	  <id>rubygems-releases</id>
