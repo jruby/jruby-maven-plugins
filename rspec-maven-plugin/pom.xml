@@ -10,4 +10,26 @@
   <artifactId>rspec-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>RSpec Maven Mojo</name>
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+	  <plugin>
+	    <artifactId>maven-invoker-plugin</artifactId>
+	    <executions>
+	      <execution>
+		<id>integration-test-no-pom</id>
+		<configuration>
+		  <pomExcludes>
+		    <pomExclude>rspec1-no-pom/pom.xml</pomExclude>
+		  </pomExcludes>
+		</configuration>
+	      </execution>
+	    </executions>
+	  </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
