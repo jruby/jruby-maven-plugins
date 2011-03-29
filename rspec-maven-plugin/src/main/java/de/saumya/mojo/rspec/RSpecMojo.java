@@ -92,12 +92,11 @@ public class RSpecMojo extends AbstractGemMojo {
     protected Properties systemProperties;
 
     /**
-     * rspec version used when there is no pom. defaults to latest version
-     * smaller then 2.0.0.
+     * rspec version used when there is no pom. default is latest version.
      * 
-     * @parameter default-value="${rspec.version}" expression="1.3.1"
+     * @parameter default-value="${rspec.version}"
      */
-    private final String rspecVersion = "1.3.1";
+    private String rspecVersion;
 
     /**
      * @parameter default-value="${repositorySystemSession}"
@@ -125,7 +124,7 @@ public class RSpecMojo extends AbstractGemMojo {
     public void executeWithGems() throws MojoExecutionException, ScriptException, IOException, GemException {
         if (this.project.getBasedir() == null) {
 
-            this.gemsInstaller.installGem("rspec", this.rspecVersion, this.repoSession, this.localRepository);
+            this.rspecVersion = this.gemsInstaller.installGem("rspec", this.rspecVersion, this.repoSession, this.localRepository).getVersion();
 
         }
         final File specSourceDirectory = specSourceDirectory();

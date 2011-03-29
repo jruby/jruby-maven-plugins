@@ -1,0 +1,18 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+String expected = "passing: ALL";
+if ( !log.contains( expected ) )
+{
+    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+
+
+File f = new File( new File( new File( basedir, "target" ), "surefire-reports" ), "TEST-success_spec.xml" );
+if ( !f.exists() )
+{
+// TODO
+//    throw new RuntimeException( "file does not exists: " + f );
+}
