@@ -164,6 +164,12 @@ XML
       <url>http://gems.saumya.de/releases</url>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>rubygems-releases</id>
+      <url>http://gems.saumya.de/releases</url>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>org.jruby</groupId>
@@ -466,31 +472,37 @@ XML
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>dm-mysql-adapter</artifactId>
+            <version>1.0.2</version>
             <type>gem</type>
           </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>do_mysql</artifactId>
+            <version>0.10.3</version>
             <type>gem</type>
           </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>jdbc-mysql</artifactId>
+            <version>5.0.4</version>
             <type>gem</type>
           </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>dm-postgres-adapter</artifactId>
+            <version>1.0.0</version>
             <type>gem</type>
           </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>do_postgres</artifactId>
+            <version>0.10.3</version>
             <type>gem</type>
           </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>jdbc-postgres</artifactId>
+            <version>8.4.702</version>
             <type>gem</type>
           </dependency>
         </dependencies>

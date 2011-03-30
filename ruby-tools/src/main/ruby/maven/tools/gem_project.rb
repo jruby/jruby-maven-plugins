@@ -168,9 +168,10 @@ module Maven
         end
 
         if plugin?(:bundler)
+          plugin_repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless plugin_repository("rubygems-releases").url
           bundler = plugin(:bundler)
           bundler.version = "${jruby.plugins.version}" unless bundler.version
-          plugin(:bundler, "${jruby.plugins.version}").executions.goals << "install"
+          bundler.executions.goals << "install"
           unless gem?(:bundler)
             gem("bundler")
           end
@@ -305,13 +306,14 @@ module Maven
           project = self
           
           plugin(:bundler) do |bundler|
-            bundler.dependencies << dep unless project.dependencies.member? dep
+            # use a dep with version so just create it from the args
+            bundler.gem(args) unless project.dependencies.member? dep
             
             if @lock
               # add its dependencies as well to have the version
               # determine by the dependencyManagement
               @lock.dependency_hull(dep.artifact_id).map.each do |d|
-                bundler.gem d[0], nil unless project.gem? d[0]
+                bundler.gem(d) unless project.gem? d[0]
               end
             end
           end

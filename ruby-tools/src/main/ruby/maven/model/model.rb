@@ -46,12 +46,16 @@ module Maven
       end
 
       def in_phase(phase, name = nil, &block)
-        name = "in_phase_#{phase.gsub(/-/,'_')}" unless name
+        name = "in_phase_#{phase.to_s.gsub(/-/,'_')}" unless name
         self.executions.get(name) do |exe|
           exe.phase = phase
           block.call(exe) if block
           exe
         end
+      end
+
+      def execute_goal(goal)
+        execution.execute(goal)
       end
 
       def executions
