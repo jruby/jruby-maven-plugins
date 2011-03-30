@@ -90,7 +90,7 @@
 #end
     <gem.home>${symbol_dollar}{project.build.directory}/rubygems</gem.home>
     <gem.path>${symbol_dollar}{project.build.directory}/rubygems</gem.path>
-    <jruby.plugins.version>0.26.0</jruby.plugins.version>
+    <jruby.plugins.version>0.27.0-SNAPSHOT</jruby.plugins.version>
     <jetty.version>7.1.0.RC1</jetty.version>
     <rails.env>development</rails.env>
   </properties>
