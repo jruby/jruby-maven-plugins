@@ -1,3 +1,15 @@
+=== 0.26.0 / 2011-03-30
+
+* new bundle install mojo to allow to use Gemfile as pom
+
+* better Gemfile to pom support
+
+* fixes in gemify
+
+* allow to use gem dependencies inside plugin
+
+* gem:push mojo added to have a compete life-cycle for gem artifacts
+
 === 0.12.0 / 2010-05-14
 
 * maven archetypes for rails2 and rails3 (inspired by email from Reto Schüttel)
