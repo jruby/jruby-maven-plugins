@@ -390,7 +390,7 @@ public class PackageMojo extends AbstractGemMojo {
 
         final StringBuilder gemFilename = new StringBuilder("rubygems".equals(artifact.getGroupId())
                 ? ""
-                : artifact.getGroupId() + ".").append(artifact.getArtifactId())
+                : artifact.getGroupId().replace('.', '-') + "-").append(artifact.getArtifactId())
                 .append("-")
                 .append(artifact.getGemVersion())
                 .append("java-gem".equals(artifact.getType()) ? "-java" : "")
