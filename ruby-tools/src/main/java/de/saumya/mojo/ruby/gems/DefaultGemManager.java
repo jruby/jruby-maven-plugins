@@ -257,8 +257,9 @@ public class DefaultGemManager implements GemManager {
                 while (line != null) {
                     //TODO maybe try to be more relax on how the version is embedded
                     if (line.contains("<a href=")) {
-                        String version = line.replaceFirst(".*<a href=\".*\">", "")
-                                .replaceFirst("</a>.*", "");
+                        // first cut the end and then the beginning - allow greedy .*
+                        String version = line.replaceFirst("</a>.*", "")
+                            .replaceFirst(".*<a href=\".*\">", "");
                         if(version.endsWith("/")){
                             version = version.substring(0, version.length() - 1);
                             if (!versions.contains(version)) {
@@ -274,7 +275,9 @@ public class DefaultGemManager implements GemManager {
                 throw new RuntimeException("error scraping versions from html page", e);
             }
             catch (IOException e) {
-                // TODO getLog().warn("error scraping versions from html index page", e);
+                // TODO 
+//                System.err.println("error scraping versions from html index page: " + e.getMessage());
+//                e.printStackTrace();
             }
             finally {
                 IOUtil.close(reader);
