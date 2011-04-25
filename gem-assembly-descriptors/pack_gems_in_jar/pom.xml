@@ -19,9 +19,13 @@
     </dependency>
   </dependencies>
   <build>
+    <finalName>rubyzip2-gems</finalName>
     <resources>
       <resource>
-        <directory>${project.build.directory}/rubygems/cache</directory>
+        <directory>${project.build.directory}/rubygems</directory>
+        <excludes>
+          <exclude>cache/**</exclude>
+        </excludes>
       </resource>
     </resources>
     <plugins>
