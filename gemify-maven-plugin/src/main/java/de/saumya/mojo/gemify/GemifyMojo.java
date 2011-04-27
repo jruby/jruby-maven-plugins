@@ -358,7 +358,7 @@ public class GemifyMojo extends AbstractGemifyMojo {
             final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
             request.setArtifact(pom.getArtifact())
                     .setLocalRepository(this.localRepository)
-                    .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
+                    .setRemoteRepositories(this.remoteRepositories)
                     .setResolveRoot(!this.onlySpecs)
                     .setResolveTransitively(false)
                     .setOffline(repositorySession.isOffline());
@@ -372,7 +372,7 @@ public class GemifyMojo extends AbstractGemifyMojo {
                         MavenProject model = manager.buildModel(artifact,
                                                                 this.repositorySession,
                                                                 this.localRepository,
-                                                                this.project.getRemoteArtifactRepositories(),
+                                                                this.remoteRepositories,
                                                                 false);
                         String url = model.getDistributionManagement() == null ?
                                 null :
@@ -433,7 +433,7 @@ public class GemifyMojo extends AbstractGemifyMojo {
         try {
             final ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
             request.setLocalRepository(this.localRepository)
-                    .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
+                    .setRemoteRepositories(this.remoteRepositories)
                     .setResolveDependencies(resolveDependencies)
                     .setRepositorySession(this.repositorySession)
                     .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
