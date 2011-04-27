@@ -125,6 +125,14 @@ public class DefaultGemManager implements GemManager {
         return createJarArtifactForGemname(gemName, null);
     }
 
+    public Artifact createPomArtifactForGemname(final String gemName)
+            throws GemException {
+        final int index = gemName.lastIndexOf(GROUP_ID_ARTIFACT_ID_SEPARATOR);
+        final String groupId = gemName.substring(0, index);
+        final String artifactId = gemName.substring(index + 1);
+        return createArtifact(groupId, artifactId, null, "pom");
+    }
+
     public Artifact createJarArtifactForGemname(final String gemName,
             final String version) throws GemException {
         final int index = gemName.lastIndexOf(GROUP_ID_ARTIFACT_ID_SEPARATOR);

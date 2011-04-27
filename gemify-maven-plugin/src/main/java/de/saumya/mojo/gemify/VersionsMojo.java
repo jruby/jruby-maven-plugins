@@ -10,6 +10,7 @@ import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingResult;
 
 import de.saumya.mojo.gems.Maven2GemVersionConverter;
 import de.saumya.mojo.gems.MavenArtifactConverter;
@@ -33,7 +34,7 @@ public class VersionsMojo extends AbstractGemifyMojo {
     protected void executeGemify() throws MojoExecutionException {
         try {
             // first get all maven-versions
-            final Artifact artifact = this.manager.createJarArtifactForGemname(this.gemname);
+            final Artifact artifact = this.manager.createPomArtifactForGemname(this.gemname);
             // use the remoteRepositories list from parent since that list obeys offline mode
             final List<String> versions = this.manager.availableVersions(artifact,
                                                                          this.localRepository,
@@ -45,7 +46,7 @@ public class VersionsMojo extends AbstractGemifyMojo {
             for (final String version : versions) {
                 final ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
                 request.setLocalRepository(this.localRepository)
-                    .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
+                    .setRemoteRepositories(this.remoteRepositories)
                     .setResolveDependencies(false)
                     .setRepositorySession(this.repositorySession)
                     .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
@@ -55,7 +56,21 @@ public class VersionsMojo extends AbstractGemifyMojo {
                     // pom works when using that version for building a gem
                     // i.e.  org.slf4j.slf4j:log4j12:1.1.0-RC0
                     // has no parent-pom in the central repository
-                    this.builder.build(artifact, request);
+                    ProjectBuildingResult result = this.builder.build(artifact, request);
+                    // assume that maven central has no broken poms ;-)
+                    if(this.remoteRepositories.size() > 1){
+                        for (org.apache.maven.model.Dependency dep : result.getProject()
+                                .getDependencies()) {
+                            // skip version ranges
+                            if(!version.matches("[\\[\\](),]")){
+                                Artifact a = this.manager.createArtifact(dep.getGroupId(),
+                                                                         dep.getArtifactId(),
+                                                                         dep.getVersion(),
+                                                                         "pom");
+                                this.builder.build(a, request);
+                            }
+                        }
+                    }
                     gemVersions.add(converter.createGemVersion(version));
                 }
                 catch (final ProjectBuildingException e) {

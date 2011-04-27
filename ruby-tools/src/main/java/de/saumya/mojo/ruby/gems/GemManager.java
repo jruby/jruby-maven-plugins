@@ -39,6 +39,9 @@ public interface GemManager {
     public abstract Artifact createJarArtifactForGemname(final String gemName)
             throws GemException;
 
+    public abstract Artifact createPomArtifactForGemname(final String gemName)
+            throws GemException;
+
     public abstract Artifact createJarArtifactForGemname(final String gemName,
             final String version) throws GemException;
 
