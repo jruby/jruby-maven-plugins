@@ -2,6 +2,7 @@ package de.saumya.mojo.proxy;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -25,7 +26,7 @@ public class ControllerServlet extends HttpServlet {
             final HttpServletResponse resp) throws ServletException,
             IOException {
         final String[] parts = req.getPathInfo().substring(1).split("/");
-        // System.out.println(Arrays.toString(parts));
+        //System.out.println(Arrays.toString(parts));
         try {
             switch (parts.length) {
             case 4: // {releases|prereleases}/rubygems/#{name}/maven-metadata.xml
@@ -90,19 +91,4 @@ public class ControllerServlet extends HttpServlet {
     private void notFound(final HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
-
-    @Override
-    protected void doHead(final HttpServletRequest req,
-            final HttpServletResponse resp) throws ServletException,
-            IOException {
-        // TODO Auto-generated method stub
-        super.doHead(req, resp);
-    }
-
-    @Override
-    protected long getLastModified(final HttpServletRequest req) {
-        // TODO Auto-generated method stub
-        return super.getLastModified(req);
-    }
-
 }
