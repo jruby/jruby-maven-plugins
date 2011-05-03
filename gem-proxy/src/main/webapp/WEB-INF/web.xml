@@ -4,6 +4,9 @@
 
 <web-app>
   <display-name>Maven Repository serving rubygems</display-name>
+  <listener>
+    <listener-class>de.saumya.mojo.proxy.GemProxyServletContextListener</listener-class>
+  </listener>
   <servlet>
     <servlet-name>gems</servlet-name>
     <servlet-class>de.saumya.mojo.proxy.ControllerServlet</servlet-class>
@@ -21,10 +24,34 @@
     <url-pattern>/prereleases/update</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/releases</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/releases/</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/releases/index.html</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/prereleases</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/prereleases/</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>/prereleases/index.html</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
     <servlet-name>gems</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
-  <listener>
-    <listener-class>de.saumya.mojo.proxy.GemProxyServletContextListener</listener-class>
-  </listener>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
 </web-app>
