@@ -6,9 +6,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.jruby.embed.LocalContextScope;
-import org.jruby.embed.LocalVariableBehavior;
-
 import de.saumya.mojo.ruby.GemScriptingContainer;
 
 public class GemProxyServletContextListener implements ServletContextListener {
@@ -79,8 +76,7 @@ public class GemProxyServletContextListener implements ServletContextListener {
     }
 
     public void contextInitialized(final ServletContextEvent sce) {
-        final GemScriptingContainer scripting = new GemScriptingContainer(LocalContextScope.SINGLETON, 
-                                                                          LocalVariableBehavior.PERSISTENT);
+        final GemScriptingContainer scripting = new GemScriptingContainer(null, null);
         ControllerService controller;
         sce.getServletContext().log("registering "
                 + ControllerService.class.getName() + " . . .");
