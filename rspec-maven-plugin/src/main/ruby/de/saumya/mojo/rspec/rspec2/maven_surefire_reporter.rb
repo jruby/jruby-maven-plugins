@@ -1,194 +1,189 @@
 
-require 'spec/runner/formatter/base_formatter'
+require 'rspec/core/formatters/base_formatter'
+require 'pp'
+require 'stringio'
+require 'fileutils'
 
+class MavenSurefireReporter < RSpec::Core::Formatters::BaseFormatter
+  class MojoLog
 
-class FileInfo
-  attr_accessor :path
-  attr_accessor :groups
-  
-  def initialize(path)
-    @path = path
-    @groups = []
-  end
-  
-  def duration
-    @groups.inject(0){|sum,e|sum+=e.duration}
-  end
-  
-  def examples
-    @groups.collect{|e| e.examples}.flatten
-  end
-  
-  def passing
-    @groups.collect{|e| e.passing}.flatten
-  end
-  
-  def failing
-    @groups.collect{|e| e.failing}.flatten
-  end
-  
-  def pending
-    @groups.collect{|e| e.pending}.flatten
-  end
-  
-end
-
-class GroupInfo
-  attr_accessor :rspec_group
-  attr_accessor :examples
-  
-  def initialize(rspec_group)
-    @rspec_group = rspec_group
-    @examples = []
-  end
-  
-  def duration
-    @examples.inject(0){|sum,e|sum+=e.duration}
-  end
-  
-  def passing
-    @examples.select{|e| e.status == :passing }
-  end
-  
-  def failing
-    @examples.select{|e| e.status == :failing }
-  end
-  
-  def pending
-    @examples.select{|e| e.status == :pending }
-  end
-  
-end
-
-class ExampleInfo
-  attr_accessor :rspec_example
-  attr_accessor :duration
-  attr_accessor :status
-  
-  attr_accessor :failure
-  attr_accessor :message
-  
-  def initialize(rspec_example)
-    @rspec_example = rspec_example
-    @duration = 0
-    @start_time = Time.now
-    @status = :pending
-  end
-  
-  def finish()
-    @duration = ( Time.now - @start_time ).to_f
-  end
-end
-
-
-class MavenSurefireReporter < Spec::Runner::Formatter::BaseFormatter
-  
-  attr_accessor :output
-  
-  def initialize(options, output)
-    super( options, output )
-    @file_info = {}
+    def info(str)
+      puts str
+    end  
     
-    @output = output
+  end
+  
+  MOJO_LOG = MojoLog.new
+
+  class FileBatch
+    attr_accessor :file
+    attr_accessor :passing
+    attr_accessor :failing
+    attr_accessor :pending
+    attr_accessor :started_at
     
-    @current_file_info = nil
-    @current_group_info = nil
-    @current_example_info = nil
-  end
-  
-  def files
-    @file_info.values
-  end
-  
-  def example_group_started(example_group)   
-    setup_current_file_info( example_group )
-    setup_current_group_info( example_group )
-    @current_group = example_group
-  end
-  
-  def setup_current_file_info(example_group)
-    filename = filename_for( example_group )
-    @current_file_info = @file_info[ filename ] 
-    if ( @current_file_info.nil? )
-      @current_file_info = FileInfo.new( filename )
-      @file_info[ filename ] = @current_file_info
+    def initialize()
+      @file = nil
+      
+      @passing = []
+      @failing = []
+      @pending = []
+      
+      @started_at = Time.now
+      @stopped_at = nil
+      
+    end
+    
+    def stop!
+      @stopped_at = Time.now
+    end
+    
+    def duration
+      @stopped_at - @started_at
+    end
+    
+    def relative_file
+      #return "unknown" if ( @file.nil? || @file == '' )
+      #return @file if ( BASE_DIR.nil? || BASE_DIR == '' )
+      
+      #puts "file==[#{@file}]"
+      #puts "BASE_DIR==[#{BASE_DIR}]"
+      
+      
+      #file_pathname = Pathname.new( @file )
+      #base_pathname = Pathname.new( BASE_DIR )
+      
+      #Pathname.new( @file ).relative_path_from( Pathname.new( BASE_DIR ) ) 
+      @file
     end
   end
   
-  def setup_current_group_info(example_group)
-    @current_group_info = GroupInfo.new( example_group )
-    @current_file_info.groups << @current_group_info
+  def initialize(output)
+    super( output )
+    @batches       = []
+    @current_batch = nil
   end
   
-  def setup_current_example_info(example)
-    @current_example_info = ExampleInfo.new( example )
-    @current_group_info.examples << @current_example_info
-  end
-  
-  def filename_for(example_group)
-    filename, lineno = example_group.location.split( ':' ); 
-    filename = filename[ SPEC_DIR.length..-1 ]
-    if ( filename[0,1] == "/" ) 
-      filename = filename[1..-1] 
-    end
-    filename
+  def example_group_started(example_group)
   end
   
   def example_started(example)
-    example_finished() unless ( @current_example.nil? )
+    file, lineno = example.metadata.file_and_line_number
     
-    setup_current_example_info( example )
-  end
-  
-  def example_finished()
-  	@current_example_info.finish
-  	@current_example_info = nil
+    if ( @current_batch.nil? || @current_batch.file != file )
+      start_new_batch(example)
+      @current_file = file
+    end
   end
   
   def example_passed(example)
-    @current_example_info.status = :passing
-    example_finished
+    @current_batch.passing << example
   end
   
-  def example_failed(example, counter, failure)
-    return unless @current_example_info
-    @current_example_info.status = :failing
-    @current_example_info.failure = failure
-    example_finished
+  def example_failed(example)
+    @current_batch.failing << example
   end
   
-  def example_pending(example, message)
-    @current_example_info.status = :pending
-    @current_example_info.failure = message
-    example_finished
+  def example_pending(example)
+    @current_batch.pending << example
   end
   
-  def xml_escape(str)
-    str.gsub( /&/, '&amp;' ).gsub( /"/, '&quot;' )
+  def start_new_batch(example)
+    finish_batch()
+    @current_batch = FileBatch.new
+    
+    file, lineno = example.metadata.file_and_line_number
+    @current_batch.file =  file
+  end
+  
+  def emit(io, &block)
+    Emitter.new( io, &block )
+  end
+  
+  class Emitter
+    def initialize(io, &block)
+      @io = io
+      @indent = 0
+      decl
+      instance_eval &block
+    end
+    
+    def decl
+      @io.puts( %q(<?xml version="1.0" encoding="UTF-8" ?>) )
+    end
+    
+    def tag(tag_name, attrs={}, &block)
+      @io.puts( indent + "<#{tag_name} #{attributes(attrs)}>" )
+      @indent = @indent + 1
+      instance_eval &block if block
+      @indent = @indent - 1
+      @io.puts( indent + "</#{tag_name}>" )
+    end
+    
+    def attributes(attrs)
+      attrs.entries.map{|e| e.first.to_s + "=" + quote(e.last.to_s) }.join( ' ' )
+    end
+    
+    def quote(str)
+      %q(") + str.gsub( /"/, '&quot;' ) + %q(")
+    end
+    
+    def indent()
+      "    " * @indent
+    end 
+  end
+  
+  def finish_batch()
+    return if ( @current_batch.nil? )
+    @current_batch.stop!
+    num_passing = @current_batch.passing.size
+    num_failing = @current_batch.failing.size
+    num_pending = @current_batch.pending.size
+    num_tests   = num_passing + num_failing + num_pending
+    duration    = @current_batch.duration 
+    
+    basename = File.basename( @current_batch.relative_file, ".rb" )
+    report_file = File.join( self.output, "surefire-reports", "TEST-" + basename + ".xml" )
+    
+    FileUtils.mkdir_p( File.dirname( report_file ) )
+    
+    batch = @current_batch
+    
+    File.open( report_file, 'w' ) do |file|
+      emit(file) do
+        tag( :testsuite, :name=>basename, :time=>duration, :failures=>num_failing, :skipped=>num_pending, :errors=>0, :tests=>num_tests ) do
+          batch.passing.each do |testcase|
+            tag( :testcase, :name=>testcase.metadata[:description], :time=>0.0 )
+          end
+          batch.failing.each do |testcase|
+            tag( :testcase, :name=>testcase.metadata[:description], :time=>0.0 ) do
+              tag( :failure )
+            end
+          end
+          batch.pending.each do |testcase|
+            tag( :testcase, :name=>testcase.metadata[:description], :time=>0.0 ) do
+              tag( :skipped )
+            end
+          end
+        end
+      end
+    end
+      
+    @batches << @current_batch
+    @current_batch = nil
+  end
+  
+  def example_finished(example)
+  end
+  
+  def example_group_finished(example_group)
   end
   
   def start_dump
-    files.each do |f|
-      output_filename = File.join( output, "TEST-#{File.basename(f.path, '.rb')}" ) + '.xml'
-      FileUtils.mkdir_p( File.dirname( output_filename ) )
-      File.open( output_filename, 'w' ) do |output|
-        output.puts( %Q(<?xml version="1.0" encoding="UTF-8" ?>) )
-        output.puts( %Q(<testsuite name="#{f.path}" time="#{f.duration}" tests="#{f.examples.size}" errors="#{f.failing.size}" skipped="#{f.pending.size}">) )
-        f.groups.each do |g|
-          g.examples.each do |ex|
-            case_name = xml_escape( g.rspec_group.description + ' ' + ex.rspec_example.description )
-            output.puts( %Q(  <testcase time="#{ex.duration}" name="#{case_name}">) )
-            if ( ex.status == :pending )
-              output.puts( %Q(    <skipped/>) )
-            elsif ( ex.status == :failing )
-              output.puts( %Q(    <failure/>) )
-            end
-            output.puts( %Q(  </testcase>) )
-          end
-        end
-        output.puts( %Q(</testsuite>) )
-      end
-    end
+    finish_batch
+  end
+  
+  def dump_summary(duration, example_count, failure_count, pending_count)
   end
   
 end

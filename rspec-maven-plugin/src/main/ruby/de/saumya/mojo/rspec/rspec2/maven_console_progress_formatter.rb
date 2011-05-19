@@ -28,6 +28,17 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
       @failing = []
       @pending = []
       
+      @started_at = Time.now
+      @stopped_at = nil
+      
+    end
+    
+    def stop!
+      @stopped_at = Time.now
+    end
+    
+    def duration
+      @stopped_at - @started_at
     end
     
     def relative_file
@@ -84,17 +95,18 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
     @current_batch.file =  file
     
     puts "* SPEC: #{@current_batch.relative_file}"
-      
   end
   
   def finish_batch()
     return if ( @current_batch.nil? )
+    @current_batch.stop!
     num_passing = @current_batch.passing.size
     num_failing = @current_batch.failing.size
     num_pending = @current_batch.pending.size
     num_tests   = num_passing + num_failing + num_pending
     
-    message = "  Tests: #{sprintf("%3d", num_tests)}\n"
+    message =  "  Duration: #{@current_batch.duration}\n"
+    message += "  Tests: #{sprintf("%3d", num_tests)}\n"
     
     if ( num_passing == num_tests )
       message += "    passing: ALL"
@@ -124,14 +136,19 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
   end
   
   def dump_summary(duration, example_count, failure_count, pending_count)
+    passing_count = example_count - ( failure_count + pending_count )
+    
     puts "============================================="
     
+    needs_another_line = false
+    
     if ( pending_count > 0 )
+      needs_another_line = true
       puts ""
       puts "Pending specs:"
     
       @batches.each do |batch|
-        if ( batch.failing.size > 0 )
+        if ( batch.pending.size > 0 )
           puts "  - #{batch.relative_file}"
           batch.pending.each do |pending|
             ignored_file, lineno = pending.metadata.file_and_line_number
@@ -142,6 +159,7 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
     end
     
     if ( failure_count > 0 )
+      needs_another_line = true
       puts ""
       puts "Failing specs:"
       
@@ -156,47 +174,14 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
       end
     end
     
+    puts "=============================================" if needs_another_line
+    
+    puts "Summary: "
+    puts "  passing: #{passing_count}"
+    puts "  pending: #{pending_count}"
+    puts "  failing: #{failure_count}"
     puts ""
-
-    if SUMMARY_REPORT
-
-      # Creating the XML report
-      FileUtils.mkdir_p File.dirname SUMMARY_REPORT
-      content = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-<testsuite failures=\"#{failure_count}\" time=\"#{duration}\" errors=\"0\" skipped=\"#{pending_count}\" tests=\"#{example_count}\" name=\"Ruby\">\n"
-
-      @batches.each do |batch|
-        # Passing
-        batch.passing.each { |test|
-          content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"/>\n"
-      }
-
-        # Pending - considering as failures
-        batch.pending.each { |test|
-          content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"><failure></failure></testcase>\n"
-        }
-        
-        # Failures
-        batch.failing.each { |test|
-          content = content + "<testcase time=\"0.0\" name=\"#{test.description}\"><failure></failure></testcase>\n"
-        }
-      end
-      
-      content = content + "</testsuite>"
-
-      File.open(SUMMARY_REPORT, 'w+') {|f| f.write(content) }
-    end
+    
   end
-  
-=begin
-  def dump_summary(duration, example_count, failure_count, pending_count)
-    unless ( @first )
-      MOJO_LOG.info( "  #{@passing.size} passing; #{@failing.size} failing; #{@pending.size} pending")
-    end
-    pass_count = example_count - ( failure_count + pending_count ) 
-    MOJO_LOG.info( "=========================================" )
-    MOJO_LOG.info( "TOTAL: #{pass_count} passing; #{failure_count} failing; #{pending_count} pending")
-  end
-=end
   
 end
