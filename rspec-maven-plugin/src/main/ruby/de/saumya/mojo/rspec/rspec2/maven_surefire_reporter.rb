@@ -1,111 +1,105 @@
 
 require 'rspec/core/formatters/base_formatter'
-require 'pp'
-require 'stringio'
-require 'fileutils'
+require 'rspec/core/formatters/snippet_extractor'
 
 class MavenSurefireReporter < RSpec::Core::Formatters::BaseFormatter
-  class MojoLog
 
-    def info(str)
-      puts str
-    end  
-    
-  end
-  
-  MOJO_LOG = MojoLog.new
-
-  class FileBatch
-    attr_accessor :file
-    attr_accessor :passing
-    attr_accessor :failing
-    attr_accessor :pending
-    attr_accessor :started_at
-    
-    def initialize()
-      @file = nil
-      
-      @passing = []
-      @failing = []
-      @pending = []
-      
-      @started_at = Time.now
-      @stopped_at = nil
-      
-    end
-    
-    def stop!
-      @stopped_at = Time.now
-    end
-    
-    def duration
-      @stopped_at - @started_at
-    end
-    
-    def relative_file
-      #return "unknown" if ( @file.nil? || @file == '' )
-      #return @file if ( BASE_DIR.nil? || BASE_DIR == '' )
-      
-      #puts "file==[#{@file}]"
-      #puts "BASE_DIR==[#{BASE_DIR}]"
-      
-      
-      #file_pathname = Pathname.new( @file )
-      #base_pathname = Pathname.new( BASE_DIR )
-      
-      #Pathname.new( @file ).relative_path_from( Pathname.new( BASE_DIR ) ) 
-      @file
-    end
-  end
-  
   def initialize(output)
     super( output )
-    @batches       = []
-    @current_batch = nil
+    @started_at = Time.now
   end
   
-  def example_group_started(example_group)
+  def example_started(ex)
+    super
+    ex.metadata[:started_at] = Time.now
   end
   
-  def example_started(example)
-    file, lineno = example.metadata.file_and_line_number
+  def example_passed(ex)
+    super
+    ex.metadata[:elapsed] = Time.now - ex.metadata[:started_at]
+  end
+  
+  def example_pending(ex)
+    super
+    ex.metadata[:elapsed] = Time.now - ex.metadata[:started_at]
+  end
+  
+  def example_failed(ex)
+    super
+    ex.metadata[:elapsed] = Time.now - ex.metadata[:started_at]
+  end
+  
+  
+  def dump_summary(duration, example_count, failure_count, pending_count)
+    elapsed = Time.now - @started_at
+    reporter = self
     
-    if ( @current_batch.nil? || @current_batch.file != file )
-      start_new_batch(example)
-      @current_file = file
+    passing_examples = ( ( examples - pending_examples ) - failed_examples )
+    extractor = SnippetExtractor.new
+    
+    report_file = File.join( TARGET_DIR, 'surefire-reports', 'TEST-rspec.xml' )
+    FileUtils.mkdir_p( File.dirname( report_file ) )
+    File.open( report_file, 'w' ) do |report_io|
+      Emitter.new( report_io ) do
+        tag( :testsuite, :time=>elapsed, :errors=>0, :tests=>example_count, :skipped=>pending_count, :failures=>failure_count, :name=>File.basename( BASE_DIR ) ) do
+          passing_examples.each do |ex|
+            class_name = File.basename( ex.metadata[:file_path], '_spec.rb' )
+            tag( :testcase, :time=>ex.metadata[:elapsed], :classname=>class_name, :name=>ex.metadata[:description] )
+          end
+          reporter.pending_examples.each do |ex|
+            class_name = File.basename( ex.metadata[:file_path], '_spec.rb' )
+            tag( :testcase, :time=>ex.metadata[:elapsed], :classname=>class_name, :name=>ex.metadata[:description] ) do
+              tag( :skipped )
+            end
+          end
+          reporter.failed_examples.each do |ex|
+            class_name = File.basename( ex.metadata[:file_path], '_spec.rb' )
+            exception = ex.metadata[:execution_result][:exception]
+            tag( :testcase, :time=>ex.metadata[:elapsed], :classname=>class_name, :name=>ex.metadata[:description] ) do
+            relevant_line = reporter.find_relevant_line( ex, exception )
+              tag( :failure, :message=>relevant_line ) do
+                content( exception.backtrace() )
+              end
+            end
+          end
+        end
+      end
     end
   end
   
-  def example_passed(example)
-    @current_batch.passing << example
+  def find_relevant_line(example, exception)
+    match_prefix = example.metadata[:file_path].to_s
+    file_line = nil
+    exception.backtrace.each do |stack_line|
+      if ( stack_line.to_s[0, match_prefix.length] == match_prefix )
+        file_line = stack_line
+        break
+      end
+    end
+    if ( file_line )
+      file, line, junk = file_line.split( ':' )
+      if ( File.exist?( file ) ) 
+        lines = File.readlines( file )
+        return lines[line.to_i-1].strip
+      end
+    end
+    nil
   end
   
-  def example_failed(example)
-    @current_batch.failing << example
-  end
   
-  def example_pending(example)
-    @current_batch.pending << example
-  end
-  
-  def start_new_batch(example)
-    finish_batch()
-    @current_batch = FileBatch.new
-    
-    file, lineno = example.metadata.file_and_line_number
-    @current_batch.file =  file
-  end
-  
-  def emit(io, &block)
-    Emitter.new( io, &block )
+  class Converter
+    def convert(code,pre)
+      code
+    end
   end
   
   class Emitter
     def initialize(io, &block)
       @io = io
       @indent = 0
+      @tag_stack = []
       decl
-      instance_eval &block
+      instance_eval &block if block
     end
     
     def decl
@@ -113,77 +107,79 @@ class MavenSurefireReporter < RSpec::Core::Formatters::BaseFormatter
     end
     
     def tag(tag_name, attrs={}, &block)
-      @io.puts( indent + "<#{tag_name} #{attributes(attrs)}>" )
-      @indent = @indent + 1
-      instance_eval &block if block
+      if ( block ) 
+        start_tag( tag_name, attrs )
+        instance_eval &block if block
+        end_tag()
+      else
+        start_tag( tag_name, attrs, false )
+      end
+    end
+    
+    def start_tag(tag_name, attrs={}, has_body=true)
+      if ( has_body ) 
+        @tag_stack.push( tag_name )
+        @io.puts( indent + "<#{tag_name}#{attributes(attrs)}>" )
+        @indent = @indent + 1
+      else 
+        @io.puts( indent + "<#{tag_name}#{attributes(attrs)}/>" )
+      end
+    end
+    
+    def content(str)
+      str.each do |line|
+        @io.puts( indent + escape( line.strip ) )
+      end
+    end
+  
+    def end_tag()
       @indent = @indent - 1
-      @io.puts( indent + "</#{tag_name}>" )
+      @io.puts( indent + "</#{@tag_stack.pop}>" )
     end
     
     def attributes(attrs)
-      attrs.entries.map{|e| e.first.to_s + "=" + quote(e.last.to_s) }.join( ' ' )
+      str = attrs.entries.map{|e| e.first.to_s + "=" + quote(e.last.to_s) }.join( ' ' )
+      str.strip!
+      return '' if str.empty?
+      " #{str}"
     end
     
     def quote(str)
-      %q(") + str.gsub( /"/, '&quot;' ) + %q(")
+      %q(") + escape( str ) + %q(")
     end
     
+    def escape(str)
+      str.gsub( /&/, '&amp;' ).gsub( /"/, '&quot;' )
+    end
+  
     def indent()
       "    " * @indent
     end 
   end
   
-  def finish_batch()
-    return if ( @current_batch.nil? )
-    @current_batch.stop!
-    num_passing = @current_batch.passing.size
-    num_failing = @current_batch.failing.size
-    num_pending = @current_batch.pending.size
-    num_tests   = num_passing + num_failing + num_pending
-    duration    = @current_batch.duration 
-    
-    basename = File.basename( @current_batch.relative_file, ".rb" )
-    report_file = File.join( self.output, "surefire-reports", "TEST-" + basename + ".xml" )
-    
-    FileUtils.mkdir_p( File.dirname( report_file ) )
-    
-    batch = @current_batch
-    
-    File.open( report_file, 'w' ) do |file|
-      emit(file) do
-        tag( :testsuite, :name=>basename, :time=>duration, :failures=>num_failing, :skipped=>num_pending, :errors=>0, :tests=>num_tests ) do
-          batch.passing.each do |testcase|
-            tag( :testcase, :name=>testcase.metadata[:description], :time=>0.0 )
-          end
-          batch.failing.each do |testcase|
-            tag( :testcase, :name=>testcase.metadata[:description], :time=>0.0 ) do
-              tag( :failure )
-            end
-          end
-          batch.pending.each do |testcase|
-            tag( :testcase, :name=>testcase.metadata[:description], :time=>0.0 ) do
-              tag( :skipped )
-            end
-          end
-        end
+  class SnippetExtractor 
+
+    def snippet_for(error_line)
+      if error_line =~ /(.*):(\d+)/
+        file = $1
+        line = $2.to_i
+        [lines_around(file, line), line]
+      else
+        ["# Couldn't get snippet for #{error_line}", 1]
       end
     end
-      
-    @batches << @current_batch
-    @current_batch = nil
-  end
   
-  def example_finished(example)
+    def lines_around(file, line)
+      if File.file?(file)
+        lines = File.open(file).read.split("\n")
+        min = [0, line-3].max
+        max = [line+1, lines.length-1].min
+        selected_lines = []
+        selected_lines.join("\n")
+        lines[min..max].join("\n")
+      else
+        "# Couldn't get snippet for #{file}"
+      end
+    end
   end
-  
-  def example_group_finished(example_group)
-  end
-  
-  def start_dump
-    finish_batch
-  end
-  
-  def dump_summary(duration, example_count, failure_count, pending_count)
-  end
-  
 end

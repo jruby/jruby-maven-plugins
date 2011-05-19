@@ -1,187 +1,173 @@
 
 require 'rspec/core/formatters/base_formatter'
-require 'pp'
-require 'stringio'
-
-class MojoLog
-
-  def info(str)
-    puts str
-  end  
-  
-end
-
-MOJO_LOG = MojoLog.new
 
 class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
 
-  class FileBatch
-    attr_accessor :file
-    attr_accessor :passing
-    attr_accessor :failing
-    attr_accessor :pending
-    
-    def initialize()
-      @file = nil
-      
-      @passing = []
-      @failing = []
-      @pending = []
-      
-      @started_at = Time.now
-      @stopped_at = nil
-      
-    end
-    
-    def stop!
-      @stopped_at = Time.now
-    end
-    
-    def duration
-      @stopped_at - @started_at
-    end
-    
-    def relative_file
-      #return "unknown" if ( @file.nil? || @file == '' )
-      #return @file if ( BASE_DIR.nil? || BASE_DIR == '' )
-      
-      #puts "file==[#{@file}]"
-      #puts "BASE_DIR==[#{BASE_DIR}]"
-      
-      
-      #file_pathname = Pathname.new( @file )
-      #base_pathname = Pathname.new( BASE_DIR )
-      
-      #Pathname.new( @file ).relative_path_from( Pathname.new( BASE_DIR ) ) 
-      @file
-    end
-  end
-  
   def initialize(output)
     super( output )
-    @batches       = []
-    @current_batch = nil
+    @started_at = Time.now
+  end
+  
+  def current_file
+    @current_file
+  end
+  
+  def current_line
+    @current_line
+  end
+  
+  def set_location(hash)
+    set_current_file( hash[:file_path] )
+    set_current_line( hash[:line_number] )
+  end
+  
+  def set_current_file(path)
+    @current_file = relative_path( path )
+  end
+  
+  def set_current_line(line_number)
+    @current_line = line_number
+  end
+  
+  def relative_path(path)
+    Pathname.new( path ).relative_path_from( Pathname.new( BASE_DIR ) )
+  end
+  
+  
+  def spec_file_started(spec_file)
+    spec_file.metadata[:started_at] = Time.now
+    meta = spec_file.metadata[:example_group]
+    set_location( meta )
+    
+    @file_passing = []
+    @file_failing = []
+    @file_pending = []
+    
+    puts "** #{current_file}"
   end
   
   def example_group_started(example_group)
+    super
+    if ( example_group.top_level? )
+      file_path = example_group.metadata[:example_group][:file_path]
+      file_path = relative_path( file_path )
+      if ( current_file != file_path )
+        spec_file_started( example_group )
+      end
+    end
   end
   
   def example_started(example)
-    file, lineno = example.metadata.file_and_line_number
-    
-    if ( @current_batch.nil? || @current_batch.file != file )
-      start_new_batch(example)
-      @current_file = file
-    end
+    super
+    example.metadata[:started_at] = Time.now
+    example.metadata[:spec_file_path] = current_file
+    set_location( example.metadata )
+    node = example.metadata[:example_group]
+    depth = print_stack(node) + 1
+    print "#{"  " * depth}#{example.metadata[:description]}"
   end
   
   def example_passed(example)
-    @current_batch.passing << example
+    super
+    @file_passing << example
+    example_completed(example)
   end
   
+  
   def example_failed(example)
-    @current_batch.failing << example
+    super
+    @file_failing << example
+    example_completed(example, :failed)
   end
   
   def example_pending(example)
-    @current_batch.pending << example
+    super
+    @file_pending << example
+    example_completed(example, :pending)
   end
   
-  def start_new_batch(example)
-    finish_batch()
-    @current_batch = FileBatch.new
+  def example_completed(example, status=nil)
+    elapsed = Time.now - example.metadata[:started_at]
+    print " - #{elapsed}s"
     
-    file, lineno = example.metadata.file_and_line_number
-    @current_batch.file =  file
-    
-    puts "* SPEC: #{@current_batch.relative_file}"
-  end
-  
-  def finish_batch()
-    return if ( @current_batch.nil? )
-    @current_batch.stop!
-    num_passing = @current_batch.passing.size
-    num_failing = @current_batch.failing.size
-    num_pending = @current_batch.pending.size
-    num_tests   = num_passing + num_failing + num_pending
-    
-    message =  "  Duration: #{@current_batch.duration}\n"
-    message += "  Tests: #{sprintf("%3d", num_tests)}\n"
-    
-    if ( num_passing == num_tests )
-      message += "    passing: ALL"
-    else
-      message += "    passing#{sprintf("%8d", num_passing).gsub(/ /, '.')}\n"
-      if ( num_pending > 0 )
-        message += "    pending#{sprintf("%8d", num_pending).gsub(/ /, '.')}\n"
-      end
-      if ( num_failing > 0 )
-        message += "    failing#{sprintf("%8d", num_failing).gsub(/ /, '.')}\n"
-      end
+    if ( status )
+      print " #{status.to_s.upcase}"
     end
     
-    puts message.chomp
-    @batches << @current_batch
-    @current_batch = nil
+    puts ""
+    
+  end
+  
+  def print_stack(node)
+    depth = 1
+    if ( node[:example_group] )
+      depth = depth + print_stack( node[:example_group] )
+    end
+    puts "#{"  " * depth }#{node[:description]}" unless node[:printed_stack]
+    node[:printed_stack] = true
+    depth
   end
   
   def example_finished(example)
+    super
   end
   
   def example_group_finished(example_group)
+    super
   end
+  
+=begin
+  def spec_file_finished(spec_file)
+    elapsed = Time.now - spec_file.metadata[:started_at]
+    puts ">> #{current_file} : #{elapsed}s : #{@file_passing.size} passing, #{@file_pending.size} pending, #{@file_failing.size} failing"
+  end
+=end
+  
+  # Dump
   
   def start_dump
-    finish_batch
+  end
+
+  def dump_failures()
+    super
+    return if ( failed_examples.empty? )
+    puts "------------------------------------------------------------------------"
+    puts "Failures"
+    dump_example_list( failed_examples )
   end
   
+  def dump_pending()
+    super
+    return if ( pending_examples.empty? )
+    puts "------------------------------------------------------------------------"
+    puts "Pending"
+    dump_example_list( pending_examples )
+  end
+  
+  def dump_example_list(examples)
+    spec_file_path = nil
+    examples.each do |example|
+      if ( example.metadata[:spec_file_path] != spec_file_path )
+        spec_file_path = example.metadata[:spec_file_path]
+        puts "  #{spec_file_path}"
+      end
+      puts "    #{example.metadata[:line_number]}:#{example.metadata[:full_description]}"
+    end
+  end
+
   def dump_summary(duration, example_count, failure_count, pending_count)
+    super
+    elapsed = Time.now - @started_at
     passing_count = example_count - ( failure_count + pending_count )
-    
-    puts "============================================="
-    
-    needs_another_line = false
-    
-    if ( pending_count > 0 )
-      needs_another_line = true
-      puts ""
-      puts "Pending specs:"
-    
-      @batches.each do |batch|
-        if ( batch.pending.size > 0 )
-          puts "  - #{batch.relative_file}"
-          batch.pending.each do |pending|
-            ignored_file, lineno = pending.metadata.file_and_line_number
-            puts "    line #{lineno}: #{pending.full_description}"
-          end
-        end
-      end
-    end
-    
-    if ( failure_count > 0 )
-      needs_another_line = true
-      puts ""
-      puts "Failing specs:"
-      
-      @batches.each do |batch|
-        if ( batch.failing.size > 0 )
-          puts "  - #{batch.relative_file}"
-          batch.failing.each do |failing|
-            ignored_file, lineno = failing.metadata.file_and_line_number
-            puts "    line #{lineno}: #{failing.full_description}"
-          end
-        end
-      end
-    end
-    
-    puts "=============================================" if needs_another_line
-    
-    puts "Summary: "
-    puts "  passing: #{passing_count}"
-    puts "  pending: #{pending_count}"
-    puts "  failing: #{failure_count}"
+    puts "------------------------------------------------------------------------"
+    puts "Completed in #{elapsed}s #{failure_count > 0 ? 'WITH FAILURES' : ''}"
+    puts "------------------------------------------------------------------------"
+    puts "Passing...#{passing_count}"
+    puts "Pending...#{pending_count}"
+    puts "Failing...#{failure_count}"
     puts ""
-    
+    puts "Total.....#{example_count}"
+    puts "------------------------------------------------------------------------"
   end
   
 end
