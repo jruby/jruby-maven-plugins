@@ -1,6 +1,7 @@
 
 require 'rspec/core/formatters/base_formatter'
 require 'rspec/core/formatters/snippet_extractor'
+require 'fileutils'
 
 class MavenSurefireReporter < RSpec::Core::Formatters::BaseFormatter
 
