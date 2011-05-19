@@ -74,10 +74,12 @@ module Maven
       req = Gem::Requirement.new(version)
       dep = Gem::Dependency.new(/^#{name}$/, req)
 
-      tuples = find(@fetcher, dep, req.prerelease?)
+      fresh_fetcher = Gem::SpecFetcher.new
+      
+      tuples = find(fresh_fetcher, dep, req.prerelease?)
       unless tuples.empty?
         tuple = tuples.first
-        @fetcher.fetch_spec(tuple[0], URI.parse(tuple[1]))
+        fresh_fetcher.fetch_spec(tuple[0], URI.parse(tuple[1]))
       end
     end
 
