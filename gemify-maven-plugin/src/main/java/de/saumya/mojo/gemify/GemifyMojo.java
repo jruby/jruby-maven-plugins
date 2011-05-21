@@ -90,7 +90,7 @@ public class GemifyMojo extends AbstractGemifyMojo {
                 relocatedGemname.append(relocation.getGroupId() == null
                         ? origin.getGroupId()
                         : relocation.getGroupId());
-                relocatedGemname.append(":");
+                relocatedGemname.append(GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR);
                 relocatedGemname.append(relocation.getArtifactId() == null
                         ? origin.getArtifactId()
                         : relocation.getArtifactId());
@@ -121,13 +121,13 @@ public class GemifyMojo extends AbstractGemifyMojo {
                         visited.remove(keyOf(artifact));
                     }
                     else {
-                        getLog().info("skip optional " + artifact);
+                        getLog().debug("skip optional " + artifact);
                     }
                 }
             }
         }
 
-        // gemify actual for given gemname
+        // gemify actual artifact for given gemname
         if(origin != result.getProject() && !this.skipDependencies){
             gemifyMavenProject(result.getProject());
         }
@@ -217,41 +217,31 @@ public class GemifyMojo extends AbstractGemifyMojo {
                     .getDistributionManagement()
                     .getRelocation();
             if (relocation != null) {
-                if (this.gemname != null) {
-                    String newGroupId = relocation.getGroupId() == null
-                            ? artifact.getGroupId()
-                            : relocation.getGroupId();
-                    String newArtifactId = relocation.getArtifactId() == null
-                            ? artifact.getArtifactId()
-                            : relocation.getArtifactId();
-                    String newVersion = relocation.getVersion() == null
-                            ? artifact.getVersion()
-                            : relocation.getVersion();
-                    artifact = this.manager.createArtifact(newGroupId,
-                                                              newArtifactId,
-                                                              newVersion,
-                                                              isPom
-                                                                      ? "pom"
-                                                                      : "jar");
-                    result.getProject().getArtifacts().add(artifact);
-                    result.getProject().setPackaging("pom");
-                    Artifact a = result.getProject().getArtifact();
-                    result.getProject()
-                            .setArtifact(this.manager.createArtifact(a.getGroupId(),
-                                                                        a.getArtifactId(),
-                                                                        a.getVersion(),
-                                                                        "pom"));
-                    getLog().info("\n\n\tartifact is relocated to "
-                            + newGroupId
-                            + ":"
-                            + newArtifactId
-                            + " version="
-                            + newVersion
-                            + (relocation.getMessage() == null ? "" : " "
-                                    + relocation.getMessage())
-                            + "\n\ttry to use the relocated artifact\n\n");
+                String newGroupId = relocation.getGroupId() == null
+                        ? artifact.getGroupId()
+                        : relocation.getGroupId();
+                String newArtifactId = relocation.getArtifactId() == null
+                        ? artifact.getArtifactId()
+                        : relocation.getArtifactId();
+                String newVersion = relocation.getVersion() == null
+                        ? artifact.getVersion()
+                        : relocation.getVersion();
+                Artifact a = result.getProject().getArtifact();
+                result.getProject()
+                        .setArtifact(this.manager.createArtifact(a.getGroupId(),
+                                                                 a.getArtifactId(),
+                                                                 a.getVersion(),
+                                                                 "pom"));
+                getLog().info("\n\n\tartifact " + artifact + " is relocated to "
+                        + newGroupId
+                        + ":"
+                        + newArtifactId
+                        + " version="
+                        + newVersion
+                        + (relocation.getMessage() == null ? "" : " "
+                                + relocation.getMessage())
+                        + "\n\ttry to use the relocated artifact\n\n");
                 }
-            }
         }
         return result;
     }

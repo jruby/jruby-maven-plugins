@@ -9,7 +9,7 @@ if ( target.exists() )
 }
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "[3.0.0.b.1, 3.0.0.b.2, 3.0.0.b.3, 3.0.0.b.4, 3.0.0.b.5";
+String expected = "[3.0.0.b.3, 3.0.0.b.4, 3.0.0.b.5";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
