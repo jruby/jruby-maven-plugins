@@ -98,6 +98,12 @@ public class RSpecMojo extends AbstractGemMojo {
      */
     private String rspecVersion;
 
+
+    /**
+     * @parameter default-value="${jruby.18and19}"
+     */
+    private boolean switch18and19;
+
     /**
      * @parameter default-value="${repositorySystemSession}"
      * @readonly
@@ -145,9 +151,45 @@ public class RSpecMojo extends AbstractGemMojo {
             getLog().error("error emitting .rb", e);
         }
 
+        // only for jruby version bigger then 1.6.0
+        if(this.switch18and19 && this.jrubyVersion.charAt(2) >= '6'){
+            getLog().info("run spec with 1.8 mode");
+            boolean error18 = !runIt(reportPath, "--1.8");
+            getLog().info("run spec with 1.9 mode");
+            boolean error19 = !runIt(reportPath, "--1.9");
+            if(error18 && error19){
+                throw new MojoExecutionException("There were test failures in both mode 1.8 and 1.9");
+            }
+            else if(error18 || error19) {
+                throw new MojoExecutionException("There were test failures in mode " + (error18 ? "1.8" : "1.9"));
+            }
+            getLog().info("");
+            getLog().info("Passed ALL RSpec tests in both mode 1.8 and 1.9");
+        }
+        else {
+            if( !runIt(reportPath, null)){
+                throw new MojoExecutionException("There were test failures");
+            }
+        }
+    }
+
+    private boolean runIt(String reportPath, final String switch18or19) throws ScriptException,
+            IOException, MojoExecutionException {
+        if(switch18or19 != null){
+            this.factory.addSwitch(switch18or19);
+        }
+
         this.factory.newScript(this.rspecScriptFactory.getScriptFile()).executeIn(launchDirectory());
 
-        final File reportFile = new File(reportPath);
+        final File reportFile;
+        if(switch18or19 != null){
+            this.factory.addSwitch(switch18or19);
+            reportFile = new File(reportPath.replace(".html", "_1_" + switch18or19.charAt(4) + ".html"));
+            new File(reportPath).renameTo(reportFile);
+        }
+        else {
+            reportFile = new File(reportPath);
+        }
 
         Reader in = null;
         try {
@@ -158,7 +200,7 @@ public class RSpecMojo extends AbstractGemMojo {
 
             while ((line = reader.readLine()) != null) {
                 if (line.contains("0 failures")) {
-                    return;
+                    return true;
                 }
             }
         } catch (final IOException e) {
@@ -172,8 +214,7 @@ public class RSpecMojo extends AbstractGemMojo {
                 }
             }
         }
-
-        throw new MojoExecutionException("There were test failures");
+        return false;
     }
 
     private void initScriptFactory(final ScriptFactory factory, final String reportPath) {
