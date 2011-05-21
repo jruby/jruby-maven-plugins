@@ -185,7 +185,8 @@ public class DefaultGemManager implements GemManager {
             final List<ArtifactRepository> remoteRepositories, boolean resolve)
             throws GemException {
         // build a POM and resolve all artifacts
-        final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest().setLocalRepository(localRepository)
+        final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest()
+                .setLocalRepository(localRepository)
                 .setRemoteRepositories(remoteRepositories)
                 .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
                 .setRepositorySession(repositorySystemSession)
