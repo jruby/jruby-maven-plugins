@@ -13,11 +13,13 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Developer;
 import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.License;
+import org.apache.maven.model.Model;
 import org.apache.maven.model.Relocation;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.velocity.VelocityComponent;
@@ -34,7 +36,7 @@ import de.saumya.mojo.ruby.gems.GemManager;
 /**
  * This is full of "workarounds" here, since for true artifact2gem conversion I
  * would need interpolated POM!
- * 
+ *
  * @author cstamas
  * @author mkristian
  */
@@ -136,6 +138,14 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
     public GemSpecification createSpecification(final MavenArtifact artifact) {
         final GemSpecification result = new GemSpecification();
 
+        if( relocateIfNeeded(artifact)){
+            Dependency dep = artifact.getPom().getDependencies().get(0);
+            result.setPost_install_message("this gem has a new name: "
+                                           + createGemName(dep.getGroupId(),
+                                                           dep.getArtifactId(),
+                                                           dep.getVersion()) + " version: " + dep.getVersion());
+        }
+
         // this is fix
         result.setPlatform(this.PLATFORM_JAVA);
 
@@ -154,33 +164,6 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
                     result.getDependencies().add(convertDependency(artifact,
                                                                    dependency));
                 }
-            }
-        }
-
-        // if this is a relocated artifact then use the relocated coordinate as dependency
-        if (artifact.getPom().getDistributionManagement() != null) {
-            Relocation relocation = artifact.getPom()
-                .getDistributionManagement()
-                .getRelocation();
-            if(relocation != null){
-                // there will be only one dependency !!
-                result.getDependencies().clear();
-                Dependency dep = new Dependency();
-                dep.setVersion(relocation.getVersion() == null
-                               ? artifact.getPom().getVersion()
-                               : relocation.getVersion());
-                dep.setArtifactId(relocation.getArtifactId() == null
-                                  ? artifact.getPom().getArtifactId()
-                                  : relocation.getArtifactId());
-                dep.setGroupId(relocation.getGroupId() == null
-                               ? artifact.getPom().getGroupId()
-                               : relocation.getGroupId());
-                result.getDependencies().add(convertDependency(artifact,
-                                                               dep));
-                result.setPost_install_message("this gem has a new name: "
-                        + createGemName(dep.getGroupId(),
-                                        dep.getArtifactId(),
-                                        dep.getVersion()) + " version: " + dep.getVersion());
             }
         }
 
@@ -216,7 +199,7 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
             final File target) throws IOException {
         final GemSpecification gemspec = createSpecification(artifact);
 
-        if (target == null) {
+        if (target == null || (target.exists() && !target.isDirectory())) {
             throw new IOException("Must specify target file, where to generate Gem!");
         }
 
@@ -224,6 +207,37 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
         final File gemfile = this.gemPackager.createGemStub(gemspec, target);
 
         return new GemArtifact(gemspec, gemfile);
+    }
+
+    private boolean relocateIfNeeded(final MavenArtifact mart){
+        Model model = mart.getPom();
+        if (model.getDistributionManagement() != null) {
+            final Relocation relocation = model.getDistributionManagement()
+                    .getRelocation();
+            if (relocation != null) {
+                String newGroupId = relocation.getGroupId() == null
+                        ? mart.getCoordinates().getGroupId()
+                        : relocation.getGroupId();
+                String newArtifactId = relocation.getArtifactId() == null
+                        ? mart.getCoordinates().getArtifactId()
+                        : relocation.getArtifactId();
+                String newVersion = relocation.getVersion() == null
+                        ? mart.getCoordinates().getVersion()
+                        : relocation.getVersion();
+
+                Dependency dep = new Dependency();
+                dep.setArtifactId(newArtifactId);
+                dep.setGroupId(newGroupId);
+                dep.setVersion(newVersion);
+                dep.setType(model.getPackaging());
+                model.getDependencies().clear();
+                model.addDependency(dep);
+                model.setPackaging("pom");
+
+                return true;
+            }
+        }
+        return false;
     }
 
     public GemArtifact createGemFromArtifact(final MavenArtifact artifact,
@@ -495,7 +509,7 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
         }
 
         requirement.addRequirement("~>", gemVersion);
-        
+
         result.setVersion_requirement(requirement);
 
         return result;
