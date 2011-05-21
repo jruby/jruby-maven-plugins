@@ -122,17 +122,18 @@ public class RSpecMojo extends AbstractGemMojo {
 
     @Override
     public void executeWithGems() throws MojoExecutionException, ScriptException, IOException, GemException {
-        if (this.project.getBasedir() == null) {
-
-            this.rspecVersion = this.gemsInstaller.installGem("rspec", this.rspecVersion, this.repoSession, this.localRepository).getVersion();
-
-        }
         final File specSourceDirectory = specSourceDirectory();
         if (!specSourceDirectory.exists() && this.args == null) {
             getLog().info("Skipping RSpec tests since " + specSourceDirectory + " is missing");
             return;
         }
         getLog().info("Running RSpec tests from " + specSourceDirectory);
+
+        if (this.project.getBasedir() == null) {
+
+            this.rspecVersion = this.gemsInstaller.installGem("rspec", this.rspecVersion, this.repoSession, this.localRepository).getVersion();
+
+        }
 
         final String reportPath = new File(this.outputDirectory, this.reportName).getAbsolutePath();
 
