@@ -125,12 +125,6 @@ public class PackageMojo extends AbstractGemMojo {
 
             }
             else {
-//                if (this.project.getBasedir() == null) {
-//                    this.gemHome = new File(this.gemHome.getAbsolutePath()
-//                            .replace("/${project.basedir}/", "/"));
-//                    this.gemPath = new File(this.gemPath.getAbsolutePath()
-//                            .replace("/${project.basedir}/", "/"));
-//                }
                 if (this.gemspec == null) {
                     for (final File f : launchDirectory().listFiles()) {
                         if (f.getName().endsWith(".gemspec")) {
@@ -393,7 +387,7 @@ public class PackageMojo extends AbstractGemMojo {
                 : artifact.getGroupId() + ".").append(artifact.getArtifactId())
                 .append("-")
                 .append(artifact.getGemVersion())
-                .append("java-gem".equals(artifact.getType()) ? "-java" : "")
+                .append("java-gem".equals(artifact.getType()) || "java".equals(this.platform) ? "-java" : "")
                 .append(".gem");
 
         FileUtils.copyFile(new File(gemDir, gemFilename.toString()),
