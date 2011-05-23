@@ -243,6 +243,7 @@ public class RSpecMojo extends AbstractGemMojo {
 
                 while ((line = reader.readLine()) != null) {
                     if (line.contains("failures")) {
+                        String replaced = line.replaceFirst("\";</.*>", "").replaceFirst("<.*\"", "");
                         run.message(mode, line.replaceFirst("\";</.*>", "").replaceFirst("<.*\"", ""));
                         break;
                     }

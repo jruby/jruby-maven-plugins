@@ -27,9 +27,9 @@ public class JRubyRun {
     
     final String version;
     
-    final boolean[] success = new boolean[2];
+    final boolean[] success = new boolean[4];
     
-    final String[] message = new String[2];
+    final String[] message = new String[4];
     
     JRubyRun(JRubyRun.Mode mode, String version){
         this.mode = mode;
