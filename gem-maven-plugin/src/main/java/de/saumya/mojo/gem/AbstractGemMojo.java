@@ -47,14 +47,14 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
      * triggers an update of maven metadata for all gems.
-     * 
+     *
      * @parameter expression="${gem.update}" default-value="false"
      */
     private boolean         update;
 
     /**
      * directory of gem home to use when forking JRuby.
-     * 
+     *
      * @parameter expression="${gem.home}"
      *            default-value="${project.build.directory}/rubygems"
      */
@@ -62,7 +62,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
      * directory of JRuby path to use when forking JRuby.
-     * 
+     *
      * @parameter expression="${gem.path}"
      *            default-value="${project.build.directory}/rubygems"
      */
@@ -70,14 +70,14 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
      * arguments for the gem command.
-     * 
+     *
      * @parameter default-value="${gem.args}"
      */
     protected String        gemArgs;
 
     /**
      * directory of JRuby bin path to use when forking JRuby.
-     * 
+     *
      * @parameter expression="${gem.binDirectory}"
      */
     protected File          binDirectory;
@@ -90,7 +90,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected GemsInstaller gemsInstaller;
 
     @Override
-    protected ScriptFactory newScriptFactory() throws MojoExecutionException {
+    protected ScriptFactory newScriptFactory(Artifact artifact) throws MojoExecutionException {
         if (this.project.getBasedir() == null) {
             this.gemHome = new File(this.gemHome.getAbsolutePath()
                     .replace("/${project.basedir}/", "/"));
@@ -101,11 +101,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig = new GemsConfig();
         this.gemsConfig.setGemHome(this.gemHome);
         this.gemsConfig.addGemPath(this.gemPath);
-        
+
         try {
             final GemScriptFactory factory = new GemScriptFactory(this.logger,
                     this.classRealm,
-                    resolveJRUBYCompleteArtifact().getFile(),
+                    artifact.getFile(),
                     this.project.getTestClasspathElements(),
                     this.jrubyFork,
                     this.gemsConfig);
@@ -153,7 +153,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 this.gemsConfig.setBinDirectory(this.gemsConfig.getBinDirectory());
                 this.gemsConfig.setGemHome(new File(this.gemsConfig.getGemHome().getAbsolutePath() + "-" + plugin.getArtifactId()));
                 this.gemsConfig.addGemPath(this.gemsConfig.getGemHome());
-                
+
                 this.gemsInstaller.installGems(this.project, this.plugin.getArtifacts(), this.localRepository);
             }
             else {

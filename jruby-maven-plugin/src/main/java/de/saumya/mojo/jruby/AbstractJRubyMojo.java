@@ -130,6 +130,15 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected ScriptFactory newScriptFactory() throws MojoExecutionException {
         try {
+            return newScriptFactory(resolveJRUBYCompleteArtifact());
+        }
+        catch (final DependencyResolutionRequiredException e) {
+            throw new MojoExecutionException("could not resolve jruby", e);
+        }
+    }
+
+    protected ScriptFactory newScriptFactory(Artifact artifact) throws MojoExecutionException {
+        try {
             final ScriptFactory factory = new ScriptFactory(this.logger,
                     this.classRealm, resolveJRUBYCompleteArtifact().getFile(),
                     this.project.getTestClasspathElements(), this.jrubyFork);
@@ -176,9 +185,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         return this.launchDirectory;
     }
 
-    private Artifact resolveJRUBYCompleteArtifact(final String version)
+    protected Artifact resolveJRUBYCompleteArtifact(final String version)
             throws DependencyResolutionRequiredException {
-        getLog().debug("resolve jruby for verions " + version);
+        getLog().debug("resolve jruby for version " + version);
         final Artifact artifact = this.repositorySystem.createArtifact(
                 "org.jruby", "jruby-complete", version, "jar");
         return resolveJRUBYCompleteArtifact(artifact);
