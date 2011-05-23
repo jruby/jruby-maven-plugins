@@ -2,7 +2,6 @@ package de.saumya.mojo.proxy;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,11 +25,15 @@ public class ControllerServlet extends HttpServlet {
             final HttpServletResponse resp) throws ServletException,
             IOException {
         final String[] parts = req.getPathInfo().substring(1).split("/");
-        //System.out.println(Arrays.toString(parts));
+        // System.out.println(Arrays.toString(parts));
         try {
             switch (parts.length) {
             case 4: // {releases|prereleases}/rubygems/#{name}/maven-metadata.xml
-                if (parts[3].equals("maven-metadata.xml")) {
+                if (!parts[1].equals("rubygems")) {
+                    notFound(resp,
+                             "Only rubygems/ groupId is supported through this proxy.");
+                }
+                else if (parts[3].equals("maven-metadata.xml")) {
                     resp.setContentType("application/xml");
                     resp.setCharacterEncoding("utf-8");
                     resp.setHeader("Vary", "Accept");
@@ -46,11 +49,15 @@ public class ControllerServlet extends HttpServlet {
                                                       "prereleases".equals(parts[0]));
                 }
                 else {
-                    notFound(resp);
+                    notFound(resp, "Unknown resource: " + parts[3]);
                 }
                 break;
             case 5:// {releases|prereleases}/rubygems/#{name}/#{version}/#{name}-#{version}.{gem|pom}
-                if (parts[4].endsWith(".gem")) {
+                if (!parts[1].equals("rubygems")) {
+                    notFound(resp,
+                             "Only rubygems/ groupId is supported through this proxy.");
+                }
+                else if (parts[4].endsWith(".gem")) {
                     resp.sendRedirect(this.controller.getGemLocation(parts[2],
                                                                      parts[3]));
                 }
@@ -76,19 +83,20 @@ public class ControllerServlet extends HttpServlet {
                                                  resp.getWriter());
                 }
                 else {
-                    notFound(resp);
+                    notFound(resp, "Unknown artifact: " + parts[4]);
                 }
                 break;
             default:
-                notFound(resp);
+                notFound(resp, "Completely unhandleable request!");
             }
         }
         catch (final FileNotFoundException e) {
-            notFound(resp);
+            notFound(resp, e.getMessage() );
         }
     }
 
-    private void notFound(final HttpServletResponse resp) throws IOException {
-        resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+    private void notFound(final HttpServletResponse resp, String message)
+            throws IOException {
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND, message);
     }
 }
