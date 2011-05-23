@@ -48,7 +48,8 @@ public class GemProxyServletContextListener implements ServletContextListener {
                     log("updated metadata");
                 }
                 catch (final InterruptedException e) {
-                    log("interrupted", e);
+                    log( "interrupted, shutting down update thread" );
+                    break;
                 }
                 catch (final RuntimeException e) {
                     log("maybe bug ?!", e);
