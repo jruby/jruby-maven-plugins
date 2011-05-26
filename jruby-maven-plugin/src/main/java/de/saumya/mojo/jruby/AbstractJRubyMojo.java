@@ -8,6 +8,7 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -21,83 +22,98 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
 
 /**
  * Base for all JRuby mojos.
- * 
+ *
  * @requiresProject false
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String DEFAULT_JRUBY_VERSION = "1.5.6";
+    private static String DEFAULT_JRUBY_VERSION = "1.6.1";
 
     public static final String GEM_RUBY_COMMAND = "META-INF/jruby.home/bin/gem";
-
-    public static final String IRB_RUBY_COMMAND = "jirb";
-
-    public static final String IRB_SWING_RUBY_COMMAND = "jirb_swing";
 
     public static final String RAKE_RUBY_COMMAND = "META-INF/jruby.home/bin/rake";
 
     /**
      * common arguments
-     * 
+     *
      * @parameter expression="${args}"
+     * <br/>
+     * Command line -Dargs=...
      */
     protected String args;
 
     /**
      * arguments for the jruby command.
-     * 
-     * @parameter default-value="${jruby.args}"
-     */
-    protected String jrubyArgs = null;
-
- 
-    /**
-     * arguments for the jruby command.
-     * 
+     *
      * @parameter expression="${jruby.jvmargs}"
+     * <br/>
+     * Command line -Djruby.jvmargs=...
      */
     protected String jrubyJvmArgs;
 
     /**
-     * switches for the jruby command.
+     * switches for the jruby command, like '--1.9'
      *
      * @parameter expression="${jruby.switches}"
+     * <br/>
+     * Command line -Djruby.switches=...
      */
     protected String jrubySwitches;
-   
+
     /**
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
      * this version is used to resolve the jruby-complete dependency from the
-     * local/remote maven repository. defaults to "1.5.6".
-     * 
-     * @parameter default-value="${jruby.version}"
+     * local/remote maven repository. it overwrites the jruby version from
+     * the dependencies if any. i.e. you can easily switch jruby version from the commandline !
+     * <br/>
+     * default: 1.6.1
+     *
+     * @parameter expression="${jruby.version}"
+     * <br/>
+     * Command line -Djruby.version=...
      */
     protected String jrubyVersion;
 
     /**
      * fork the JRuby execution.
-     * 
+     *
      * @parameter expression="${jruby.fork}" default-value="true"
+     * <br/>
+     * Command line -Djruby.fork=...
      */
     protected boolean jrubyFork;
 
     /**
      * verbose jruby related output
-     * 
+     *
      * @parameter expression="${jruby.verbose}" default-value="false"
+     * <br/>
+     * Command line -Djruby.verbose=...
      */
     protected boolean jrubyVerbose;
 
+
     /**
      * the launch directory for the JRuby execution.
-     * 
-     * @parameter default-value="${launchDirectory}"
+     *
+     * @parameter expression="${jruby.sourceDirectory}" default-value="src/main/ruby"
+     * <br/>
+     * Command line -Djruby.soureDirectory=...
+     */
+    protected File rubySourceDirectory;
+
+    /**
+     * the launch directory for the JRuby execution.
+     *
+     * @parameter default-value="${basedir}" expression="${jruby.launchDirectory}"
+     * <br/>
+     * Command line -Djruby.launchDirectory=...
      */
     private File launchDirectory;
 
     /**
      * reference to maven project for internal use.
-     * 
+     *
      * @parameter expression="${project}"
      * @required
      * @readOnly true
@@ -106,7 +122,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * local repository for internal use.
-     * 
+     *
      * @parameter default-value="${localRepository}"
      * @required
      * @readonly
@@ -115,7 +131,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * classrealm for internal use.
-     * 
+     *
      * @parameter expression="${dummyExpression}"
      * @readonly
      */
@@ -155,9 +171,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if(rubySourceDirectory.exists()){
+            Resource resource = new Resource();
+            resource.setDirectory(rubySourceDirectory.getAbsolutePath());
+            project.getBuild().getResources().add(resource);
+        }
+
         this.logger = new MojoLogger(this.jrubyVerbose, getLog());
         this.factory = newScriptFactory();
-        this.factory.addJavaArgs(this.jrubyArgs);
         this.factory.addJvmArgs(this.jrubyJvmArgs);
         this.factory.addSwitches(this.jrubySwitches);
 
