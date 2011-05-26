@@ -16,17 +16,12 @@ import de.saumya.mojo.ruby.script.ScriptException;
 @Deprecated
 public class IRBMojo extends AbstractJRubyMojo {
 
-    // override super mojo and make this readonly
-    /**
-     * @parameter expression="false"
-     * @readonly
-     */
-    protected boolean fork;
-
     /**
      * arguments for the irb command.
      * 
-     * @parameter default-value="${irb.args}"
+     * @parameter expression="${irb.args}"
+     * <br/>
+     * Command line -Dirb.args=...
      */
     protected String irbArgs = null;
 
@@ -34,6 +29,8 @@ public class IRBMojo extends AbstractJRubyMojo {
      * launch IRB in a swing window.
      * 
      * @parameter default-value="${irb.swing}"
+     * <br/>
+     * Command line -Dirb.swing=...
      */
     protected boolean swing = false;
 
@@ -48,7 +45,7 @@ public class IRBMojo extends AbstractJRubyMojo {
     public void executeJRuby() throws MojoExecutionException, ScriptException,
             IOException {
         this.factory.newScriptFromJRubyJar(
-                this.swing ? IRB_SWING_RUBY_COMMAND : IRB_RUBY_COMMAND)
+                this.swing ? "jirb_swing" : "jirb")
                 .addArgs(this.irbArgs).addArgs(this.args).execute();
     }
 }

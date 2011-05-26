@@ -24,8 +24,9 @@ public class CompileMojo extends AbstractJRubyMojo {
     /**
      * directory where to find the ruby files
      * 
-     * @parameter default-value="src/main/ruby"
+     * @parameter
      */
+    @Deprecated
     protected File rubyDirectory;
 
     /**
@@ -33,17 +34,21 @@ public class CompileMojo extends AbstractJRubyMojo {
      * java classes (needs >=jruby-1.5). default is the same as for java
      * classes.
      * 
-     * @parameter default-value="${project.build.outputDirectory}"
+     * @parameter expression="${project.build.outputDirectory}"
      */
     protected File outputDirectory;
 
     /**
-     * @parameter expression="${jruby.failure.ignore}" default-value="false"
+     * @parameter expression="${jrubyc.ignoreFailue}" default-value="false"
+     * <br/>
+     * Command line -Djrubyc.ignoreFailure=...
      */
     protected boolean ignoreFailures;
 
     /**
-     * @parameter expression="${jruby.generate.java}" default-value="false"
+     * @parameter expression="${jrubyc.generateJava}" default-value="false"
+     * <br/>
+     * Command line -Djrubyc.generateJava=...
      */
     protected boolean generateJava;
 
@@ -80,7 +85,13 @@ public class CompileMojo extends AbstractJRubyMojo {
         } else {
             script.addArg("-t", fixPathSeparator(this.outputDirectory));
         }
-        script.addArg(this.rubyDirectory);
+        if(rubyDirectory != null){
+            getLog().warn("please use rubySourceDirectory instead");
+            script.addArg(this.rubyDirectory);
+        }
+        else {
+            script.addArg(this.rubySourceDirectory);
+        }
         script.execute();
     }
 
