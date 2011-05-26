@@ -18,26 +18,26 @@ public class IRBMojo extends AbstractJRubyMojo {
 
     /**
      * arguments for the irb command.
-     * 
-     * @parameter expression="${irb.args}"
      * <br/>
      * Command line -Dirb.args=...
+     * 
+     * @parameter expression="${irb.args}"
      */
     protected String irbArgs = null;
 
     /**
      * launch IRB in a swing window.
-     * 
-     * @parameter default-value="${irb.swing}"
      * <br/>
      * Command line -Dirb.swing=...
+     * 
+     * @parameter default-value="${irb.swing}"
      */
     protected boolean swing = false;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         // make sure the whole things run in the same process
-        super.jrubyFork = false;
+        this.jrubyFork = false;
         super.execute();
     }
 

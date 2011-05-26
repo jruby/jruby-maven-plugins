@@ -39,16 +39,18 @@ public class CompileMojo extends AbstractJRubyMojo {
     protected File outputDirectory;
 
     /**
-     * @parameter expression="${jrubyc.ignoreFailue}" default-value="false"
+     * do not fail the goal
      * <br/>
      * Command line -Djrubyc.ignoreFailure=...
+     * @parameter expression="${jrubyc.ignoreFailue}" default-value="false"
      */
     protected boolean ignoreFailures;
 
     /**
-     * @parameter expression="${jrubyc.generateJava}" default-value="false"
+     * just generate java classes and add them to the maven source path
      * <br/>
      * Command line -Djrubyc.generateJava=...
+     * @parameter expression="${jrubyc.generateJava}" default-value="false"
      */
     protected boolean generateJava;
 
@@ -61,20 +63,20 @@ public class CompileMojo extends AbstractJRubyMojo {
 
     /**
      * verbose jrubyc related output (only with > jruby-1.6.x)
-     *
-     * @parameter expression="${jrubyc.verbose}" default-value="false"
      * <br/>
      * Command line -Djrubyc.verbose=...
+     *
+     * @parameter expression="${jrubyc.verbose}" default-value="false"
      */
     private boolean jrubycVerbose;
 
     //TODO not working for me
 //    /**
 //     * generate handles for the compiled classes (only with > jruby-1.6.x)
-//     *
-//     * @parameter expression="${jrubyc.handles}" default-value="false"
 //     * <br/>
 //     * Command line -Djrubyc.handles=...
+//     *
+//     * @parameter expression="${jrubyc.handles}" default-value="false"
 //     */
 //    private boolean jrubycHandles;
 

@@ -18,57 +18,57 @@ public class JRubyMojo extends AbstractJRubyMojo {
 
     /**
      * arguments for the jruby command.
-     *
-     * @parameter expression="${jruby.args}"
      * <br/>
      * Command line -Djruby.args=...
+     *
+     * @parameter expression="${jruby.args}"
      */
     protected String jrubyArgs = null;
 
     /**
      * ruby code which gets executed.
-     *
-     * @parameter expression="${jruby.script}"
      * <br/>
      * Command line -Djruby.script=...
+     *
+     * @parameter expression="${jruby.script}"
      */
     protected String script = null;
 
     /**
      * ruby file which gets executed.
-     *
-     * @parameter expression="${jruby.file}"
      * <br/>
      * Command line -Djruby.file=...
+     *
+     * @parameter expression="${jruby.file}"
      */
     protected File file = null;
 
     /**
      * output file where the standard out will be written
-     *
-     * @parameter expression="${jruby.outputFile}"
      * <br/>
      * Command line -Djruby.outputFile=...
+     *
+     * @parameter expression="${jruby.outputFile}"
      */
     protected File outputFile = null;
 
     /**
      * directory of gem home to use when forking JRuby.
+     * <br/>
+     * Command line -Dgem.home=...
      *
      * @parameter expression="${gem.home}"
      *            default-value="${project.build.directory}/rubygems"
-     * <br/>
-     * Command line -Dgem.home=...
      */
     protected File          gemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby.
+     * <br/>
+     * Command line -Dgem.path=...
      *
      * @parameter expression="${gem.path}"
      *            default-value="${project.build.directory}/rubygems"
-     * <br/>
-     * Command line -Dgem.path=...
      */
     protected File          gemPath;
 

@@ -35,28 +35,28 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * common arguments
-     *
-     * @parameter expression="${args}"
      * <br/>
      * Command line -Dargs=...
+     *
+     * @parameter expression="${args}"
      */
     protected String args;
 
     /**
      * arguments for the jruby command.
-     *
-     * @parameter expression="${jruby.jvmargs}"
      * <br/>
      * Command line -Djruby.jvmargs=...
+     *
+     * @parameter expression="${jruby.jvmargs}"
      */
     protected String jrubyJvmArgs;
 
     /**
      * switches for the jruby command, like '--1.9'
-     *
-     * @parameter expression="${jruby.switches}"
      * <br/>
      * Command line -Djruby.switches=...
+     *
+     * @parameter expression="${jruby.switches}"
      */
     protected String jrubySwitches;
 
@@ -67,47 +67,47 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * the dependencies if any. i.e. you can easily switch jruby version from the commandline !
      * <br/>
      * default: 1.6.1
-     *
-     * @parameter expression="${jruby.version}"
      * <br/>
      * Command line -Djruby.version=...
+     *
+     * @parameter expression="${jruby.version}"
      */
     protected String jrubyVersion;
 
     /**
      * fork the JRuby execution.
-     *
-     * @parameter expression="${jruby.fork}" default-value="true"
      * <br/>
      * Command line -Djruby.fork=...
+     *
+     * @parameter expression="${jruby.fork}" default-value="true"
      */
     protected boolean jrubyFork;
 
     /**
      * verbose jruby related output
-     *
-     * @parameter expression="${jruby.verbose}" default-value="false"
      * <br/>
      * Command line -Djruby.verbose=...
+     *
+     * @parameter expression="${jruby.verbose}" default-value="false"
      */
     protected boolean jrubyVerbose;
 
 
     /**
      * the launch directory for the JRuby execution.
-     *
-     * @parameter expression="${jruby.sourceDirectory}" default-value="src/main/ruby"
      * <br/>
      * Command line -Djruby.soureDirectory=...
+     *
+     * @parameter expression="${jruby.sourceDirectory}" default-value="src/main/ruby"
      */
     protected File rubySourceDirectory;
 
     /**
      * the launch directory for the JRuby execution.
-     *
-     * @parameter default-value="${basedir}" expression="${jruby.launchDirectory}"
      * <br/>
      * Command line -Djruby.launchDirectory=...
+     *
+     * @parameter default-value="${project.basedir}" expression="${jruby.launchDirectory}"
      */
     private File launchDirectory;
 
@@ -116,7 +116,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      *
      * @parameter expression="${project}"
      * @required
-     * @readOnly true
+     * @readOnly
      */
     protected MavenProject project;
 

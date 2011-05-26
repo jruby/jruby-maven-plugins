@@ -26,27 +26,28 @@ public class RUnitMojo extends AbstractTestMojo {
     }
     
     /**
-     * runit directory with glob to be used for the runit command.
-     * 
-     * @parameter expression="${runit.dir}" default-value="test/**\/*_test.rb"
+     * runit directory with glob to be used for the ruby unit command.
      * <br/>
      * Command line -Drunit.dir=...
+     * 
+     * @parameter expression="${runit.dir}" default-value="test/**\/*_test.rb"
      */
     private final String runitDirectory = null;
 
     /**
      * arguments for the runit command.
-     * 
-     * @parameter expression="${runit.args}"
      * <br/>
      * Command line -Drunit.args=...
+     * 
+     * @parameter expression="${runit.args}"
      */
     private final String runitArgs = null;
 
     /**
-     * @parameter expression="${skipRunit}" default-value="false"
+     * skip the ruby unit tests
      * <br/>
      * Command line -DskipRunit=...
+     * @parameter expression="${skipRunit}" default-value="false"
      */
     protected boolean skipRunit;
 
@@ -134,6 +135,7 @@ public class RUnitMojo extends AbstractTestMojo {
                 result.success = (vector[ResultEnum.FAILURES.ordinal()] == 0) && 
                     (vector[ResultEnum.ERRORS.ordinal()] == 0);
                 
+                // TODO should be a real report with testcases
                 String surefireXml = MessageFormat.format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
                         + "<testsuite time=\"{0}\" errors=\"{1}\" tests=\"{2}\" skipped=\"{3}\" failures=\"{4}\" name=\"{5}\">\n" +
                         		"</testsuite>\n", 
@@ -150,7 +152,6 @@ public class RUnitMojo extends AbstractTestMojo {
                         "UTF-8", 
                         surefireXml);
                 if(summaryReport != null){
-                    // TODO should be a real report with testcases
                     FileUtils.fileWrite(summaryReport.getAbsolutePath(), 
                             "UTF-8", 
                             surefireXml);

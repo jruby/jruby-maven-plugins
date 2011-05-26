@@ -29,29 +29,34 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
     protected File testReportDirectory;
     
     /** 
-     * @parameter expression="${maven.test.skip}" default-value="false"
+     * skip all tests
      * <br/>
      * Command line -Dmaven.test.skip=...
+     * @parameter expression="${maven.test.skip}" default-value="false"
      */
     protected boolean skipTests;
 
     /**
-     * @parameter expression="${jruby.18and19}"
+     * run tests for both ruby 1.8 and 1.9
      * <br/>
      * Command line -Djruby.18and19=...
+     * 
+     * @parameter expression="${jruby.18and19}"
      */
     private Boolean switch18and19;
 
 
     /**
-     * @parameter expression="${jruby.versions}"
+     * run tests with a several versions of jruby
      * <br/>
      * Command line -Djruby.versions=...
+     * 
+     * @parameter expression="${jruby.versions}"
      */
     private String versions;
 
     /**
-     * The name of the summary (xml-)report which can be used by TeamCity and Co. default is null.
+     * The name of the summary (xml-)report which can be used by TeamCity and Co.
      *
      * @parameter
      */
