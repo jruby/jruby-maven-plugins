@@ -59,16 +59,40 @@ public class CompileMojo extends AbstractJRubyMojo {
      */
     protected File generatedJavaDirectory;
 
+    /**
+     * verbose jrubyc related output (only with > jruby-1.6.x)
+     *
+     * @parameter expression="${jrubyc.verbose}" default-value="false"
+     * <br/>
+     * Command line -Djrubyc.verbose=...
+     */
+    private boolean jrubycVerbose;
+
+    //TODO not working for me
+//    /**
+//     * generate handles for the compiled classes (only with > jruby-1.6.x)
+//     *
+//     * @parameter expression="${jrubyc.handles}" default-value="false"
+//     * <br/>
+//     * Command line -Djrubyc.handles=...
+//     */
+//    private boolean jrubycHandles;
+
     @Override
     public void executeJRuby() throws MojoExecutionException, IOException,
             ScriptException {
+        if(rubyDirectory != null){
+            getLog().warn("please use rubySourceDirectory instead");
+        }
+
         if (this.generateJava) {
             if (!this.generatedJavaDirectory.exists()) {
                 this.generatedJavaDirectory.mkdirs();
             }
             this.project.addCompileSourceRoot(this.generatedJavaDirectory
                     .getAbsolutePath());
-        } else if (!this.outputDirectory.exists()) {
+        }
+        else if (!this.outputDirectory.exists()) {
             this.outputDirectory.mkdirs();
         }
 
@@ -76,23 +100,22 @@ public class CompileMojo extends AbstractJRubyMojo {
                 "\nrequire 'jruby/jrubyc'\n"
                         + "status = JRubyCompiler::compile_argv(ARGV)\n"
                         + "raise 'compilation-error(s)' if status !=0 && !"
-                        + this.ignoreFailures).addArg("-d",
-                fixPathSeparator(this.rubyDirectory));
+                        + this.ignoreFailures);
 
         if (this.generateJava) {
-            script.addArg("--java").addArg("-t",
-                    fixPathSeparator(this.generatedJavaDirectory));
+            script.addArg("--java")
+                .addArg("-t", fixPathSeparator(this.generatedJavaDirectory));
         } else {
             script.addArg("-t", fixPathSeparator(this.outputDirectory));
         }
-        if(rubyDirectory != null){
-            getLog().warn("please use rubySourceDirectory instead");
-            script.addArg(this.rubyDirectory);
+
+        if(jrubyVersion.charAt(2) >= '6' && (this.jrubyVerbose || this.jrubycVerbose)){
+            script.addArg("--verbose");
         }
-        else {
-            script.addArg(this.rubySourceDirectory);
-        }
-        script.execute();
+        // add current directory
+        script.addArg(".");
+
+        script.executeIn(this.rubyDirectory == null? this.rubySourceDirectory : this.rubyDirectory);
     }
 
     private String fixPathSeparator(final File f) {

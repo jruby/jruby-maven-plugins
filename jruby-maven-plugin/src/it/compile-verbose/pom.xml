@@ -6,30 +6,13 @@
   <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-version</artifactId>
   <version>testing</version>
-  <dependencies>
-    <dependency>
-      <groupId>org.jruby</groupId>
-      <artifactId>jruby-complete</artifactId>
-      <version>1.6.1</version>
-    </dependency>
-  </dependencies>
+
   <build>
     <plugins>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby-maven-plugin</artifactId>
 	<version>@project.version@</version>
-	<configuration>
-	  <generateJava>true</generateJava>
-	</configuration>
-	<executions>
-	  <execution>
-	    <phase>process-resources</phase>
-	    <goals>
-	      <goal>compile</goal>
-	    </goals>
-	  </execution>
-	</executions>
       </plugin>
     </plugins>
   </build>
