@@ -24,7 +24,6 @@ public class ScriptFactory {
     public static List<String> NO_CLASSPATH = Collections.emptyList();
 
     final Arguments            switches     = new Arguments();
-    final Arguments            javaArgs     = new Arguments();
     final Arguments            jvmArgs      = new Arguments();
     private final Map<String, String>  env          = new HashMap<String, String>();
     final Logger               logger;
@@ -113,26 +112,9 @@ public class ScriptFactory {
         return new Script(this, file);
     }
 
-    public void addJavaOption(final String name) {
-        this.javaArgs.add(name);
-    }
-
-    public void addJavaOption(final String name, final String value) {
-        this.javaArgs.add(name, value);
-    }
-
-    public void addJavaProperty(final String name, final String value) {
-        this.javaArgs.add("-D" + name + "=" + value);
-    }
-
-    public void addJavaArgs(final String args) {
-        this.javaArgs.parseAndAdd(args);
-    }
-
     public void addJvmArgs(final String args) {
         this.jvmArgs.parseAndAdd(args);
     }
-    
     
     public void addSwitch(final String name) {
         this.switches.add(name);

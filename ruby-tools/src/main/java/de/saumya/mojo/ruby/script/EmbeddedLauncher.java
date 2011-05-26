@@ -108,8 +108,8 @@ class EmbeddedLauncher extends AbstractLauncher {
         args.addAll(0, this.factory.switches.list);
 
         if (warn) {
-            if (this.factory.javaArgs.list.size() > 0) {
-                this.logger.warn("have to ignore java arguments and properties in the current setup");
+            if (this.factory.jvmArgs.list.size() > 0) {
+                this.logger.warn("have to ignore jvm arguments and properties in the current setup");
             }
             if (this.factory.environment().size() > 0) {
                 this.logger.warn("have to ignore environment settings in the current setup");
