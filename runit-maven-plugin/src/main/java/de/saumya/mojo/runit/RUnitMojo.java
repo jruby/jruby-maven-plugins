@@ -26,24 +26,27 @@ public class RUnitMojo extends AbstractTestMojo {
     }
     
     /**
-     * runit directory with glob to be used for the runit command. <br/>
-     * Commmand line -Drunit.dir=...
+     * runit directory with glob to be used for the runit command.
      * 
      * @parameter expression="${runit.dir}" default-value="test/**\/*_test.rb"
+     * <br/>
+     * Command line -Drunit.dir=...
      */
     private final String runitDirectory = null;
 
     /**
      * arguments for the runit command.
      * 
-     * @parameter expression="${runit.args}" <br/>
-     *            Commmand line -Drunit.args=...
+     * @parameter expression="${runit.args}"
+     * <br/>
+     * Command line -Drunit.args=...
      */
     private final String runitArgs = null;
 
     /**
-     * @parameter expression="${skipRunit}" default-value="false" <br/>
-     *            Commmand line -DskipRunit=...
+     * @parameter expression="${skipRunit}" default-value="false"
+     * <br/>
+     * Command line -DskipRunit=...
      */
     protected boolean skipRunit;
 
