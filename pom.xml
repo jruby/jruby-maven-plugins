@@ -91,6 +91,7 @@
 -->
     <module>ruby-tools</module>
     <module>rake-maven-plugin</module>
+    <module>runit-maven-plugin</module>
     <module>gemify-maven-plugin</module>
     <module>bundler-maven-plugin</module>
   </modules>
