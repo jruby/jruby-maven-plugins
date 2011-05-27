@@ -17,18 +17,18 @@ import de.saumya.mojo.runit.JRubyRun.Result;
 
 /**
  * maven wrapper around some test command.
- * 
+ *
  * @phase test
  * @requiresDependencyResolution test
  */
 public abstract class AbstractTestMojo extends AbstractGemMojo {
-    
-    /** 
-     * @parameter expression="${project.build.directory}/surefire-reports" 
+
+    /**
+     * @parameter expression="${project.build.directory}/surefire-reports"
      */
     protected File testReportDirectory;
-    
-    /** 
+
+    /**
      * skip all tests
      * <br/>
      * Command line -Dmaven.test.skip=...
@@ -40,7 +40,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
      * run tests for both ruby 1.8 and 1.9
      * <br/>
      * Command line -Djruby.18and19=...
-     * 
+     *
      * @parameter expression="${jruby.18and19}"
      */
     private Boolean switch18and19;
@@ -50,7 +50,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
      * run tests with a several versions of jruby
      * <br/>
      * Command line -Djruby.versions=...
-     * 
+     *
      * @parameter expression="${jruby.versions}"
      */
     private String versions;
@@ -61,7 +61,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
      * @parameter
      */
     protected File summaryReport;
-    
+
     protected void executeWithGems() throws MojoExecutionException, IOException, ScriptException, GemException {
         testReportDirectory = new File(testReportDirectory.getAbsolutePath().replace("${project.basedir}/",""));
         List<JRubyRun> runs = new ArrayList<JRubyRun>();
@@ -141,6 +141,6 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
     }
 
 
-    protected abstract Result runIt(ScriptFactory factory, Mode mode, String version) 
+    protected abstract Result runIt(ScriptFactory factory, Mode mode, String version)
         throws IOException, ScriptException, MojoExecutionException;
 }
