@@ -32,4 +32,13 @@
       </build>
     </profile>
   </profiles>
+  <dependencies>
+    <dependency>
+      <groupId>de.saumya.mojo</groupId>
+      <artifactId>runit-maven-plugin</artifactId>
+      <version>0.27.0-SNAPSHOT</version>
+      <type>maven-plugin</type>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
 </project>
