@@ -96,7 +96,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     /**
      * the launch directory for the JRuby execution.
      * <br/>
-     * Command line -Djruby.soureDirectory=...
+     * Command line -Djruby.sourceDirectory=...
      *
      * @parameter expression="${jruby.sourceDirectory}" default-value="src/main/ruby"
      */
