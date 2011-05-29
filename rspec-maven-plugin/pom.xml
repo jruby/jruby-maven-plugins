@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>gem-parent-mojo</artifactId>
+    <artifactId>tests-parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
     <version>0.27.0-SNAPSHOT</version>
-    <relativePath>../gem-parent-mojo/pom.xml</relativePath>
+    <relativePath>../tests-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>rspec-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
@@ -32,13 +32,4 @@
       </build>
     </profile>
   </profiles>
-  <dependencies>
-    <dependency>
-      <groupId>de.saumya.mojo</groupId>
-      <artifactId>runit-maven-plugin</artifactId>
-      <version>0.27.0-SNAPSHOT</version>
-      <type>maven-plugin</type>
-      <scope>compile</scope>
-    </dependency>
-  </dependencies>
 </project>

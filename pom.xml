@@ -79,6 +79,7 @@
   <modules>
     <module>parent-mojo</module>
     <module>gem-parent-mojo</module>
+    <module>tests-parent-mojo</module>
     <module>jruby-maven-plugin</module>
     <module>gem-maven-plugin</module>
     <module>rspec-maven-plugin</module>

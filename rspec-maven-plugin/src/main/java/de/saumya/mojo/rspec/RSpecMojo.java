@@ -5,21 +5,21 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.sonatype.aether.RepositorySystemSession;
 
-import de.saumya.mojo.gem.AbstractGemMojo;
-import de.saumya.mojo.rspec.JRubyRun.Mode;
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
+import de.saumya.mojo.runit.AbstractTestMojo;
+import de.saumya.mojo.runit.JRubyRun;
+import de.saumya.mojo.runit.JRubyRun.Mode;
+import de.saumya.mojo.runit.JRubyRun.Result;
 
 /**
  * executes the jruby command.
@@ -28,7 +28,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @phase test
  * @requiresDependencyResolution test
  */
-public class RSpecMojo extends AbstractGemMojo {
+public class RSpecMojo extends AbstractTestMojo {
 
     /**
      * The project base directory
@@ -47,13 +47,6 @@ public class RSpecMojo extends AbstractGemMojo {
      * @readonly
      */
     protected List<String> classpathElements;
-
-    /**
-     * The flag to skip tests (optional, defaults to "false")
-     *
-     * @parameter expression="${maven.test.skip}"
-     */
-    protected boolean skipTests;
 
     /** @parameter default-value="${skipSpecs}" */
     protected boolean skipSpecs = false;
@@ -81,13 +74,6 @@ public class RSpecMojo extends AbstractGemMojo {
     protected String reportName;
 
     /**
-     * The name of the summary (xml-)report which can be used by TeamCity and Co. default is null.
-     *
-     * @parameter
-     */
-    protected File summaryReport;
-
-    /**
      * List of system properties to set for the tests.
      *
      * @parameter
@@ -101,18 +87,6 @@ public class RSpecMojo extends AbstractGemMojo {
      */
     private String rspecVersion;
 
-
-    /**
-     * @parameter default-value="${jruby.18and19}"
-     */
-    private boolean switch18and19;
-
-
-    /**
-     * @parameter default-value="${jruby.versions}"
-     */
-    private String versions;
-
     /**
      * @parameter default-value="${repositorySystemSession}"
      * @readonly
@@ -120,6 +94,8 @@ public class RSpecMojo extends AbstractGemMojo {
     private RepositorySystemSession repoSession;
 
     private ScriptFactory rspecScriptFactory;
+
+    private String reportPath;
 
     private File specSourceDirectory() {
         return new File(launchDirectory(), this.specSourceDirectory);
@@ -150,9 +126,9 @@ public class RSpecMojo extends AbstractGemMojo {
 
         }
 
-        final String reportPath = new File(this.outputDirectory, this.reportName).getAbsolutePath();
+        this.reportPath = new File(this.outputDirectory, this.reportName).getAbsolutePath();
 
-        initScriptFactory(getRSpecScriptFactory(), reportPath);
+        initScriptFactory(getRSpecScriptFactory(), this.reportPath);
 
         try {
             this.rspecScriptFactory.emit();
@@ -160,107 +136,61 @@ public class RSpecMojo extends AbstractGemMojo {
             getLog().error("error emitting .rb", e);
         }
 
-        List<JRubyRun> runs = new ArrayList<JRubyRun>();
-        if (versions == null){
-            runs.add(new JRubyRun(Mode.DEFAULT, this.jrubyVersion));
-        }
-        else {
-            String[] jrubyVersions = versions.split("[\\ ,;]");
-            for(String version: jrubyVersions){
-                JRubyRun run = new JRubyRun(switch18and19 ? Mode._18_19 : Mode._18, version);
-                runs.add(run);
-            }
-        }
-
-        for( JRubyRun run: runs){
-            runIt(run, reportPath);
-        }
-
-        getLog().info("");
-        getLog().info("\tOverall RSpec Summary");
-        getLog().info("\t=====================");
-        boolean failure = false;
-        for( JRubyRun run: runs){
-            for(Mode mode: run.asSingleModes()){
-                getLog().info("\t" + run.toString(mode));
-                failure |= !run.success(mode);
-            }
-        }
-        getLog().info("");
-
-        if(failure){
-            throw new MojoExecutionException("There were test failures");
-        }
+        super.executeWithGems();
     }
 
-    private void runIt(JRubyRun run, String reportPath) throws ScriptException,
-            IOException, MojoExecutionException {
+    protected Result runIt(de.saumya.mojo.ruby.script.ScriptFactory factory,
+            Mode mode, String version) throws IOException, ScriptException,
+            MojoExecutionException {
+        factory.newScript(this.rspecScriptFactory.getScriptFile())
+                .executeIn(launchDirectory());
 
-        final de.saumya.mojo.ruby.script.ScriptFactory factory;
-        if (this.jrubyVersion.equals(run.version) || run.mode == Mode.DEFAULT){
-            factory = this.factory;
+        final File reportFile;
+        if (mode != Mode.DEFAULT) {
+            reportFile = new File(reportPath.replace(".html", "-" + version
+                    + mode.name() + ".html"));
+        }
+        else if (this.jrubyVersion.equals(version)) {
+            reportFile = new File(reportPath);
         }
         else {
-            try {
-                factory = newScriptFactory(resolveJRUBYCompleteArtifact(run.version));
-            } catch (DependencyResolutionRequiredException e) {
-                throw new MojoExecutionException("could not resolve jruby", e);
-            }
-        }
-
-        if(run.mode != Mode.DEFAULT){
-            reportPath.replace(".html", "_" + run.version
-                    + ".html");
-        }
-
-        for (Mode mode : run.asSingleModes()) {
-            if(mode != Mode.DEFAULT){
-                factory.addSwitch(mode.flag);
-                getLog().info("");
-                getLog().info("\trun spec with jruby " + run.version + " in mode " + mode);
-                getLog().info("");
-            }
-
-            factory.newScript(this.rspecScriptFactory.getScriptFile())
-                    .executeIn(launchDirectory());
-
-            final File reportFile;
-            if(mode != Mode.DEFAULT){
-                reportFile = new File(reportPath.replace(".html", mode.name()
+            reportFile = new File(reportPath.replace(".html", "-" + version
                     + ".html"));
-                new File(reportPath).renameTo(reportFile);
-            }
-            else {
-                reportFile = new File(reportPath);
-            }
-
-            Reader in = null;
-            try {
-                in = new FileReader(reportFile);
-                final BufferedReader reader = new BufferedReader(in);
-
-                String line = null;
-
-                while ((line = reader.readLine()) != null) {
-                    if (line.contains("failures")) {
-                        run.message(mode, line.replaceFirst("\";</.*>", "").replaceFirst("<.*\"", ""));
-                        break;
-                    }
-                }
-            } catch (final IOException e) {
-                throw new MojoExecutionException(
-                        "Unable to read test report file: " + reportFile);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (final IOException e) {
-                        throw new MojoExecutionException(e.getMessage());
-                    }
-                }
-            }
-            run.success(mode, run.message(mode).contains("0 failures"));
         }
+        new File(reportPath).renameTo(reportFile);
+
+        Result result = new Result();
+        Reader in = null;
+        try {
+            in = new FileReader(reportFile);
+            final BufferedReader reader = new BufferedReader(in);
+
+            String line = null;
+
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("failures")) {
+                    result.message = line.replaceFirst("\";</.*>", "")
+                            .replaceFirst("<.*\"", "");
+                    break;
+                }
+            }
+        }
+        catch (final IOException e) {
+            throw new MojoExecutionException("Unable to read test report file: "
+                    + reportFile);
+        }
+        finally {
+            if (in != null) {
+                try {
+                    in.close();
+                }
+                catch (final IOException e) {
+                    throw new MojoExecutionException(e.getMessage());
+                }
+            }
+        }
+        result.success = result.message.contains("0 failures");
+        return result;
     }
 
     private void initScriptFactory(final ScriptFactory factory, final String reportPath) {
@@ -299,7 +229,7 @@ public class RSpecMojo extends AbstractGemMojo {
             this.rspecScriptFactory = getRSpecScriptFactory(plugin.getArtifacts());
         }
 
-        // get the sciptfactory when there is no pom
+        // get the script-factory when there is no pom
         if (this.rspecScriptFactory == null) {
          this.rspecScriptFactory = scriptFactory4Version(this.rspecVersion);
         }
@@ -315,10 +245,9 @@ public class RSpecMojo extends AbstractGemMojo {
         for (Artifact each : dependencyArtifacts ) {
             // allow all scope, since with deps within plugins the scope is less important
             if (each.getGroupId().equals("rubygems") && each.getArtifactId().equals("rspec")) {
-             return scriptFactory4Version(each.getVersion());
+                return scriptFactory4Version(each.getVersion());
             }
         }
         return null;
     }
-
 }
