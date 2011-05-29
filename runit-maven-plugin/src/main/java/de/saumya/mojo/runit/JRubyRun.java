@@ -34,7 +34,7 @@ public class JRubyRun {
 
     final Result[] results = new Result[4];
 
-    public JRubyRun(JRubyRun.Mode mode, String version){
+    public JRubyRun(Mode mode, String version){
         this.mode = mode;
         this.version = version;
     }

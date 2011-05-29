@@ -6,6 +6,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.jruby.embed.LocalContextScope;
+import org.jruby.embed.LocalVariableBehavior;
+
 import de.saumya.mojo.ruby.GemScriptingContainer;
 
 public class GemProxyServletContextListener implements ServletContextListener {
@@ -45,7 +48,8 @@ public class GemProxyServletContextListener implements ServletContextListener {
                     log("updated metadata");
                 }
                 catch (final InterruptedException e) {
-                    log("interrupted", e);
+                    log( "interrupted, shutting down update thread" );
+                    break;
                 }
                 catch (final RuntimeException e) {
                     log("maybe bug ?!", e);
@@ -76,7 +80,8 @@ public class GemProxyServletContextListener implements ServletContextListener {
     }
 
     public void contextInitialized(final ServletContextEvent sce) {
-        final GemScriptingContainer scripting = new GemScriptingContainer(null, null);
+        final GemScriptingContainer scripting = new GemScriptingContainer(LocalContextScope.SINGLETON,
+                                                                          LocalVariableBehavior.PERSISTENT );
         ControllerService controller;
         sce.getServletContext().log("registering "
                 + ControllerService.class.getName() + " . . .");

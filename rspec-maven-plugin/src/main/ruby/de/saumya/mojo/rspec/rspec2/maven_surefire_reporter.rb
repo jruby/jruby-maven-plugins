@@ -150,7 +150,7 @@ class MavenSurefireReporter < RSpec::Core::Formatters::BaseFormatter
     end
     
     def escape(str)
-      str.gsub( /&/, '&amp;' ).gsub( /"/, '&quot;' )
+      str.gsub( /&/, '&amp;' ).gsub( /"/, '&quot;' ).gsub( /</, "&lt;" ).gsub( />/, '&gt;' )
     end
   
     def indent()

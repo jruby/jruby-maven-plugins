@@ -350,7 +350,8 @@ POM
       req = Gem::Requirement.new(version)
       dep = Gem::Dependency.new(/^#{name}$/, req)
 
-      tuples = find(@fetcher, dep, req.prerelease?)
+      fresh_fetcher = Gem::SpecFetcher.new
+      tuples = find(fresh_fetcher, dep, req.prerelease?)
       return nil if tuples.empty?
       tuples.detect {|t| t[0][2] == 'java' } || tuples.first
     end
