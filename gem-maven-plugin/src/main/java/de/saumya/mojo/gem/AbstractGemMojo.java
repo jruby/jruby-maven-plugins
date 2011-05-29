@@ -2,14 +2,10 @@ package de.saumya.mojo.gem;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
@@ -44,13 +40,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter expression="${gem.installRI}" default-value="false"
      */
     protected boolean         installRI;
-
-    /**
-     * triggers an update of maven metadata for all gems.
-     *
-     * @parameter expression="${gem.update}" default-value="false"
-     */
-    private boolean         update;
 
     /**
      * directory of gem home to use when forking JRuby.
@@ -138,9 +127,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 this.factory,
                 this.manager);
 
-        updateMetadata();
-
         try {
+            // install the gem dependecies from the pom
+            this.gemsInstaller.installPom(this.project, this.localRepository);
+
+            // has the plugin gem dependencies ?
             boolean hasGems = false;
             for(Artifact artifact: plugin.getArtifacts()){
                 if (artifact.getType().contains("gem")){
@@ -148,21 +139,31 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     break;
                 }
             }
+            // install the gems for the plugin
             if (hasGems){
                 // use a common bindir, i.e. the one from the configured gemHome
+                // remove default by setting it explicitly
                 this.gemsConfig.setBinDirectory(this.gemsConfig.getBinDirectory());
+                File home = this.gemsConfig.getGemHome();
                 this.gemsConfig.setGemHome(new File(this.gemsConfig.getGemHome().getAbsolutePath() + "-" + plugin.getArtifactId()));
                 this.gemsConfig.addGemPath(this.gemsConfig.getGemHome());
 
                 this.gemsInstaller.installGems(this.project, this.plugin.getArtifacts(), this.localRepository);
-            }
-            else {
-                this.gemsInstaller.installPom(this.project, this.localRepository);
+
+                this.gemsConfig.setGemHome(home);
             }
         }
         catch (final GemException e) {
             throw new MojoExecutionException("error in installing gems", e);
         }
+
+        // add the gems to the test-classpath
+        for(File path: this.gemsConfig.getGemPath()){
+            Resource resource = new Resource();
+            resource.setDirectory(path.getAbsolutePath());
+            project.getBuild().getTestResources().add(resource);
+        }
+
         try {
 
             executeWithGems();
@@ -176,28 +177,4 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     abstract protected void executeWithGems() throws MojoExecutionException,
             ScriptException, GemException, IOException, MojoFailureException;
 
-    void updateMetadata() throws MojoExecutionException {
-        if (this.update) {
-            final List<String> done = new ArrayList<String>();
-            for (final ArtifactRepository repo : this.project.getRemoteArtifactRepositories()) {
-                if (repo.getId().startsWith("rubygems")) {
-                    URL url = null;
-                    try {
-                        url = new URL(repo.getUrl() + "/update");
-                        if (!done.contains(url.getHost())) {
-                            done.add(url.getHost());
-                            final InputStream in = url.openStream();
-                            in.read();
-                            in.close();
-                        }
-                    }
-                    catch (final IOException e) {
-                        throw new MojoExecutionException("error in sending update url: "
-                                + url,
-                                e);
-                    }
-                }
-            }
-        }
-    }
 }
