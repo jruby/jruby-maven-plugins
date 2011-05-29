@@ -92,7 +92,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      */
     protected boolean jrubyVerbose;
 
-
     /**
      * the launch directory for the JRuby execution.
      * <br/>
