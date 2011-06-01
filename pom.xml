@@ -12,7 +12,7 @@
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
   <scm>
     <connection>scm:git:git://github.com/mkristian/jruby-maven-plugins.git</connection>
-    <developerConnection>scm:git:git@github.com:mkristian/jruby-maven-plugins.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com:mkristian/jruby-maven-plugins.git</developerConnection>
     <url>http://github.com/mkristian/jruby-maven-plugins</url>
   </scm>
   <licenses>
