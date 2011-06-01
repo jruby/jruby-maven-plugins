@@ -4,7 +4,7 @@
   <parent>
     <artifactId>gem-parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.27.0-SNAPSHOT</version>
+    <version>0.27.0</version>
     <relativePath>../gem-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>rails3-maven-plugin</artifactId>
@@ -60,7 +60,7 @@
 		    <pomExclude>*mysql/pom.xml</pomExclude>
 		    <pomExclude>*postgres/pom.xml</pomExclude>
 		  </pomExcludes>
-		  <settingsFile></settingsFile>
+		  <settingsFile />
 		  <localRepositoryPath>${localRepositoryPath}</localRepositoryPath>
 		</configuration>
 	      </execution>
