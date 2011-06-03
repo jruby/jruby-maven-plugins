@@ -184,14 +184,14 @@ public class DefaultRailsManager implements RailsManager {
                 throw new RailsException("failed to filter " + script, e);
             }
 
-            final VelocityContext context = new VelocityContext();
-
             installer.factory.newScriptFromResource("maven/tools/pom_generator.rb")
                 .addArg("rails")
                 .addArg("Gemfile")
                 .executeIn(appPath, new File(appPath, "pom.xml"));
 
             // write out a new index.html
+            final VelocityContext context = new VelocityContext();
+            context.put("railsVersion", railsVersion);
             filterContent(appPath, context, "src/main/webapp/index.html");
             filterContent(appPath,
                           context,
@@ -288,12 +288,6 @@ public class DefaultRailsManager implements RailsManager {
             script.addArg(arg);
         }
         script.addArg("RAILS_ENV=" + environment);
-
-        // final File gemfile = new File( launchDirectory, "Gemfile.maven" );
-        // if ( gemfile.exists() )
-        // {
-        // script.addArg( "BUNDLE_GEMFILE=" + gemfile.getAbsolutePath() );
-        // }
         script.executeIn(launchDirectory);
     }
 
