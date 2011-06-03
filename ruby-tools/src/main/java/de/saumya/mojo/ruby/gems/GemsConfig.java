@@ -154,6 +154,7 @@ public class GemsConfig {
         if( path != null ){
             this.gemPaths.add(path);
             this.gemBase = null;
+            this.gemsDirectory = null;
         }
     }
 
