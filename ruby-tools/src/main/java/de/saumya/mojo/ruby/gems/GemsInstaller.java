@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -123,12 +122,18 @@ public class GemsInstaller {
                 script = maybeAddArtifact(script, pom.getArtifact());
             }
             if (!this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL) {
+                // keep the version hard-coded to stay reproducible
                 final Artifact openssl = this.manager.createGemArtifact(JRUBY_OPENSSL,
                                                                         "0.7");
 
+                final List<ArtifactRepository> remoteRepos = pom.getRemoteArtifactRepositories();
+                if (pom.getFile() == null) {
+                    // we do not have a pom so we need the default gems repo
+                    this.manager.addDefaultGemRepository(remoteRepos);
+                }
                 this.manager.resolve(openssl,
                                      localRepository,
-                                     pom.getRemoteArtifactRepositories());
+                                     remoteRepos);
                 script = maybeAddArtifact(script, openssl);
             }
         }
