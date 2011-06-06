@@ -1,4 +1,3 @@
-
 require 'rspec/core/formatters/base_formatter'
 
 class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
@@ -59,7 +58,6 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
   
   def example_started(example)
     super
-    example.metadata[:started_at] = Time.now
     example.metadata[:spec_file_path] = current_file
     set_location( example.metadata )
     node = example.metadata[:example_group]
@@ -87,7 +85,7 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
   end
   
   def example_completed(example, status=nil)
-    elapsed = Time.now - example.metadata[:started_at]
+    elapsed = Time.now - example.metadata[:execution_result][:started_at]
     print " - #{elapsed}s"
     
     if ( status )
