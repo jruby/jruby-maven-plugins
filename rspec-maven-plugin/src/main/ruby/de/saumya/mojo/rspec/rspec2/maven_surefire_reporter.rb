@@ -5,47 +5,31 @@ require 'fileutils'
 
 class MavenSurefireReporter < RSpec::Core::Formatters::BaseFormatter
 
+  attr_reader :passing_examples
+
   def initialize(output)
     super( output )
     @started_at = Time.now
+    @passing_examples = []
   end
   
-  def example_started(ex)
+  def example_passed(example)
     super
-    ex.metadata[:started_at] = Time.now
+    @passing_examples << example
   end
-  
-  def example_passed(ex)
-    super
-    ex.metadata[:elapsed] = Time.now - ex.metadata[:started_at]
-  end
-  
-  def example_pending(ex)
-    super
-    ex.metadata[:elapsed] = Time.now - ex.metadata[:started_at]
-  end
-  
-  def example_failed(ex)
-    super
-    ex.metadata[:elapsed] = Time.now - ex.metadata[:started_at]
-  end
-  
   
   def dump_summary(duration, example_count, failure_count, pending_count)
     elapsed = Time.now - @started_at
     reporter = self
-    
-    passing_examples = ( ( examples - pending_examples ) - failed_examples )
     extractor = SnippetExtractor.new
-    
     report_file = File.join( TARGET_DIR, 'surefire-reports', 'TEST-rspec.xml' )
     FileUtils.mkdir_p( File.dirname( report_file ) )
     File.open( report_file, 'w' ) do |report_io|
       Emitter.new( report_io ) do
         tag( :testsuite, :time=>elapsed, :errors=>0, :tests=>example_count, :skipped=>pending_count, :failures=>failure_count, :name=>File.basename( BASE_DIR ) ) do
-          passing_examples.each do |ex|
+          reporter.passing_examples.each do |ex|
             class_name = File.basename( ex.metadata[:file_path], '_spec.rb' )
-            tag( :testcase, :time=>ex.metadata[:elapsed], :classname=>class_name, :name=>ex.metadata[:description] )
+            tag( :testcase, :time=>ex.metadata[:execution_result][:run_time], :classname=>class_name, :name=>ex.metadata[:description] )
           end
           reporter.pending_examples.each do |ex|
             class_name = File.basename( ex.metadata[:file_path], '_spec.rb' )
@@ -56,7 +40,7 @@ class MavenSurefireReporter < RSpec::Core::Formatters::BaseFormatter
           reporter.failed_examples.each do |ex|
             class_name = File.basename( ex.metadata[:file_path], '_spec.rb' )
             exception = ex.metadata[:execution_result][:exception]
-            tag( :testcase, :time=>ex.metadata[:elapsed], :classname=>class_name, :name=>ex.metadata[:description] ) do
+            tag( :testcase, :time=>ex.metadata[:execution_result][:run_time], :classname=>class_name, :name=>ex.metadata[:description] ) do
             relevant_line = reporter.find_relevant_line( ex, exception )
               tag( :failure, :message=>relevant_line ) do
                 content( exception.backtrace() )
