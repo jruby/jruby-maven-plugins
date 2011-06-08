@@ -4,6 +4,7 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
 
   def initialize(output)
     super( output )
+    @printed_stacks = {}
     @started_at = Time.now
   end
   
@@ -101,8 +102,8 @@ class MavenConsoleProgressFormatter < RSpec::Core::Formatters::BaseFormatter
     if ( node[:example_group] )
       depth = depth + print_stack( node[:example_group] )
     end
-    puts "#{"  " * depth }#{node[:description]}" unless node[:printed_stack]
-    node[:printed_stack] = true
+    puts "#{"  " * depth }#{node[:description]}" unless @printed_stacks[node[:description]]
+    @printed_stacks[node[:description]] = true
     depth
   end
   
