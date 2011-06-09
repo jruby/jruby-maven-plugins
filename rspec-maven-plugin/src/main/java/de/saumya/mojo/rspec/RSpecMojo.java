@@ -168,7 +168,8 @@ public class RSpecMojo extends AbstractTestMojo {
             String line = null;
 
             while ((line = reader.readLine()) != null) {
-                if (line.contains("failures")) {
+                // singular case needs to be treated as well
+                if (line.contains("failure") && line.contains("example")) {
                     result.message = line.replaceFirst("\";</.*>", "")
                             .replaceFirst("<.*\"", "");
                     break;
