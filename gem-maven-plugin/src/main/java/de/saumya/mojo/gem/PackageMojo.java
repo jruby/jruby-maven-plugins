@@ -144,7 +144,7 @@ public class PackageMojo extends AbstractGemMojo {
                     }
                 }
 
-                this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                this.factory.newScriptFromJRubyJar("gem")
                         .addArg("build", this.gemspec)
                         .executeIn(launchDirectory());
 
@@ -371,7 +371,7 @@ public class PackageMojo extends AbstractGemMojo {
 
         final File localGemspec = new File(launchDirectory(), gemSpec.getName());
 
-        this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+        this.factory.newScriptFromJRubyJar("gem")
                 .addArg("build", gemSpec)
                 .executeIn(gemDir);
 

@@ -29,7 +29,7 @@ public class SpecMojo extends AbstractJRubyMojo {
             getLog().warn("please specifiy a gem file, use '-Dgemfile=...'");
         }
         else {
-            this.factory.newScriptFromResource(AbstractGemMojo.GEM_RUBY_COMMAND)
+            this.factory.newScriptFromJRubyJar("gem")
                     .addArg("spec")
                     .addArgs(this.gemfile)
                     .addArgs(this.args)

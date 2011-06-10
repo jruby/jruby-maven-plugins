@@ -175,7 +175,7 @@ public class GemifyMojo extends AbstractGemMojo {
         else {
             // assume we have the dependent gems in place so tell gems to
             // install them without dependency check
-            final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+            final Script script = this.factory.newScriptFromJRubyJar("gem")
                     .addArg("install")
                     .addArg((installRDoc ? "--" : "--no-") + "rdoc")
                     .addArg((installRI ? "--" : "--no-") + "ri")
@@ -326,7 +326,7 @@ public class GemifyMojo extends AbstractGemMojo {
         }
         // this.launchDir = gemDir;
         getLog().info("<gemify> B");
-        this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+        this.factory.newScriptFromJRubyJar("gem")
                 .addArg("build")
                 .addArg(gemSpec)
                 .executeIn(gemDir);

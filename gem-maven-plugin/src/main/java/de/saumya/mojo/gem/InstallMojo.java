@@ -34,7 +34,7 @@ public class InstallMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, MojoFailureException {
-        final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+        final Script script = this.factory.newScriptFromJRubyJar("gem")
                 .addArg("install");
         // no given gem and pom artifact in place
         if (this.gem == null && this.project.getArtifact() != null

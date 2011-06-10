@@ -35,7 +35,7 @@ public class PushMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, MojoFailureException {
-        final Script script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+        final Script script = this.factory.newScriptFromJRubyJar("gem")
                 .addArg("push");
         if(this.project.getArtifact().getFile() == null){
             File f = new File(this.project.getBuild().getDirectory(), this.project.getBuild().getFinalName() +".gem");
@@ -43,8 +43,6 @@ public class PushMojo extends AbstractGemMojo {
                 this.project.getArtifact().setFile(f);
             }
         }
-        System.out.println(this.project.getBuild().getDirectory());
-        System.out.println(this.project.getBuild().getFinalName());
         // no given gem and pom artifact in place
         if (this.gem == null && this.project.getArtifact() != null
                 && this.project.getArtifact().getFile() != null

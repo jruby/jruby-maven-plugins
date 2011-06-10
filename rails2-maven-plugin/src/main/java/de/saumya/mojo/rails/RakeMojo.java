@@ -31,7 +31,7 @@ public class RakeMojo extends AbstractRailsMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
-        this.factory.newScriptFromResource(RAKE_RUBY_COMMAND)
+        this.factory.newScriptFromJRubyJar("rake")
                 .addArgs(this.rakeArgs)
                 .addArgs(this.args)
                 .addArgs(this.task)

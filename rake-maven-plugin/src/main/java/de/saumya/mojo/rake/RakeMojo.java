@@ -57,7 +57,7 @@ public class RakeMojo extends AbstractGemMojo {
                                           this.localRepository);
 
         }
-        final Script script = this.factory.newScriptFromResource(RAKE_RUBY_COMMAND);
+        final Script script = this.factory.newScriptFromJRubyJar("rake");
         script.addArg("-f", this.rakefile);
 
         if (this.rakeArgs != null) {

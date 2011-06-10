@@ -22,7 +22,7 @@ public class GemMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
-        this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+        this.factory.newScriptFromJRubyJar("gem")
                 .addArgs(this.gemArgs)
                 .addArgs(this.args)
                 .execute();
