@@ -123,7 +123,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         }
         else {
             try {
-                factory = newScriptFactory(resolveJRUBYCompleteArtifact(run.version));
+                factory = newScriptFactory(resolveJRubyCompleteArtifact(run.version));
             } catch (DependencyResolutionRequiredException e) {
                 throw new MojoExecutionException("could not resolve jruby", e);
             }
