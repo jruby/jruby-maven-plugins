@@ -92,7 +92,7 @@ public class DefaultGemManager implements GemManager {
     public ArtifactRepository defaultGemArtifactRepositoryForVersion(
             final String artifactVersion) {
         final String preRelease = artifactVersion != null
-                && artifactVersion.matches(".*[a-z][A-Z].*") ? "pre" : "";
+                && artifactVersion.matches(".*[a-zA-Z].*") ? "pre" : "";
         return this.repositorySystem.createArtifactRepository("rubygems-"
                                                                       + preRelease
                                                                       + "releases",
@@ -151,13 +151,20 @@ public class DefaultGemManager implements GemManager {
     }
 
     // convenience methods
-
     public Artifact createArtifact(final String groupId,
             final String artifactId, final String version, final String type) {
+        return createArtifact(groupId, artifactId, version, null, type);
+    }
+    
+    public Artifact createArtifact(final String groupId,
+            final String artifactId, final String version, final String classifier, final String type) {
         final Dependency dep = new Dependency();
         dep.setGroupId(groupId);
         dep.setArtifactId(artifactId);
         dep.setType(type);
+        if(classifier != null){
+            dep.setClassifier(classifier);
+        }
         dep.setVersion(version == null ? "[0,)" : version);
         return this.repositorySystem.createDependencyArtifact(dep);
     }

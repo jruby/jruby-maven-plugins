@@ -27,11 +27,14 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
  */
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
-    private static String DEFAULT_JRUBY_VERSION = "1.6.1";
+    protected static final String JRUBY_COMPLETE = "jruby-complete";
 
-    public static final String GEM_RUBY_COMMAND = "META-INF/jruby.home/bin/gem";
+    protected static final String JRUBY_CORE = "jruby-core";
 
-    public static final String RAKE_RUBY_COMMAND = "META-INF/jruby.home/bin/rake";
+    protected static final Object JRUBY_STDLIB = "jruby-stdlib";
+
+    protected static String DEFAULT_JRUBY_VERSION = "1.6.2";
+
 
     /**
      * common arguments
@@ -145,7 +148,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected ScriptFactory newScriptFactory() throws MojoExecutionException {
         try {
-            return newScriptFactory(resolveJRUBYCompleteArtifact());
+            return newScriptFactory(resolveJRubyArtifact());
         }
         catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("could not resolve jruby", e);
@@ -155,8 +158,11 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected ScriptFactory newScriptFactory(Artifact artifact) throws MojoExecutionException {
         try {
             final ScriptFactory factory = new ScriptFactory(this.logger,
-                    this.classRealm, resolveJRUBYCompleteArtifact().getFile(),
-                    this.project.getTestClasspathElements(), this.jrubyFork);
+                    this.classRealm, 
+                    artifact.getArtifactId().equals(JRUBY_CORE)? null: artifact.getFile(),
+                    artifact.getArtifactId().equals(JRUBY_CORE)? retrieveStdlibArtifact().getFile(): artifact.getFile(),
+                    this.project.getTestClasspathElements(), 
+                    this.jrubyFork);
             return factory;
         } catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("could not resolve jruby", e);
@@ -167,6 +173,18 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             throw new MojoExecutionException(
                     "could not initialize script factory", e);
         }
+    }
+
+    protected Artifact retrieveStdlibArtifact() throws DependencyResolutionRequiredException {
+        for (final Dependency artifact : this.project.getDependencies()) {
+            if (artifact.getArtifactId().equals(JRUBY_STDLIB)) {
+                return resolveJRubyArtifact(this.repositorySystem
+                        .createArtifact(artifact.getGroupId(), artifact
+                                .getArtifactId(), artifact.getVersion(),
+                                artifact.getType()));
+            }
+        }
+        return null;
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -205,21 +223,20 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         return this.launchDirectory;
     }
 
-    protected Artifact resolveJRUBYCompleteArtifact(final String version)
+    protected Artifact resolveJRubyCompleteArtifact(final String version)
             throws DependencyResolutionRequiredException {
         getLog().debug("resolve jruby for version " + version);
         final Artifact artifact = this.repositorySystem.createArtifact(
-                "org.jruby", "jruby-complete", version, "jar");
-        return resolveJRUBYCompleteArtifact(artifact);
+                "org.jruby", JRUBY_COMPLETE, version, "jar");
+        return resolveJRubyArtifact(artifact);
     }
 
-    private Artifact resolveJRUBYCompleteArtifact(final Artifact artifact)
+    private Artifact resolveJRubyArtifact(final Artifact artifact)
             throws DependencyResolutionRequiredException {
         final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
         request.setArtifact(artifact);
         request.setLocalRepository(this.localRepository);
-        request.setRemoteRepositories(this.project
-                .getRemoteArtifactRepositories());
+        request.setRemoteRepositories(this.project.getRemoteArtifactRepositories());
         this.repositorySystem.resolve(request);
 
         if (this.jrubyVerbose) {
@@ -230,27 +247,28 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         return artifact;
     }
 
-    protected Artifact resolveJRUBYCompleteArtifact()
-            throws DependencyResolutionRequiredException,
+    protected Artifact resolveJRubyArtifact() throws DependencyResolutionRequiredException,
             MojoExecutionException {
         if (this.jrubyVersion != null) {
             // preference to command line or property version
-            return resolveJRUBYCompleteArtifact(this.jrubyVersion);
-        } else {
-            // then take jruby from the dependencies
-            for (final Object o : this.project.getDependencies()) {
-                final Dependency artifact = (Dependency) o;
-                if (artifact.getArtifactId().equals("jruby-complete")
-                        && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
+            return resolveJRubyCompleteArtifact(this.jrubyVersion);
+        } 
+        else {
+            // then take jruby from the dependencies either jruby-complete or jruby-core
+            for (final Dependency artifact : this.project.getDependencies()) {
+                if ((artifact.getArtifactId().equals(JRUBY_COMPLETE)
+                      ||  artifact.getArtifactId().equals(JRUBY_CORE))
+                      // TODO this condition is not needed ?
+                            && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
                         && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
-                    return resolveJRUBYCompleteArtifact(this.repositorySystem
+                    return resolveJRubyArtifact(this.repositorySystem
                             .createArtifact(artifact.getGroupId(), artifact
                                     .getArtifactId(), artifact.getVersion(),
                                     artifact.getType()));
                 }
             }
         }
-        // take the default version of jruby
-        return resolveJRUBYCompleteArtifact(DEFAULT_JRUBY_VERSION);
+        // finally fall back on the default version of jruby
+        return resolveJRubyCompleteArtifact(DEFAULT_JRUBY_VERSION);
     }
 }

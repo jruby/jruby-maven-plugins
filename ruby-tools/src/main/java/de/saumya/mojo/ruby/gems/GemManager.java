@@ -58,7 +58,10 @@ public interface GemManager {
 
     public Artifact createArtifact(final String groupId,
             final String artifactId, final String version, final String type);
-
+    
+    public Artifact createArtifact(final String groupId,
+            final String artifactId, final String version, final String classifier, final String type);
+    
     public MavenProject buildModel(Artifact artifact,
             final RepositorySystemSession repositorySystemSession,
             final ArtifactRepository localRepository,

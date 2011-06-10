@@ -84,9 +84,11 @@ class AntLauncher extends AbstractLauncher {
         	java.createJvmarg().setValue(arg);	
         }
         
+        if (this.factory.jrubyJar != null){
         java.createJvmarg().setValue("-Xbootclasspath/a:"
                 + this.factory.jrubyJar.getAbsolutePath());
-
+        }
+        
         if (outputFile != null) {
             java.setOutput(outputFile);
         }

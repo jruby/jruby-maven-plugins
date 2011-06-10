@@ -1,0 +1,33 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>typhoeus-test</artifactId>
+  <version>0.0.0</version>
+<!--  <repositories>
+    <repository>
+      <id>rubygems-releases</id>
+      <url>http://gems.saumya.de/releases</url>
+    </repository>
+  </repositories>
+-->
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>typhoeus</artifactId>
+      <version>0.2.4</version>
+      <type>gem</type>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>@project.version@</version>
+        <configuration>
+          <supportNative>true</supportNative>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

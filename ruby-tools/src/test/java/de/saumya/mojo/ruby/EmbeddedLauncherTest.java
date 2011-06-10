@@ -50,9 +50,9 @@ public class EmbeddedLauncherTest extends TestCase {
         this.factory = new GemScriptFactory(logger,
                 null,
                 new File(""),
+                new File(""),
                 classpathElements,
-                false,
-                config);
+                false, config);
 
         // for eclipse
         final File output = new File("target/test-classes");

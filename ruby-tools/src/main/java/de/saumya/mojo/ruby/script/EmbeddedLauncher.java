@@ -58,7 +58,9 @@ class EmbeddedLauncher extends AbstractLauncher {
             }
             catch (final NoSuchRealmException e) {
                 jruby = classRealm.getWorld().newRealm("jruby");
-                jruby.addConstituent(jrubyJar.toURI().toURL());
+                if(jrubyJar != null){
+                    jruby.addConstituent(jrubyJar.toURI().toURL());
+                }
             }
             try {
                 jruby.getWorld().disposeRealm("pom");

@@ -5,6 +5,7 @@ package de.saumya.mojo.ruby.gems;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +37,6 @@ public class GemsInstaller {
         this.manager = manager;
     }
 
-    public static final String GEM_RUBY_COMMAND = "META-INF/jruby.home/bin/gem";
-
     public void installPom(final MavenProject pom) throws IOException,
             ScriptException, GemException {
         installGems(pom, null);
@@ -62,7 +61,9 @@ public class GemsInstaller {
                                                                        remoteRepositories);
         }
         else {
-            remoteRepositories = Collections.singletonList(this.manager.defaultGemArtifactRepositoryForVersion(version));
+            remoteRepositories = new ArrayList<ArtifactRepository>();
+            this.manager.addDefaultGemRepository(remoteRepositories);
+            this.manager.addDefaultGemRepositoryForVersion(version, remoteRepositories);
             artifact = this.manager.createGemArtifact(name, version);
         }
         final MavenProject pom = this.manager.buildPom(artifact,
@@ -85,10 +86,16 @@ public class GemsInstaller {
     }
 
     public void installGems(final MavenProject pom, final Collection<Artifact> artifacts,
-                final ArtifactRepository localRepository) throws IOException,
+            final ArtifactRepository localRepository) throws IOException,
+            ScriptException, GemException {
+        installGems(pom, artifacts, localRepository, pom.getRemoteArtifactRepositories());
+    }
+    
+    public void installGems(final MavenProject pom, final Collection<Artifact> artifacts,
+                final ArtifactRepository localRepository, List<ArtifactRepository> remoteRepos) throws IOException,
                 ScriptException, GemException {
-        // start with empty script which will be create when first
-        // un-installed gem is found
+        // start with empty script. 
+        // script will be create when first un-installed gem is found
         Script script = null;
         if (pom != null) {
             boolean hasAlreadyOpenSSL = false;
@@ -96,7 +103,7 @@ public class GemsInstaller {
                 if (!artifact.getFile().exists()) {
                     this.manager.resolve(artifact,
                                          localRepository,
-                                         pom.getRemoteArtifactRepositories());
+                                         remoteRepos);
 
                 }
                 script = maybeAddArtifact(script, artifact);
@@ -108,7 +115,7 @@ public class GemsInstaller {
                     if (!artifact.getFile().exists()) {
                         this.manager.resolve(artifact,
                                              localRepository,
-                                             pom.getRemoteArtifactRepositories());
+                                             remoteRepos);
 
                     }
                     script = maybeAddArtifact(script, artifact);
@@ -121,12 +128,11 @@ public class GemsInstaller {
                     && pom.getArtifact().getFile().isFile()) {
                 script = maybeAddArtifact(script, pom.getArtifact());
             }
-            if (!this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL) {
+            if (!this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL && script != null) {
                 // keep the version hard-coded to stay reproducible
                 final Artifact openssl = this.manager.createGemArtifact(JRUBY_OPENSSL,
                                                                         "0.7");
 
-                final List<ArtifactRepository> remoteRepos = pom.getRemoteArtifactRepositories();
                 if (pom.getFile() == null) {
                     // we do not have a pom so we need the default gems repo
                     this.manager.addDefaultGemRepository(remoteRepos);
@@ -166,7 +172,7 @@ public class GemsInstaller {
         if (artifact.getType().contains("gem")) {
             if (!exists(artifact)) {
                 if (script == null) {
-                    script = this.factory.newScriptFromResource(GEM_RUBY_COMMAND)
+                    script = this.factory.newScriptFromJRubyJar("gem")
                             .addArg("install")
                             .addArg("--ignore-dependencies")
                             .addArg(booleanArg(this.config.isAddRdoc(), "rdoc"))

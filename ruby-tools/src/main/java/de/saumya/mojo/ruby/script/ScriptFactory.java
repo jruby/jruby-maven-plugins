@@ -25,7 +25,10 @@ public class ScriptFactory {
 
     final Arguments            switches     = new Arguments();
     final Arguments            jvmArgs      = new Arguments();
+
     private final Map<String, String>  env          = new HashMap<String, String>();
+    private final File stdlibJar;
+
     final Logger               logger;
     final ClassRealm           classRealm;
     final File                 jrubyJar;
@@ -35,10 +38,17 @@ public class ScriptFactory {
     final Launcher             launcher;
 
     public ScriptFactory(final Logger logger, final ClassRealm classRealm,
-            final File jrubyJar, final List<String> classpathElements,
-            final boolean fork) throws ScriptException, IOException {
+            final File jrubyJar, File stdlibJar,
+            final List<String> classpathElements, final boolean fork) throws ScriptException, IOException {
         this.logger = logger;
+        
         this.jrubyJar = jrubyJar;
+        this.stdlibJar = stdlibJar;
+        if(this.jrubyJar != null){
+            this.logger.debug("script uses jruby jar:" + this.jrubyJar.getAbsolutePath());
+        }
+        this.logger.debug("script uses jruby stdlib jar:" + this.stdlibJar.getAbsolutePath());
+        
         this.classpathElements = classpathElements == null
                 ? NO_CLASSPATH
                 : Collections.unmodifiableList(classpathElements);
@@ -51,7 +61,9 @@ public class ScriptFactory {
             catch (final NoSuchRealmException e) {
                 try {
                     jruby = classRealm.getWorld().newRealm("jruby");
-                    jruby.addConstituent(jrubyJar.toURI().toURL());
+                    if(jrubyJar != null){
+                        jruby.addConstituent(jrubyJar.toURI().toURL());
+                    }
                 }
                 catch (final DuplicateRealmException ee) {
                     throw new ScriptException("could not setup classrealm for jruby",
@@ -81,7 +93,7 @@ public class ScriptFactory {
     public Script newScriptFromJRubyJar(final String scriptName)
             throws MalformedURLException {
         return new Script(this, new URL("jar:file:"
-                + this.jrubyJar.getAbsolutePath()
+                + this.stdlibJar.getAbsolutePath()
                 + "!/META-INF/jruby.home/bin/" + scriptName));
     }
 
