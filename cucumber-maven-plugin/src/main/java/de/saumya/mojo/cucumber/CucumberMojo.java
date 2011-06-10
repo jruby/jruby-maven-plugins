@@ -70,11 +70,12 @@ public class CucumberMojo extends AbstractGemMojo {
 	@Override
 	public void executeWithGems() throws MojoExecutionException,
 			ScriptException, IOException, GemException {
-        if (project.getBasedir() != null && !cucumberDirectory.exists() && this.args == null) {
-            getLog().info("Skipping cucumber tests since " + cucumberDirectory + " is missing");
+        if (this.project.getBasedir() != null && this.cucumberDirectory != null && 
+                !this.cucumberDirectory.exists() && this.args == null) {
+            getLog().info("Skipping cucumber tests since " + this.cucumberDirectory + " is missing");
             return;
         }
-        getLog().debug("Running Cucumber tests from " + cucumberDirectory);
+        getLog().debug("Running Cucumber tests from " + this.cucumberDirectory);
 
         if (this.project.getBasedir() == null) {
 
