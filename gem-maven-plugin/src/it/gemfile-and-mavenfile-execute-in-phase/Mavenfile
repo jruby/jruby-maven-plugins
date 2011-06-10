@@ -1,4 +1,4 @@
 execute_in_phase(:install) do
 puts "hello"
 end
-properties['jruby.plugins.version'] = '0.25.0'
+properties['jruby.plugins.version'] = '0.27.0'
