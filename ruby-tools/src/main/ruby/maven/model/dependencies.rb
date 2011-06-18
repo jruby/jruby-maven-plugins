@@ -56,7 +56,7 @@ module Maven
           nil
         else
           low, high = convert(args[0])
-          low, high = convert(args[1], low, high) if args[1]
+          low, high = convert(args[1], low, high) if args[1] =~ /[=~><]/
           if low == high
             low
           else
@@ -76,19 +76,25 @@ module Maven
         elsif arg =~ /<=/
           val = arg.sub(/<=\s*/, '')
           [(nil || low), "#{val}]"]
-        elsif arg =~ />/
+        # treat '!' the same way as '>' since maven can not describe such range
+        elsif arg =~ /[!>]/  
           val = arg.sub(/>\s*/, '')
           ["(#{val}", (nil || high)]
         elsif arg =~ /</
           val = arg.sub(/<\s*/, '')
           [(nil || low), "#{val})"]
-        elsif arg =~ /=/
+        elsif arg =~ /\=/
           val = arg.sub(/=\s*/, '')
           [val, val]
         else
           [arg, arg]
         end
       end
+    end
+
+    class Parent < Coordinate
+      tags :relative_path
+
     end
 
     class Exclusion < Tag
@@ -128,14 +134,20 @@ module Maven
       def initialize(type, *args)
         super(*args)
         @type = type
+        args.flatten!
+        if args[0] =~ /:/ && args.size == 3
+          @classifier = args[2] unless args[2] =~ /[=~><]/
+        elsif args.size == 4
+          @classifier = args[3] unless args[3] =~ /[=~><]/
+        end
       end
 
       def hash
-        "#{group_id}:#{artifact_id}:#{@type}".hash
+        "#{group_id}:#{artifact_id}:#{@type}:#{@classifier}".hash
       end
 
       def ==(other)
-        super && @type == other.instance_variable_get(:@type)
+        super && @type == other.instance_variable_get(:@type) && @classifier == other.instance_variable_get(:@classifier)
       end
       alias :eql? :==
 
@@ -188,6 +200,10 @@ module Maven
 
       def gem?(*args)
         dependencies.member?(Dependency.new(:gem, ['rubygems', *args].flatten))
+      end
+
+      def detect_gem(name)
+        dependencies.detect { |d| d.type.to_sym == :gem && d.artifact_id == name }
       end
 
       def maven_gem?(*args)
