@@ -4,7 +4,7 @@ module Maven
   module Model
 
     class Build < Tag
-      tags :final_name, :plugins
+      tags :source_directory, :script_source_directory, :test_source_directory, :output_directory, :test_output_directory, :default_goal, :directory, :final_name, :plugins
 
       def plugins(&block)
         @plugins ||= PluginHash.new
@@ -42,7 +42,7 @@ module Maven
       end
 
       def with(config)
-        self.configuration = config
+        self.configuration config
       end
 
       def in_phase(phase, name = nil, &block)
@@ -55,7 +55,7 @@ module Maven
       end
 
       def execute_goal(goal)
-        execution.execute(goal)
+        execution.execute_goal(goal)
       end
 
       def executions
@@ -66,12 +66,9 @@ module Maven
         executions.get(name, &block)
       end
 
-      def configuration=(c)
-        if c.is_a? Hash
-          @configuration = Configuration.new(c)
-        else
-          @configuration = c
-        end
+      def configuration(c = nil)
+        @configuration = Configuration.new(c) if c
+        @configuration ||= Configuration.new({})
       end
     end
 
@@ -82,12 +79,9 @@ module Maven
         self.id id if id
       end
 
-      def configuration=(c)
-        if c.is_a? Hash
-          @configuration = Configuration.new(c)
-        else
-          @configuration = c
-        end
+      def configuration(c = nil)
+        @configuration = Configuration.new(c) if c
+        @configuration ||= Configuration.new({})
       end
 
       def execute_goal(g)
@@ -96,7 +90,7 @@ module Maven
       end
 
       def with(config)
-        self.configuration = config
+        self.configuration config
       end
 
       def goals
@@ -118,7 +112,7 @@ module Maven
     end
 
     class Profile < Tag
-      tags :id, :activation
+      tags :id, :activation, :repositories, :plugin_repositories
       
       include Dependencies
 
@@ -158,6 +152,34 @@ module Maven
            block.call(@activation) if block
            @activation
          end
+      end
+
+      def repositories(&block)
+        @repositories ||= ModelHash.new(Repository)
+        if block
+          block.call(@repositories)
+        end
+        @repositories
+      end
+
+      def repository(id, url = nil, &block)
+        repo = repositories.get(id, &block)
+        repo.url = url if url
+        repo
+      end
+
+      def plugin_repositories(&block)
+        @plugin_repositories ||= ModelHash.new(PluginRepository)
+        if block
+          block.call(@plugin_repositories)
+        end
+        @plugin_repositories
+      end
+
+      def plugin_repository(id, url = nil, &block)
+        repo = plugin_repositories.get(id, &block)
+        repo.url = url if url
+        repo
       end
 
       def plugin(*args, &block)
@@ -216,8 +238,9 @@ module Maven
       end
     end
 
+
     class Project < Coordinate
-      prepend_tags :model_version
+      prepend_tags :model_version, :parent
 
       tags :name, :packaging, :description, :url, :developers, :licenses, :repositories, :plugin_repositories
 
@@ -228,7 +251,6 @@ module Maven
       def initialize(*args, &block)
         super(*args)
         model_version "4.0.0"
-        version "0.0.0" unless version
         if block
           block.call(self)
         end
@@ -237,6 +259,11 @@ module Maven
 
       def _name
         "project"
+      end
+
+      def version(val = nil)
+        self.version = val if val
+        @version ||= (@parent.nil? ? '0.0.0' : @parent.version)
       end
 
       def name(val = nil)
@@ -255,6 +282,12 @@ module Maven
 
       def description=(val)
         @description = "<![CDATA[#{val}]]>"
+      end
+      
+      def parent(*args, &block)
+        @parent ||= Parent.new(*args)
+        @parent.call(block) if block
+        @parent
       end
 
       def execute_in_phase(phase, name = nil, &block)
