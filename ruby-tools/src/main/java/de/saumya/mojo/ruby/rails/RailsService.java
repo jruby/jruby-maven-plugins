@@ -54,7 +54,7 @@ public class RailsService {
                                new File(appPath),
                                null,
                                railsVersion,
-                               args);
+                               null, args);
     }
 
     public void rake(final String tasks) throws IOException, ScriptException,

@@ -11,13 +11,15 @@ import de.saumya.mojo.ruby.script.ScriptException;
 
 public interface RailsManager {
 
+    public enum ORM { activerecord, datamapper }
+
     public abstract void initInstaller(final GemsInstaller installer,
             final File launchDirectory) throws RailsException, IOException;
 
     public abstract void createNew(final GemsInstaller installer,
             final RepositorySystemSession repositorySystemSession,
             final File appPath, String database, final String railsVersion,
-            final String... args) throws RailsException, GemException,
+            ORM orm, final String... args) throws RailsException, GemException,
             IOException, ScriptException;
 
     public abstract void rake(final GemsInstaller installer,

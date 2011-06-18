@@ -44,6 +44,11 @@
 	  <role-hint>default</role-hint>
 	  <field-name>velocityComponent</field-name>
 	</requirement>
+	<requirement>  
+	  <role>org.codehaus.plexus.logging.Logger</role>
+	  <role-hint>default</role-hint>
+	  <field-name>logger</field-name>
+	</requirement>
       </requirements>
     </component>
     <component>

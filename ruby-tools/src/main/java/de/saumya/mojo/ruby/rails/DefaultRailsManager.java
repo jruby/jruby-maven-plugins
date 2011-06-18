@@ -26,6 +26,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.velocity.VelocityContext;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.velocity.VelocityComponent;
@@ -39,7 +40,6 @@ import de.saumya.mojo.ruby.script.ScriptException;
 @Component(role = RailsManager.class)
 public class DefaultRailsManager implements RailsManager {
 
-    public static final String         RAKE_RUBY_COMMAND = "META-INF/jruby.home/bin/rake";
     private static Map<String, String> DATABASES         = new HashMap<String, String>();
     static {
         DATABASES.put("sqlite", "sqilte3");
@@ -54,6 +54,9 @@ public class DefaultRailsManager implements RailsManager {
 
     @Requirement
     private VelocityComponent          velocityComponent;
+    
+    @Requirement
+    private Logger                     logger;
 
     public void initInstaller(final GemsInstaller installer,
             final File launchDirectory) throws RailsException, IOException {
@@ -68,6 +71,8 @@ public class DefaultRailsManager implements RailsManager {
         final File boot = new File(new File(launchDirectory, "config"),
                 "boot.rb");
         if (boot.exists() && new File(launchDirectory, "Gemfile.maven").exists()) {
+            this.logger.info( "DEPRECATED: the use of Gemfile.maven deprecated. " +
+            		"use '$ mvn rails:pom' to generate a pom out of the Gemfile");
             InputStream bootIn = null;
             InputStream bootOrig = null;
             InputStream bootPatched = null;
@@ -110,7 +115,7 @@ public class DefaultRailsManager implements RailsManager {
     public void createNew(final GemsInstaller installer,
             final RepositorySystemSession repositorySystemSession,
             final File appPath, String database, String railsVersion,
-            final String... args) throws RailsException, GemException,
+            ORM orm, final String... args) throws RailsException, GemException,
             IOException, ScriptException
 
     {
@@ -150,40 +155,30 @@ public class DefaultRailsManager implements RailsManager {
         if (database != null) {
             script.addArg("-d", database);
         }
+        if (repositorySystemSession.isOffline()) {
+            this.logger.info("system is offline: using jruby rails template from jar file - might be outdated");
+            script.addArg("-m", getClass().getResource("/rails-templates/" + orm.name() + ".rb").toString()
+                          .replaceFirst("^jar:", ""));
+        }
+        else {
+            switch(orm){
+            case activerecord:
+                script.addArg("-m", "http://jruby.org/rails3.rb");
+                break;
+            case datamapper:
+                script.addArg("-m", "http://jruby.org/rails3.rb");
+                break;
+            default:
+                throw new RuntimeException( "unknown ORM :" + orm);
+            }
+        }
+
+        if (!railsVersion.startsWith("3.0")) {
+            script.addArg("--skip-bundle");
+        }
         script.execute();
 
-        // correct the database for the jdbc adapter
-        database = database.replace("postgresql", "postgres");
         if (appPath != null) {
-            if ("mysql".equals(database)) {
-
-                final File yaml = new File(new File(appPath, "config"),
-                        "database.yml");
-                try {
-                    FileUtils.fileWrite(yaml.getAbsolutePath(),
-                                        FileUtils.fileRead(yaml)
-                                                .replaceAll("mysql2", "mysql"));
-                }
-                catch (final IOException e) {
-                    throw new RailsException("failed to filter " + script, e);
-                }
-            }
-            // rectify the Gemfile to allow both ruby + jruby to work
-            final File gemfile = new File(appPath, "Gemfile");
-            try {
-                FileUtils.fileWrite(gemfile.getAbsolutePath(),
-                                    FileUtils.fileRead(gemfile)
-                                            .replaceFirst("\ngem (.[^r][a-z0-9-]+.*)\n",
-                                                          "\ngem $1 unless defined?(JRUBY_VERSION)\n"
-                                                                  + "gem \"activerecord-jdbc-adapter\" if defined?(JRUBY_VERSION)\n"
-                                                                  + "gem \"jdbc-"
-                                                                  + database
-                                                                  + "\", :require => false if defined?(JRUBY_VERSION)\n"));
-            }
-            catch (final IOException e) {
-                throw new RailsException("failed to filter " + script, e);
-            }
-
             installer.factory.newScriptFromResource("maven/tools/pom_generator.rb")
                 .addArg("rails")
                 .addArg("Gemfile")
@@ -230,9 +225,16 @@ public class DefaultRailsManager implements RailsManager {
         final String keystore = "src/test/resources/server.keystore";
         final File keystoreFile = new File(launchDirectory, keystore);
         if (!keystoreFile.exists()) {
-            FileUtils.copyURLToFile(getClass().getResource("/archetype-resources/"
-                                            + keystore),
-                                    new File(launchDirectory, keystore));
+            FileUtils.copyURLToFile(getClass().getResource("/rails-resources/"
+                                            + keystore), keystoreFile);
+        }
+        
+        // add a monkey patch for throwables
+        final String javaThrowable = "config/initializers/java_throwable_monkey_patch.rb";
+        final File javaThrowableFile = new File(launchDirectory, keystore);
+        if (!javaThrowableFile.exists()) {
+            FileUtils.copyURLToFile(getClass().getResource("/rails-resources/"
+                                            + javaThrowable), javaThrowableFile);
         }
 
     }
@@ -249,7 +251,7 @@ public class DefaultRailsManager implements RailsManager {
         if (!force && templateFile.exists()) {
             return;
         }
-        final InputStream input = getClass().getResourceAsStream("/archetype-resources/"
+        final InputStream input = getClass().getResourceAsStream("/rails-resources/"
                 + template);
 
         try {
@@ -282,7 +284,7 @@ public class DefaultRailsManager implements RailsManager {
             final File launchDirectory, final String environment,
             final String task, final String... args) throws IOException,
             ScriptException, GemException, RailsException {
-        final Script script = installer.factory.newScriptFromResource(RAKE_RUBY_COMMAND);
+        final Script script = installer.factory.newScriptFromJRubyJar("rake");
         script.addArgs(task);
         for (final String arg : args) {
             script.addArg(arg);
