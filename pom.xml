@@ -54,7 +54,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <invoker.skip>true</invoker.skip>
     <maven.version>3.0.2</maven.version>
-    <jruby.version>1.5.6</jruby.version>
+    <jruby.version>1.6.2</jruby.version>
   </properties>
   <build>
     <plugins>
@@ -83,13 +83,10 @@
     <module>jruby-maven-plugin</module>
     <module>gem-maven-plugin</module>
     <module>rspec-maven-plugin</module>
-    <module>rails-maven-archetype</module>
     <module>rails2-maven-plugin</module>
     <module>rails3-maven-plugin</module>
     <module>cucumber-maven-plugin</module>
-<!--
     <module>gem-proxy</module>
--->
     <module>ruby-tools</module>
     <module>rake-maven-plugin</module>
     <module>runit-maven-plugin</module>
