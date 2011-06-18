@@ -15,6 +15,13 @@ import org.jruby.embed.ScriptingContainer;
 
 public class GemScriptingContainer extends ScriptingContainer {
 
+    public GemScriptingContainer() {
+        this(LocalContextScope.SINGLETON,
+                LocalVariableBehavior.PERSISTENT,
+                null,
+                null);
+    }
+
     public GemScriptingContainer(final File gemHome, final File gemPath) {
         this(LocalContextScope.SINGLETON,
                 LocalVariableBehavior.PERSISTENT,
