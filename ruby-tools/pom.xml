@@ -93,6 +93,12 @@
   <profiles>
     <profile>
       <id>integration-test</id>
+      <repositories>
+	<repository>
+	  <id>rubygems-releases</id>
+	  <url>http://gems.saumya.de/releases</url>
+	</repository>
+      </repositories>
       <pluginRepositories>
 	<pluginRepository>
 	  <id>rubygems-releases</id>
@@ -104,7 +110,7 @@
 	  <plugin>
 	    <groupId>de.saumya.mojo</groupId>
 	    <artifactId>rspec-maven-plugin</artifactId>
-	    <version>0.26.0</version>
+	    <version>${project.version}</version>
 	    <configuration>
 	      <specSourceDirectory>src/test/spec</specSourceDirectory>
 	    </configuration>
@@ -119,7 +125,7 @@
 	      <dependency>
 		<groupId>rubygems</groupId>
 		<artifactId>rspec</artifactId>
-		<version>2.4.0</version>
+		<version>2.6.0</version>
 		<type>gem</type>
 	      </dependency>
 	    </dependencies>
