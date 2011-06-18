@@ -1,1 +1,0 @@
-rails2:generate rails2:rake post-integration-test
