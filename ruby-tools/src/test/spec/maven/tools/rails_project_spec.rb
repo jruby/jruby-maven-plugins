@@ -51,16 +51,22 @@ describe Maven::Tools::RailsProject do
       <type>jar</type>
     </dependency>
     <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>bundler</artifactId>
+      <version>[0.0.0,)</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
       <groupId>org.jruby.rack</groupId>
       <artifactId>jruby-rack</artifactId>
-      <version>1.0.7</version>
+      <version>1.0.9</version>
       <type>jar</type>
     </dependency>
   </dependencies>
   <properties>
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.path>${project.build.directory}/rubygems</gem.path>
-    <jetty.version>7.2.2.v20101205</jetty.version>
+    <jetty.version>7.4.2.v20110526</jetty.version>
     <jruby.plugins.version>@project.version@</jruby.plugins.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <rails.env>development</rails.env>
@@ -69,11 +75,24 @@ describe Maven::Tools::RailsProject do
     <plugins>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
+        <artifactId>bundler-maven-plugin</artifactId>
+        <version>${jruby.plugins.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>install</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
         <artifactId>rails3-maven-plugin</artifactId>
         <version>${jruby.plugins.version}</version>
         <executions>
           <execution>
-            <id>initialize</id>
+            <id>in_phase_validate</id>
+            <phase>validate</phase>
             <goals>
               <goal>initialize</goal>
             </goals>
@@ -101,6 +120,17 @@ describe Maven::Tools::RailsProject do
             </resource>
             <resource>
               <directory>${gem.path}</directory>
+              <includes>
+                <include>gems/**</include>
+                <include>specifications/**</include>
+              </includes>
+              <targetPath>WEB-INF/gems</targetPath>
+            </resource>
+            <resource>
+              <directory>${gem.path}-bundler-maven-plugin</directory>
+              <includes>
+                <include>specifications/**</include>
+              </includes>
               <targetPath>WEB-INF/gems</targetPath>
             </resource>
           </webResources>
@@ -162,20 +192,77 @@ describe Maven::Tools::RailsProject do
             <version>${jetty.version}</version>
             <configuration>
               <connectors>
-		<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-		  <port>8080</port>
-		</connector>
-		<connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
-		  <port>8443</port>
-		  <keystore>${project.basedir}/src/test/resources/server.keystore</keystore>
-		  <keyPassword>123456</keyPassword>
-		  <password>123456</password>
-		</connector>
+                <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                  <port>8080</port>
+                </connector>
+                <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                  <port>8443</port>
+                  <keystore>${project.basedir}/src/test/resources/server.keystore</keystore>
+                  <keyPassword>123456</keyPassword>
+                  <password>123456</password>
+                </connector>
               </connectors>
               <webAppConfig>
                 <overrideDescriptor>${project.build.directory}/jetty/override-${rails.env}-web.xml</overrideDescriptor>
               </webAppConfig>
             </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>executable</id>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>kos</id>
+          <url>http://opensource.kantega.no/nexus/content/groups/public/</url>
+        </pluginRepository>
+      </pluginRepositories>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.simplericity.jettyconsole</groupId>
+            <artifactId>jetty-console-maven-plugin</artifactId>
+            <version>1.42</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>createconsole</goal>
+                </goals>
+                <configuration>
+                <!--
+                                  see http://simplericity.com/2009/11/10/1257880778509.html for more info
+                -->
+                <!--
+		  <backgroundImage>${basedir}/src/main/jettyconsole/puffin.jpg</backgroundImage>
+		  <additionalDependencies>
+		    <additionalDependency>
+		      <artifactId>jetty-console-winsrv-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-requestlog-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-log4j-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-jettyxml-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-ajp-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-gzip-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-startstop-plugin</artifactId>
+		    </additionalDependency>
+		  </additionalDependencies>
+
+                -->
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>

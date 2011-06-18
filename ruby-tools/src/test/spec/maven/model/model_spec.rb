@@ -5,7 +5,7 @@ describe Maven::Model do
   describe Maven::Model::Project do
 
     before :each do
-      @project = Maven::Model::Project.new("test:project")
+      @project = Maven::Model::Project.new("test:project", '0.0.0')
     end
 
     it 'should setup a project with split args' do
@@ -19,6 +19,41 @@ describe Maven::Model do
 XML
     end
     
+    it 'should setup a minimal project' do
+      project = Maven::Model::Project.new
+      project.artifact_id = 'mini'
+      project.parent('test:parent', '1.2.3')
+      project.to_xml.should == <<-XML
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>test</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.2.3</version>
+  </parent>
+  <artifactId>mini</artifactId>
+</project>
+XML
+    end
+    
+    it 'should setup a project with parent' do
+      @project.parent("test:parent", '0.1.2').relative_path='../pom.rb'
+      @project.to_xml.should == <<-XML
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>test</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.1.2</version>
+    <relativePath>../pom.rb</relativePath>
+  </parent>
+  <groupId>test</groupId>
+  <artifactId>project</artifactId>
+  <version>0.0.0</version>
+</project>
+XML
+    end
+
     it 'should setup a project with metadata' do
       @project.name "name"
       @project.packaging = :jar

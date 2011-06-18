@@ -13,12 +13,21 @@ module Maven
       def add_defaults(args = {})
         self.name = "#{dir_name} - rails application" unless name
         
+        # setup bundler plugin
+        plugins(:bundler)
+
         s_args = args.dup
         s_args.delete(:jruby_plugins)
         super(s_args)
 
         versions = VERSIONS.merge(args)
-                
+        
+        rails_gem = dependencies.detect { |d| d.type.to_sym == :gem && d.artifact_id.to_s =~ /^rail.*s$/ } # allow rails or railties
+
+        if rails_gem && rails_gem.version =~ /^3.1./
+          versions[:jruby_rack] = '1.1.0.dev'
+        end
+
         jar("org.jruby.rack:jruby-rack", versions[:jruby_rack]) unless jar?("org.jruby.rack:jruby-rack")
 
         self.properties = {
@@ -28,7 +37,7 @@ module Maven
 
         plugin(:rails3) do |rails|
           rails.version = "${jruby.plugins.version}" unless rails.version
-          rails.execution(:initialize).goals << "initialize"
+          rails.in_phase(:validate).execute_goal(:initialize)#.goals << "initialize"
         end
 
         plugin(:war, versions[:war_plugin]) unless plugin?(:war)
@@ -42,7 +51,13 @@ module Maven
               }
               l << {
                 :directory => '${gem.path}',
-                :targetPath => 'WEB-INF/gems'
+                :targetPath => 'WEB-INF/gems',
+                :includes => ['gems/**', 'specifications/**']
+              }
+              l << {
+                :directory => '${gem.path}-bundler-maven-plugin',
+                :targetPath => 'WEB-INF/gems',
+                :includes => ['specifications/**']
               }
             end
           })
@@ -61,25 +76,61 @@ module Maven
                              "${jetty.version}")
          
         profile(:run) do |run|
-            run.activation.by_default
-            run.plugin("org.mortbay.jetty:jetty-maven-plugin",
+          overrideDescriptor = '${project.build.directory}/jetty/override-${rails.env}-web.xml'
+          run.activation.by_default
+          run.plugin("org.mortbay.jetty:jetty-maven-plugin",
                        "${jetty.version}").with({
                 :webAppConfig => {
-                  :overrideDescriptor => '${project.build.directory}/jetty/override-${rails.env}-web.xml'
+                  :overrideDescriptor => overrideDescriptor           
                 },
                 :connectors => <<-XML
 
-		<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-		  <port>8080</port>
-		</connector>
-		<connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
-		  <port>8443</port>
-		  <keystore>${project.basedir}/src/test/resources/server.keystore</keystore>
-		  <keyPassword>123456</keyPassword>
-		  <password>123456</password>
-		</connector>
+                <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                  <port>8080</port>
+                </connector>
+                <connector implementation="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                  <port>8443</port>
+                  <keystore>${project.basedir}/src/test/resources/server.keystore</keystore>
+                  <keyPassword>123456</keyPassword>
+                  <password>123456</password>
+                </connector>
 XML
               })
+        end
+        profile(:executable) do |exec|
+          exec.plugin_repository('kos').url = 'http://opensource.kantega.no/nexus/content/groups/public/'
+          exec.plugin('org.simplericity.jettyconsole:jetty-console-maven-plugin', '1.42').execution do |jetty|
+            jetty.execute_goal(:createconsole)
+            jetty.configuration.comment <<-TEXT
+                  see http://simplericity.com/2009/11/10/1257880778509.html for more info
+                -->
+                <!--
+		  <backgroundImage>${basedir}/src/main/jettyconsole/puffin.jpg</backgroundImage>
+		  <additionalDependencies>
+		    <additionalDependency>
+		      <artifactId>jetty-console-winsrv-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-requestlog-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-log4j-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-jettyxml-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-ajp-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-gzip-plugin</artifactId>
+		    </additionalDependency>
+		    <additionalDependency>
+		      <artifactId>jetty-console-startstop-plugin</artifactId>
+		    </additionalDependency>
+		  </additionalDependencies>
+TEXT
+          end
         end
       end
     end

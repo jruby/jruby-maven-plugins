@@ -41,9 +41,15 @@ module Maven
 
       def load_gemspec(specfile)
         require 'rubygems'
-        spec = ::Gem::Specification.load(specfile)
+        spec = 
+          if specfile.is_a? ::Gem::Specification 
+            specfile
+          else
+            ::Gem::Specification.load(specfile)
+            loaded_files << File.expand_path(specfile)
+          end
         raise "file not found '#{specfile}'" unless spec
-        loaded_files << File.expand_path(specfile)
+        @is_gemspec = loaded_files.size == 0
         artifact_id spec.name
         version spec.version
         name spec.summary || "#{self.artifact_id} - gem"
@@ -59,7 +65,6 @@ module Maven
           self.licenses.new(license)
         end
 
-        
         config = {}
         add_param(config, "autorequire", spec.autorequire)
         add_param(config, "defaultExecutable", spec.default_executable)
@@ -71,9 +76,9 @@ module Maven
         add_param(config, "rdocOptions", spec.rdoc_options)
         add_param(config, "requirePaths", spec.require_paths, ["lib"])
         add_param(config, "rubyforgeProject", spec.rubyforge_project)
-        add_param(config, "requiredRubygemsVersion", spec.required_rubygems_version, ">= 0")
+        add_param(config, "requiredRubygemsVersion", spec.required_rubygems_version ? "<![CDATA[#{spec.required_rubygems_version}]]>" : nil)
         add_param(config, "bindir", spec.bindir, "bin")
-        add_param(config, "requiredRubyVersion", spec.required_ruby_version, ">= 0")
+        add_param(config, "requiredRubyVersion", spec.required_ruby_version ? "<![CDATA[#{spec.required_ruby_version}]]>" : nil)
         add_param(config, "postInstallMessage", spec.post_install_message ? "<![CDATA[#{spec.post_install_message}]]>" : nil)
         add_param(config, "executables", spec.executables)
         add_param(config, "extensions", spec.extensions)
@@ -150,7 +155,25 @@ module Maven
 
         repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless repository("rubygems-releases").url
         
-        jar("org.jruby:jruby-complete", versions[:jruby_version]) unless jar?("org.jruby:jruby-complete")
+        has_prerelease = dependencies.detect { |d| d.type.to_sym == :gem && d.version =~ /[a-zA-Z]/ }
+
+        repository("rubygems-prereleases").url = "http://gems.saumya.de/prereleases" if has_prerelease && !repository("rubygems-prereleases").url
+
+        if !jar?("org.jruby:jruby-complete") && !jar?("org.jruby:jruby-core") && versions[:jruby_version]
+          minor = versions[:jruby_version].sub(/[0-9]*\./, '').sub(/\..*/, '')
+
+          #TODO once jruby-core pom is working !!!
+          if minor.to_i > 55 #TODO fix minor minimum version
+            jar("org.jruby:jruby-core", versions[:jruby_version])
+            jar("org.jruby:jruby-stdlib", versions[:jruby_version])
+            # override deps which works
+            jar("jline:jline", '0.9.94') if versions[:jruby_version] =~ /1.6.[1-2]/
+            jar("org.jruby.extras:jffi", '1.0.8', 'native') if versions[:jruby_version] =~ /1.6.[0-2]/
+            jar("org.jruby.extras:jaffl", '0.5.10') if versions[:jruby_version] =~ /1.6.[0-2]/
+          else
+            jar("org.jruby:jruby-complete", versions[:jruby_version]) 
+          end
+        end
 
         # TODO go through all plugins to find out any SNAPSHOT version !!
         if versions[:jruby_plugins] =~ /-SNAPSHOT$/ || properties['jruby.plugins.version'] =~ /-SNAPSHOT$/
@@ -168,7 +191,7 @@ module Maven
         end
 
         if plugin?(:bundler)
-          plugin_repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless plugin_repository("rubygems-releases").url
+          # plugin_repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless plugin_repository("rubygems-releases").url
           bundler = plugin(:bundler)
           bundler.version = "${jruby.plugins.version}" unless bundler.version
           bundler.executions.goals << "install"
@@ -302,18 +325,31 @@ module Maven
             end
           end
         end
-        if (profiles.size > 0) && dep
+        if dep && !@is_gemspec
           project = self
           
+          # first collect the missing deps it any
+          bundler_deps = []
           plugin(:bundler) do |bundler|
             # use a dep with version so just create it from the args
-            bundler.gem(args) unless project.dependencies.member? dep
+            bundler_deps << args unless project.dependencies.member? dep
             
+            #TODO this should be done after all deps are in place - otherwise it depends on order how bundler gets setup
             if @lock
               # add its dependencies as well to have the version
               # determine by the dependencyManagement
               @lock.dependency_hull(dep.artifact_id).map.each do |d|
-                bundler.gem(d) unless project.gem? d[0]
+                bundler_deps << d unless project.gem? d[0]
+              end
+            end
+          end
+          
+          # now add the deps to bundler plugin
+          # avoid to setup bundler if it has no deps
+          if bundler_deps.size > 0 
+            plugin(:bundler) do |bundler|
+              bundler_deps.each do |d|
+                bundler.gem(d)
               end
             end
           end

@@ -52,6 +52,14 @@ XML
       <type>gem</type>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>bundler-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>
 XML
     end
@@ -164,12 +172,6 @@ XML
       <url>http://gems.saumya.de/releases</url>
     </repository>
   </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>rubygems-releases</id>
-      <url>http://gems.saumya.de/releases</url>
-    </pluginRepository>
-  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>org.jruby</groupId>
