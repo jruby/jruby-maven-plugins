@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>directory-browsing</artifactId>
+  <version>0.0.0</version>
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>de.saumya.mojo</groupId>
+	<artifactId>gem-maven-plugin</artifactId>
+	<version>@project.parent.version@</version>
+	<configuration>
+	  <includeOpenSSL>false</includeOpenSSL>
+	</configuration>
+        <executions>
+	  <execution>
+	    <id>test</id>
+	    <phase>test</phase>
+	    <goals>
+	      <goal>exec</goal>
+	    </goals>
+	    <configuration>
+	      <script>
+		require 'src/main/ruby/crawl.rb'
+		warn "fix load path"
+		c = Crawl.new
+		c.target = "${project.build.directory}/crawl"
+		c.base_url = "http://localhost:8080/releases/rubygems"
+
+		c.load("rails/")
+		c.load("rails/maven-metadata.xml")
+		c.load("rails/maven-metadata.xml.sha1")
+		c.load("rails/3.0.9/")
+		c.load("rails/3.0.9/rails-3.0.9.gem.sha1")
+		c.load("rails/3.0.9/rails-3.0.9.pom")
+		c.load("rails/3.0.9/rails-3.0.9.pom.sha1")
+	      </script>
+	    </configuration>
+	  </execution>
+	  <execution>
+	    <id>verify</id>
+	    <phase>verify</phase>
+	    <goals>
+	      <goal>exec</goal>
+	    </goals>
+	    <configuration>
+	      <script>
+		target = "${project.build.directory}/crawl"
+
+		# check directory
+                expected = ["rails-index.html", "maven-metadata.xml", "maven-metadata.xml.sha1", "3.0.9-index.html", "rails-3.0.9.gem.sha1", "rails-3.0.9.pom", "rails-3.0.9.pom.sha1"]
+
+		Dir["#{target}/*.*"].each do |f|
+		  unless expected.delete(File.basename(f))
+         		  raise "directory #{target} does not contain #{File.basename(f)}"
+	          end
+                end
+		if expected.size > 0
+		  raise "did not download " + expected.join(',')
+                end
+
+		# check SHA1 files
+                Dir["#{target}/*sha1"].each do |f|
+		   if File.size(f) != 40
+                      raise "sha1 from #{f} has wrong length #{File.size(f)}"
+		   end
+		end
+
+		# check HTML
+		#TODO
+		
+		# check XML
+		#TODO
+	      </script>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

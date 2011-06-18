@@ -5,7 +5,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.27.0-SNAPSHOT</version>
+    <version>0.27.1-SNAPSHOT</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-proxy</artifactId>
@@ -19,42 +19,42 @@
       <artifactId>ruby-tools</artifactId>
       <version>${project.parent.version}</version>
       <exclusions>
-	<exclusion>
-	  <groupId>org.codehaus.plexus</groupId>
-	  <artifactId>plexus-classworlds</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>ant</groupId>
-	  <artifactId>ant</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.apache.maven</groupId>
-	  <artifactId>maven-model</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.yaml</groupId>
-	  <artifactId>snakeyaml</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.codehaus.plexus</groupId>
-	  <artifactId>plexus-velocity</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.codehaus.plexus</groupId>
-	  <artifactId>plexus-component-annotations</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.codehaus.plexus</groupId>
-	  <artifactId>plexus-container-default</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.codehaus.plexus</groupId>
-	  <artifactId>plexus-utils</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.codehaus.plexus</groupId>
-	  <artifactId>plexus-archiver</artifactId>
-	</exclusion>
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-classworlds</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ant</groupId>
+          <artifactId>ant</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>maven-model</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.yaml</groupId>
+          <artifactId>snakeyaml</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-velocity</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-component-annotations</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-container-default</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-utils</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-archiver</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -71,15 +71,90 @@
   </dependencies>
   <build>
     <finalName>rubygems</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/ruby</directory>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>7.1.0.v20100505</version>
-	<configuration>
-	  <scanIntervalSeconds>10</scanIntervalSeconds>
-	</configuration>
+        <configuration>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <systemProperties>
+            <systemProperty>
+              <name>gem.proxy.storage</name>
+              <value>${project.build.directory}/storage</value>
+            </systemProperty>
+          </systemProperties>
+        </configuration>
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <properties>
+        <invoker.skip>false</invoker.skip>
+      </properties>
+      <build>
+        <defaultGoal>install</defaultGoal>
+        <plugins>
+          <plugin>
+            <artifactId>maven-invoker-plugin</artifactId>
+            <version>1.5</version>
+            <configuration>
+              <projectsDirectory>src/it</projectsDirectory>
+              <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+              <preBuildHookScript>setup.bsh</preBuildHookScript>
+              <postBuildHookScript>verify.bsh</postBuildHookScript>
+            </configuration>
+            <executions>
+              <execution>
+                <id>integration-test</id>
+                <goals>
+                  <goal>install</goal>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <settingsFile>src/it/settings.xml</settingsFile>
+                  <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin> 
+          <plugin>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty-maven-plugin</artifactId>
+	    <configuration>
+	      <stopPort>4711</stopPort>
+	      <stopKey>gem-proxy</stopKey>
+	    </configuration>
+            <executions>
+              <execution>
+                <id>start-jetty</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <scanIntervalSeconds>0</scanIntervalSeconds>
+                  <daemon>true</daemon>
+                </configuration>
+              </execution>
+              <execution>
+                <id>stop-jetty</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>stop</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

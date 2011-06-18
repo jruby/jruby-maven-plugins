@@ -1,102 +1,107 @@
 package de.saumya.mojo.proxy;
 
-import java.io.FileNotFoundException;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.saumya.mojo.proxy.Controller.FileLocation;
+
 public class ControllerServlet extends HttpServlet {
 
     private static final long serialVersionUID = -1377408089637782007L;
 
-    private ControllerService controller;
+    private Controller controller;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        this.controller = (ControllerService) getServletContext().getAttribute(ControllerService.class.getName());
+        this.controller = (Controller) getServletContext().getAttribute(Controller.class.getName());
     }
 
     @Override
     protected void doGet(final HttpServletRequest req,
             final HttpServletResponse resp) throws ServletException,
             IOException {
-        final String[] parts = req.getPathInfo().substring(1).split("/");
-        // System.out.println(Arrays.toString(parts));
+        FileLocation file = controller.locate(req.getPathInfo().substring(1));
+
+        switch(file.type){
+        case NOT_FOUND: 
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, file.content);
+            break;
+        case XML_CONTENT:
+            resp.setContentType("application/xml");
+            resp.setCharacterEncoding("utf-8");
+            resp.setHeader("Vary", "Accept");
+            write(resp, file.content);
+            break;
+        case XML_FILE:
+            resp.setContentType("application/xml");
+            resp.setCharacterEncoding("utf-8");
+            resp.setHeader("Vary", "Accept");
+            write(resp, file.localFile);
+            break;
+        case HTML_CONTENT:
+            resp.setContentType("text/html");
+            resp.setCharacterEncoding("utf-8");
+            resp.setHeader("Vary", "Accept");
+            write(resp, file.content);
+            break;
+        case ASCII_FILE:
+            resp.setContentType("text/plain");
+            resp.setCharacterEncoding("ASCII");
+            write(resp, file.localFile);
+            break;
+        case ASCII_CONTENT:
+            resp.setContentType("text/plain");
+            resp.setCharacterEncoding("ASCII");
+            write(resp, file.content);
+            break;
+        case REDIRECT_TO_DIRECTORY:
+            resp.sendRedirect(req.getRequestURI() + "/");
+            break;
+        case REDIRECT:
+            resp.sendRedirect(file.remoteUrl.toString());
+            break;
+        case TEMP_UNAVAILABLE:
+            resp.setHeader("Retry-After", "120");//seconds
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, file.content);
+            break;
+        default:
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Completely unhandleable request!");
+        }        
+    }
+
+    private void write(HttpServletResponse resp, File localFile) throws IOException {
+        OutputStream output = resp.getOutputStream();
+        InputStream input = null;
         try {
-            switch (parts.length) {
-            case 4: // {releases|prereleases}/rubygems/#{name}/maven-metadata.xml
-                if (!parts[1].equals("rubygems")) {
-                    notFound(resp,
-                             "Only rubygems/ groupId is supported through this proxy.");
-                }
-                else if (parts[3].equals("maven-metadata.xml")) {
-                    resp.setContentType("application/xml");
-                    resp.setCharacterEncoding("utf-8");
-                    resp.setHeader("Vary", "Accept");
-                    this.controller.writeMetaData(parts[2],
-                                                  resp.getWriter(),
-                                                  "prereleases".equals(parts[0]));
-                }
-                else if (parts[3].equals("maven-metadata.xml.sha1")) {
-                    resp.setContentType("text/plain");
-                    resp.setCharacterEncoding("ASCII");
-                    this.controller.writeMetaDataSHA1(parts[2],
-                                                      resp.getWriter(),
-                                                      "prereleases".equals(parts[0]));
-                }
-                else {
-                    notFound(resp, "Unknown resource: " + parts[3]);
-                }
-                break;
-            case 5:// {releases|prereleases}/rubygems/#{name}/#{version}/#{name}-#{version}.{gem|pom}
-                if (!parts[1].equals("rubygems")) {
-                    notFound(resp,
-                             "Only rubygems/ groupId is supported through this proxy.");
-                }
-                else if (parts[4].endsWith(".gem")) {
-                    resp.sendRedirect(this.controller.getGemLocation(parts[2],
-                                                                     parts[3]));
-                }
-                else if (parts[4].endsWith(".gem.sha1")) {
-                    resp.setContentType("text/plain");
-                    resp.setCharacterEncoding("ASCII");
-                    this.controller.writeGemSHA1(parts[2],
-                                                 parts[3],
-                                                 resp.getWriter());
-                }
-                else if (parts[4].endsWith(".pom")) {
-                    resp.setContentType("application/xml");
-                    resp.setCharacterEncoding("UTF-8");
-                    this.controller.writePom(parts[2],
-                                             parts[3],
-                                             resp.getWriter());
-                }
-                else if (parts[4].endsWith(".pom.sha1")) {
-                    resp.setContentType("text/plain");
-                    resp.setCharacterEncoding("ASCII");
-                    this.controller.writePomSHA1(parts[2],
-                                                 parts[3],
-                                                 resp.getWriter());
-                }
-                else {
-                    notFound(resp, "Unknown artifact: " + parts[4]);
-                }
-                break;
-            default:
-                notFound(resp, "Completely unhandleable request!");
+            input = new BufferedInputStream(new FileInputStream(localFile));
+            int c = input.read();
+            while(c != -1){
+                output.write(c);
+                c = input.read();
             }
         }
-        catch (final FileNotFoundException e) {
-            notFound(resp, e.getMessage() );
+        finally {
+            output.flush();
+            if(input != null){
+               input.close(); 
+            }
         }
     }
 
-    private void notFound(final HttpServletResponse resp, String message)
-            throws IOException {
-        resp.sendError(HttpServletResponse.SC_NOT_FOUND, message);
+    private void write(HttpServletResponse resp, String content) throws IOException {
+        PrintWriter writer = resp.getWriter();
+        writer.append(content);
+        writer.flush();
     }
 }

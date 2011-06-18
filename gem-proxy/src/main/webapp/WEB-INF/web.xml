@@ -4,6 +4,10 @@
 
 <web-app>
   <display-name>Maven Repository serving rubygems</display-name>
+  <context-param>
+    <param-name>gem-proxy-storage</param-name>
+    <param-value>/var/cache/gem-proxy</param-value> 
+  </context-param>
   <listener>
     <listener-class>de.saumya.mojo.proxy.GemProxyServletContextListener</listener-class>
   </listener>
@@ -11,22 +15,6 @@
     <servlet-name>gems</servlet-name>
     <servlet-class>de.saumya.mojo.proxy.ControllerServlet</servlet-class>
   </servlet>
-  <servlet>
-    <servlet-name>update</servlet-name>
-    <servlet-class>de.saumya.mojo.proxy.UpdateServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>update</servlet-name>
-    <url-pattern>/releases/update</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>update</servlet-name>
-    <url-pattern>/prereleases/update</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>/releases</url-pattern>
-  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>default</servlet-name>
     <url-pattern>/releases/</url-pattern>
@@ -38,10 +26,6 @@
   <servlet-mapping>
     <servlet-name>default</servlet-name>
     <url-pattern>/prereleases</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>/prereleases/</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>default</servlet-name>
