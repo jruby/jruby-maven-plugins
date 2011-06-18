@@ -53,8 +53,14 @@ EOF
         end
       end
 
+      def comment(c)
+        @comment = c if c
+        @comment
+      end
+
       def to_xml(buf = "", indent = "")
         buf << "#{indent}<#{_name}>\n"
+        buf << "#{indent}<!--\n#{indent}#{@comment}\n#{indent}-->\n" if @comment
         self.class.tags.each do |var|
           val = instance_variable_get("@#{var}".to_sym)
           var = var.to_s.gsub(/_(.)/) { $1.upcase }
@@ -244,6 +250,7 @@ EOF
 
       def to_xml(buf = "", indent = "")
         buf << "#{indent}<#{@name}>\n" if @name 
+        buf << "#{indent}<!--\n#{indent}#{@comment}\n#{indent}-->\n" if @comment
         @items.each do |i|
           i.to_xml(buf, indent)
         end
@@ -266,6 +273,7 @@ EOF
       
       def to_xml(buf = "", indent = "")
         buf << "#{indent}<#{@name}>\n"
+        buf << "#{indent}<!--\n#{indent}#{@comment}\n#{indent}-->\n" if @comment
         map_to_xml(buf, indent, @props)
         buf << "#{indent}</#{@name}>\n"
       end
