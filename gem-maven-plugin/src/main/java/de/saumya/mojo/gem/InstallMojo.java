@@ -19,13 +19,19 @@ public class InstallMojo extends AbstractGemMojo {
 
     /**
      * arguments for the "gem install" command.
+     * <br/>
+     * Command line -Dinstall.args=...
      * 
      * @parameter default-value="${install.args}"
      */
     protected String installArgs = null;
 
     /**
-     * gem file to install locally.
+     * gem file to install locally.<br/>
+     * <b>Note:</b> this will install the gem in ${gem.home} so in general that is only
+     * useful if some other goal does something with it
+     * <br/>
+     * Command line -Dgem=...
      * 
      * @parameter default-value="${gem}"
      */

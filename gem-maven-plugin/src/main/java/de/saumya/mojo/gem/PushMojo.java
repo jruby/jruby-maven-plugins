@@ -20,15 +20,19 @@ public class PushMojo extends AbstractGemMojo {
 
     /**
      * arguments for the ruby script given through file parameter.
+     * <br/>
+     * Command line -Dpush.args=...
      * 
-     * @parameter default-value="${push.args}"
+     * @parameter expression="${push.args}"
      */
     protected String pushArgs = null;
 
     /**
      * arguments for the ruby script given through file parameter.
+     * <br/>
+     * Command line -Dgem=...
      * 
-     * @parameter default-value="${gem}"
+     * @parameter expression="${gem}"
      */
     protected File gem;
 

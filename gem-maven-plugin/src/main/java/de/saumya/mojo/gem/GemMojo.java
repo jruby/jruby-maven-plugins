@@ -14,6 +14,8 @@ import de.saumya.mojo.ruby.script.ScriptException;
 public class GemMojo extends AbstractGemMojo {
     /**
      * arguments for the gem command of JRuby.
+     * <br/>
+     * Command line -Dgem.args=...
      * 
      * @parameter default-value="${gem.args}"
      */

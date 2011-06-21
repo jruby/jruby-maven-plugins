@@ -20,21 +20,37 @@ public class PomMojo extends AbstractJRubyMojo {
     PluginDescriptor  plugin;
 
     /**
+     * the pom file to generate
+     * <br/>
+     * Command line -Dpom=...
+     * 
      * @parameter expression="${pom}" default-value="pom.xml"
      */
     protected File    pom;
 
     /**
+     * force overwrite of an existing pom
+     * <br/>
+     * Command line -Dpom.force=...
+     * 
      * @parameter default-value="${pom.force}"
      */
     protected boolean force = false;
 
     /**
+     * use a gemspec file to generate a pom
+     * <br/>
+     * Command line -Dpom.gemspec=...
+     * 
      * @parameter default-value="${pom.gemspec}"
      */
     protected File    gemspec;
 
     /**
+     * use Gemfile to generate a pom
+     * <br/>
+     * Command line -Dpom.gemfile=...
+     * 
      * @parameter expression="${pom.gemfile}"
      *            default-value="Gemfile"
      */
@@ -97,7 +113,7 @@ public class PomMojo extends AbstractJRubyMojo {
             }
             else {
                 if (this.jrubyVerbose) {
-                    getLog().info("pom is newer then Gemfile. skip creation of pom. force creation with -Drails.pom.force");
+                    getLog().info("pom is newer then " + type + ". skip creation of pom. force creation with -Dpom.force");
                 }
             }
         }
