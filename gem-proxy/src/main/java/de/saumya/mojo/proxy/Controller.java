@@ -2,11 +2,14 @@ package de.saumya.mojo.proxy;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -144,11 +147,14 @@ public class Controller {
                     return directory(parts[2], parts[3], path);
                 }
                 if(filename.endsWith(".gem")){
-                    File local = new File(localStorage, filename + SHA1);
+                    File local = new File(localStorage, filename.replace(".gem", ".pom"));
                     if(!local.exists()){
                         if (!createFiles(parts[2], parts[3])){
                             return new FileLocation(filename + " is being generated", Type.TEMP_UNAVAILABLE);
                         }
+                    }
+                    if(fileContainsPlatformJava(local)){
+                        filename = filename.replace(".gem", "-java.gem");
                     }
                     return new FileLocation(new URL(RUBYGEMS_URL + "/" + filename));
                 }
@@ -238,6 +244,26 @@ public class Controller {
         }
     }
 
+    private boolean fileContainsPlatformJava(File file) throws IOException{
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
+            String line = reader.readLine();
+            while(line != null){
+                if(line.contains("<platform>java</platform>")){
+                    return true;
+                }
+                line = reader.readLine();
+            }
+        }
+        finally {
+            if(reader != null) {
+                reader.close();
+            }
+        }
+        return false;
+    }
+    
     private void downloadGemfile(File gemfile, URL url) throws IOException {
         InputStream input = null;
         OutputStream output = null;
