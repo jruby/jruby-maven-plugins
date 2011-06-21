@@ -1,3 +1,21 @@
+=== 0.28.0 / 2011-06-21
+
+* run rspec with a list of jruby-versions and both for 1.8 and 1.9. producing a little summary at the end
+
+* runit mojo for testcases
+
+* add src/main/ruby and lib directory to load-path if exist
+
+* add src/main/ruby to classloader so java classes can find the scripts
+
+* add rubygems to test-resources, i.e. to test-classloader so java tests can use them (via scripting containers)
+
+* added assembly descriptors for packaging "uberjar" with all dependencies inside a single jar (jar as well gem dependencies)
+
+* gem-proxy is a total rewrite and comes with  directory browsing for all but ONE directory. the pom generation is the same as done by the gem mojo and maven-metadata.xml is generated on the fly i.e. is up to date to rubygems.org
+
+* general improvements in Gemfile, gemspec tp pom convertion. rspec, etc.
+
 === 0.26.0 / 2011-03-30
 
 * new bundle install mojo to allow to use Gemfile as pom
