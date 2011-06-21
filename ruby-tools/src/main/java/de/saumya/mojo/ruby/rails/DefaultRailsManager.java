@@ -166,7 +166,7 @@ public class DefaultRailsManager implements RailsManager {
                 script.addArg("-m", "http://jruby.org/rails3.rb");
                 break;
             case datamapper:
-                script.addArg("-m", "http://jruby.org/rails3.rb");
+                script.addArg("-m", "http://datamapper.org/templates/rails.rb");
                 break;
             default:
                 throw new RuntimeException( "unknown ORM :" + orm);

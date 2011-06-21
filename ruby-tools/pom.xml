@@ -106,6 +106,7 @@
 	</pluginRepository>
       </pluginRepositories>
       <build>
+        <defaultGoal>install</defaultGoal>
 	<plugins>
 	  <plugin>
 	    <groupId>de.saumya.mojo</groupId>

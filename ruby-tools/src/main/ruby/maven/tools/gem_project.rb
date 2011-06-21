@@ -41,13 +41,12 @@ module Maven
 
       def load_gemspec(specfile)
         require 'rubygems'
-        spec = 
-          if specfile.is_a? ::Gem::Specification 
-            specfile
-          else
-            ::Gem::Specification.load(specfile)
-            loaded_files << File.expand_path(specfile)
-          end
+        if specfile.is_a? ::Gem::Specification 
+          spec = specfile
+        else
+          spec = ::Gem::Specification.load(specfile)
+          loaded_files << File.expand_path(specfile)
+        end
         raise "file not found '#{specfile}'" unless spec
         @is_gemspec = loaded_files.size == 0
         artifact_id spec.name
@@ -76,10 +75,13 @@ module Maven
         add_param(config, "rdocOptions", spec.rdoc_options)
         add_param(config, "requirePaths", spec.require_paths, ["lib"])
         add_param(config, "rubyforgeProject", spec.rubyforge_project)
-        add_param(config, "requiredRubygemsVersion", spec.required_rubygems_version ? "<![CDATA[#{spec.required_rubygems_version}]]>" : nil)
+        add_param(config, "requiredRubygemsVersion", 
+                  spec.required_rubygems_version && spec.required_rubygems_version != ">= 0" ? "<![CDATA[#{spec.required_rubygems_version}]]>" : nil)
         add_param(config, "bindir", spec.bindir, "bin")
-        add_param(config, "requiredRubyVersion", spec.required_ruby_version ? "<![CDATA[#{spec.required_ruby_version}]]>" : nil)
-        add_param(config, "postInstallMessage", spec.post_install_message ? "<![CDATA[#{spec.post_install_message}]]>" : nil)
+        add_param(config, "requiredRubyVersion", 
+                  spec.required_ruby_version && spec.required_ruby_version != ">= 0" ? "<![CDATA[#{spec.required_ruby_version}]]>" : nil)
+        add_param(config, "postInstallMessage", 
+                  spec.post_install_message ? "<![CDATA[#{spec.post_install_message}]]>" : nil)
         add_param(config, "executables", spec.executables)
         add_param(config, "extensions", spec.extensions)
         add_param(config, "platform", spec.platform, 'ruby')
@@ -191,7 +193,7 @@ module Maven
         end
 
         if plugin?(:bundler)
-          # plugin_repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless plugin_repository("rubygems-releases").url
+          plugin_repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless plugin_repository("rubygems-releases").url
           bundler = plugin(:bundler)
           bundler.version = "${jruby.plugins.version}" unless bundler.version
           bundler.executions.goals << "install"
@@ -330,19 +332,19 @@ module Maven
           
           # first collect the missing deps it any
           bundler_deps = []
-          plugin(:bundler) do |bundler|
-            # use a dep with version so just create it from the args
-            bundler_deps << args unless project.dependencies.member? dep
+          #plugin(:bundler) do |bundler|
+          # use a dep with version so just create it from the args
+          bundler_deps << args unless project.dependencies.member? dep
             
-            #TODO this should be done after all deps are in place - otherwise it depends on order how bundler gets setup
-            if @lock
-              # add its dependencies as well to have the version
-              # determine by the dependencyManagement
-              @lock.dependency_hull(dep.artifact_id).map.each do |d|
-                bundler_deps << d unless project.gem? d[0]
-              end
+          #TODO this should be done after all deps are in place - otherwise it depends on order how bundler gets setup
+          if @lock
+            # add its dependencies as well to have the version
+            # determine by the dependencyManagement
+            @lock.dependency_hull(dep.artifact_id).map.each do |d|
+              bundler_deps << d unless project.gem? d[0]
             end
           end
+          #end
           
           # now add the deps to bundler plugin
           # avoid to setup bundler if it has no deps

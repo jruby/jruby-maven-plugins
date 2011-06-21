@@ -14,7 +14,7 @@ module Maven
         self.name = "#{dir_name} - rails application" unless name
         
         # setup bundler plugin
-        plugins(:bundler)
+        plugin(:bundler)
 
         s_args = args.dup
         s_args.delete(:jruby_plugins)

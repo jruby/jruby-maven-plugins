@@ -25,6 +25,12 @@ describe Maven::Tools::RailsProject do
       <url>http://gems.saumya.de/releases</url>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>rubygems-releases</id>
+      <url>http://gems.saumya.de/releases</url>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>

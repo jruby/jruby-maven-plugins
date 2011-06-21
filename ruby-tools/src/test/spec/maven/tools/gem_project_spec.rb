@@ -52,14 +52,6 @@ XML
       <type>gem</type>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>de.saumya.mojo</groupId>
-        <artifactId>bundler-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>
 XML
     end
@@ -172,6 +164,12 @@ XML
       <url>http://gems.saumya.de/releases</url>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>rubygems-releases</id>
+      <url>http://gems.saumya.de/releases</url>
+    </pluginRepository>
+  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>org.jruby</groupId>
@@ -612,8 +610,8 @@ XML
           <postInstallMessage><![CDATA[be happy]]></postInstallMessage>
           <rdocOptions>--main,README.txt</rdocOptions>
           <requirePaths>mylib</requirePaths>
-          <requiredRubyVersion>= 1.8.7</requiredRubyVersion>
-          <requiredRubygemsVersion>= 1.4.2</requiredRubygemsVersion>
+          <requiredRubyVersion><![CDATA[= 1.8.7]]></requiredRubyVersion>
+          <requiredRubygemsVersion><![CDATA[= 1.4.2]]></requiredRubygemsVersion>
           <requirements>java</requirements>
           <rubyforgeProject>myproject</rubyforgeProject>
           <testFiles>test/first_test.rb</testFiles>
