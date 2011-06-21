@@ -174,10 +174,11 @@ public class DefaultGemManager implements GemManager {
             final List<ArtifactRepository> remoteRepositories)
             throws GemException {
         if (artifact.getFile() == null || !artifact.getFile().exists()) {
-            final Set<Artifact> artifacts = this.repositorySystem.resolve(new ArtifactResolutionRequest().setArtifact(artifact)
+            ArtifactResolutionRequest req = new ArtifactResolutionRequest()
+                    .setArtifact(artifact)
                     .setLocalRepository(localRepository)
-                    .setRemoteRepositories(remoteRepositories))
-                    .getArtifacts();
+                    .setRemoteRepositories(remoteRepositories);
+            final Set<Artifact> artifacts = this.repositorySystem.resolve(req).getArtifacts();
             if (artifacts.size() == 0) {
                 throw new GemException("could not resolve artifact: "
                         + artifact);
