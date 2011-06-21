@@ -46,7 +46,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected String args;
 
     /**
-     * arguments for the jruby command.
+     * jvm arguments for the java command executing jruby
      * <br/>
      * Command line -Djruby.jvmargs=...
      *
@@ -69,7 +69,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * local/remote maven repository. it overwrites the jruby version from
      * the dependencies if any. i.e. you can easily switch jruby version from the commandline !
      * <br/>
-     * default: 1.6.1
+     * default: 1.6.2
      * <br/>
      * Command line -Djruby.version=...
      *
@@ -96,13 +96,22 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected boolean jrubyVerbose;
 
     /**
-     * the launch directory for the JRuby execution.
+     * directory with ruby sources - added to java classpath and ruby loadpath
      * <br/>
      * Command line -Djruby.sourceDirectory=...
      *
      * @parameter expression="${jruby.sourceDirectory}" default-value="src/main/ruby"
      */
     protected File rubySourceDirectory;
+
+    /**
+     * directory with ruby sources - added to ruby loadpath only
+     * <br/>
+     * Command line -Djruby.lib=...
+     *
+     * @parameter expression="${jruby.lib}" default-value="lib"
+     */
+    protected File libDirectory;
 
     /**
      * the launch directory for the JRuby execution.
@@ -188,16 +197,31 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if(rubySourceDirectory.exists()){
-            Resource resource = new Resource();
-            resource.setDirectory(rubySourceDirectory.getAbsolutePath());
-            project.getBuild().getResources().add(resource);
-        }
 
         this.logger = new MojoLogger(this.jrubyVerbose, getLog());
         this.factory = newScriptFactory();
         this.factory.addJvmArgs(this.jrubyJvmArgs);
         this.factory.addSwitches(this.jrubySwitches);
+
+        if(rubySourceDirectory != null && rubySourceDirectory.exists()){
+            if(jrubyVerbose){
+                getLog().info("add to java classpath and ruby loadpath: " + rubySourceDirectory.getAbsolutePath());
+            }
+            // add it to the load path for all scripts using that factory
+            this.factory.addSwitch("-I", rubySourceDirectory.getAbsolutePath());
+            // add it to the classpath so java classes can find the ruby files
+            Resource resource = new Resource();
+            resource.setDirectory(rubySourceDirectory.getAbsolutePath());
+            project.getBuild().getResources().add(resource);
+        }
+
+        if(libDirectory != null && libDirectory.exists()){
+            if(jrubyVerbose){
+                getLog().info("add to ruby loadpath: " + libDirectory.getAbsolutePath());
+            }
+            // add it to the load path for all scripts using that factory
+            this.factory.addSwitch("-I", libDirectory.getAbsolutePath());
+        }
 
         try {
 
