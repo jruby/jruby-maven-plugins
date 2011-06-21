@@ -4,10 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Set;
+import java.util.TreeSet;
 
 public abstract class RubygemsHtmlVisitor {
     
     private StringBuilder currentListElement = null;
+
+    private final Set<String> versions = new TreeSet<String>();
 
     private final boolean prereleases;
 
@@ -58,11 +62,15 @@ public abstract class RubygemsHtmlVisitor {
     }
 
     private void checkLine(String versionLine) {        
-        if(!versionLine.contains("yanked")){
-            String version = versionLine.replaceFirst("</a>.*$", "").replaceFirst("^.*>", "");
-            if((!prereleases && version.matches("^[0-9]+(\\.[0-9]+)*$")) || 
-                    (prereleases && version.matches("^[0-9]+(\\.[0-9a-zA-Z]+)*$") && version.matches(".*[a-zA-Z].*"))){
+        if(!versionLine.contains("yanked") && !versionLine.contains("x86-m")){
+            String version = versionLine.replaceFirst("</a>.*$", "")
+                    .replaceFirst("^.*>", "").trim();
+            if (((!prereleases && version.matches("^[0-9]+(\\.[0-9]+)*$"))
+                    || (prereleases
+                            && version.matches("^[0-9]+(\\.[0-9a-zA-Z]+)*$") && version.matches(".*[a-zA-Z].*")))
+                    && !versions.contains(version)) {
                 addVersion(version);
+                versions.add(version);
             }
         }
     }
