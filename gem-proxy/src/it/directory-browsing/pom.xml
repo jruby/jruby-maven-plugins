@@ -22,7 +22,7 @@
 	    </goals>
 	    <configuration>
 	      <script>
-		require 'src/main/ruby/crawl.rb'
+		require 'crawl'
 		warn "fix load path"
 		c = Crawl.new
 		c.target = "${project.build.directory}/crawl"
