@@ -147,6 +147,8 @@ public class Controller {
                     return directory(parts[2], parts[3], path);
                 }
                 if(filename.endsWith(".gem")){
+                    // keep it backward compatible
+                    filename = filename.replace("-java.gem", ".gem");
                     File local = new File(localStorage, filename.replace(".gem", ".pom"));
                     if(!local.exists()){
                         if (!createFiles(parts[2], parts[3])){
