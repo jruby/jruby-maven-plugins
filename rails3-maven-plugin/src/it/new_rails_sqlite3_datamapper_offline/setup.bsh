@@ -1,0 +1,11 @@
+import java.io.*;
+
+new File( new File( basedir, "script" ), "rails" ).delete();
+
+new File( basedir, "script" ).delete();
+
+new File( basedir, "Gemfile" ).delete();
+
+new File( basedir, "Gemfile.maven" ).delete();
+
+new File( basedir, "pom.xml").delete();

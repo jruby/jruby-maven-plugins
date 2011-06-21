@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>rails</groupId>
+    <artifactId>rails_app</artifactId>
+    <version>0.0.0</version>
+    <relativePath>pom-base.xml</relativePath>
+  </parent>
+  <artifactId>server</artifactId>
+  <packaging>war</packaging>
+
+  <properties>
+    <!-- TODO remove the need to use default here -->
+    <jetty.port>8080</jetty.port>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+	<version>${jetty.version}</version>
+	<configuration>
+	  <stopKey>foo</stopKey>
+	  <stopPort>9999</stopPort>
+	  <port>${jetty.port}</port>
+	</configuration>
+	<executions>
+	  <execution>
+	    <id>start-jetty</id>
+	    <phase>pre-integration-test</phase>
+	    <goals>
+	      <goal>run</goal>
+	    </goals>
+	    <configuration>
+	      <daemon>true</daemon>
+	    </configuration>
+	  </execution>
+	  <execution>
+	    <id>stop-jetty</id>
+	    <phase>post-integration-test</phase>
+	    <goals>
+	      <goal>stop</goal>
+	    </goals>
+	  </execution>
+	</executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+	<version>1.3</version>
+	<executions>
+	  <execution>
+	    <id>get-files</id>
+	    <phase>integration-test</phase>
+	    <goals>
+	      <goal>run</goal>
+	    </goals>
+	    <configuration>
+	      <tasks>
+		<get src="http://localhost:${jetty.port}/index.html" dest="target/index.html"/>
+		<get src="http://localhost:${jetty.port}/users" dest="target/users.html"/>
+		<get src="http://localhost:${jetty.port}/users/new" dest="target/new.html"/>
+	      </tasks>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

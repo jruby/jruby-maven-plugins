@@ -76,21 +76,12 @@ public class NewMojo extends AbstractRailsMojo {
      */
     protected String            artifactVersion                = null;
 
-//    /**
-//     * use latest prerelease version unless a rails version is specified.
-//     * <br/>
-//     * Command line -Dprerelease=...
-//     *
-//     * @parameter expression="${prerelease}" default-value="false"
-//     */
-//    protected boolean usePrerelease;
-
     /**
      * use latest prerelease version unless a rails version is specified.
      * <br/>
      * Command line -Dorm=activerecord or -Dorm=datamapper
      *
-     * @parameter expression="${rails.orm}" default-value="activerecord"
+     * @parameter expression="${orm}" default-value="activerecord"
      */
     protected String railsORM;
 
@@ -140,6 +131,7 @@ public class NewMojo extends AbstractRailsMojo {
                 }
             }
 
+            getLog().info("use ORM " + ORM.valueOf(this.railsORM));
             this.railsManager.createNew(this.gemsInstaller,
                                         this.repoSession,
                                         this.appPath,
