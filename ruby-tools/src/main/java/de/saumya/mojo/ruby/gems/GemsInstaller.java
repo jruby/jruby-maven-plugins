@@ -100,15 +100,17 @@ public class GemsInstaller {
         if (pom != null) {
             boolean hasAlreadyOpenSSL = false;
             for (final Artifact artifact : pom.getArtifacts()) {
-                if (!artifact.getFile().exists()) {
-                    this.manager.resolve(artifact,
-                                         localRepository,
-                                         remoteRepos);
+                if ("compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope())) {
+                    if (!artifact.getFile().exists()) {
+                        this.manager.resolve(artifact,
+                                             localRepository,
+                                             remoteRepos);
 
+                    }
+                    script = maybeAddArtifact(script, artifact);
+                    hasAlreadyOpenSSL = hasAlreadyOpenSSL
+                            || artifact.getArtifactId().equals(JRUBY_OPENSSL);
                 }
-                script = maybeAddArtifact(script, artifact);
-                hasAlreadyOpenSSL = hasAlreadyOpenSSL
-                        || artifact.getArtifactId().equals(JRUBY_OPENSSL);
             }
             if (artifacts != null) {
                 for (final Artifact artifact : artifacts) {
