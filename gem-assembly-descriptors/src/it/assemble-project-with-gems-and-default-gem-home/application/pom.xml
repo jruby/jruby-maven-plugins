@@ -62,7 +62,7 @@
 	  <dependency>
 	    <groupId>de.saumya.mojo</groupId>
 	    <artifactId>gem-assembly-descriptors</artifactId>
-	    <version>@project.parent.version@</version>
+	    <version>@project.version@</version>
 	  </dependency>
 	</dependencies>
       </plugin>     
