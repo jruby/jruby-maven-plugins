@@ -41,6 +41,16 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected boolean       includeOpenSSL;
 
     /**
+     * flag whether to include all gems to test-resources, i.e. to test-classpath or not
+     * <br/>
+     * Command line -Dgem.includeRubygemsInTestResources=...
+     * 
+     * @parameter expression="${gem.includeRubygemsInTestResources}" default-value="true"
+     */
+    protected boolean       includeRubygemsInTestResources;
+
+    
+    /**
      * flag whether to install rdocs of the used gems or not
      * <br/>
      * Command line -Dgem.installRDoc=...
@@ -77,15 +87,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      *            default-value="${project.build.directory}/rubygems"
      */
     protected File          gemPath;
-
-    /**
-     * arguments for the gem command.
-     * <br/>
-     * Command line -Dgem.args=...
-     *
-     * @parameter default-value="${gem.args}"
-     */
-    protected String        gemArgs;
 
     /**
      * directory of JRuby bin path to use when forking JRuby.
@@ -236,11 +237,20 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             throw new MojoExecutionException("error in installing gems", e);
         }
 
-        // add the gems to the test-classpath
-        for(File path: this.gemsConfig.getGemPath()){
-            Resource resource = new Resource();
-            resource.setDirectory(path.getAbsolutePath());
-            project.getBuild().getTestResources().add(resource);
+        if (this.includeRubygemsInTestResources) {
+            for (File path : this.gemsConfig.getGemPath()) {
+                if (jrubyVerbose) {
+                    getLog().info("add to rubygems to test-classpath from: "
+                            + path.getAbsolutePath());
+                }
+                // add it to the classpath so java classes can find the ruby
+                // files
+                Resource resource = new Resource();
+                resource.setDirectory(path.getAbsolutePath());
+                resource.addInclude("gems/**");
+                resource.addInclude("specifications/**");
+                project.getBuild().getTestResources().add(resource);
+            }
         }
 
         try {
