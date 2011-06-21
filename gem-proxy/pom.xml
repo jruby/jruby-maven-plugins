@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.27.1-SNAPSHOT</version>
+    <version>0.28.0</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-proxy</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   <packaging>war</packaging>
   <name>Rubygems as Maven Repository Webapp</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
@@ -17,7 +16,7 @@
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>ruby-tools</artifactId>
-      <version>${project.parent.version}</version>
+      <version>0.28.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.codehaus.plexus</groupId>
