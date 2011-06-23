@@ -5,23 +5,20 @@ package de.saumya.mojo.proxy;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Set;
 
 public class VersionDirectoryBuilder extends RubygemsHtmlVisitor {
     
-    private final HtmlDirectoryBuilder builder;
-    
-    public VersionDirectoryBuilder(boolean prereleases, HtmlDirectoryBuilder html) {
-        super(prereleases);
-        this.builder = html;
-    }
-
     public static void main(String... args) throws Exception{
         String first = null;
         for(int i = 1; i < 3; i ++){
             long start = System.currentTimeMillis();
             HtmlDirectoryBuilder builder = new HtmlDirectoryBuilder();
-            VersionDirectoryBuilder visitor = new VersionDirectoryBuilder(true, builder);
-            visitor.build("rails");
+            VersionDirectoryBuilder visitor = new VersionDirectoryBuilder("rails", 
+                                                                          true, 
+                                                                          builder, 
+                                                                          Controller.BROKEN_GEMS.get("rails"));
+            visitor.build();
             System.err.println(System.currentTimeMillis() - start);
             if(first == null){
                 first = builder.toHTML();
@@ -33,9 +30,16 @@ public class VersionDirectoryBuilder extends RubygemsHtmlVisitor {
         }
         System.err.println(first);
     }
+
+    private final HtmlDirectoryBuilder builder;
     
-    public void build(String gemname) throws IOException{
-        accept(new URL("http://rubygems.org/gems/" + gemname + "/versions"));
+    public VersionDirectoryBuilder(String gemname, boolean prereleases, HtmlDirectoryBuilder html, Set<String> brokenVersions) {
+        super(gemname, prereleases, brokenVersions);
+        this.builder = html;
+    }
+
+    public void build() throws IOException{
+        accept(new URL("http://rubygems.org/gems/" + this.gemname + "/versions"));
     }
 
     protected void addVersion(String version) {

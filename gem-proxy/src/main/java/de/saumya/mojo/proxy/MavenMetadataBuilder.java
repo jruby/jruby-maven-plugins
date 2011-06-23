@@ -5,21 +5,16 @@ package de.saumya.mojo.proxy;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Set;
 
 public class MavenMetadataBuilder extends RubygemsHtmlVisitor {
     
-    public MavenMetadataBuilder(boolean prereleases) {
-        super(prereleases);
-    }
-
-    private StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-
     public static void main(String... args) throws Exception{
         String first = null;
         for(int i = 1; i < 10; i ++){
             long start = System.currentTimeMillis();
-            MavenMetadataBuilder visitor = new MavenMetadataBuilder(true);
-            visitor.build("rails");
+            MavenMetadataBuilder visitor = new MavenMetadataBuilder("rails", true, Controller.BROKEN_GEMS.get("rails"));
+            visitor.build();
             System.err.println(System.currentTimeMillis() - start);
             if(first == null){
                 first = visitor.toXML().replaceFirst(".*<last.*\n", "");
@@ -30,18 +25,24 @@ public class MavenMetadataBuilder extends RubygemsHtmlVisitor {
             }
         }
     }
+
+    public MavenMetadataBuilder(String gemname, boolean prereleases, Set<String> brokenVersions) {
+        super(gemname, prereleases, brokenVersions);
+    }
+
+    private StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     
     public String toXML(){
         return xml.toString();
     }
 
-    public void build(String gemname) throws IOException{
+    public void build() throws IOException{
         xml.append("<metadata>\n");
         xml.append("  <groupId>rubygems</groupId>\n");
-        xml.append("  <artifactId>").append(gemname).append("</artifactId>\n");
+        xml.append("  <artifactId>").append(this.gemname).append("</artifactId>\n");
         xml.append("  <versioning>\n");
         xml.append("    <versions>\n");
-        accept(new URL("http://rubygems.org/gems/" + gemname + "/versions"));
+        accept(new URL("http://rubygems.org/gems/" + this.gemname + "/versions"));
         xml.append("    </versions>\n");
         xml.append("  </versioning>\n");
         xml.append("  <lastUpdated>")

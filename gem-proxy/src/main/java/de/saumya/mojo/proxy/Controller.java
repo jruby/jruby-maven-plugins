@@ -17,8 +17,11 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import de.saumya.mojo.proxy.Controller.FileLocation.Type;
 import de.saumya.mojo.ruby.GemScriptingContainer;
@@ -28,12 +31,20 @@ public class Controller {
     private static final String SHA1 = ".sha1";
 
     private static final String RUBYGEMS_URL = "http://rubygems.org/gems";
+
+    static final Map<String, Set<String>> BROKEN_GEMS = new HashMap<String, Set<String>>();
+    
+    static {
+        Set<String> rails = new TreeSet<String>();
+        rails.add("2.0.0"); // activeresource-2.0.0 does not exist !!!
+        BROKEN_GEMS.put("rails", rails);
+    }
  
     private final File localStorage;
     
     private final GemScriptingContainer script = new GemScriptingContainer();
     
-     public static class FileLocation {
+    public static class FileLocation {
         enum Type { 
             XML_CONTENT, 
             HTML_CONTENT, 
@@ -85,8 +96,8 @@ public class Controller {
 
      public Controller(File storage) throws IOException{
          this.localStorage = storage;
-         localStorage.mkdirs();
-         createPom = script.runScriptletFromClassloader("create_pom.rb");
+         this.localStorage.mkdirs();
+         this.createPom = script.runScriptletFromClassloader("create_pom.rb");
      }
      
      public FileLocation locate(String path) throws IOException{
@@ -315,8 +326,8 @@ public class Controller {
         
         html.buildHeader(path);
 
-        VersionDirectoryBuilder builder = new VersionDirectoryBuilder(prereleases, html);
-        builder.build(name);
+        VersionDirectoryBuilder builder = new VersionDirectoryBuilder(name, prereleases, html, BROKEN_GEMS.get(name));
+        builder.build();
         
         html.buildFileLink("maven-metadata.xml");
         html.buildFileLink("maven-metadata.xml" + SHA1);
@@ -331,14 +342,14 @@ public class Controller {
     }
 
     private FileLocation metadata(String name, boolean prereleases) throws IOException {
-        MavenMetadataBuilder builder = new MavenMetadataBuilder(prereleases);
-        builder.build(name);
+        MavenMetadataBuilder builder = new MavenMetadataBuilder(name, prereleases, BROKEN_GEMS.get(name));
+        builder.build();
         return new FileLocation(builder.toXML(), Type.XML_CONTENT);
     }
 
     private FileLocation metadataSha1(String name, boolean prereleases) throws IOException {
-        MavenMetadataBuilder builder = new MavenMetadataBuilder(prereleases);
-        builder.build(name);
+        MavenMetadataBuilder builder = new MavenMetadataBuilder(name, prereleases, BROKEN_GEMS.get(name));
+        builder.build();
         return new FileLocation(sha1(builder.toXML()), Type.ASCII_CONTENT);
     }
     

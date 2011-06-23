@@ -15,8 +15,14 @@ public abstract class RubygemsHtmlVisitor {
 
     private final boolean prereleases;
 
-    public RubygemsHtmlVisitor(boolean prereleases) {
+    private Set<String> brokenVersions;
+
+    protected String gemname;
+
+    public RubygemsHtmlVisitor(String gemname, boolean prereleases, Set<String> brokenVersions) {
+        this.gemname = gemname;
         this.prereleases = prereleases;
+        this.brokenVersions = brokenVersions;
     }
 
     public void accept(URL url) throws IOException{
@@ -68,7 +74,7 @@ public abstract class RubygemsHtmlVisitor {
             if (((!prereleases && version.matches("^[0-9]+(\\.[0-9]+)*$"))
                     || (prereleases
                             && version.matches("^[0-9]+(\\.[0-9a-zA-Z]+)*$") && version.matches(".*[a-zA-Z].*")))
-                    && !versions.contains(version)) {
+                    && !versions.contains(version) && (brokenVersions == null || !brokenVersions.contains(version))) {
                 addVersion(version);
                 versions.add(version);
             }
