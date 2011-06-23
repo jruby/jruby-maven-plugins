@@ -100,7 +100,8 @@ public class GemsInstaller {
         if (pom != null) {
             boolean hasAlreadyOpenSSL = false;
             for (final Artifact artifact : pom.getArtifacts()) {
-                if ("compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope())) {
+                // assume pom.getBasedir() != null indicates the project pom
+                if ("compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope()) || pom.getBasedir() != null) {
                     if (!artifact.getFile().exists()) {
                         this.manager.resolve(artifact,
                                              localRepository,
