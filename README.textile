@@ -1,6 +1,6 @@
 h1. maven plugins for jruby
 
-h2. my problem with maven vs. gem
+h2. my problem with maven vs. rubygems
 
 p. both project try to solve the same problems. I just wrote a gem for jruby only, now I need to include some java code as a jar file and I depend on 3rd party jars. what shall I do ? pack them all up with the gem. but then I loose all dependency info from my jars and I cannot share them and I might run into version conflicts later since the gem packed jar file is just a file like any ruby file.
 
@@ -25,24 +25,35 @@ p. important is to declare the rubygems repository whenever you have gem artifac
 
 bc.  <repositories>
     <repository>
-      <id>rubygems</id>
-      <releases>
-        <updatePolicy>never</updatePolicy>
-        <checksumPolicy>ignore</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <url>http://rubygems.org/gems</url>
-      <layout>gem</layout>
+      <id>rubygems-releases</id>
+      <url>http://gems.saumya.de/releases</url>
     </repository>
+    <!-- and for prereleased gems
+    <repository>
+      <id>rubygems-prereleases</id>
+      <url>http://gems.saumya.de/prereleases</url>
+    </repository>
+    -->
   </repositories>
 
-p. here there are a few things to mention: update-policy is set to 'never' to tell core maven to not do it, the gem plugin will take of this on daily manner. the checksum-policy is set to 'ignore' since there are no checksum files - anyways you will see some error messages with the checksum which can be safely ignored. the gem layout works only with maven3 (maven2 produces some error of not finding the layout with hint 'gem')
+p. alternatively use:
 
-h3. jruby-maven-plugin, rails2-maven-plugin, rails3-maven-plugin, rspec-maven-plugin
+bc.  <repositories>
+    <repository>
+      <id>rubygems-releases</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </repository>
+    <!-- and for prereleased gems
+    <repository>
+      <id>rubygems-prereleases</id>
+      <url>http://rubygems-proxy.torquebox.org/prereleases</url>
+    </repository>
+    -->
+  </repositories>
 
-p. for example the jruby plugin declaration looks like this:
+h3. jruby-maven-plugin, rails2-maven-plugin, rails3-maven-plugin, rspec-maven-plugin, cucumber-maven-plugin, bundler-maven-plugin
+
+p. for example the rails3 plugin declaration looks like this:
 
 bc.   <build>
     <plugins>
@@ -64,6 +75,8 @@ p. more help you get with
 
 * @mvn rspec:help@
 
+* . . . .
+
 p. the prefix is **ruby** since there is already a jruby plugin on codehaus with the prefix **jruby**.
 
 h3. gem-maven-plugin
@@ -79,7 +92,7 @@ bc.   <build>
       </plugin>
       . . . .
 
-p. please not the **extensions** set to true - only with this setting the gem plugin can manage the gem artifacts properly
+p. please not the **extensions** set to true - only with this setting the gem plugin can package and install gem artifacts.
 
 p. more help you get with
 
@@ -95,9 +108,7 @@ p. the first name is the system property which can be set either via the command
 
 * jruby.verbose (verbose) - default: false
 
-* jruby.home (home) - default: none
-
-* jruby.version (version) - default: taken from dependency or 1.5.0
+* jruby.version (version) - default: taken from dependency or 1.6.2
 
 * jruby.jvmargs (JVM args) - default: -client -Xmx384m
 
@@ -107,25 +118,13 @@ p. the first name is the system property which can be set either via the command
 
 * (launchDirectory) - default: current-directory when there is no pom, or basedir
 
+p. **note**: these parameter names did change over the course of time of these plugins. most notable is the change from **jruby.gem.home** to **gem.home** and **jruby.gem.path** to **gem.path**.
+
 h2. common parameters for all goals from gem, rpec and rails plugins
 
 * "offline command line switch -o" (offline) - default: false
 
 * gem.includeOpenSSL (includeOpenSSL) - default: true
-
-* gem.forceVersion (forceVersion) - default: false
-
-* gem.useTransitiveDependencies (useTransitiveDependencies) - default: false
-
-p. any goal has the properties 'jruby.version' and 'jruby.fork'. you can set via the command line
-
-h2. common parameters for all goals from rails2/rails3 plugins
-
-* args (args) - default: none
-
-* rails.dir (dir) - default: src/main/rails or basedir
-
-* rails.env (env) - default: none (but rails defaults to development)
 
 h2. rubygems
 
@@ -133,9 +132,9 @@ p. the default behaviour is to fork jruby which allows to use a custom gem home/
 
 p. after a @mvn clean@ you can be sure that there is just one version for given gem present in target/rubygems. maven also resolves the version needed which might be different from what you get if you use rubygems or bundler. you can always use an explicit dependency to select a specific version of a particular gem.
 
-p. **note**: with rubygems any version with an alphabet is a "prerelease". for maven this is not the case and it treats all versions in similarthe same manner. to rectify this is a pending issue.
+p. **note**: with rubygems any version with an alphabet is a "prerelease". for maven this is not the case and it treats all versions in the same manner.
 
-h2. rails-maven-archetype
+h2. rails-maven-archetype (not maintained anymore)
 
 p. suppose you have already a rails-2.3.5 application inside a *myapp* directory. have a terminal open in the parent directory of this application and execute following command:
 
@@ -159,3 +158,6 @@ p. for some little more info what you can do with this start the server (as usua
 
 p. and open the browser at "http://localhost:3000/maven.html":http://localhost:3000/maven.html
 
+h1. more info
+
+p. on the blog "http://blog.mkristian.tk/":http://blog.mkristian.tk/ you will find more info on how to use these plugins.
