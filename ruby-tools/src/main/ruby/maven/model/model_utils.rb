@@ -266,7 +266,12 @@ EOF
         @props = args
       end
 
-      def [](key, value)
+      def [](key)
+        @props ||= {}
+        @props[key]
+      end
+
+      def []=(key, value)
         @props ||= {}
         @props[key] = value
       end
