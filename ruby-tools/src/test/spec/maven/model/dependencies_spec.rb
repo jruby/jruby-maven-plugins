@@ -169,7 +169,8 @@ XML
       <groupId>org.jruby</groupId>
       <artifactId>jruby-stdlib</artifactId>
       <version>1.6.0</version>
-      <type>test-jar</type>
+      <type>jar</type>
+      <scope>test</scope>
       <exclusions>
         <exclusion>
           <groupId>joda</groupId>

@@ -238,7 +238,8 @@ XML
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-noop</artifactId>
       <version>1.6.2</version>
-      <type>test-jar</type>
+      <type>jar</type>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <dependencyManagement>

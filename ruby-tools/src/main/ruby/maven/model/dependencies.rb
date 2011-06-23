@@ -168,7 +168,9 @@ module Maven
       end
 
       def self.new_test_jar(*args)
-        new(:"test-jar", *args)
+        result = new(:jar, *args)
+        result.scope :test
+        result
       end
 
       def exclusions(&block)
@@ -195,7 +197,7 @@ module Maven
       end
 
       def test_jar?(*args)
-        dependencies.member?(Dependency.new(:"test-jar", *args))
+        dependencies.member?(Dependency.new_test_jar(*args))
       end
 
       def gem?(*args)
