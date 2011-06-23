@@ -18,7 +18,6 @@ import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.runit.AbstractTestMojo;
-import de.saumya.mojo.runit.JRubyRun;
 import de.saumya.mojo.runit.JRubyRun.Mode;
 import de.saumya.mojo.runit.JRubyRun.Result;
 
