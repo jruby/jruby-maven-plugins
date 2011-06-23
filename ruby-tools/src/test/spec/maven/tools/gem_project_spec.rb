@@ -612,7 +612,6 @@ XML
           <requirePaths>mylib</requirePaths>
           <requiredRubyVersion><![CDATA[= 1.8.7]]></requiredRubyVersion>
           <requiredRubygemsVersion><![CDATA[= 1.4.2]]></requiredRubygemsVersion>
-          <requirements>java</requirements>
           <rubyforgeProject>myproject</rubyforgeProject>
           <testFiles>test/first_test.rb</testFiles>
         </configuration>

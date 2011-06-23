@@ -67,7 +67,6 @@ module Maven
         config = {}
         add_param(config, "autorequire", spec.autorequire)
         add_param(config, "defaultExecutable", spec.default_executable)
-        add_param(config, "requirements", spec.requirements)
         add_param(config, "testFiles", spec.test_files)
         #has_rdoc always gives true => makes not sense to keep it then
         #add_param(config, "hasRdoc", spec.has_rdoc)
@@ -117,6 +116,16 @@ module Maven
             req.to_s
           end
           gem(dep.name, versions).scope = scope
+        end
+
+        spec.requirements.each do |req|
+          begin
+            eval req
+          rescue => e
+            # TODO requirements is a list !!!
+            add_param(config, "requirements", req)
+            warn e
+          end
         end
       end
 
