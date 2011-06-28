@@ -170,7 +170,7 @@ public class RSpecMojo extends AbstractTestMojo {
         new File(reportPath).renameTo(reportFile);
 
         Result result = new Result();
-		result.message = "";
+		result.message = "An unknown error occurred.";
         Reader in = null;
         try {
             in = new FileReader(reportFile);
