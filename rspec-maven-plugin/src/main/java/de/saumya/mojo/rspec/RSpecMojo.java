@@ -170,7 +170,6 @@ public class RSpecMojo extends AbstractTestMojo {
         new File(reportPath).renameTo(reportFile);
 
         Result result = new Result();
-		result.message = "An unknown error occurred.";
         Reader in = null;
         try {
             in = new FileReader(reportFile);
@@ -201,7 +200,13 @@ public class RSpecMojo extends AbstractTestMojo {
                 }
             }
         }
-        result.success = result.message.contains("0 failures");
+
+		if (result.message == null) {
+			result.message = "An unknown error occurred";
+			result.success = false;
+		}
+        else
+			result.success = result.message.contains("0 failures");
         return result;
     }
 
