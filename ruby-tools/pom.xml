@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.28.2</version>
+    <version>0.28.3-SNAPSHOT</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>ruby-tools</artifactId>

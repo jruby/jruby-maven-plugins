@@ -4,11 +4,11 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.28.2</version>
+    <version>0.28.3-SNAPSHOT</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-assembly-descriptors</artifactId>
-  <version>0.3</version>
+  <version>0.4-SNAPSHOT</version>
   <name>Assembly Descriptors with the Gems</name>
   <profiles>
     <profile>
