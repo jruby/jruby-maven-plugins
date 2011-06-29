@@ -248,6 +248,9 @@ public class RSpecMojo extends AbstractTestMojo {
 
         // get the script-factory when there is no pom
         if (this.rspecScriptFactory == null) {
+            if(this.rspecVersion == null && this.project.getBasedir() != null){
+                throw new MojoExecutionException("please add a gem dependency for rspec to your POM");
+            }
             this.rspecScriptFactory = scriptFactory4Version(this.rspecVersion);
         }
 
