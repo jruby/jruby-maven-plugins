@@ -200,7 +200,13 @@ public class RSpecMojo extends AbstractTestMojo {
                 }
             }
         }
-        result.success = result.message.contains("0 failures");
+
+		if (result.message == null) {
+			result.message = "An unknown error occurred";
+			result.success = false;
+		}
+        else
+			result.success = result.message.contains("0 failures");
         return result;
     }
 
