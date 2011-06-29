@@ -251,7 +251,7 @@ public class DefaultRailsManager implements RailsManager {
         if (!force && templateFile.exists()) {
             return;
         }
-        final InputStream input = getClass().getResourceAsStream("/rails-resources/"
+        final InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("rails-resources/"
                 + template);
 
         try {
