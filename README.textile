@@ -120,6 +120,12 @@ p. the first name is the system property which can be set either via the command
 
 p. **note**: these parameter names did change over the course of time of these plugins. most notable is the change from **jruby.gem.home** to **gem.home** and **jruby.gem.path** to **gem.path**.
 
+p. **note**: Installing the gems for all projects in a single location 
+(for example, ${settings.localRepository}/rubygems/) is NOT recommended,
+because you may end up with several versions of a given gem,
+and rubygems will not necessarily choose the right one to load at runtime.
+(That's why the default location for gems is target/rubygems.)
+
 h2. common parameters for all goals from gem, rpec and rails plugins
 
 * "offline command line switch -o" (offline) - default: false
