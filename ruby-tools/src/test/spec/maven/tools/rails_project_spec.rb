@@ -71,6 +71,7 @@ describe Maven::Tools::RailsProject do
   </dependencies>
   <properties>
     <gem.home>${project.build.directory}/rubygems</gem.home>
+    <gem.includeRubygemsInTestResources>false</gem.includeRubygemsInTestResources>
     <gem.path>${project.build.directory}/rubygems</gem.path>
     <jetty.version>7.4.2.v20110526</jetty.version>
     <jruby.plugins.version>@project.version@</jruby.plugins.version>

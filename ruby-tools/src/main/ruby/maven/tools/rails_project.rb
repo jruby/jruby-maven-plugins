@@ -33,6 +33,7 @@ module Maven
         self.properties = {
           "jetty.version" => versions[:jetty_plugin],
           "rails.env" => "development",
+          "gem.includeRubygemsInTestResources" => false
         }.merge(self.properties)
 
         plugin(:rails3) do |rails|

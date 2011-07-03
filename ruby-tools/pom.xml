@@ -112,7 +112,8 @@
 	  <plugin>
 	    <groupId>de.saumya.mojo</groupId>
 	    <artifactId>rspec-maven-plugin</artifactId>
-	    <version>${project.version}</version>
+            <!-- hardcode it so integration tests run on new version -->
+	    <version>0.28.3</version>
 	    <configuration>
 	      <specSourceDirectory>src/test/spec</specSourceDirectory>
 	    </configuration>
