@@ -202,11 +202,17 @@ public class RSpecMojo extends AbstractTestMojo {
         }
 
 		if (result.message == null) {
-			result.message = "An unknown error occurred";
-			result.success = false;
+		    if(reportFile.length() == 0){
+	            result.success = true;
+		    }
+		    else { // this means the report file partial and thus an error occured
+		        result.message = "An unknown error occurred";
+		        result.success = false;
+		    }
 		}
-        else
+        else {
 			result.success = result.message.contains("0 failures");
+        }
         return result;
     }
 
