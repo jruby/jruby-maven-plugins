@@ -19,6 +19,7 @@ import de.saumya.mojo.runit.JRubyRun.Result;
  * maven wrapper around the runit/testcase command.
  *
  * @goal test
+ * @phase test
  */
 public class RUnitMojo extends AbstractTestMojo {
 
@@ -81,7 +82,12 @@ public class RUnitMojo extends AbstractTestMojo {
         scriptFactory.setSystemProperties(project.getProperties());
         scriptFactory.setSummaryReport(summaryReport);
         scriptFactory.setReportPath(outputfile);
-        scriptFactory.setSourceDir(new File(launchDirectory(), runitDirectory));
+        if(runitDirectory.startsWith(launchDirectory().getAbsolutePath())){
+            scriptFactory.setSourceDir(new File(runitDirectory));
+        }
+        else{
+            scriptFactory.setSourceDir(new File(launchDirectory(), runitDirectory));
+        }
         try {
             scriptFactory.setClasspathElements(project
                     .getTestClasspathElements());
