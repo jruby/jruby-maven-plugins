@@ -11,9 +11,9 @@
   </description>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
   <scm>
-    <connection>scm:git:git://github.com/mkristian/jruby-maven-plugins.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/mkristian/jruby-maven-plugins.git</developerConnection>
-    <url>http://github.com/mkristian/jruby-maven-plugins</url>
+    <connection>scm:git:git://github.com/torquebox/jruby-maven-plugins.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/torquebox/jruby-maven-plugins.git</developerConnection>
+    <url>http://github.com/torquebox/jruby-maven-plugins</url>
   </scm>
   <licenses>
     <license>
