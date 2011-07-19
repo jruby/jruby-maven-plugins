@@ -1,12 +1,12 @@
 h1. rails3 maven plugin
 
-p. this plugin allows to manage a rails application from maven (i.e. also from a maven shell). you have a goal *rails3:rails* which generates you an empty rails application with pom and then you can use *rails3:rake*, *rails3:generate* and *rails3:server* to manage common tasks with rails. finally there is an internal goal *rail3:war* which helps packing the rails application inside a war file.
+p. this plugin allows to manage a rails application from maven (i.e. also from a maven shell). you have a goal *rails3:new* which generates you an empty rails application with pom and then you can use *rails3:rake*, *rails3:generate* and *rails3:server* to manage common tasks with rails. finally there is an internal goal *rail3:war* which helps packing the rails application inside a war file.
 
 p. *note*: the prefix *rails3* is to distinguise another plugin for rails 2.3.x with *rails* as prefix
 
 h2. commandline/configuration arguments
 
-p. in general you can use @-Dargs=....@ to pass in any arguments to any rails goal. but in case you want to execute more then one goal you have specialized argumets for each goal in the form @-Dxyz.args=.....@ where @xyz@ is the goal the arguments belong to. furthermore some goals have special arguments like the @tasks@ with the @rails:rake@ goal or @app_path@ of @rails3:rails@ or @generator@ of @rails3:generate@. see also the documentation of the respective goal for more details.
+p. in general you can use @-Dargs=....@ to pass in any arguments to any rails goal. but in case you want to execute more then one goal you have specialized argumets for each goal in the form @-Dxyz.args=.....@ where @xyz@ is the goal the arguments belong to. furthermore some goals have special arguments like the @tasks@ with the @rails:rake@ goal or @app_path@ of @rails3:new@ or @generator@ of @rails3:generate@. see also the documentation of the respective goal for more details.
 
 p. when configuring the plugin within the pom.xml you can use the same either a short argument name for all the goals or longer argument names for each goal different. the goal specific arguments have the form @xyzArgs@ where @xyz@ is the goal name.
 
@@ -14,15 +14,15 @@ h2. the plugin needs maven3
 
 p. this plugin uses gem-maven-plugin to manage gem artifacts which needs maven3: http://maven.apache.org/downloads.html
 
-h2. rails3:rails
+h2. rails3:new
 
 h3. use outside of rails application
 
-@mvn rails3:rails -Dapp_path=yet_another_blog@
+@mvn rails3:new -Dapp_path=yet_another_blog@
 
 p. will generate a new application in *yet_another_blog* using the mysql database. with
 
-@mvn rails3:rails@
+@mvn rails3:new@
 
 p. you get the usual help messages.
 
@@ -32,11 +32,11 @@ h3. use inside of rails application
 
 p. an overview over the different possible commands
 
-@mvn rails3:rails@
+@mvn rails3:new@
 
 p. and use the following for execute one of them
 
-@mvn rails3:rails -Dargs=help@
+@mvn rails3:new -Dargs=help@
 
 h2. rails3:rake
 
