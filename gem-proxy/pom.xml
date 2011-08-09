@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.28.3-SNAPSHOT</version>
+    <version>0.28.4-SNAPSHOT</version>
   </parent>
   <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-proxy</artifactId>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>ruby-tools</artifactId>
-      <version>0.28.3-SNAPSHOT</version>
+      <version>${parent.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.codehaus.plexus</groupId>
@@ -86,6 +86,10 @@
             <systemProperty>
               <name>gem.proxy.storage</name>
               <value>${project.build.directory}/storage</value>
+            </systemProperty>
+            <systemProperty>
+              <name>jetty.port</name>
+              <value>8989</value>
             </systemProperty>
           </systemProperties>
         </configuration>
