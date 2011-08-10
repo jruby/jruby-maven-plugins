@@ -126,7 +126,9 @@ class MavenSurefireReporter < Spec::Runner::Formatter::BaseFormatter
   end
   
   def filename_for(example_group)
-    filename, lineno = example_group.location.split( ':' ); 
+    example_group.location =~ /^(.*):([0-9])+/
+    filename = $1
+    lineno = $2
     filename = filename[ SPEC_DIR.length..-1 ]
     if ( filename[0,1] == "/" ) 
       filename = filename[1..-1] 
