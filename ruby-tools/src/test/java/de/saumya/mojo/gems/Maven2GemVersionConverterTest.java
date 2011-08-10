@@ -8,6 +8,8 @@ import org.codehaus.plexus.util.IOUtil;
 
 public class Maven2GemVersionConverterTest extends TestCase
 {
+	private static final String SEP = System.getProperty("line.separator");
+	
     private Maven2GemVersionConverter converter;
 
     @Override
@@ -58,7 +60,7 @@ public class Maven2GemVersionConverterTest extends TestCase
     {
         String[] versions =
             IOUtil.toString( Thread.currentThread().getContextClassLoader().getResourceAsStream( "versions.txt" ) )
-                .split( "\\s" );
+                .split( SEP );
         for ( String version : versions )
         {
             String gemVersion = converter.createGemVersion( version );

@@ -15,6 +15,8 @@ import de.saumya.mojo.ruby.script.GemScriptFactory;
 import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class EmbeddedLauncherTest extends TestCase {
+	
+	private static final String SEP = System.getProperty("line.separator");
 
     public EmbeddedLauncherTest(final String testName) {
         super(testName);
@@ -42,8 +44,8 @@ public class EmbeddedLauncherTest extends TestCase {
         config.addGemPath(path);
         
         this.path.mkdirs();
-        this.expected = "onetwothree\n" + this.home.getAbsolutePath() + "\n"
-                + this.path.getAbsolutePath() + "\n";
+        this.expected = "onetwothree" + SEP + this.home.getAbsolutePath() + SEP
+                + this.path.getAbsolutePath() + SEP;
 
         final Logger logger = new NoopLogger();
         // no classrealm
@@ -74,9 +76,7 @@ public class EmbeddedLauncherTest extends TestCase {
             // in this case GEM_HOME was set in system environment
             f = new File("target/test-classes/test.rb-gem.txt");
         }
-        assertEquals("onetwothree", FileUtils.fileRead(f)
-                .replace("\n", "--n--")
-                .replaceFirst("--n--.*", ""));
+        assertEquals("onetwothree", FileUtils.fileRead(f).trim() );
     }
 
     public void testExecutionInTarget() throws Exception {
@@ -96,7 +96,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 .addArg("three")
                 .executeIn(new File("target"));
         assertEquals("onetwothree", FileUtils.fileRead(f)
-                .replace("\n", "--n--")
+                .replace( SEP, "--n--")
                 .replaceFirst("--n--.*", ""));
     }
 
@@ -145,7 +145,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 .addArg("three")
                 .executeIn(new File("target"));
         assertEquals(this.expected,
-                     FileUtils.fileRead("target/test-classes/test.rb-gem.txt"));
+                     FileUtils.fileRead("target/test-classes/test.rb-gem.txt") );
     }
 
     public void testScriptWithOutput() throws Exception {
@@ -156,7 +156,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 .addArg("two")
                 .addArg("three")
                 .execute(output);
-        assertEquals(this.expected, FileUtils.fileRead(output));
+        assertEquals(this.expected, FileUtils.fileRead(output).replaceAll( "\\s", SEP ) );
     }
 
     public void testScriptWithOutputInTarget() throws Exception {
@@ -167,7 +167,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 .addArg("two")
                 .addArg("three")
                 .executeIn(new File("target"), output);
-        assertEquals(this.expected, FileUtils.fileRead(output));
+        assertEquals(this.expected, FileUtils.fileRead(output).replaceAll( "\\s", SEP ) );
     }
 
     public void testSimpleScriptInTarget() throws Exception {
@@ -178,7 +178,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 .addArg("two")
                 .addArg("three")
                 .executeIn(new File("target"));
-        assertEquals("onetwothree\n", FileUtils.fileRead(output));
+        assertEquals("onetwothree", FileUtils.fileRead(output).trim() );
     }
 
     public void testSimpleScriptWithOutputInTarget() throws Exception {
@@ -188,7 +188,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 .addArg("two")
                 .addArg("three")
                 .executeIn(new File("target"), output);
-        assertEquals("onetwothree\n", FileUtils.fileRead(output));
+        assertEquals("onetwothree", FileUtils.fileRead(output).trim() );
     }
 
     public void testGemHomeAndGemPath() throws Exception {
@@ -196,19 +196,22 @@ public class EmbeddedLauncherTest extends TestCase {
         this.factory.newScriptFromResource("META-INF/jruby.home/bin/gem")
                 .addArg("env")
                 .execute(output);
-        final String[] lines = FileUtils.fileRead(output).split("\\n");
+        final String[] lines = FileUtils.fileRead(output).split( "\n" );
         int countDir = 0;
         int countHome = 0;
         int countPath = 0;
+        String home = this.home.getAbsolutePath();
+        home = home.replaceAll("\\\\", "/" ).toLowerCase();
+        String path = this.path.getAbsolutePath();
+        path = path.replaceAll("\\\\", "/" ).toLowerCase();
         for (final String line : lines) {
-            if (line.contains("DIRECTORY: " + this.home.getAbsolutePath())) {
+            if (line.toLowerCase().contains("directory: " + home ) ) {
                 countDir++;
             }
-            if (line.contains(this.home.getAbsolutePath())
-                    && !line.contains(this.path.getAbsolutePath())) {
+            if (line.toLowerCase().contains(home) && !line.toLowerCase().contains(path) ) {
                 countHome++;
             }
-            if (line.contains(this.path.getAbsolutePath())) {
+            if (line.toLowerCase().contains(path)) {
                 countPath++;
             }
         }

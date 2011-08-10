@@ -89,14 +89,14 @@ public class MavenArtifactConverterTest extends PlexusTestCase {
         this.scripting.callMethod(gemTester,
                                   "install_gems",
                                   new String[] {
-                                          "target/gems/mvn:org.slf4j:slf4j-api-1.5.8-java.gem",
-                                          "target/gems/mvn:org.slf4j:slf4j-simple-1.5.8-java.gem" },
+                                          "target/gems/mvn.org.slf4j.slf4j-api-1.5.8-java.gem",
+                                          "target/gems/mvn.org.slf4j.slf4j-simple-1.5.8-java.gem" },
                                   Object.class);
         // TODO do not know why this is needed. but without it the first run
         // fails and any successive runs succeeds !!
         this.scripting.callMethod(gemTester,
                                   "gem",
-                                  "mvn:org.slf4j:slf4j-simple",
+                                  "mvn.org.slf4j.slf4j-simple",
                                   Object.class);
 
         // load the slf4j-simple
