@@ -3,6 +3,7 @@ package de.saumya.mojo.rails;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 import de.saumya.mojo.ruby.script.ScriptException;
 
