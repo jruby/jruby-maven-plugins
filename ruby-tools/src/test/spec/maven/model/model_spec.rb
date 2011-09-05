@@ -129,7 +129,7 @@ XML
     end
 
     it 'should setup a project with repositories' do
-      @project.repository("rubygems-releases", "http://gems.saumya.de/releases")
+      @project.repository("rubygems-releases", "http://rubygems-proxy.torquebox.org/releases")
       @project.plugin_repository("sonatype-snapshots") do |sonatype|
         sonatype.url "http://oss.sonatype.org/content/repositories/snapshots"
         sonatype.releases(:enabled => false)
@@ -150,7 +150,7 @@ XML
   <repositories>
     <repository>
       <id>rubygems-releases</id>
-      <url>http://gems.saumya.de/releases</url>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
     </repository>
     <repository>
       <id>jboss-public-repository-group</id>

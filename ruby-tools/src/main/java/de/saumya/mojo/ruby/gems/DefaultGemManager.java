@@ -40,7 +40,7 @@ import org.sonatype.aether.RepositorySystemSession;
 @Component(role = GemManager.class)
 public class DefaultGemManager implements GemManager {
 
-    private static final String       DEFAULT_GEMS_REPOSITORY_BASE_URL = "http://gems.saumya.de/";
+    private static final String       DEFAULT_GEMS_REPOSITORY_BASE_URL = "http://rubygems-proxy.torquebox.org/";
 
     @Requirement
     private RepositorySystem          repositorySystem;

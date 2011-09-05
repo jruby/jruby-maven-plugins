@@ -164,11 +164,11 @@ module Maven
         
         packaging "gem" unless packaging
 
-        repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless repository("rubygems-releases").url
+        repository("rubygems-releases").url = "http://rubygems-proxy.torquebox.org/releases" unless repository("rubygems-releases").url
         
         has_prerelease = dependencies.detect { |d| d.type.to_sym == :gem && d.version =~ /[a-zA-Z]/ }
 
-        repository("rubygems-prereleases").url = "http://gems.saumya.de/prereleases" if has_prerelease && !repository("rubygems-prereleases").url
+        repository("rubygems-prereleases").url = "http://rubygems-proxy.torquebox.org/prereleases" if has_prerelease && !repository("rubygems-prereleases").url
 
         if !jar?("org.jruby:jruby-complete") && !jar?("org.jruby:jruby-core") && versions[:jruby_version]
           minor = versions[:jruby_version].sub(/[0-9]*\./, '').sub(/\..*/, '')
@@ -202,7 +202,7 @@ module Maven
         end
 
         if plugin?(:bundler)
-          plugin_repository("rubygems-releases").url = "http://gems.saumya.de/releases" unless plugin_repository("rubygems-releases").url
+          plugin_repository("rubygems-releases").url = "http://rubygems-proxy.torquebox.org/releases" unless plugin_repository("rubygems-releases").url
           bundler = plugin(:bundler)
           bundler.version = "${jruby.plugins.version}" unless bundler.version
           bundler.executions.goals << "install"

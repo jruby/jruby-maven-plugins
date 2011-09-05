@@ -22,13 +22,13 @@ describe Maven::Tools::RailsProject do
   <repositories>
     <repository>
       <id>rubygems-releases</id>
-      <url>http://gems.saumya.de/releases</url>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
     </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
       <id>rubygems-releases</id>
-      <url>http://gems.saumya.de/releases</url>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
     </pluginRepository>
   </pluginRepositories>
   <dependencies>
