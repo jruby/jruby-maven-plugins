@@ -134,7 +134,7 @@ public class GemsInstaller {
             if (!this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL && script != null) {
                 // keep the version hard-coded to stay reproducible
                 final Artifact openssl = this.manager.createGemArtifact(JRUBY_OPENSSL,
-                                                                        "0.7");
+                                                                        "0.7.4");
 
                 if (pom.getFile() == null) {
                     // we do not have a pom so we need the default gems repo
