@@ -145,6 +145,7 @@ public class DefaultRailsManager implements RailsManager {
 
         // run the "rails new"-script
         final Script script = installer.factory.newScript(installer.config.binScriptFile("rails"))
+                .addArg("_" + railsVersion + "_")
                 .addArg("new");
         if (appPath != null) {
             script.addArg(appPath.getAbsolutePath());
@@ -289,7 +290,9 @@ public class DefaultRailsManager implements RailsManager {
         for (final String arg : args) {
             script.addArg(arg);
         }
-        script.addArg("RAILS_ENV=" + environment);
+        if(environment != null){
+            script.addArg("RAILS_ENV=" + environment);
+        }
         script.executeIn(launchDirectory);
     }
 
