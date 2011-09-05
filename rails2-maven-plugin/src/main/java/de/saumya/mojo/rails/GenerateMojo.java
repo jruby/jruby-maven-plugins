@@ -29,6 +29,13 @@ public class GenerateMojo extends AbstractRailsMojo {
     protected String generator    = null;
 
     @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        // make sure the whole things run in the same process
+        this.jrubyFork = false;
+        super.execute();
+    }
+
+    @Override
     protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
         this.factory.newScript(railsScriptFile("generate"))
