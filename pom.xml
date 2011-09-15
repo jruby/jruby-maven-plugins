@@ -53,8 +53,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <invoker.skip>true</invoker.skip>
-    <maven.version>3.0.2</maven.version>
-    <jruby.version>1.6.2</jruby.version>
+    <maven.version>3.0.3</maven.version>
+    <jruby.version>1.6.4</jruby.version>
   </properties>
   <build>
     <plugins>
