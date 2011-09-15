@@ -211,7 +211,7 @@ public class DefaultRailsManager implements RailsManager {
 
             setupWebXML(appPath);
 
-            if (gwt!= null){
+            if (gwt!= null && gwt.packageName != null){
                 installer.installGem("activerecord-jdbc" + database + "-adapter",
                                      null,// use the latest version
                                      repositorySystemSession,
