@@ -9,6 +9,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.rails.GwtOptions;
 import de.saumya.mojo.ruby.rails.RailsException;
 import de.saumya.mojo.ruby.rails.RailsManager.ORM;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -41,13 +42,22 @@ public class NewMojo extends AbstractRailsMojo {
     protected File              appPath                        = null;
 
     /**
-     * the database to use. DEFAULT: sqlite3
+     * the database to use
      * <br/>
      * Command line -Ddatabase=...
      *
-     * @parameter default-value="${database}"
+     * @parameter expression="${database}" default-value="sqlite3"
      */
     protected String            database                       = null;
+
+    /**
+     * rails template to apply after create the application
+     * <br/>
+     * Command line -Dtemplate=...
+     *
+     * @parameter expression="${template}"
+     */
+    protected String            template                       = null;
 
     /**
      * the rails version to use
@@ -77,13 +87,42 @@ public class NewMojo extends AbstractRailsMojo {
     protected String            artifactVersion                = null;
 
     /**
-     * use latest prerelease version unless a rails version is specified.
+     * select the ORM to use
      * <br/>
      * Command line -Dorm=activerecord or -Dorm=datamapper
      *
      * @parameter expression="${orm}" default-value="activerecord"
      */
     protected String railsORM;
+
+    /**
+     * when the gwt package is given then the rails gets GWT as view component
+     * <br/>
+     * Command line -Dgwt.package=...
+     *
+     * @parameter expression="${gwt.package}"
+     */
+    protected String gwtPackage;
+
+    /**
+     * setup GWT with session support
+     * <br/>
+     * Command line -Dgwt.session=true
+     *
+     * @parameter expression="${gwt.session}" default-value="false"
+     */
+    protected boolean gwtSession;
+
+    /**
+     * setup GWT with menu support
+     * <br/>
+     * Command line -Dgwt.menu=true
+     *
+     * @parameter expression="${gwt.menu}" default-value="false"
+     */
+    protected boolean gwtMenu;
+
+
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -132,12 +171,15 @@ public class NewMojo extends AbstractRailsMojo {
             }
 
             getLog().info("use ORM " + ORM.valueOf(this.railsORM));
+            GwtOptions gwt = new GwtOptions(gwtPackage, gwtSession, gwtMenu);
             this.railsManager.createNew(this.gemsInstaller,
                                         this.repoSession,
                                         this.appPath,
                                         this.database,
                                         this.railsVersion,
                                         ORM.valueOf(this.railsORM),
+                                        this.template,
+                                        gwt,
                                         combArgs);
         }
         catch (final RailsException e) {

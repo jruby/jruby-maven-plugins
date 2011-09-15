@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.saumya.mojo.ruby.rails;
 
@@ -54,7 +54,7 @@ public class DefaultRailsManager implements RailsManager {
 
     @Requirement
     private VelocityComponent          velocityComponent;
-    
+
     @Requirement
     private Logger                     logger;
 
@@ -72,7 +72,7 @@ public class DefaultRailsManager implements RailsManager {
                 "boot.rb");
         if (boot.exists() && new File(launchDirectory, "Gemfile.maven").exists()) {
             this.logger.info( "DEPRECATED: the use of Gemfile.maven deprecated. " +
-            		"use '$ mvn rails:pom' to generate a pom out of the Gemfile");
+              "use '$ mvn rails:pom' to generate a pom out of the Gemfile");
             InputStream bootIn = null;
             InputStream bootOrig = null;
             InputStream bootPatched = null;
@@ -116,23 +116,35 @@ public class DefaultRailsManager implements RailsManager {
             final RepositorySystemSession repositorySystemSession,
             final File appPath, String database, String railsVersion,
             ORM orm, final String... args) throws RailsException, GemException,
-            IOException, ScriptException
+            IOException, ScriptException {
+        createNew(installer, repositorySystemSession, appPath, database, railsVersion, orm,
+                  null, null, args);
+    }
 
-    {
+    public void createNew(final GemsInstaller installer,
+                final RepositorySystemSession repositorySystemSession,
+                final File appPath, String database, String railsVersion,
+                final ORM orm, final String template, final GwtOptions gwt,
+                final String... args)
+        throws RailsException, GemException, IOException, ScriptException {
         final File pomFile = new File(appPath, "pom.xml");
         if (pomFile.exists()) {
             throw new RailsException(pomFile
                     + " exists - skip installation of rails");
         }
 
-        // use a rubygems directory in way that the new application can also use
-        // it
+        // use a rubygems directory in way that the new application can also use it
         if(!installer.config.getGemHome().exists()){
             installer.config.setGemBase(new File(new File(appPath, "target"),
                     "rubygems"));
         }
-       // setupGemHomeAndGemPath(installer);
 
+        if (railsVersion == null) {
+            //TODO remove this when rails-3.0.10 and rails-3.1 is working properly
+            railsVersion = "3.0.9";
+            this.logger.info("use rails version " + railsVersion +
+                             " since it creates a nice platform independent Gemfile");
+        }
         railsVersion = installer.installGem("rails",
                                             railsVersion,
                                             repositorySystemSession,
@@ -157,26 +169,28 @@ public class DefaultRailsManager implements RailsManager {
             script.addArg("-d", database);
         }
         if (repositorySystemSession.isOffline()) {
-            this.logger.info("system is offline: using jruby rails template from jar file - might be outdated");
-            script.addArg("-m", getClass().getResource("/rails-templates/" + orm.name() + ".rb").toString()
-                          .replaceFirst("^jar:", ""));
+            this.logger.info("system is offline: using jruby rails templates from jar file - might be outdated");
+        }
+        if (template != null || (gwt != null && gwt.packageName != null)){
+            String tmp = templateFrom(orm, repositorySystemSession.isOffline(), railsVersion);
+            if(tmp != null ){
+                System.setProperty("maven.rails.basetemplate", tmp);
+            }
+            if (template != null){
+                System.setProperty("maven.rails.extratemplate", template);
+            }
+            if (gwt != null){
+                System.setProperty("maven.rails.gwt", gwt.packageName);
+            }
+            script.addArg("-m", templateFromResource("templates"));
         }
         else {
-            switch(orm){
-            case activerecord:
-                script.addArg("-m", "http://jruby.org/rails3.rb");
-                break;
-            case datamapper:
-                script.addArg("-m", "http://datamapper.org/templates/rails.rb");
-                break;
-            default:
-                throw new RuntimeException( "unknown ORM :" + orm);
-            }
+            script.addArg("-m", templateFrom(orm, repositorySystemSession.isOffline(), railsVersion));
         }
 
-        if (!railsVersion.startsWith("3.0")) {
-            script.addArg("--skip-bundle");
-        }
+        // skip bundler
+        script.addArg("--skip-bundle");
+
         script.execute();
 
         if (appPath != null) {
@@ -196,7 +210,50 @@ public class DefaultRailsManager implements RailsManager {
                           true);
 
             setupWebXML(appPath);
+
+            if (gwt!= null){
+                installer.installGem("activerecord-jdbc" + database + "-adapter",
+                                     null,// use the latest version
+                                     repositorySystemSession,
+                                     localRepository());
+                installer.installGem("resty-generators",
+                                     null,// use the latest versiona
+                                     repositorySystemSession,
+                                     localRepository());
+                generate(installer,
+                         repositorySystemSession,
+                         appPath,
+                         "resty:setup",
+                         gwt.packageName,
+                         railsBooleanOption(gwt.session, "session"),
+                         railsBooleanOption(gwt.menu, "menu"));
+            }
         }
+    }
+
+    private String railsBooleanOption(final boolean option, final String name) {
+        return "--" + (option ? "" : "skip-") + name;
+    }
+
+    private String templateFrom(final ORM orm, final boolean offline, String railsVersion) {
+        if (offline) {
+            return templateFromResource(orm.name());
+        }
+        else {
+            switch(orm){
+            case activerecord:
+                return railsVersion.startsWith("3.0.") ? "http://jruby.org/rails3.rb" : null;
+            case datamapper:
+                return "http://datamapper.org/templates/rails.rb";
+            default:
+                throw new RuntimeException( "unknown ORM :" + orm);
+            }
+        }
+    }
+
+    private String templateFromResource(final String name) {
+        return getClass().getResource("/rails-templates/" + name + ".rb").toString()
+                      .replaceFirst("^jar:", "");
     }
 
     private void setupWebXML(final File launchDirectory) throws RailsException,
@@ -223,21 +280,20 @@ public class DefaultRailsManager implements RailsManager {
                       "target/jetty/override-production-web.xml");
 
         // create the keystore for SSL
-        final String keystore = "src/test/resources/server.keystore";
-        final File keystoreFile = new File(launchDirectory, keystore);
-        if (!keystoreFile.exists()) {
-            FileUtils.copyURLToFile(getClass().getResource("/rails-resources/"
-                                            + keystore), keystoreFile);
-        }
-        
-        // add a monkey patch for throwables
-        final String javaThrowable = "config/initializers/java_throwable_monkey_patch.rb";
-        final File javaThrowableFile = new File(launchDirectory, keystore);
-        if (!javaThrowableFile.exists()) {
-            FileUtils.copyURLToFile(getClass().getResource("/rails-resources/"
-                                            + javaThrowable), javaThrowableFile);
-        }
+        copyFile(launchDirectory, "src/test/resources/server.keystore");
 
+        // add a monkey patch for throwables
+        copyFile(launchDirectory, "config/initializers/java_throwable_monkey_patch.rb");
+
+    }
+
+    private void copyFile(final File launchDirectory, final String name)
+            throws IOException {
+        final File file = new File(launchDirectory, name);
+        if (!file.exists()) {
+            FileUtils.copyURLToFile(getClass().getResource("/rails-resources/"
+                                            + name), file);
+        }
     }
 
     private void filterContent(final File app, final VelocityContext context,

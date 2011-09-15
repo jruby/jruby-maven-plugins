@@ -21,6 +21,12 @@ public interface RailsManager {
             final File appPath, String database, final String railsVersion,
             ORM orm, final String... args) throws RailsException, GemException,
             IOException, ScriptException;
+    public abstract void createNew(final GemsInstaller installer,
+            final RepositorySystemSession repositorySystemSession,
+            final File appPath, String database, String railsVersion,
+            final ORM orm, final String template, final GwtOptions gwt,
+            final String... args) throws RailsException, GemException, IOException,
+            ScriptException;
 
     public abstract void rake(final GemsInstaller installer,
             final RepositorySystemSession repositorySystemSession,
