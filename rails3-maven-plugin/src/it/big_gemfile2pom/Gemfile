@@ -71,7 +71,7 @@ group :development, :test do
   gem 'capybara'
   gem 'launchy'
   gem 'configuration', '~> 1.2.0' # needed by ruby-maven: launchy has it as test dependency
-  gem 'autotest-rails'
+  gem 'autotest-rails', '4.1.0'  #needs ZenTest-4.5 which does not exist
   gem 'autotest-notification'
   gem 'database_cleaner'
 #  gem 'spork', '~> 0.9.0.rc'

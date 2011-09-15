@@ -52,6 +52,7 @@
 		    <pomInclude>*/pom.xml</pomInclude>
 		  </pomIncludes>
 		  <pomExcludes>
+		    <pomExclude>big_*/pom.xml</pomExclude>
 		    <pomExclude>*mysql/pom.xml</pomExclude>
 		    <pomExclude>*postgres/pom.xml</pomExclude>
 		  </pomExcludes>
@@ -72,6 +73,7 @@
 	    <artifactId>maven-invoker-plugin</artifactId>
 	    <configuration>
 	      <pomExcludes>
+		<pomExclude>big_*/pom.xml</pomExclude>
 		<pomExclude>nothing</pomExclude>
 	      </pomExcludes>
 	    </configuration>
