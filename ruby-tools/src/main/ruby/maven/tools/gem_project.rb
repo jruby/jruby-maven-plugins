@@ -125,6 +125,9 @@ module Maven
             # TODO requirements is a list !!!
             add_param(config, "requirements", req)
             warn e
+          rescue SyntaxError => e
+            # TODO requirements is a list !!!
+            add_param(config, "requirements", req)
           end
         end
       end
