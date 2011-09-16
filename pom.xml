@@ -55,6 +55,9 @@
     <invoker.skip>true</invoker.skip>
     <maven.version>3.0.3</maven.version>
     <jruby.version>1.6.4</jruby.version>
+    <jruby.rack.version>1.0.10</jruby.rack.version>
+    <jetty.version>7.5.1.v20110908</jetty.version>
+    <war.version>2.1.1</war.version>
   </properties>
   <build>
     <plugins>
