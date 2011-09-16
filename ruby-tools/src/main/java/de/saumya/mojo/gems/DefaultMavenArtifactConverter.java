@@ -321,7 +321,9 @@ public class DefaultMavenArtifactConverter implements MavenArtifactConverter {
     protected String createGemName(final String groupId,
             final String artifactId, final String version) {
         // TODO: think about this
-        return ( GEMNAME_PREFIX + groupId + GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR + artifactId ).replace( ':', '.' );
+        // return ( GEMNAME_PREFIX + groupId + GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR + artifactId ).replace( ':', '.' );
+        // TODO think about this harder ;-)
+        return ( GEMNAME_PREFIX + groupId + GemManager.GROUP_ID_ARTIFACT_ID_SEPARATOR + artifactId );
     }
 
     protected String getGemFileName(final String groupId,
