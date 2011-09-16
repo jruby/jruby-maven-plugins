@@ -19,6 +19,7 @@ import de.saumya.mojo.gems.spec.GemSpecificationIO;
  * 
  * @author cstamas
  */
+@SuppressWarnings("deprecation")
 @Component(role = GemSpecificationIO.class, hint = "yaml")
 public class YamlGemSpecificationIO implements GemSpecificationIO {
     protected Yaml _yaml;
