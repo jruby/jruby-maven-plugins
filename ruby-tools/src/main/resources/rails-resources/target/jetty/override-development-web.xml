@@ -9,6 +9,10 @@
     <param-value>development</param-value>
   </context-param>
   <context-param>
+    <param-name>jruby.rack.logging</param-name>
+    <param-value>stdout</param-value>
+  </context-param>
+  <context-param>
     <param-name>jruby.rack.layout_class</param-name>
     <param-value>JRuby::Rack::RailsFilesystemLayout</param-value>
   </context-param>
