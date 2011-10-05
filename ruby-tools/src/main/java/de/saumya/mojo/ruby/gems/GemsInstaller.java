@@ -22,7 +22,7 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class GemsInstaller {
 
-    private static final String JRUBY_OPENSSL = "jruby-openssl";
+    public static final String JRUBY_OPENSSL = "jruby-openssl";
 
     public final GemsConfig     config;
 
@@ -142,7 +142,7 @@ public class GemsInstaller {
                 }
                 this.manager.resolve(openssl,
                                      localRepository,
-                                     remoteRepos);
+                                     remoteRepos, true);
                 script = maybeAddArtifact(script, openssl);
             }
         }

@@ -56,6 +56,12 @@ public interface GemManager {
             final List<ArtifactRepository> remoteRepositories)
             throws GemException;
 
+    public void resolve(final Artifact artifact, 
+            final ArtifactRepository localRepository, 
+            final List<ArtifactRepository> remoteRepositories, 
+            boolean transitively)
+            throws GemException;
+
     public Artifact createArtifact(final String groupId,
             final String artifactId, final String version, final String type);
     

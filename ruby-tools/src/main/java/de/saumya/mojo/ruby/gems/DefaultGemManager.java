@@ -42,7 +42,7 @@ public class DefaultGemManager implements GemManager {
 
     private static final String       DEFAULT_GEMS_REPOSITORY_BASE_URL = "http://rubygems-proxy.torquebox.org/";
 
-    @Requirement
+    @Requirement 
     private RepositorySystem          repositorySystem;
 
     @Requirement
@@ -171,7 +171,13 @@ public class DefaultGemManager implements GemManager {
 
     public void resolve(final Artifact artifact,
             final ArtifactRepository localRepository,
-            final List<ArtifactRepository> remoteRepositories)
+            final List<ArtifactRepository> remoteRepositories) throws GemException{
+        resolve(artifact, localRepository, remoteRepositories, false);
+    }
+    
+    public void resolve(final Artifact artifact,
+            final ArtifactRepository localRepository,
+            final List<ArtifactRepository> remoteRepositories, boolean transitively)
             throws GemException {
         if (artifact.getFile() == null || !artifact.getFile().exists()) {
             ArtifactResolutionRequest req = new ArtifactResolutionRequest()
