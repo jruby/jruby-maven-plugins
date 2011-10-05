@@ -5,7 +5,10 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.sonatype.aether.RepositorySystemSession;
 
+import de.saumya.mojo.ruby.gems.GemException;
+import de.saumya.mojo.ruby.gems.GemsInstaller;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -35,10 +38,17 @@ public class PushMojo extends AbstractGemMojo {
      * @parameter expression="${gem}"
      */
     protected File gem;
+    
+    /**
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    protected RepositorySystemSession repoSession;
 
     @Override
     public void executeWithGems() throws MojoExecutionException,
-            ScriptException, IOException, MojoFailureException {
+            ScriptException, IOException, MojoFailureException, GemException {
+        gemsInstaller.installGem(GemsInstaller.JRUBY_OPENSSL, "0.7.4", this.repoSession, localRepository);
         final Script script = this.factory.newScriptFromJRubyJar("gem")
                 .addArg("push");
         if(this.project.getArtifact().getFile() == null){
