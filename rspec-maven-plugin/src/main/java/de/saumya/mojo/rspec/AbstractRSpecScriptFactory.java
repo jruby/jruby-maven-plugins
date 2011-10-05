@@ -118,8 +118,10 @@ public abstract class AbstractRSpecScriptFactory extends AbstractScriptFactory {
 
         if (gemPaths != null) {
             builder.append("ENV['GEM_PATH']='");
+            String sep = "";
             for(File path: gemPaths) {
-                builder.append(System.getProperty("path.separator") + path);
+                builder.append(sep + path);
+                sep = System.getProperty("path.separator");
             }
             builder.append("'\n");
         }

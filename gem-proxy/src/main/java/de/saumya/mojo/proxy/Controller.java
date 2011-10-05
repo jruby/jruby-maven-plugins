@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -355,7 +356,12 @@ public class Controller {
     
     private String sha1(String text) {
         MessageDigest md = newSha1Digest();
-        md.update(text.getBytes(Charset.forName("UTF-8")));
+        try {
+            md.update(text.getBytes("UTF-8"));
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("should not happen", e);
+        }
         return toHex(md.digest());
     }
 

@@ -2,6 +2,7 @@ package de.saumya.mojo.gem;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -176,13 +177,20 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             target.mkdirs();
             unzip.setSourceFile(dist.getFile());
             unzip.setDestDirectory(target);
+            File f = null;
             try {
                 unzip.extract();
-                new File(target, "jruby-" + jrubyVersion + "/bin/jruby").setExecutable(true);
+                f = new File(target, "jruby-" + jrubyVersion + "/bin/jruby");
+                // use reflection so it compiles with java1.5 as well but does not set executable
+                Method m = f.getClass().getMethod("setExecutable", boolean.class);
+                m.invoke(f, new Boolean(true));
             }
             catch (ArchiverException e) {
                 throw new MojoExecutionException("could unzip jruby distribution for native support",
                         e);
+            }
+            catch (Exception e) {
+                getLog().warn("can not set executable flag: " + f.getAbsolutePath() + " (" + e.getMessage() + ")");
             }
         }
         return jrubyDir;
