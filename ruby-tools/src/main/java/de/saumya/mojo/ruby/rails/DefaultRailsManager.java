@@ -179,7 +179,7 @@ public class DefaultRailsManager implements RailsManager {
             if (template != null){
                 System.setProperty("maven.rails.extratemplate", template);
             }
-            if (gwt != null){
+            if (gwt != null && gwt.packageName != null){
                 System.setProperty("maven.rails.gwt", gwt.packageName);
             }
             script.addArg("-m", templateFromResource("templates"));
