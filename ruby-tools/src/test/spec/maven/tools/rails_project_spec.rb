@@ -51,21 +51,21 @@ describe Maven::Tools::RailsProject do
       <type>gem</type>
     </dependency>
     <dependency>
-      <groupId>org.jruby</groupId>
-      <artifactId>jruby-complete</artifactId>
-      <version>@jruby.version@</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
       <groupId>rubygems</groupId>
       <artifactId>bundler</artifactId>
       <version>[0.0.0,)</version>
       <type>gem</type>
     </dependency>
     <dependency>
+      <groupId>org.jruby</groupId>
+      <artifactId>jruby-complete</artifactId>
+      <version>@jruby.version@</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
       <groupId>org.jruby.rack</groupId>
       <artifactId>jruby-rack</artifactId>
-      <version>1.0.9</version>
+      <version>@jruby.rack.version@</version>
       <type>jar</type>
     </dependency>
   </dependencies>
@@ -73,7 +73,7 @@ describe Maven::Tools::RailsProject do
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.includeRubygemsInTestResources>false</gem.includeRubygemsInTestResources>
     <gem.path>${project.build.directory}/rubygems</gem.path>
-    <jetty.version>7.4.2.v20110526</jetty.version>
+    <jetty.version>@jetty.version@</jetty.version>
     <jruby.plugins.version>@project.version@</jruby.plugins.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <rails.env>development</rails.env>
@@ -108,7 +108,7 @@ describe Maven::Tools::RailsProject do
       </plugin>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
+        <version>@war.version@</version>
         <configuration>
           <webResources>
             <resource>

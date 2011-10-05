@@ -172,12 +172,6 @@ XML
   </pluginRepositories>
   <dependencies>
     <dependency>
-      <groupId>org.jruby</groupId>
-      <artifactId>jruby-complete</artifactId>
-      <version>@jruby.version@</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
       <groupId>rubygems</groupId>
       <artifactId>bundler</artifactId>
       <version>[0.0.0,)</version>
@@ -676,14 +670,6 @@ XML
       <url>http://rubygems-proxy.torquebox.org/releases</url>
     </repository>
   </repositories>
-  <dependencies>
-    <dependency>
-      <groupId>org.jruby</groupId>
-      <artifactId>jruby-complete</artifactId>
-      <version>@jruby.version@</version>
-      <type>jar</type>
-    </dependency>
-  </dependencies>
   <properties>
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.path>${project.build.directory}/rubygems</gem.path>

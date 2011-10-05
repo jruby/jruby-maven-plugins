@@ -11,7 +11,7 @@ module Maven
         proj.to_xml
       end
 
-      def read_gemfile(filename, plugin_version = nil, jruby_version = nil)
+      def read_gemfile(filename, plugin_version = nil)
         dir = File.dirname(filename)
         proj = 
           if File.exists? File.join( dir, 'config', 'application.rb' )
@@ -21,16 +21,16 @@ module Maven
           end
         proj.load(filename.to_s)
         proj.load(File.join(File.dirname(filename.to_s), 'Mavenfile'))
-        proj.add_defaults(versions(plugin_version, jruby_version))
+        proj.add_defaults(versions(plugin_version, nil))
         proj.dump_loaded_file_list
         proj.to_xml
       end
 
-      def read_gemspec(filename, plugin_version = nil, jruby_version = nil)
+      def read_gemspec(filename, plugin_version = nil)
         proj = Maven::Tools::GemProject.new
         proj.load_gemspec(filename.to_s)
         proj.load(File.join(File.dirname(filename.to_s), 'Mavenfile'))
-        proj.add_defaults(versions(plugin_version, jruby_version))
+        proj.add_defaults(versions(plugin_version, nil))
         proj.dump_loaded_file_list
         proj.to_xml
       end

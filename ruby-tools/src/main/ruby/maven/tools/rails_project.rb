@@ -28,6 +28,22 @@ module Maven
           versions[:jruby_rack] = '1.1.0.dev'
         end
 
+        if !jar?("org.jruby:jruby-complete") && !jar?("org.jruby:jruby-core") && versions[:jruby_version]
+          minor = versions[:jruby_version].sub(/[0-9]*\./, '').sub(/\..*/, '')
+
+          #TODO once jruby-core pom is working !!!
+          if minor.to_i > 55 #TODO fix minor minimum version
+            jar("org.jruby:jruby-core", versions[:jruby_version])
+            jar("org.jruby:jruby-stdlib", versions[:jruby_version])
+            # override deps which works
+            jar("jline:jline", '0.9.94') if versions[:jruby_version] =~ /1.6.[1-2]/
+            jar("org.jruby.extras:jffi", '1.0.8', 'native') if versions[:jruby_version] =~ /1.6.[0-2]/
+            jar("org.jruby.extras:jaffl", '0.5.10') if versions[:jruby_version] =~ /1.6.[0-2]/
+          else
+            jar("org.jruby:jruby-complete", versions[:jruby_version]) 
+          end
+        end
+
         jar("org.jruby.rack:jruby-rack", versions[:jruby_rack]) unless jar?("org.jruby.rack:jruby-rack")
 
         self.properties = {

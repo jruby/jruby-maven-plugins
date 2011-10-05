@@ -113,7 +113,8 @@ module Maven
             end
 
           versions = dep.requirement.requirements.collect do |req|
-            req.to_s
+            # use this construct to get the same result in 1.8.x and 1.9.x
+            req.collect{ |i| i.to_s }.join
           end
           gem(dep.name, versions).scope = scope
         end
@@ -172,22 +173,6 @@ module Maven
         has_prerelease = dependencies.detect { |d| d.type.to_sym == :gem && d.version =~ /[a-zA-Z]/ }
 
         repository("rubygems-prereleases").url = "http://rubygems-proxy.torquebox.org/prereleases" if has_prerelease && !repository("rubygems-prereleases").url
-
-        if !jar?("org.jruby:jruby-complete") && !jar?("org.jruby:jruby-core") && versions[:jruby_version]
-          minor = versions[:jruby_version].sub(/[0-9]*\./, '').sub(/\..*/, '')
-
-          #TODO once jruby-core pom is working !!!
-          if minor.to_i > 55 #TODO fix minor minimum version
-            jar("org.jruby:jruby-core", versions[:jruby_version])
-            jar("org.jruby:jruby-stdlib", versions[:jruby_version])
-            # override deps which works
-            jar("jline:jline", '0.9.94') if versions[:jruby_version] =~ /1.6.[1-2]/
-            jar("org.jruby.extras:jffi", '1.0.8', 'native') if versions[:jruby_version] =~ /1.6.[0-2]/
-            jar("org.jruby.extras:jaffl", '0.5.10') if versions[:jruby_version] =~ /1.6.[0-2]/
-          else
-            jar("org.jruby:jruby-complete", versions[:jruby_version]) 
-          end
-        end
 
         # TODO go through all plugins to find out any SNAPSHOT version !!
         if versions[:jruby_plugins] =~ /-SNAPSHOT$/ || properties['jruby.plugins.version'] =~ /-SNAPSHOT$/
