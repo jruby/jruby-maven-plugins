@@ -4,7 +4,7 @@
   <parent>
     <artifactId>gem-parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.28.5-SNAPSHOT</version>
+    <version>0.28.5</version>
     <relativePath>../gem-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>cucumber-maven-plugin</artifactId>
