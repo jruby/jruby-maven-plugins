@@ -149,74 +149,96 @@ public class InstallMojo extends AbstractGemMojo {
     private void generateBinStubs() throws IOException {
         if(binStubs != null){
             binStubs.mkdirs();
-            File stubFile = new File(binStubs, "setup");
-            FileUtils.fileWrite(stubFile, this.getPrologScript() + this.getTestClasspathSetupScript() + getRubygemsSetupScript());
+            {
+                File bundleFile = new File(binStubs, "bundle");
+                // TODO make a stub from resource
+                FileUtils.fileWrite(bundleFile, "#!/usr/bin/env jruby" + System.getProperty("line.separator") +
+                                "require 'pathname'" + System.getProperty("line.separator") +
+                                "load(File.expand_path('../setup', Pathname.new(__FILE__).realpath))" +
+                                System.getProperty("line.separator") + 
+                                "require 'rubygems'" + System.getProperty("line.separator") + 
+                                "load Gem.bin_path('bundler', 'bundle')" + System.getProperty("line.separator"));
+                setExecutable(bundleFile);
+            }
+            {
+                File setupFile = new File(binStubs, "setup");
+                RubyStringBuilder builder = new RubyStringBuilder();
+                this.getPrologScript(builder);
+                this.getHistoryLogScript(builder);
+                this.getTestClasspathSetupScript(builder);
+                this.getRubygemsSetupScript(builder);
+                FileUtils.fileWrite(setupFile, builder.toString());
+            }
             String sep = System.getProperty("line.separator");
             String stub = IOUtil.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream("stub")) + 
                 sep;
             for( File f: gemsConfig.getBinDirectory().listFiles()){
+                if (f.getName().equals("bundle")){
+                    continue;
+                }
                 String[] lines = FileUtils.fileRead(f).split(sep);
-                stubFile = new File(binStubs, f.getName());
-                if(!stubFile.exists()){
+                File binstubFile = new File(binStubs, f.getName());
+                if(!binstubFile.exists()){
                     if(jrubyVerbose){
-                        getLog().info("create bin stub " + stubFile);
+                        getLog().info("create bin stub " + binstubFile);
                     }
-                    FileUtils.fileWrite(stubFile, stub + lines[lines.length - 1].replaceFirst(", version", ""));
-                    try {
-                        // use reflection so it compiles with java1.5 as well but does not set executable
-                        Method m = stubFile.getClass().getDeclaredMethod("setExecutable", boolean.class);
-                        m.invoke(stubFile, new Boolean(true));
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                        getLog().warn("can not set executable flag: "
-                                + stubFile.getAbsolutePath() + " (" + e.getMessage() + ")");
-                    }
+                    FileUtils.fileWrite(binstubFile, stub + lines[lines.length - 1].replaceFirst(", version", ""));
+                    setExecutable(binstubFile);
                 }
             }
         }
     }
+
+    private void setExecutable(File stubFile) {
+        try {
+            // use reflection so it compiles with java1.5 as well but does not set executable
+            Method m = stubFile.getClass().getDeclaredMethod("setExecutable", boolean.class);
+            m.invoke(stubFile, new Boolean(true));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            getLog().warn("can not set executable flag: "
+                    + stubFile.getAbsolutePath() + " (" + e.getMessage() + ")");
+        }
+    }
     
     //TODO from rspec mojo - factor out to common!
-    private String getTestClasspathSetupScript() {
-        StringBuilder builder = new StringBuilder();
+    private void getTestClasspathSetupScript(RubyStringBuilder builder) {
 
-        builder.append("# Set up the classpath for running outside of maven\n");
-        builder.append("\n");
+        builder.appendLine("if defined? JRUBY_VERSION");
+        builder.appendLine("  # Set up the classpath for running outside of maven");
+        builder.appendLine();
 
-        builder.append("def add_classpath_element(element)\n");
-        builder.append("  JRuby.runtime.jruby_class_loader.addURL( Java::java.net::URL.new( element ) )\n");
-        builder.append("end\n");
-        builder.append("\n");
+        builder.appendLine("  def add_classpath_element(element)");
+        builder.appendLine("    JRuby.runtime.jruby_class_loader.addURL( Java::java.net::URL.new( element ) )");
+        builder.appendLine("  end");
+        builder.appendLine();
 
         for (String path : classpathElements) {
             if (!(path.endsWith("jar") || path.endsWith("/"))) {
                 path = path + "/";
             }
             if(!path.matches("jruby-complete-")){
-                builder.append("add_classpath_element(%Q( file://" + sanitize(path) + " ))\n");
+                builder.appendLine("  add_classpath_element(%Q( file://" + sanitize(path) + " ))");
             }
         }
         
-        builder.append("\n");
-
-        return builder.toString();
+        builder.appendLine("end");
+        builder.appendLine();
     }
 
     //TODO from rspec mojo - factor out to common!
-    private String getRubygemsSetupScript() {
+    private void getRubygemsSetupScript(RubyStringBuilder builder) {
         File[] gemPaths = gemsConfig.getGemPath();
         if (gemHome == null && gemPaths == null) {
-            return "";
+            return;
         }
 
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("# Set up GEM_HOME and GEM_PATH for running outside of maven\n");
-        builder.append("\n");
+        builder.appendLine("# Set up GEM_HOME and GEM_PATH for running outside of maven");
+        builder.appendLine();
 
         if (gemHome != null) {
-            builder.append("ENV['GEM_HOME']='" + gemHome + "'\n");
+            builder.appendLine("ENV['GEM_HOME']='" + gemHome + "'");
         }
 
         if (gemPaths != null) {
@@ -226,12 +248,10 @@ public class InstallMojo extends AbstractGemMojo {
                 builder.append(sep + path);
                 sep = System.getProperty("path.separator");
             }
-            builder.append("'\n");
+            builder.appendLine("'");
         }
 
-        builder.append("\n");
-
-        return builder.toString();
+        builder.appendLine();
     }
 
     //TODO from rspec mojo - factor out to common!
@@ -244,13 +264,39 @@ public class InstallMojo extends AbstractGemMojo {
         return sanitized;
     }
     //TODO from rspec mojo - factor out to common!
-    private String getPrologScript() {
-        StringBuilder builder = new StringBuilder();
+    private void getPrologScript(RubyStringBuilder builder) {
 
-        builder.append("require %(java)\n");
-        builder.append("\n");
-
-        return builder.toString();
+        builder.appendLine("require %(java) if defined? JRUBY_VERSION");
+        builder.appendLine();
     }
-
+    
+        static class RubyStringBuilder {
+            
+            private final StringBuilder builder = new StringBuilder();
+            
+            private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+            
+            public void append(String val){
+                builder.append(val);
+            }
+            public void appendLine(){
+                builder.append(LINE_SEPARATOR);
+            }
+            public void appendLine(String val){
+                builder.append(val).append(LINE_SEPARATOR);
+            }
+            
+            public String toString(){
+                return builder.toString();
+            }
+        }
+    private void getHistoryLogScript(RubyStringBuilder builder) {
+        builder.appendLine("log = File.join('log', 'history.log')");
+        builder.appendLine("if File.exists? File.dirname(log)");
+        builder.appendLine("  File.open(log, 'a') do |f|");
+        builder.appendLine("    f.puts \"#{$0.sub(/.*\\//, '')} #{ARGV.join ' '}\"");
+        builder.appendLine("  end");
+        builder.appendLine("end");
+        builder.appendLine();
+    }
 }
