@@ -11,7 +11,8 @@ module Maven
         proj.to_xml
       end
 
-      def read_gemfile(filename, plugin_version = nil)
+      # the dummy allows to have all three methods the same argument list
+      def read_gemfile(filename, plugin_version = nil, dummy = nil)
         dir = File.dirname(filename)
         proj = 
           if File.exists? File.join( dir, 'config', 'application.rb' )
@@ -26,7 +27,8 @@ module Maven
         proj.to_xml
       end
 
-      def read_gemspec(filename, plugin_version = nil)
+      # the dummy allows to have all three methods the same argument list
+      def read_gemspec(filename, plugin_version = nil, dummy = nil)
         proj = Maven::Tools::GemProject.new
         proj.load_gemspec(filename.to_s)
         proj.load(File.join(File.dirname(filename.to_s), 'Mavenfile'))

@@ -557,6 +557,17 @@ XML
   <version>1.0.0</version>
   <name><![CDATA[minimal - gem]]></name>
   <packaging>gem</packaging>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <configuration>
+          <gemspec>/home/kristian/projects/active/maven/jruby-maven-plugins/ruby-tools/src/test/spec/maven/tools/minimal.gemspec</gemspec>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
 XML
     end
@@ -600,6 +611,7 @@ XML
           <extensions>myext</extensions>
           <extraRdocFiles>README.txt</extraRdocFiles>
           <files>AGPL.txt,README.txt,test/first_test.rb,mybin/hello,myext,lib/first.rb,spec/first_spec.rb,features/first.feature</files>
+          <gemspec>/home/kristian/projects/active/maven/jruby-maven-plugins/ruby-tools/src/test/spec/maven/tools/no-deps.gemspec</gemspec>
           <platform>java</platform>
           <postInstallMessage><![CDATA[be happy]]></postInstallMessage>
           <rdocOptions>--main,README.txt</rdocOptions>
@@ -649,6 +661,17 @@ XML
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <configuration>
+          <gemspec>/home/kristian/projects/active/maven/jruby-maven-plugins/ruby-tools/src/test/spec/maven/tools/deps.gemspec</gemspec>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
 XML
     end
@@ -683,6 +706,9 @@ XML
         <artifactId>gem-maven-plugin</artifactId>
         <version>${jruby.plugins.version}</version>
         <extensions>true</extensions>
+        <configuration>
+          <gemspec>/home/kristian/projects/active/maven/jruby-maven-plugins/ruby-tools/src/test/spec/maven/tools/minimal.gemspec</gemspec>
+        </configuration>
       </plugin>
     </plugins>
   </build>

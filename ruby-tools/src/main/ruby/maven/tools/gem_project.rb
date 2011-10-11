@@ -46,9 +46,9 @@ module Maven
         else
           spec = ::Gem::Specification.load(specfile)
           loaded_files << File.expand_path(specfile)
+          @gemspec = specfile
         end
         raise "file not found '#{specfile}'" unless spec
-        @is_gemspec = loaded_files.size == 0
         artifact_id spec.name
         version spec.version
         name spec.summary || "#{self.artifact_id} - gem"
@@ -65,6 +65,7 @@ module Maven
         end
 
         config = {}
+        add_param(config, "gemspec", @gemspec) if loaded_files.size == 1
         add_param(config, "autorequire", spec.autorequire)
         add_param(config, "defaultExecutable", spec.default_executable)
         add_param(config, "testFiles", spec.test_files)
@@ -324,7 +325,7 @@ module Maven
             end
           end
         end
-        if dep && !@is_gemspec
+        if dep && !@gemspec
           project = self
           
           # first collect the missing deps it any
