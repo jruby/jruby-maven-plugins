@@ -2,6 +2,7 @@ package de.saumya.mojo.gemify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -426,7 +427,9 @@ public class GemifyMojo extends AbstractGemifyMojo {
                     .setRemoteRepositories(this.remoteRepositories)
                     .setResolveDependencies(resolveDependencies)
                     .setRepositorySession(this.repositorySession)
-                    .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
+                    .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL)
+                    // FIXME hack to fix a problem with jdk determination on com.thoughtworks.xstream:xstream
+                    .setActiveProfileIds(Arrays.asList("jdk16", "jdk14", "jdk15", "jdk17"));
             return this.builder.build(artifact, request);
         }
         catch (final ProjectBuildingException e) {
