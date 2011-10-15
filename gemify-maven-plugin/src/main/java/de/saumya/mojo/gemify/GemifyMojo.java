@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -423,13 +424,21 @@ public class GemifyMojo extends AbstractGemifyMojo {
             final boolean resolveDependencies) throws MojoExecutionException {
         try {
             final ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
+            // FIXME hack to fix a problem with jdk determination on com.thoughtworks.xstream:xstream
+            List<String> jdkList = new LinkedList<String>(Arrays.asList("jdk16", "jdk14", "jdk15", "jdk17"));
+            String jdk = "jdk" + System.getProperty("java.specification.version").replace(".", "");
+            jdkList.remove(jdk);
+            
             request.setLocalRepository(this.localRepository)
                     .setRemoteRepositories(this.remoteRepositories)
                     .setResolveDependencies(resolveDependencies)
                     .setRepositorySession(this.repositorySession)
                     .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL)
-                    // FIXME hack to fix a problem with jdk determination on com.thoughtworks.xstream:xstream
-                    .setActiveProfileIds(Arrays.asList("jdk16", "jdk14", "jdk15", "jdk17"));
+            // FIXME hack to fix a problem with jdk determination on com.thoughtworks.xstream:xstream
+                    .setInactiveProfileIds(jdkList);
+            
+            // FIXME hack to fix a problem with jdk determination on com.thoughtworks.xstream:xstream
+            request.setActiveProfileIds(Arrays.asList(jdk));
             return this.builder.build(artifact, request);
         }
         catch (final ProjectBuildingException e) {
