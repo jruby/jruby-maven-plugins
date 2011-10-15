@@ -1,6 +1,7 @@
 package de.saumya.mojo.ruby.gems;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -51,12 +52,12 @@ public interface GemManager {
             throws GemException;
 
     // convenience methods for artifacts
-    public void resolve(final Artifact artifact,
+    public Set<Artifact> resolve(final Artifact artifact,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories)
             throws GemException;
 
-    public void resolve(final Artifact artifact, 
+    public Set<Artifact> resolve(final Artifact artifact, 
             final ArtifactRepository localRepository, 
             final List<ArtifactRepository> remoteRepositories, 
             boolean transitively)

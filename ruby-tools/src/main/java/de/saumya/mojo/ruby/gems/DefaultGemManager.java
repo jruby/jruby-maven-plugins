@@ -169,19 +169,20 @@ public class DefaultGemManager implements GemManager {
         return this.repositorySystem.createDependencyArtifact(dep);
     }
 
-    public void resolve(final Artifact artifact,
+    public Set<Artifact> resolve(final Artifact artifact,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories) throws GemException{
-        resolve(artifact, localRepository, remoteRepositories, false);
+        return resolve(artifact, localRepository, remoteRepositories, false);
     }
     
-    public void resolve(final Artifact artifact,
+    public Set<Artifact> resolve(final Artifact artifact,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories, boolean transitively)
             throws GemException {
         if (artifact.getFile() == null || !artifact.getFile().exists()) {
             ArtifactResolutionRequest req = new ArtifactResolutionRequest()
                     .setArtifact(artifact)
+                    .setResolveTransitively(transitively)
                     .setLocalRepository(localRepository)
                     .setRemoteRepositories(remoteRepositories);
             final Set<Artifact> artifacts = this.repositorySystem.resolve(req).getArtifacts();
@@ -190,6 +191,10 @@ public class DefaultGemManager implements GemManager {
                         + artifact);
             }
             artifact.setFile(artifacts.iterator().next().getFile());
+            return artifacts;
+        }
+        else {
+            return Collections.emptySet();
         }
     }
 

@@ -140,10 +140,11 @@ public class GemsInstaller {
                     // we do not have a pom so we need the default gems repo
                     this.manager.addDefaultGemRepository(remoteRepos);
                 }
-                this.manager.resolve(openssl,
-                                     localRepository,
-                                     remoteRepos, true);
-                script = maybeAddArtifact(script, openssl);
+                for(Artifact a : this.manager.resolve(openssl,
+                                                      localRepository,
+                                                      remoteRepos, true) ) {
+                    script = maybeAddArtifact(script, a);
+                }
             }
         }
 
