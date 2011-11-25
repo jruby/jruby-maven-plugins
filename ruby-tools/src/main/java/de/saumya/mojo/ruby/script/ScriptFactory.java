@@ -5,7 +5,6 @@ package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,10 +90,18 @@ public class ScriptFactory {
     }
 
     public Script newScriptFromJRubyJar(final String scriptName)
-            throws MalformedURLException {
-        return new Script(this, new URL("jar:file:"
+            throws IOException {
+        URL url = new URL("jar:file:"
                 + this.stdlibJar.getAbsolutePath()
-                + "!/META-INF/jruby.home/bin/" + scriptName));
+                + "!/META-INF/jruby.home/bin/" + scriptName);
+        try {
+            url.openConnection().getContent();
+            return new Script(this, url);
+        }
+        catch (IOException e) {
+            // fallback on classloader
+            return newScriptFromResource("META-INF/jruby.home/bin/" + scriptName);
+        }
     }
 
     public Script newScriptFromResource(final String scriptName)
