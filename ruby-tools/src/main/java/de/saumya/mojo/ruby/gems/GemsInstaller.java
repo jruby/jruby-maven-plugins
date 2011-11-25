@@ -4,6 +4,7 @@
 package de.saumya.mojo.ruby.gems;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.script.Script;
@@ -23,7 +25,13 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
 public class GemsInstaller {
 
     public static final String JRUBY_OPENSSL = "jruby-openssl";
-
+    private static final FileFilter FILTER = new FileFilter() {
+        
+        public boolean accept(File f) {
+            return f.getName().endsWith(".gemspec");
+        }
+    };
+    
     public final GemsConfig     config;
 
     public final ScriptFactory  factory;
@@ -154,6 +162,12 @@ public class GemsInstaller {
                 this.config.getBinDirectory().mkdirs();
             }
             script.execute();
+            
+            // workaround for unpatched: https://github.com/rubygems/rubygems/commit/21cccd55b823848c5e941093a615b0fdd6cd8bc7
+            for(File spec : new File(this.config.getGemHome(), "specifications").listFiles(FILTER)){
+                String content = FileUtils.fileRead(spec);
+                FileUtils.fileWrite(spec.getAbsolutePath(), content.replaceFirst(" 00:00:00.000000000Z", ""));
+            }
         }
     }
 
