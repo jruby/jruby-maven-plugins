@@ -140,10 +140,8 @@ public class DefaultRailsManager implements RailsManager {
         }
 
         if (railsVersion == null) {
-            //TODO remove this when rails-3.0.10 and rails-3.1 is working properly
-            railsVersion = "3.0.9";
-            this.logger.info("use rails version " + railsVersion +
-                             " since it creates a nice platform independent Gemfile");
+            this.logger.info("NOTE: use rails version 3.0.9 to creates a nice platform independent Gemfile." +
+                             " change the rails version anytime later");
         }
         railsVersion = installer.installGem("rails",
                                             railsVersion,
@@ -236,18 +234,22 @@ public class DefaultRailsManager implements RailsManager {
     }
 
     private String templateFrom(final ORM orm, final boolean offline, String railsVersion) {
-        if (offline) {
-            return templateFromResource(orm.name());
-        }
-        else {
-            switch(orm){
-            case activerecord:
-                return railsVersion.startsWith("3.0.") ? "http://jruby.org/rails3.rb" : null;
-            case datamapper:
-                return "http://datamapper.org/templates/rails.rb";
-            default:
-                throw new RuntimeException( "unknown ORM :" + orm);
+        switch(orm){
+        case activerecord:
+            if (railsVersion.matches("3.0.[0-9]")){
+                if (offline) {
+                    return templateFromResource(orm.name());
+                }
+                return "http://jruby.org/rails3.rb";
             }
+            return null;
+        case datamapper:
+            if (railsVersion.startsWith("3.0.") || offline) {
+                return templateFromResource(orm.name());
+            }
+            return "http://datamapper.org/templates/rails.rb";
+        default:
+            throw new RuntimeException( "unknown ORM :" + orm);
         }
     }
 
