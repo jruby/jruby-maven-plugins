@@ -70,6 +70,10 @@ class GemspecWriter {
         for (final Contributor contributor : project.getContributors()) {
             appendAuthor(contributor.getName(), contributor.getEmail());
         }
+        if (project.getDevelopers().isEmpty() && project.getContributors().isEmpty()){
+            appendList("authors", "dummy");
+        }
+
         append();
 
         for (final License license : project.getLicenses()) {

@@ -282,7 +282,7 @@ public class GemifyMojo extends AbstractGemMojo {
             }
         }
 
-        getLog().info("<gemify> A");
+        getLog().debug("<gemify> A");
         gemSpecWriter.close();
 
         gemSpecWriter.copy(gemDir);
@@ -325,12 +325,12 @@ public class GemifyMojo extends AbstractGemMojo {
             }
         }
         // this.launchDir = gemDir;
-        getLog().info("<gemify> B");
+        getLog().debug("<gemify> B");
         this.factory.newScriptFromJRubyJar("gem")
                 .addArg("build")
                 .addArg(gemSpec)
                 .executeIn(gemDir);
-        getLog().info("<gemify> C");
+        getLog().debug("<gemify> C");
 
         return gemSpec.getAbsolutePath().replaceFirst(".gemspec$", "") + "-"
                 + gemVersion(project.getVersion()) + ".gem";
