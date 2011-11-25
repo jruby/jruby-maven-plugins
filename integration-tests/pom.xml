@@ -2,40 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>gem-parent-mojo</artifactId>
+    <artifactId>parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
     <version>0.28.6-SNAPSHOT</version>
-    <relativePath>../gem-parent-mojo/pom.xml</relativePath>
+    <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
-  <artifactId>rails3-maven-plugin</artifactId>
-  <packaging>maven-plugin</packaging>
-  <name>Rails3 Maven Mojo</name>
-  <dependencies>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-velocity</artifactId>
-      <version>1.1.8</version>
-      <!-- somehow a class is somehow missing -->
-      <scope>runtime</scope>
-    </dependency>
-  </dependencies>
+  <artifactId>integration-tests</artifactId>
+  <packaging>pom</packaging>
+  <name>integration tests where all plugins are needed</name>
   <properties>
     <jruby.fork>true</jruby.fork>
   </properties>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>2.5.1</version>
-        <configuration>
-          <encoding>UTF-8</encoding>
-          <goalPrefix>rails3</goalPrefix>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <profiles>
-<!--
     <profile>
       <id>integration-test</id>
       <build>
@@ -84,6 +62,5 @@
 	</plugins>
       </build>
     </profile>
--->
   </profiles>
 </project>
