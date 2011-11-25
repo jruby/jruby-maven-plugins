@@ -126,6 +126,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig = new GemsConfig();
         this.gemsConfig.setGemHome(this.gemHome);
         this.gemsConfig.addGemPath(this.gemPath);
+        this.gemsConfig.addGemPath(new File(this.gemPath.getParentFile(), 
+                                            this.gemPath.getName() + "-bundler-maven-plugin"));
 
         try {
             final GemScriptFactory factory = new GemScriptFactory(this.logger,
