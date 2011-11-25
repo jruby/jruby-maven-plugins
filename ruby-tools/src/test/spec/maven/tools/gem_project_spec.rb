@@ -52,6 +52,22 @@ XML
       <type>gem</type>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>bundler-maven-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>ixtlan-core</artifactId>
+            <version>[0.0.0,)</version>
+            <type>gem</type>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
 </project>
 XML
     end
@@ -79,6 +95,12 @@ XML
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
         <dependencies>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>ixtlan-core</artifactId>
+            <version>[0.0.0,)</version>
+            <type>gem</type>
+          </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>dm-sqlite3-adapter</artifactId>
@@ -220,6 +242,12 @@ XML
             <groupId>rubygems</groupId>
             <artifactId>dm-postgres-adapter</artifactId>
             <version>[0.0.0,1.0.0]</version>
+            <type>gem</type>
+          </dependency>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>bundler</artifactId>
+            <version>[0.0.0,)</version>
             <type>gem</type>
           </dependency>
         </dependencies>
@@ -463,6 +491,18 @@ XML
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
         <dependencies>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>ixtlan-core</artifactId>
+            <version>[0.0.0,)</version>
+            <type>gem</type>
+          </dependency>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>dm-sqlite-adapter</artifactId>
+            <version>[1.0.0,1.0.99999]</version>
+            <type>gem</type>
+          </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>dm-mysql-adapter</artifactId>

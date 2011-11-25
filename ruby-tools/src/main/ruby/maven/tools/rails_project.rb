@@ -79,6 +79,7 @@ module Maven
             end
           })
 
+        profile(:assets).activation.by_default if profiles.key?(:assets)
         profile(:development).activation.by_default
         profile(:test).activation.property("rails.env", "test")
         profile(:production) do |prod|   

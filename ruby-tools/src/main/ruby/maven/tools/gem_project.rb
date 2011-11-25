@@ -332,7 +332,7 @@ module Maven
           bundler_deps = []
           #plugin(:bundler) do |bundler|
           # use a dep with version so just create it from the args
-          bundler_deps << args unless project.dependencies.member? dep
+          bundler_deps << args
             
           #TODO this should be done after all deps are in place - otherwise it depends on order how bundler gets setup
           if @lock

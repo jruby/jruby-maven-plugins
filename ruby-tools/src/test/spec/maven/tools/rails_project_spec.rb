@@ -59,7 +59,7 @@ describe Maven::Tools::RailsProject do
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>@jruby.version@</version>
+      <version>#{defined?(JRUBY_VERSION) ? JRUBY_VERSION : '1.6.5'}</version>
       <type>jar</type>
     </dependency>
     <dependency>
@@ -91,6 +91,32 @@ describe Maven::Tools::RailsProject do
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>rails</artifactId>
+            <version>3.0.1</version>
+            <type>gem</type>
+          </dependency>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>activerecord-jdbc-adapter</artifactId>
+            <version>[0.0.0,)</version>
+            <type>gem</type>
+          </dependency>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>jdbc-sqlite3</artifactId>
+            <version>[0.0.0,)</version>
+            <type>gem</type>
+          </dependency>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>bundler</artifactId>
+            <version>[0.0.0,)</version>
+            <type>gem</type>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
@@ -308,6 +334,18 @@ XML
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
         <dependencies>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>rails</artifactId>
+            <version>3.0.1</version>
+            <type>gem</type>
+          </dependency>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>activerecord-jdbc-adapter</artifactId>
+            <version>[0.0.0,)</version>
+            <type>gem</type>
+          </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>jdbc-sqlite3</artifactId>
