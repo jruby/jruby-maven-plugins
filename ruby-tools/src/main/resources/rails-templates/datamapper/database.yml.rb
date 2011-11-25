@@ -3,7 +3,7 @@
 # TODO think about a better way
 db_name = app_path.split('/').last
 
-database = options[:database]
+database = options[:database].sub(/jdbc/, '')
 database = 'postgres' if database == 'postgresql'
 database = 'sqlite'   if database == 'sqlite3'
 

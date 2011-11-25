@@ -5,7 +5,7 @@
 DATAMAPPER = '#{DATAMAPPER}'
 RSPEC      = '#{RSPEC}'
 
-database = options[:database]
+database = options[:database].sub(/jdbc/, '')
 database = 'postgres' if database == 'postgresql'
 database = 'sqlite'   if database == 'sqlite3'
 
