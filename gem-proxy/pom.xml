@@ -65,7 +65,7 @@
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>${jruby.version}</version>
+      <version>1.6.5</version>
     </dependency>
   </dependencies>
   <build>
