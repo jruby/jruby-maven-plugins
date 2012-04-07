@@ -250,7 +250,7 @@ public class GemArtifact implements Artifact {
     }
 
     public boolean isSnapshot() {
-        return this.artifact.isSnapshot();
+        return this.artifact.getVersion().matches("[a-zA-Z]");
     }
 
     public void selectVersion(final String version) {

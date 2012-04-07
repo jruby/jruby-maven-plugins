@@ -105,7 +105,23 @@ public class DefaultGemManager implements GemManager {
     }
 
     public void addDefaultGemRepository(final List<ArtifactRepository> repos) {
-        addDefaultGemRepositoryForVersion("0.0.0", repos);
+        addDefaultGemRepositories(repos);
+    }
+
+    public void addDefaultGemRepositories(final List<ArtifactRepository> repos) {
+        ArtifactRepositoryPolicy enabled = new ArtifactRepositoryPolicy(true, "never", "strict");
+        ArtifactRepositoryPolicy disabled = new ArtifactRepositoryPolicy(false, "never", "strict");
+        ArtifactRepository repo = this.repositorySystem.createArtifactRepository("rubygems-releases",
+                                                                                 DEFAULT_GEMS_REPOSITORY_BASE_URL + "releases",
+                                                                                 new DefaultRepositoryLayout(),
+                                                                                 enabled, disabled);        
+        repos.add(repo);
+        repo = this.repositorySystem.createArtifactRepository("rubygems-prereleases",
+                                                              DEFAULT_GEMS_REPOSITORY_BASE_URL + "prereleases",
+                                                              new DefaultRepositoryLayout(),
+                                                              disabled, enabled);
+        
+        repos.add(repo);
     }
 
     public void addDefaultGemRepositoryForVersion(final String artifactVersion,

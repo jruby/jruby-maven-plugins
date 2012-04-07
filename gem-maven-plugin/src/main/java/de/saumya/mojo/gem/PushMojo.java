@@ -8,7 +8,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.gems.GemException;
-import de.saumya.mojo.ruby.gems.GemsInstaller;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -48,7 +47,7 @@ public class PushMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, MojoFailureException, GemException {
-        gemsInstaller.installGem(GemsInstaller.JRUBY_OPENSSL, "0.7.4", this.repoSession, localRepository);
+        gemsInstaller.installOpenSSLGem(this.repoSession, localRepository);
         final Script script = this.factory.newScriptFromJRubyJar("gem")
                 .addArg("push");
         if(this.project.getArtifact().getFile() == null){

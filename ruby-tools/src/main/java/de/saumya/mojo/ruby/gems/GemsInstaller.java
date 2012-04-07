@@ -24,7 +24,9 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class GemsInstaller {
 
-    public static final String JRUBY_OPENSSL = "jruby-openssl";
+    private static final String OPENSSL_VERSION = "0.7.4.1";
+    private static final String OPENSSL = "jruby-openssl-maven";
+    
     private static final FileFilter FILTER = new FileFilter() {
         
         public boolean accept(File f) {
@@ -55,7 +57,13 @@ public class GemsInstaller {
             ScriptException, GemException {
         installGems(pom, localRepository);
     }
-
+    
+    public MavenProject installOpenSSLGem(final RepositorySystemSession repositorySystemSession,
+            final ArtifactRepository localRepository) throws GemException,
+            IOException, ScriptException {
+        return installGem(OPENSSL, OPENSSL_VERSION, repositorySystemSession, localRepository);
+    }
+    
     public MavenProject installGem(final String name, final String version,
             final RepositorySystemSession repositorySystemSession,
             final ArtifactRepository localRepository) throws GemException,
@@ -70,8 +78,7 @@ public class GemsInstaller {
         }
         else {
             remoteRepositories = new ArrayList<ArtifactRepository>();
-            this.manager.addDefaultGemRepository(remoteRepositories);
-            this.manager.addDefaultGemRepositoryForVersion(version, remoteRepositories);
+            this.manager.addDefaultGemRepositories(remoteRepositories);
             artifact = this.manager.createGemArtifact(name, version);
         }
         final MavenProject pom = this.manager.buildPom(artifact,
@@ -118,7 +125,7 @@ public class GemsInstaller {
                     }
                     script = maybeAddArtifact(script, artifact);
                     hasAlreadyOpenSSL = hasAlreadyOpenSSL
-                            || artifact.getArtifactId().equals(JRUBY_OPENSSL);
+                            || artifact.getArtifactId().equals(OPENSSL);
                 }
             }
             if (artifacts != null) {
@@ -131,7 +138,7 @@ public class GemsInstaller {
                     }
                     script = maybeAddArtifact(script, artifact);
                     hasAlreadyOpenSSL = hasAlreadyOpenSSL
-                            || artifact.getArtifactId().equals(JRUBY_OPENSSL);
+                            || artifact.getArtifactId().equals(OPENSSL);
                 }
             }
             if (pom.getArtifact().getFile() != null
@@ -141,12 +148,12 @@ public class GemsInstaller {
             }
             if (!this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL && script != null) {
                 // keep the version hard-coded to stay reproducible
-                final Artifact openssl = this.manager.createGemArtifact(JRUBY_OPENSSL,
-                                                                        "0.7.4");
+                final Artifact openssl = this.manager.createGemArtifact(OPENSSL,
+                                                                        OPENSSL_VERSION);
 
                 if (pom.getFile() == null) {
                     // we do not have a pom so we need the default gems repo
-                    this.manager.addDefaultGemRepository(remoteRepos);
+                    this.manager.addDefaultGemRepositories(remoteRepos);
                 }
                 for(Artifact a : this.manager.resolve(openssl,
                                                       localRepository,

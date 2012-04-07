@@ -30,8 +30,12 @@ public interface GemManager {
     public ArtifactRepository defaultGemArtifactRepositoryForVersion(
             final String artifactVersion);
 
+    @Deprecated 
     public void addDefaultGemRepository(final List<ArtifactRepository> repos);
 
+    public void addDefaultGemRepositories(final List<ArtifactRepository> repos);
+
+    @Deprecated 
     public void addDefaultGemRepositoryForVersion(final String artifactVersion,
             final List<ArtifactRepository> repos);
 
