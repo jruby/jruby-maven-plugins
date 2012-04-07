@@ -10,7 +10,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * goal to run the rails server.
  * 
  * @goal server
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution runtime
  */
 public class ServerMojo extends AbstractRailsMojo {
 
