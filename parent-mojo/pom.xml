@@ -6,6 +6,7 @@
     <artifactId>jruby-maven-plugins</artifactId>
     <version>0.28.7-SNAPSHOT</version>
   </parent>
+    <version>0.28.7-SNAPSHOT</version>
   <artifactId>parent-mojo</artifactId>
   <packaging>pom</packaging>
   <name>Mojo Parent</name>
@@ -82,6 +83,46 @@
         </executions>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <!--plugin>
+	  <groupId>org.eclipse.m2e</groupId>
+            <artifactId>lifecycle-mapping</artifactId>
+            <version>1.0.0</version>
+            <configuration>
+                <lifecycleMappingMetadata>
+                    <pluginExecutions>
+                        <pluginExecution>
+                            <pluginExecutionFilter>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>build-helper-maven-plugin</artifactId>
+                                <versionRange>[1.4,)</versionRange>
+                                <goals>
+                                    <goal>add-source</goal>
+                                </goals>
+                                </pluginExecutionFilter>
+                            <action>
+                                <execute />
+                            </action>
+                        </pluginExecution>
+                        <pluginExecution>
+                            <pluginExecutionFilter>
+                                <artifactId>maven-enforcer-plugin</artifactId>
+                                <versionRange>[1.0,)</versionRange>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                </pluginExecutionFilter>
+                            <action>
+                                <ignore />
+                            </action>
+                        </pluginExecution>
+                    </pluginExecutions>
+                </lifecycleMappingMetadata>
+            </configuration>
+        </plugin-->
+        </plugins>
+    </pluginManagement>
   </build>
   <profiles>
     <profile>

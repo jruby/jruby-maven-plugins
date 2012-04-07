@@ -6,7 +6,6 @@
     <groupId>de.saumya.mojo</groupId>
     <version>0.28.7-SNAPSHOT</version>
   </parent>
-  <groupId>de.saumya.mojo</groupId>
   <artifactId>ruby-tools</artifactId>
   <name>Ruby Tools</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
