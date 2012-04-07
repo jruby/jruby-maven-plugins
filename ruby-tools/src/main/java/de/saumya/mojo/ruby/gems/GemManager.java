@@ -10,7 +10,7 @@ import org.sonatype.aether.RepositorySystemSession;
 
 public interface GemManager {
 
-    public static final String GROUP_ID_ARTIFACT_ID_SEPARATOR = ":";
+    public static final String GROUP_ID_ARTIFACT_ID_SEPARATOR = "@";
 
     // GEM artifact factory methods
     public abstract Artifact createGemArtifact(final String gemname)
