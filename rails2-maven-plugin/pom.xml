@@ -4,7 +4,7 @@
   <parent>
     <artifactId>parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.28.7-SNAPSHOT</version>
+    <version>0.28.7-jruby-SNAPSHOT</version>
     <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>rails2-maven-plugin</artifactId>
