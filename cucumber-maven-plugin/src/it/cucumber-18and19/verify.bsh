@@ -1,0 +1,26 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+String expected = "mode 1.8: errors=\"0\" failures=\"0\" name=\"Sample\" tests=\"1\"";
+if ( !log.contains( expected ) )
+{
+    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+expected = "mode 1.9: errors=\"0\" failures=\"0\" name=\"Sample\" tests=\"1\"";
+if ( !log.contains( expected ) )
+{
+    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+
+File file = new File( basedir, "target/surefire-reports/TEST-simplest-1.6.2--1.8.xml");
+if ( !file.exists() )
+{
+    throw new RuntimeException( "file does not exists: '" + file.getAbsolutePath() + "'" );
+}
+
+file = new File( basedir, "target/surefire-reports/TEST-simplest-1.6.2--1.9.xml");
+if ( !file.exists() )
+{
+    throw new RuntimeException( "file does not exists: '" + file.getAbsolutePath() + "'" );
+}

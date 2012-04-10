@@ -1,16 +1,20 @@
 package de.saumya.mojo.cucumber;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.sonatype.aether.RepositorySystemSession;
+import org.codehaus.plexus.util.FileUtils;
 
-import de.saumya.mojo.gem.AbstractGemMojo;
-import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
+import de.saumya.mojo.ruby.script.ScriptFactory;
+import de.saumya.mojo.runit.AbstractTestMojo;
+import de.saumya.mojo.runit.JRubyRun.Mode;
+import de.saumya.mojo.runit.JRubyRun.Result;
+import de.saumya.mojo.runit.TestScriptFactory;
 
 /**
  * maven wrapper around the cucumber command.
@@ -19,12 +23,16 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @phase test
  * @requiresDependencyResolution test
  */
-public class CucumberMojo extends AbstractGemMojo {
+public class CucumberMojo extends AbstractTestMojo {
+
+    enum ResultEnum {
+        ERRORS, FAILURES, TEST
+    }
 
 	/**
 	 * cucumber features directory to be used for the cucumber command.
 	 * 
-	 * @parameter default-value="${cucumber.dir}"
+	 * @parameter expression="${cucumber.dir}" 
 	 */
 	private final File cucumberDirectory = null;
 
@@ -35,27 +43,22 @@ public class CucumberMojo extends AbstractGemMojo {
 	 */
 	private final String cucumberArgs = null;
 
-	/**
-	 * cucumber version used when there is no pom. defaults to latest version.
-	 * 
-	 * @parameter default-value="${cucumber.version}"
-	 */
-	private final String cucumberVersion = null;
-
-	/** @parameter default-value="${project.build.directory}/surefire-reports" */
-	private String testReportDirectory;
-
-	/** @parameter default-value="${maven.test.skip}" */
-	protected boolean skipTests = false;
+//	/**
+//	 * cucumber version used when there is no pom. defaults to latest version.
+//	 * 
+//	 * @parameter default-value="${cucumber.version}"
+//	 */
+//	private final String cucumberVersion = null;
 
 	/** @parameter default-value="${skipCucumber}" */
 	protected boolean skipCucumber = false;
 
-	/**
-	 * @parameter default-value="${repositorySystemSession}"
-	 * @readonly
-	 */
-	private RepositorySystemSession repoSession;
+//	/**
+//	 * @parameter default-value="${repositorySystemSession}"
+//	 * @readonly
+//	 */
+//	private RepositorySystemSession repoSession;
+
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
@@ -63,32 +66,30 @@ public class CucumberMojo extends AbstractGemMojo {
 			getLog().info("Skipping Cucumber tests");
 			return;
 		} else {
+	        if (this.project.getBasedir() != null && 
+	                ((this.cucumberDirectory != null && !this.cucumberDirectory.exists()) ||  
+	                (this.cucumberDirectory == null && !new File(this.project.getBasedir(), "features").exists())) &&
+	                this.args == null) {
+	            getLog().info("Skipping cucumber tests since " + this.cucumberDirectory + " is missing");
+	            return;
+	        }
+	        getLog().debug("Running Cucumber tests from " + this.cucumberDirectory);
 			super.execute();
 		}
 	}
 
+    @Override
+    protected TestScriptFactory newTestScriptFactory(Mode mode) {
+        return new CucumberMavenTestScriptFactory();
+    }
+    
 	@Override
-	public void executeWithGems() throws MojoExecutionException,
-			ScriptException, IOException, GemException {
-        if (this.project.getBasedir() != null && this.cucumberDirectory != null && 
-                !this.cucumberDirectory.exists() && this.args == null) {
-            getLog().info("Skipping cucumber tests since " + this.cucumberDirectory + " is missing");
-            return;
-        }
-        getLog().debug("Running Cucumber tests from " + this.cucumberDirectory);
+    protected Result runIt(ScriptFactory factory, Mode mode, final String version, TestScriptFactory scriptFactory)
+            throws IOException, ScriptException, MojoExecutionException {
+	    scriptFactory.setSourceDir(new File("."));
+        scriptFactory.emit();
 
-        if (this.project.getBasedir() == null) {
-
-			this.gemsInstaller.installGem("cucumber", this.cucumberVersion,
-					this.repoSession, this.localRepository);
-
-		}
-		final Script script = this.factory.newScriptFromSearchPath("cucumber");
-		script.addArg("-f", "pretty");
-		if (this.project.getBasedir() != null) {
-			script.addArg("-f", "junit");
-			script.addArg("-o", this.testReportDirectory);
-		}
+		final Script script = this.factory.newScript(scriptFactory.getCoreScript());
 		if (this.cucumberArgs != null) {
 			script.addArgs(this.cucumberArgs);
 		}
@@ -99,6 +100,63 @@ public class CucumberMojo extends AbstractGemMojo {
 			script.addArg(this.cucumberDirectory);
 		}
 
-		script.executeIn(launchDirectory());
+        try {
+            script.executeIn(launchDirectory());
+        } catch (Exception e) {
+            getLog().debug("exception in running tests", e);
+        }
+
+        Result result = new Result();
+        result.message = "did not find test summary";
+        result.success = false;
+        
+        FileFilter filter = new FileFilter() {
+            
+            public boolean accept(File f) {
+                return !f.getName().matches(".*-[1-9]\\.[1-9]+\\.[^.]+--1.[89].xml$") && 
+                        f.getName().endsWith(".xml");
+            }
+        };
+        
+
+        if (testReportDirectory.exists()){
+            for (File outputfile : testReportDirectory.listFiles(filter)) {
+                System.out.println(outputfile);
+                for (Object lineObj : FileUtils.loadFile(outputfile)) {
+                    String line = lineObj.toString();
+                    if (line.contains("failures")) {
+                        line = line.replaceFirst("^<[^\\s]+\\s", "")
+                                .replaceFirst(">\\s*$", "");
+
+                        result.message = line;
+                        line = line.replaceAll(" name=\"[^\"]+\"", "")
+                                .replaceAll("[a-z]+=\"", "")
+                                .replaceAll("\"", "").trim();
+                        int last = line.lastIndexOf(" ");
+                        line = line.substring(0, last);
+
+                        int[] vector = new int[3];
+                        int i = 0;
+                        for (String n : line.split("\\s+")) {
+                            vector[i++] = Integer.parseInt(n);
+                        }
+                        result.success = (vector[ResultEnum.FAILURES.ordinal()] == 0)
+                                && (vector[ResultEnum.ERRORS.ordinal()] == 0);
+
+                        File dest = new File(outputfile.getAbsolutePath()
+                                .replaceFirst(".xml$",
+                                        "-" + version + 
+                                        (mode.flag != null ? mode.flag : "") + 
+                                        ".xml"));
+                        outputfile.renameTo(dest);
+                        if (summaryReport != null) {
+                            FileUtils.copyFile(dest, summaryReport);
+                        }
+                        return result;
+                    }
+                }
+            }
+        }
+        return result;
 	}
 }
