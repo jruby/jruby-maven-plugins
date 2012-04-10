@@ -1,4 +1,0 @@
-import java.io.*;
-
-new File( new File( new File( new File( new File(localRepositoryPath, "javax"), "servlet"), "servlet-api"), "2.3"), "servlet-api-2.3.jar").delete() || true;
-
