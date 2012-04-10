@@ -88,7 +88,6 @@
     <module>jruby-maven-plugin</module>
     <module>gem-maven-plugin</module>
     <module>rspec-maven-plugin</module>
-    <module>rails2-maven-plugin</module>
     <module>rails3-maven-plugin</module>
     <module>cucumber-maven-plugin</module>
     <!--module>gem-proxy</module>
@@ -96,7 +95,7 @@
     <module>ruby-tools</module>
     <module>rake-maven-plugin</module>
     <module>runit-maven-plugin</module>
-    <module>gemify-maven-plugin</module>
+    <module>minitest-maven-plugin</module>
     <module>bundler-maven-plugin</module>
     <module>integration-tests</module>
   </modules>

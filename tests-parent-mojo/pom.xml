@@ -52,6 +52,7 @@
           <excludes>
 	    <exclude>de/saumya/mojo/jruby/**</exclude>
 	    <exclude>de/saumya/mojo/gem/**</exclude>
+	    <exclude>de/saumya/mojo/runit/**</exclude>
 	  </excludes>
         </configuration>
       </plugin>
