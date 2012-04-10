@@ -31,8 +31,8 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
     /**
      * skip all tests
      * <br/>
-     * Command line -Dmaven.test.skip=...
-     * @parameter expression="${maven.test.skip}" default-value="false"
+     * Command line -DskipTests=...
+     * @parameter expression="${skipTests}" default-value="false"
      */
     protected boolean skipTests;
 
@@ -72,11 +72,16 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         else {
             final Mode mode;
             if(switch18and19 == null || switch18and19 == false){
-                if(jrubySwitches != null && jrubySwitches.contains("--1.9")){
-                    mode = Mode._19;
+                if(jrubySwitches != null) { 
+                    if (jrubySwitches.contains("--1.9")){
+                        mode = Mode._19;
+                    }
+                    else {
+                        mode = Mode._18;
+                    }
                 }
                 else {
-                    mode = Mode._18;
+                    mode = Mode.DEFAULT;
                 }
             }
             else {
@@ -89,8 +94,26 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
             }
         }
 
+        final File outputDir = new File(this.project.getBuild().getDirectory()
+                .replace("${project.basedir}/", ""));
+        
         for( JRubyRun run: runs){
-            runIt(run);
+            TestScriptFactory scriptFactory = newTestScriptFactory(run.mode);
+            scriptFactory.setBaseDir(project.getBasedir());
+            scriptFactory.setGemHome(gemsConfig.getGemHome());
+            scriptFactory.setGemPaths(gemsConfig.getGemPath());
+            scriptFactory.setOutputDir(outputDir);
+            scriptFactory.setSystemProperties(project.getProperties());
+            scriptFactory.setSummaryReport(summaryReport);
+            scriptFactory.setReportPath(testReportDirectory);
+            try {
+                scriptFactory.setClasspathElements(project
+                        .getTestClasspathElements());
+            }
+            catch (DependencyResolutionRequiredException e) {
+                throw new MojoExecutionException("error getting classpath", e);
+            }
+            runIt(run, scriptFactory);
         }
 
         boolean hasOverview = this.versions != null || (switch18and19 != null && switch18and19);
@@ -116,7 +139,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         }
     }
 
-    protected void runIt(JRubyRun run) throws MojoExecutionException, IOException, ScriptException {
+    protected void runIt(JRubyRun run, TestScriptFactory testScriptFactory) throws MojoExecutionException, IOException, ScriptException {
         final de.saumya.mojo.ruby.script.ScriptFactory factory;
         if (this.jrubyVersion.equals(run.version) || run.mode == Mode.DEFAULT){
             factory = this.factory;
@@ -130,17 +153,21 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         }
 
         for (Mode mode : run.asSingleModes()) {
+            getLog().info("");
             if (mode != Mode.DEFAULT) {
                 factory.addSwitch(mode.flag);
-                getLog().info("");
                 getLog().info("\trun with jruby " + run.version + " in mode " + mode);
-                getLog().info("");
             }
-            run.setResult(mode, runIt(factory, mode, run.version));
+            else {
+                getLog().info("\trun with jruby " + run.version);
+            }
+            getLog().info("");
+            run.setResult(mode, runIt(factory, mode, run.version, testScriptFactory));
         }
     }
 
-
-    protected abstract Result runIt(ScriptFactory factory, Mode mode, String version)
+    protected abstract TestScriptFactory newTestScriptFactory(Mode mode);
+    
+    protected abstract Result runIt(ScriptFactory factory, Mode mode, String version, TestScriptFactory testScriptFactory)
         throws IOException, ScriptException, MojoExecutionException;
 }

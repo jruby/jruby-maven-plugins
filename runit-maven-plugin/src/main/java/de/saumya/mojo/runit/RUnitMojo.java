@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
@@ -61,39 +60,18 @@ public class RUnitMojo extends AbstractTestMojo {
         }
     }
 
-    protected Result runIt(ScriptFactory factory, Mode mode, String version)
+    protected Result runIt(ScriptFactory factory, Mode mode, String version, TestScriptFactory scriptFactory)
             throws IOException, ScriptException, MojoExecutionException {
         final File outputfile = new File(this.project.getBuild().getDirectory()
                 .replace("${project.basedir}/", ""), "runit.txt");
 
-        final TestScriptFactory scriptFactory;
-        if (mode == Mode._18
-                || (mode == Mode.DEFAULT && (jrubySwitches == null || !jrubySwitches
-                        .contains("--1.9")))) {
-            scriptFactory = new Runit18MavenTestScriptFactory();
-        } else {
-            scriptFactory = new Runit19MavenTestScriptFactory();
-        }
-
-        scriptFactory.setBaseDir(project.getBasedir());
-        scriptFactory.setGemHome(gemsConfig.getGemHome());
-        scriptFactory.setGemPaths(gemsConfig.getGemPath());
         scriptFactory.setOutputDir(outputfile.getParentFile());
-        scriptFactory.setSystemProperties(project.getProperties());
-        scriptFactory.setSummaryReport(summaryReport);
         scriptFactory.setReportPath(outputfile);
         if(runitDirectory.startsWith(launchDirectory().getAbsolutePath())){
             scriptFactory.setSourceDir(new File(runitDirectory));
         }
         else{
             scriptFactory.setSourceDir(new File(launchDirectory(), runitDirectory));
-        }
-        try {
-            scriptFactory.setClasspathElements(project
-                    .getTestClasspathElements());
-        }
-        catch (DependencyResolutionRequiredException e) {
-            throw new MojoExecutionException("error getting classpath", e);
         }
 
         scriptFactory.emit();
@@ -158,6 +136,19 @@ public class RUnitMojo extends AbstractTestMojo {
         result.message = "did not find test summary";
         result.success = false;
         return result;
+    }
+
+    @Override
+    protected TestScriptFactory newTestScriptFactory(Mode mode) {
+        final TestScriptFactory scriptFactory;
+        if (mode == Mode._18
+                || (mode == Mode.DEFAULT && (jrubySwitches == null || !jrubySwitches
+                        .contains("--1.9")))) {
+            scriptFactory = new Runit18MavenTestScriptFactory();
+        } else {
+            scriptFactory = new Runit19MavenTestScriptFactory();
+        }
+        return scriptFactory;
     }
 
 }

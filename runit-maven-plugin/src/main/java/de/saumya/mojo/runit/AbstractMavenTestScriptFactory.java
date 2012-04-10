@@ -73,21 +73,14 @@ public abstract class AbstractMavenTestScriptFactory extends AbstractTestScriptF
         return builder.toString();
     }
 
-    // TODO ???? needed ?
     protected void getResultsScript(StringBuilder builder) {
-        builder.append("# A little magic to report back to maven\n");
+        builder.append("# A little exit code magic\n");
         builder.append("\n");
 
         builder.append("if File.new(REPORT_PATH, 'r').read =~ /, 0 failures/ \n");
-        builder.append("  if ( $0 == __FILE__ )\n" );
-        builder.append("    exit 0\n" );
-        builder.append("  end\n" );
-        builder.append("  false\n");
+        builder.append("  exit 0\n" );
         builder.append("else\n");
-        builder.append("  if ( $0 == __FILE__ )\n" );
-        builder.append("    exit 1\n" );
-        builder.append("  end\n" );
-        builder.append("  true\n");
+        builder.append("  exit 1\n" );
         builder.append("end\n");
         builder.append("\n");
     }

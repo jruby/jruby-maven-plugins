@@ -2,6 +2,7 @@ package de.saumya.mojo.runit;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Properties;
 
@@ -70,8 +71,14 @@ public abstract class AbstractTestScriptFactory implements TestScriptFactory {
 
         FileUtils.fileWrite(scriptFile.getAbsolutePath(), "UTF-8", script);
         
-        // TODO is that java-1.5 ?
-        scriptFile.setExecutable(true);
+        try {
+            // use reflection so it compiles with java1.5 as well but does not set executable
+            Method m = scriptFile.getClass().getMethod("setExecutable", boolean.class);
+            m.invoke(scriptFile, new Boolean(true));
+        }
+        catch (Exception e) {
+            //ignore for the time being
+        }
     }
 
 }
