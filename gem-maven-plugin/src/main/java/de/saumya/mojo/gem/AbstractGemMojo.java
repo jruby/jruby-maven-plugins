@@ -258,7 +258,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         if (this.includeRubygemsInTestResources) {
             for (File path : this.gemsConfig.getGemPath()) {
                 if (jrubyVerbose) {
-                    getLog().info("add to rubygems to test-classpath from: "
+                    getLog().info("add gems to test-classpath from: "
                             + path.getAbsolutePath());
                 }
                 // add it to the classpath so java classes can find the ruby
