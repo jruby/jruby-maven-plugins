@@ -82,6 +82,7 @@ public class InstallMojo extends AbstractGemMojo {
         }
         return md;
     }
+    
     private String toHex(byte[] data) {
         StringBuilder buf = new StringBuilder();//data.length * 2);
         for (byte b: data) {
@@ -117,7 +118,10 @@ public class InstallMojo extends AbstractGemMojo {
                 }
             }
             else{
-                FileUtils.fileWrite(sha1, pomSha1);
+                // just do the timestamping if there is target dir
+                if (sha1.getParentFile().exists()) {
+                    FileUtils.fileWrite(sha1, pomSha1);
+                }
             }
         }
         final Script script = this.factory.newScriptFromSearchPath("bundle");
