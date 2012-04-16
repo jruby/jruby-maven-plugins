@@ -3,7 +3,13 @@ package de.saumya.mojo.minitest;
 import de.saumya.mojo.runit.AbstractMavenTestScriptFactory;
 
 public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFactory {
-    
+
+    private final boolean useGem;
+
+    public MinitestMavenTestScriptFactory(boolean useGem){
+        this.useGem = useGem;
+    }
+
     @Override
     protected void getRunnerScript(StringBuilder builder) {
         getTeeClass(builder);
@@ -31,6 +37,9 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
 
     void getAddTestCases(StringBuilder builder){
         builder.append("require 'rubygems'\n");
+        if (useGem) {
+            builder.append("gem 'minitest'\n");
+        }
         builder.append("require 'minitest/autorun'\n");
         builder.append("Dir[SOURCE_DIR].each { |f| require f if File.file? f }\n");
     }

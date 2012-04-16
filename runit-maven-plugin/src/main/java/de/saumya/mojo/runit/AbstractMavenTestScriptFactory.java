@@ -104,15 +104,19 @@ public abstract class AbstractMavenTestScriptFactory extends AbstractTestScriptF
         builder.append("\n");
 
         if (gemHome != null) {
-            builder.append("ENV['GEM_HOME']='" + gemHome + "'\n");
+            builder.append("ENV['GEM_HOME']=%q(" + gemHome + ")\n");
         }
 
         if (gemPaths != null) {
-            builder.append("ENV['GEM_PATH']='");
+            builder.append("ENV['GEM_PATH']=%q(");
+            String separator = "";
             for(File path: gemPaths) {
-                builder.append(System.getProperty("path.separator") + path);
+                builder.append(separator + path);
+                if (separator.length() == 0){
+                    separator = System.getProperty("path.separator");
+                }
             }
-            builder.append("'\n");
+            builder.append(")\n");
         }
 
         builder.append("\n");

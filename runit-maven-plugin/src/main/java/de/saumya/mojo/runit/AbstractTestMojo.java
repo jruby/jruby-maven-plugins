@@ -43,7 +43,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
      *
      * @parameter expression="${jruby.18and19}"
      */
-    private Boolean switch18and19;
+    protected Boolean use18and19;
 
 
     /**
@@ -66,12 +66,12 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         testReportDirectory = new File(testReportDirectory.getAbsolutePath().replace("${project.basedir}/",""));
         List<JRubyRun> runs = new ArrayList<JRubyRun>();
         if (versions == null){
-            final Mode mode = switch18and19 == null? Mode.DEFAULT: Mode._18_19;
+            final Mode mode = use18and19 == null? Mode.DEFAULT: Mode._18_19;
             runs.add(new JRubyRun(mode, this.jrubyVersion));
         }
         else {
             final Mode mode;
-            if(switch18and19 == null || switch18and19 == false){
+            if(use18and19 == null || use18and19 == false){
                 if(jrubySwitches != null) { 
                     if (jrubySwitches.contains("--1.9")){
                         mode = Mode._19;
@@ -96,10 +96,11 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
 
         final File outputDir = new File(this.project.getBuild().getDirectory()
                 .replace("${project.basedir}/", ""));
-        
+        TestScriptFactory scriptFactory = null;
         for( JRubyRun run: runs){
-            TestScriptFactory scriptFactory = newTestScriptFactory(run.mode);
+            scriptFactory = newTestScriptFactory(run.mode);
             scriptFactory.setBaseDir(project.getBasedir());
+            
             scriptFactory.setGemHome(gemsConfig.getGemHome());
             scriptFactory.setGemPaths(gemsConfig.getGemPath());
             scriptFactory.setOutputDir(outputDir);
@@ -113,10 +114,13 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
             catch (DependencyResolutionRequiredException e) {
                 throw new MojoExecutionException("error getting classpath", e);
             }
+            
             runIt(run, scriptFactory);
         }
 
-        boolean hasOverview = this.versions != null || (switch18and19 != null && switch18and19);
+        scriptFactory.emit();
+
+        boolean hasOverview = this.versions != null || (use18and19 != null && use18and19);
         if(hasOverview){
             getLog().info("");
             getLog().info("\tOverall Summary");
@@ -133,6 +137,8 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         }
         if(hasOverview){
             getLog().info("");
+            getLog().info("use '" + scriptFactory.getScriptFile() + 
+                    "' for faster command line execution.");
         }
         if(failure){
             throw new MojoExecutionException("There were test failures");

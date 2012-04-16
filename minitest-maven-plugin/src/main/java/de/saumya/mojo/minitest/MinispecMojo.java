@@ -16,47 +16,48 @@ import de.saumya.mojo.runit.JRubyRun.Result;
 import de.saumya.mojo.runit.TestScriptFactory;
 
 /**
- * maven wrapper around minitest.
+ * maven wrapper around minispec.
  *
- * @goal test
+ * @goal spec
  * @phase test
  */
-public class MinitestMojo extends AbstractTestMojo {
+public class MinispecMojo extends AbstractTestMojo {
 
     /**
-     * minitest directory with glob to speficy the test files. <br/>
-     * Command line -Dminitest.dir=...
+     * minispec directory with glob to speficy the test files. <br/>
+     * Command line -Dminispec.dir=...
      *
-     * @parameter expression="${minitest.dir}" default-value="test/**\/*_test.rb"
+     * @parameter expression="${minispec.dir}" default-value="spec/**\/*_spec.rb"
      */
-    private final String minitestDirectory = null;
+    private final String minispecDirectory = null;
 
     /**
      * arguments for the minitest command. <br/>
-     * Command line -Drunit.args=...
+     * Command line -Dminispec.args=...
      *
-     * @parameter expression="${minitest.args}"
+     * @parameter expression="${minispec.args}"
      */
-    private final String minitestArgs = null;
+    private final String minispecArgs = null;
 
     /**
-     * skip the minitests <br/>
-     * Command line -DskipMinitests=...
+     * skip the minispecs <br/>
+     * Command line -DskipMinispecs=...
      *
-     * @parameter expression="${skipMinitests}" default-value="false"
+     * @parameter expression="${skipMinispecs}" default-value="false"
      */
-    protected boolean skipMinitests;
-    
+    protected boolean skipMinispecs;
+
     private TestResultManager resultManager;
     private File outputfile;
-    
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (this.skipTests || this.skipMinitests) {
-            getLog().info("Skipping Minitests");
+        if (this.skipTests || this.skipMinispecs) {
+            getLog().info("Skipping Minispecs");
+            return;
         } else {
             outputfile = new File(this.project.getBuild().getDirectory()
-                    .replace("${project.basedir}/", ""), "minitest.txt");
+                    .replace("${project.basedir}/", ""), "minispec.txt");
             resultManager = new TestResultManager(project.getName(), "minispec", testReportDirectory, summaryReport);
             super.execute();
         }
@@ -64,18 +65,19 @@ public class MinitestMojo extends AbstractTestMojo {
 
     protected Result runIt(ScriptFactory factory, Mode mode, String version, TestScriptFactory scriptFactory)
             throws IOException, ScriptException, MojoExecutionException {
+        
         scriptFactory.setOutputDir(outputfile.getParentFile());
         scriptFactory.setReportPath(outputfile);
-        if(minitestDirectory.startsWith(launchDirectory().getAbsolutePath())){
-            scriptFactory.setSourceDir(new File(minitestDirectory));
+        if(minispecDirectory.startsWith(launchDirectory().getAbsolutePath())){
+            scriptFactory.setSourceDir(new File(minispecDirectory));
         }
         else{
-            scriptFactory.setSourceDir(new File(launchDirectory(), minitestDirectory));
+            scriptFactory.setSourceDir(new File(launchDirectory(), minispecDirectory));
         }
 
         final Script script = factory.newScript(scriptFactory.getCoreScript());
-        if (this.minitestArgs != null) {
-            script.addArgs(this.minitestArgs);
+        if (this.minispecArgs != null) {
+            script.addArgs(this.minispecArgs);
         }
         if (this.args != null) {
             script.addArgs(this.args);
@@ -84,7 +86,7 @@ public class MinitestMojo extends AbstractTestMojo {
         try {
             script.executeIn(launchDirectory());
         } catch (Exception e) {
-            getLog().debug("exception in running tests", e);
+            getLog().debug("exception in running specs", e);
         }
 
         return resultManager.generateReports(mode, version, outputfile);
