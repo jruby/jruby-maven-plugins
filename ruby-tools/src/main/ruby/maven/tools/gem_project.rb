@@ -171,9 +171,13 @@ module Maven
 
         repository("rubygems-releases").url = "http://rubygems-proxy.torquebox.org/releases" unless repository("rubygems-releases").url
         
-        has_prerelease = dependencies.detect { |d| d.type.to_sym == :gem && d.version =~ /[a-zA-Z]/ }
-
-        repository("rubygems-prereleases").url = "http://rubygems-proxy.torquebox.org/prereleases" if has_prerelease && !repository("rubygems-prereleases").url
+        unless repository("rubygems-prereleases").url
+          repository("rubygems-prereleases") do |r|
+            r.url = "http://rubygems-proxy.torquebox.org/prereleases"
+            r.releases(:enabled => false)
+            r.snapshots(:enabled => true)
+          end
+        end
 
         # TODO go through all plugins to find out any SNAPSHOT version !!
         if versions[:jruby_plugins] =~ /-SNAPSHOT$/ || properties['jruby.plugins.version'] =~ /-SNAPSHOT$/
@@ -188,10 +192,15 @@ module Maven
           gem = plugin(:gem)
           gem.version = "${jruby.plugins.version}" unless gem.version
           gem.extensions = true if packaging =~ /gem/
+          if File.exists?('lib') && File.exists?(File.join('src', 'main', 'java'))
+            plugin(:jar) do |j|
+              j.version = versions[:jar_plugin] unless j.version
+              j.in_phase('prepare-package').execute_goal(:jar).with :outputDirectory => '${project.basedir}/lib', :finalName => '${project.artifactId}'
+            end
+          end
         end
-
+        
         if plugin?(:bundler)
-          plugin_repository("rubygems-releases").url = "http://rubygems-proxy.torquebox.org/releases" unless plugin_repository("rubygems-releases").url
           bundler = plugin(:bundler)
           bundler.version = "${jruby.plugins.version}" unless bundler.version
           bundler.executions.goals << "install"
@@ -204,6 +213,8 @@ module Maven
           #add_test_plugin(nil, "test")
           add_test_plugin("rspec", "spec")
           add_test_plugin("cucumber", "features")
+          add_test_plugin("minitest", "test")
+          add_test_plugin("minitest", "spec", 'spec')
         end
 
         self.properties = {
@@ -212,13 +223,29 @@ module Maven
           "gem.path" => "${project.build.directory}/rubygems",
           "jruby.plugins.version" => versions[:jruby_plugins]
         }.merge(self.properties)
+
+        has_plugin_gems = build.plugins.detect do |k, pl|
+          pl.dependencies.detect { |d| d.type.to_sym == :gem } if pl.dependencies
+        end
+        
+        if has_plugin_gems
+          plugin_repository("rubygems-releases").url = "http://rubygems-proxy.torquebox.org/releases" unless plugin_repository("rubygems-releases").url
+        
+          unless plugin_repository("rubygems-prereleases").url
+            plugin_repository("rubygems-prereleases") do |r|
+              r.url = "http://rubygems-proxy.torquebox.org/prereleases"
+              r.releases(:enabled => false)
+              r.snapshots(:enabled => true)
+            end
+          end
+        end
       end
 
-      def add_test_plugin(name, test_dir)
+      def add_test_plugin(name, test_dir, goal = 'test')
         unless plugin?(name)
           has_gem = name.nil? ? true : gem?(name)
           if has_gem && File.exists?(test_dir)
-            plugin(name || 'runit', "${jruby.plugins.version}").execution.goals << "test" 
+            plugin(name || 'runit', "${jruby.plugins.version}").execution.goals << goal
           end
         else
           pl = plugin(name || 'runit')
