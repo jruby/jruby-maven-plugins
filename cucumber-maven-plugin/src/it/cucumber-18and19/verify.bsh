@@ -2,12 +2,12 @@ import java.io.*;
 import org.codehaus.plexus.util.FileUtils;
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "mode 1.8: errors=\"0\" failures=\"0\" name=\"Sample\" tests=\"1\"";
+String expected = "mode 1.8: 1 tests, 0 assertions, 0 failures, 0 errors, 0 skips";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
-expected = "mode 1.9: errors=\"0\" failures=\"0\" name=\"Sample\" tests=\"1\"";
+expected = "mode 1.9: 1 tests, 0 assertions, 0 failures, 0 errors, 0 skips";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
