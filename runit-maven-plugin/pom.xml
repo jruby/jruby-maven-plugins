@@ -4,7 +4,7 @@
   <parent>
     <artifactId>gem-parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.28.7-SNAPSHOT</version>
+    <version>0.29.0-SNAPSHOT</version>
     <relativePath>../gem-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>runit-maven-plugin</artifactId>
