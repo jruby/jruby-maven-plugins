@@ -97,7 +97,7 @@ EOF
             buf << "#{indent}  <#{var}>#{val}</#{var}>\n" if val
           end
         end
-        buf << "#{indent}</#{_name}>\n"
+        buf << "#{indent}</#{_name.sub(/ .*$/, '')}>\n"
         buf
       end
     end
@@ -188,7 +188,7 @@ EOF
       def adjust_key(name)
         name = name.to_s
         if (name =~ /\:/).nil?
-          if [:jruby, :gem, :rspec, :rake, :rails2, :rails3, :gemify, :cucumber, :runit, :bundler].member? name.to_sym
+          if [:jruby, :gem, :rspec, :rake, :minitest, :rails3, :gemify, :cucumber, :runit, :bundler].member? name.to_sym
             "de.saumya.mojo:#{name}-maven-plugin"
           else
             "maven-#{name}-plugin"
