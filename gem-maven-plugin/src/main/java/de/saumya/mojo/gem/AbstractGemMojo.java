@@ -115,7 +115,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected GemsInstaller gemsInstaller;
 
     @Override
-    protected ScriptFactory newScriptFactory(Artifact artifact) throws MojoExecutionException {
+    public void execute() throws MojoExecutionException, MojoFailureException{
         if (this.project.getBasedir() == null) {
             this.gemHome = new File(this.gemHome.getAbsolutePath()
                     .replace("/${project.basedir}/", "/"));
@@ -126,9 +126,19 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig = new GemsConfig();
         this.gemsConfig.setGemHome(this.gemHome);
         this.gemsConfig.addGemPath(this.gemPath);
-        this.gemsConfig.addGemPath(new File(this.gemPath.getParentFile(), 
-                                            this.gemPath.getName() + "-bundler-maven-plugin"));
+ 
+        this.gemsConfig.setAddRdoc(this.installRDoc);
+        this.gemsConfig.setAddRI(this.installRI);
+        this.gemsConfig.setBinDirectory(this.binDirectory);
+        // this.gemsConfig.setUserInstall(userInstall);
+        // this.gemsConfig.setSystemInstall(systemInstall);
+        this.gemsConfig.setSkipJRubyOpenSSL(!this.includeOpenSSL);
 
+        super.execute();
+    }
+
+    @Override
+    protected ScriptFactory newScriptFactory(Artifact artifact) throws MojoExecutionException {
         try {
             final GemScriptFactory factory = new GemScriptFactory(this.logger,
                     this.classRealm,
@@ -200,21 +210,16 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     @Override
     protected void executeJRuby() throws MojoExecutionException,
-            MojoFailureException, IOException, ScriptException {
-                this.gemsConfig.setAddRdoc(this.installRDoc);
-        this.gemsConfig.setAddRI(this.installRI);
-        this.gemsConfig.setBinDirectory(this.binDirectory);
-        // this.gemsConfig.setUserInstall(userInstall);
-        // this.gemsConfig.setSystemInstall(systemInstall);
-        this.gemsConfig.setSkipJRubyOpenSSL(!this.includeOpenSSL);
-
+        MojoFailureException, IOException, ScriptException {
+        
         this.gemsInstaller = new GemsInstaller(this.gemsConfig,
                 this.factory,
                 this.manager);
 
         try {
             // install the gem dependencies from the pom
-            this.gemsInstaller.installPom(this.project, this.localRepository);
+            this.gemsInstaller.installPom(this.project, 
+                                          this.localRepository);
 
             // has the plugin gem dependencies ?
             boolean hasGems = false;
@@ -224,14 +229,16 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     break;
                 }
             }
-            // install the gems for the plugin
-            File pluginGemHome = new File(this.gemsConfig.getGemHome().getAbsolutePath() + "-" + plugin.getArtifactId());
-            pluginGemHome.mkdirs();
             if (hasGems){
+                // install the gems for the plugin
+                File pluginGemHome = new File(this.gemsConfig.getGemHome().getAbsolutePath() + "-" + plugin.getArtifactId());
+                pluginGemHome.mkdirs();
                 // use a common bindir, i.e. the one from the configured gemHome
                 // remove default by setting it explicitly
                 this.gemsConfig.setBinDirectory(this.gemsConfig.getBinDirectory());
+                // remember gem_home
                 File home = this.gemsConfig.getGemHome();
+                // use plugin home for plugin gems
                 this.gemsConfig.setGemHome(pluginGemHome);
                 this.gemsConfig.addGemPath(this.gemsConfig.getGemHome());
 
@@ -240,6 +247,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                                this.localRepository, 
                                                this.project.getPluginArtifactRepositories());
 
+                // reset old gem home again
                 this.gemsConfig.setGemHome(home);
             }
         }
