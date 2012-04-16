@@ -57,7 +57,7 @@ public class MinitestMojo extends AbstractTestMojo {
         } else {
             outputfile = new File(this.project.getBuild().getDirectory()
                     .replace("${project.basedir}/", ""), "minitest.txt");
-            resultManager = new TestResultManager(project.getName(), "minispec", testReportDirectory, summaryReport);
+            resultManager = new TestResultManager(project.getName(), "minitest", testReportDirectory, summaryReport);
             super.execute();
         }
     }
@@ -92,8 +92,8 @@ public class MinitestMojo extends AbstractTestMojo {
 
     @Override
     protected TestScriptFactory newTestScriptFactory(Mode mode) {
-	// TODO localte minitest gem
-        return new MinitestMavenTestScriptFactory(use18and19);
+	// TODO locate minitest gem
+        return new MinitestMavenTestScriptFactory(use18and19 == null ? false : use18and19);
     }
 
 }
