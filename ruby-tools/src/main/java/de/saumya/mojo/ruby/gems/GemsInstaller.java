@@ -24,8 +24,8 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class GemsInstaller {
 
-    private static final String OPENSSL_VERSION = "0.7.4.1";
-    private static final String OPENSSL = "jruby-openssl-maven";
+    private static final String OPENSSL_VERSION = "0.7.4";
+    private static final String OPENSSL = "jruby-openssl";//-maven";
     
     private static final FileFilter FILTER = new FileFilter() {
         
