@@ -20,6 +20,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.runit.AbstractTestMojo;
 import de.saumya.mojo.runit.JRubyRun.Mode;
 import de.saumya.mojo.runit.JRubyRun.Result;
+import de.saumya.mojo.runit.TestScriptFactory;
 
 /**
  * executes the jruby command.
@@ -283,6 +284,19 @@ public class RSpecMojo extends AbstractTestMojo {
                 return scriptFactory4Version(each.getVersion());
             }
         }
+        return null;
+    }
+
+    @Override
+    protected TestScriptFactory newTestScriptFactory(Mode mode) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected Result runIt(de.saumya.mojo.ruby.script.ScriptFactory factory,
+            Mode mode, String version, TestScriptFactory testScriptFactory)
+            throws IOException, ScriptException, MojoExecutionException {
         return null;
     }
 }
