@@ -1,6 +1,6 @@
 package de.saumya.mojo.cucumber;
 
-import de.saumya.mojo.runit.AbstractMavenTestScriptFactory;
+import de.saumya.mojo.tests.AbstractMavenTestScriptFactory;
 
 public class CucumberMavenTestScriptFactory extends AbstractMavenTestScriptFactory {
     

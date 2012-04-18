@@ -1,8 +1,9 @@
-package de.saumya.mojo.runit;
+package de.saumya.mojo.tests;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 
 public abstract class AbstractMavenTestScriptFactory extends AbstractTestScriptFactory {
 

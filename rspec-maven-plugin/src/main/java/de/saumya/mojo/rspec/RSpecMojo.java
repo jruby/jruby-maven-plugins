@@ -17,10 +17,10 @@ import org.sonatype.aether.RepositorySystemSession;
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
-import de.saumya.mojo.runit.AbstractTestMojo;
-import de.saumya.mojo.runit.JRubyRun.Mode;
-import de.saumya.mojo.runit.JRubyRun.Result;
-import de.saumya.mojo.runit.TestScriptFactory;
+import de.saumya.mojo.tests.AbstractTestMojo;
+import de.saumya.mojo.tests.JRubyRun.Mode;
+import de.saumya.mojo.tests.JRubyRun.Result;
+import de.saumya.mojo.tests.TestScriptFactory;
 
 /**
  * executes the jruby command.

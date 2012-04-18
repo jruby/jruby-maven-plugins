@@ -1,4 +1,4 @@
-package de.saumya.mojo.runit;
+package de.saumya.mojo.tests;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +12,8 @@ import de.saumya.mojo.gem.AbstractGemMojo;
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
-import de.saumya.mojo.runit.JRubyRun.Mode;
-import de.saumya.mojo.runit.JRubyRun.Result;
+import de.saumya.mojo.tests.JRubyRun.Mode;
+import de.saumya.mojo.tests.JRubyRun.Result;
 
 /**
  * maven wrapper around some test command.
@@ -35,6 +35,14 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
      * @parameter expression="${skipTests}" default-value="false"
      */
     protected boolean skipTests;
+
+    /**
+     * skip all tests
+     * <br/>
+     * Command line -Dmaven.test.skip=...
+     * @parameter expression="${maven.test.skip}" default-value="false"
+     */
+    protected boolean skip;
 
     /**
      * run tests for both ruby 1.8 and 1.9

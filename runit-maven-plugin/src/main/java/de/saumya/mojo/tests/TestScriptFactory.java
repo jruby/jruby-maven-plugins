@@ -1,4 +1,4 @@
-package de.saumya.mojo.runit;
+package de.saumya.mojo.tests;
 
 import java.io.File;
 import java.io.IOException;

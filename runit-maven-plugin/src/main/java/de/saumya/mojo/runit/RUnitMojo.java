@@ -9,8 +9,11 @@ import org.apache.maven.plugin.MojoFailureException;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
-import de.saumya.mojo.runit.JRubyRun.Mode;
-import de.saumya.mojo.runit.JRubyRun.Result;
+import de.saumya.mojo.tests.AbstractTestMojo;
+import de.saumya.mojo.tests.TestResultManager;
+import de.saumya.mojo.tests.TestScriptFactory;
+import de.saumya.mojo.tests.JRubyRun.Mode;
+import de.saumya.mojo.tests.JRubyRun.Result;
 
 /**
  * maven wrapper around the runit/testcase command.
@@ -53,7 +56,7 @@ public class RUnitMojo extends AbstractTestMojo {
     
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (this.skipTests || this.skipRunit) {
+        if (this.skip || this.skipTests || this.skipRunit) {
             getLog().info("Skipping RUnit tests");
             return;
         } else {

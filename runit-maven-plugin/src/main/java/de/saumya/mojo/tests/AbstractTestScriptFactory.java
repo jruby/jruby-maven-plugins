@@ -1,4 +1,4 @@
-package de.saumya.mojo.runit;
+package de.saumya.mojo.tests;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.codehaus.plexus.util.FileUtils;
+
 
 public abstract class AbstractTestScriptFactory implements TestScriptFactory {
 

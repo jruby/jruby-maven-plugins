@@ -9,11 +9,11 @@ import org.apache.maven.plugin.MojoFailureException;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
-import de.saumya.mojo.runit.AbstractTestMojo;
-import de.saumya.mojo.runit.JRubyRun.Mode;
-import de.saumya.mojo.runit.JRubyRun.Result;
-import de.saumya.mojo.runit.TestResultManager;
-import de.saumya.mojo.runit.TestScriptFactory;
+import de.saumya.mojo.tests.AbstractTestMojo;
+import de.saumya.mojo.tests.JRubyRun.Mode;
+import de.saumya.mojo.tests.JRubyRun.Result;
+import de.saumya.mojo.tests.TestResultManager;
+import de.saumya.mojo.tests.TestScriptFactory;
 
 /**
  * maven wrapper around the cucumber command.
@@ -64,7 +64,7 @@ public class CucumberMojo extends AbstractTestMojo {
     
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		if (this.skipTests || this.skipCucumber) {
+		if (this.skip || this.skipTests || this.skipCucumber) {
 			getLog().info("Skipping Cucumber tests");
 		} 
 		else {

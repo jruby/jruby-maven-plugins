@@ -1,7 +1,4 @@
-/**
- *
- */
-package de.saumya.mojo.runit;
+package de.saumya.mojo.tests;
 
 public class JRubyRun {
 

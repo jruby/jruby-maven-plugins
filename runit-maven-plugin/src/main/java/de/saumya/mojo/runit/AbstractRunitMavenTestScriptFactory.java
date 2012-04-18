@@ -1,5 +1,7 @@
 package de.saumya.mojo.runit;
 
+import de.saumya.mojo.tests.AbstractMavenTestScriptFactory;
+
 public abstract class AbstractRunitMavenTestScriptFactory extends AbstractMavenTestScriptFactory {
 
     @Override

@@ -1,6 +1,6 @@
 package de.saumya.mojo.minitest;
 
-import de.saumya.mojo.runit.AbstractMavenTestScriptFactory;
+import de.saumya.mojo.tests.AbstractMavenTestScriptFactory;
 
 public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFactory {
 

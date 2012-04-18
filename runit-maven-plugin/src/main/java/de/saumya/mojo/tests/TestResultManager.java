@@ -1,4 +1,4 @@
-package de.saumya.mojo.runit;
+package de.saumya.mojo.tests;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,8 +6,8 @@ import java.text.MessageFormat;
 
 import org.codehaus.plexus.util.FileUtils;
 
-import de.saumya.mojo.runit.JRubyRun.Mode;
-import de.saumya.mojo.runit.JRubyRun.Result;
+import de.saumya.mojo.tests.JRubyRun.Mode;
+import de.saumya.mojo.tests.JRubyRun.Result;
 
 public class TestResultManager {
 
