@@ -152,15 +152,11 @@ module Maven
       alias :eql? :==
 
       def self.new_gem(gemname, *args)
-        if gemname =~ /^mvn:/
-          new(:maven_gem, gemname.sub(/^mvn:/, ''), *args)
-        else
-          new(:gem, "rubygems", gemname, *args)
-        end
+        new(:gem, "rubygems", gemname, *args)
       end
 
-      def self.new_maven_gem(gemname, *args)
-        new(:maven_gem, gemname.sub(/^mvn:/, ''), *args)
+      def self.new_pom(*args)
+        new(:pom, *args)
       end
 
       def self.new_jar(*args)
@@ -208,8 +204,8 @@ module Maven
         dependencies.detect { |d| d.type.to_sym == :gem && d.artifact_id == name }
       end
 
-      def maven_gem?(*args)
-        dependencies.member?(Dependency.new_maven_gem(*args))
+      def pom?(*args)
+        dependencies.member?(Dependency.new_pom(*args))
       end
 
       def dependencies(&block)
@@ -270,11 +266,11 @@ module Maven
         add_gem(args, &block)
       end
 
-      def maven_gem(*args, &block)
+      def pom(*args, &block)
         if args.last.is_a?(Hash)
           raise "hash not allowed in that context"
         end
-        add_dependency(Dependency.new_maven_gem(args), args.size > 1, &block)
+        add_dependency(Dependency.new_pom(args), args.size > 1, &block)
       end
     end
   end

@@ -187,17 +187,14 @@ XML
 XML
   end
 
-  it 'should allow maven_gem dependencies with exclusions' do
-    @a.gem 'mvn:org.jruby:jruby-stdlib', '>= 1.6.0' do |j|
+  it 'should allow pom dependencies with exclusions' do
+    @a.pom 'org.jruby:jruby-stdlib', '>= 1.6.0' do |j|
       j.exclusions << ["joda", "joda-time"]
       j.exclusions << "rubyzip2"
     end
-
-    @a.gem "mvn:org.slf4j:slf4j-simple", "1.6.2"
-
     @a.dependencies.empty?.should be_false
     @a.jar?("org.jruby:jruby-stdlib").should be_false
-    @a.maven_gem?("mvn:org.jruby:jruby-stdlib").should be_true
+    @a.pom?("org.jruby:jruby-stdlib").should be_true
     @a.to_xml.should == <<-XML
 <a>
   <dependencies>
@@ -205,7 +202,7 @@ XML
       <groupId>org.jruby</groupId>
       <artifactId>jruby-stdlib</artifactId>
       <version>[1.6.0,)</version>
-      <type>maven_gem</type>
+      <type>pom</type>
       <exclusions>
         <exclusion>
           <groupId>joda</groupId>
@@ -216,12 +213,6 @@ XML
           <artifactId>rubyzip2</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.6.2</version>
-      <type>maven_gem</type>
     </dependency>
   </dependencies>
 </a>

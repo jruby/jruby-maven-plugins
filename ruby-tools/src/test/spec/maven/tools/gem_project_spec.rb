@@ -9,7 +9,7 @@ describe Maven::Tools::GemProject do
   
   it 'should setup an empty gem project' do
     @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>test</artifactId>
@@ -24,7 +24,7 @@ XML
     it 'should load Gemfile with minimal gemspec' do
       @project.load(File.join(File.dirname(__FILE__), 'Gemfile.minimal'))
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>minimal</artifactId>
@@ -38,7 +38,7 @@ XML
     it 'should load Gemfile with "source", "path" and "platform"' do
       @project.load(File.join(File.dirname(__FILE__), 'Gemfile.ignored'))
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>test</artifactId>
@@ -75,7 +75,7 @@ XML
     it 'should load Gemfile with simple gems"' do
       @project.load(File.join(File.dirname(__FILE__), 'Gemfile.gems'))
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>test</artifactId>
@@ -173,7 +173,7 @@ XML
       @project.name "test"
       @project.add_defaults
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>test</artifactId>
@@ -185,11 +185,31 @@ XML
       <id>rubygems-releases</id>
       <url>http://rubygems-proxy.torquebox.org/releases</url>
     </repository>
+    <repository>
+      <id>rubygems-prereleases</id>
+      <url>http://rubygems-proxy.torquebox.org/prereleases</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
       <id>rubygems-releases</id>
       <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>rubygems-prereleases</id>
+      <url>http://rubygems-proxy.torquebox.org/prereleases</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </pluginRepository>
   </pluginRepositories>
   <dependencies>
@@ -315,7 +335,7 @@ XML
       @project.load(File.join(File.dirname(__FILE__), 'Gemfile.lockfile'))
       @project.name "test"
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>test</artifactId>
@@ -590,7 +610,7 @@ XML
     it 'should load minimal gemspec' do
       @project.load_gemspec(File.join(File.dirname(__FILE__), 'minimal.gemspec'))
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>minimal</artifactId>
@@ -615,7 +635,7 @@ XML
     it 'should load gemspec without dependencies' do
       @project.load_gemspec(File.join(File.dirname(__FILE__), 'no-deps.gemspec'))
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>no-deps</artifactId>
@@ -671,7 +691,7 @@ XML
     it 'should load gemspec with dependencies' do
       @project.load_gemspec(File.join(File.dirname(__FILE__), 'deps.gemspec'))
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>deps</artifactId>
@@ -720,7 +740,7 @@ XML
       @project.load_gemspec(File.join(File.dirname(__FILE__), 'minimal.gemspec'))
       @project.add_defaults
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>rubygems</groupId>
   <artifactId>minimal</artifactId>
@@ -731,6 +751,16 @@ XML
     <repository>
       <id>rubygems-releases</id>
       <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </repository>
+    <repository>
+      <id>rubygems-prereleases</id>
+      <url>http://rubygems-proxy.torquebox.org/prereleases</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
   <properties>

@@ -10,7 +10,7 @@ describe Maven::Model do
 
     it 'should setup a project with split args' do
       Maven::Model::Project.new("test", "project", "1.0.0").to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -24,7 +24,7 @@ XML
       project.artifact_id = 'mini'
       project.parent('test:parent', '1.2.3')
       project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>test</groupId>
@@ -39,7 +39,7 @@ XML
     it 'should setup a project with parent' do
       @project.parent("test:parent", '0.1.2').relative_path='../pom.rb'
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>test</groupId>
@@ -63,7 +63,7 @@ more
 TXT
       @project.url "http://example.com"
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -82,7 +82,7 @@ XML
       @project.developers.new("my name1", "my_email1@example.com")
       @project.developers.new("my name2 <my_email2@example.com>")
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -107,7 +107,7 @@ XML
       @project.licenses.new("MIT-LICENSE.txt")
       @project.licenses.new("http://www.gnu.org/licenses/gpl.html")
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -142,7 +142,7 @@ XML
         jboss.snapshots(:enabled => true, :updatePolicy => :daily, :checksumPolicy => :ignore)
       end
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -194,7 +194,7 @@ XML
                                    "gem.path" => "${user.home}/.gem/jruby/1.8"
                                  })
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -222,7 +222,7 @@ XML
       @project.gem "rspec"
       @project.test_jar "org.slf4j:slf4j-noop", "1.6.2"
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -275,7 +275,7 @@ XML
       @project.gem 'sqlite-jdbc', '3.6.10'
       @project.gem('sqlite-jdbc').exclude 'nestedvm'
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -315,7 +315,7 @@ XML
       @project.plugin("clean", "2.4.1")
       @project.plugin(:compile, "2.3.2").with :source => "1.5", :target => "1.5"
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -348,7 +348,7 @@ XML
       @project.plugin(:gem).in_phase("pre-integration-test").execute_goal(:install)
       @project.plugin(:cucumber).in_phase("integration-test").execute_goal(:test).with(:cucumberArgs => "--no-colors")
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
@@ -427,7 +427,7 @@ XML
                                    end
                                  })
       @project.to_xml.should == <<-XML
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>test</groupId>
   <artifactId>project</artifactId>
