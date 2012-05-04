@@ -1,0 +1,19 @@
+PATH
+  remote: .
+  specs:
+    maven-tools (0.1)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    minitest (2.10.0)
+    rake (0.9.2.2)
+
+PLATFORMS
+  java
+  ruby
+
+DEPENDENCIES
+  maven-tools!
+  minitest (= 2.10.0)
+  rake (= 0.9.2.2)

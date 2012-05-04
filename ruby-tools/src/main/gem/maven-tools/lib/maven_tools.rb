@@ -1,0 +1,1 @@
+require 'maven/tools/jarfile'
