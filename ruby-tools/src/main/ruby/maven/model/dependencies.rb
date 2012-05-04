@@ -1,4 +1,5 @@
-require File.join(File.dirname(__FILE__), 'model_utils.rb')
+require 'maven/model/utils'
+require 'maven/tools/coordinate'
 
 module Maven
   module Model
@@ -27,9 +28,16 @@ module Maven
     end
 
     class Coordinate < Tag
+
+      private
+
+      include ::Maven::Tools::Coordinate
+
+      public
+
       tags :group_id, :artifact_id, :version
       def initialize(*args)
-        @group_id, @artifact_id, @version = *coordinate(*args.flatten)
+        @group_id, @artifact_id, @version = gav(*args.flatten)
       end
 
       def hash
@@ -41,55 +49,6 @@ module Maven
       end
       alias :eql? :==
 
-      private
-
-      def coordinate(*args)
-        if args[0] =~ /:/
-          [args[0].sub(/:[^:]+$/, ''), args[0].sub(/.*:/, ''), convert_version(*args[1, 2])]
-        else
-          [args[0], args[1], convert_version(*args[2,3])]
-        end
-      end
-
-      def convert_version(*args)
-        if args.size == 0
-          nil
-        else
-          low, high = convert(args[0])
-          low, high = convert(args[1], low, high) if args[1] =~ /[=~><]/
-          if low == high
-            low
-          else
-            "#{low || '[0.0.0'},#{high || ')'}"
-          end
-        end
-      end
-
-      def convert(arg, low = nil, high = nil)
-        if arg =~ /~>/
-          val = arg.sub(/~>\s*/, '')
-          last = val.sub(/\.[^.]+$/, '.99999')
-          ["[#{val}", "#{last}]"]
-        elsif arg =~ />=/
-          val = arg.sub(/>=\s*/, '')
-          ["[#{val}", (nil || high)]
-        elsif arg =~ /<=/
-          val = arg.sub(/<=\s*/, '')
-          [(nil || low), "#{val}]"]
-        # treat '!' the same way as '>' since maven can not describe such range
-        elsif arg =~ /[!>]/  
-          val = arg.sub(/>\s*/, '')
-          ["(#{val}", (nil || high)]
-        elsif arg =~ /</
-          val = arg.sub(/<\s*/, '')
-          [(nil || low), "#{val})"]
-        elsif arg =~ /\=/
-          val = arg.sub(/=\s*/, '')
-          [val, val]
-        else
-          [arg, arg]
-        end
-      end
     end
 
     class Parent < Coordinate
@@ -100,7 +59,7 @@ module Maven
     class Exclusion < Tag
       tags :group_id, :artifact_id
       def initialize(*args)
-        @group_id, @artifact_id = *coordinate(*args)
+        @group_id, @artifact_id = group_artifact(*args)
       end
 
       def hash
@@ -114,19 +73,7 @@ module Maven
 
       private
       
-      def coordinate(*args)
-        case args.size
-        when 1
-          name = args[0].sub(/^mvn:/, '')
-          if name =~ /:/
-            [name.sub(/:[^:]+$/, ''), name.sub(/.*:/, '')]
-          else
-            ["rubygems", name]
-          end
-        else
-          [args[0], args[1]]
-        end
-      end
+      include ::Maven::Tools::Coordinate
     end
 
     class Dependency < Coordinate

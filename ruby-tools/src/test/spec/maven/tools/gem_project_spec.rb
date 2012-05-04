@@ -1,5 +1,13 @@
-require File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'main', 'ruby', 'maven', 'tools', 'gem_project.rb')
+require 'maven/tools/gem_project'
 
+Maven::Tools::VERSIONS = { 
+      :jetty_plugin => "@jetty.version@",
+      :jruby_rack => "@jruby.rack.version@",
+      :war_plugin => "@war.version@",
+      :jar_plugin => "@jar.version@",
+      :jruby_plugins => "@project.version@",
+      :jruby_version => defined?(JRUBY_VERSION) ? JRUBY_VERSION : "@jruby.version@"
+}
 
 describe Maven::Tools::GemProject do
 
@@ -116,7 +124,7 @@ XML
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>dm-hsqldb-adapter</artifactId>
-            <version>0.10.0</version>
+            <version>[0.10.0,0.10.0.0.0.0.0.1)</version>
             <type>gem</type>
           </dependency>
         </dependencies>
@@ -147,7 +155,7 @@ XML
         <dependency>
           <groupId>rubygems</groupId>
           <artifactId>dm-hsqldb-adapter</artifactId>
-          <version>0.10.0</version>
+          <version>[0.10.0,0.10.0.0.0.0.0.1)</version>
           <type>gem</type>
         </dependency>
       </dependencies>
@@ -261,7 +269,7 @@ XML
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>dm-postgres-adapter</artifactId>
-            <version>[0.0.0,1.0.0]</version>
+            <version>[0,1.0.0]</version>
             <type>gem</type>
           </dependency>
           <dependency>
@@ -310,7 +318,7 @@ XML
         <dependency>
           <groupId>rubygems</groupId>
           <artifactId>dm-postgres-adapter</artifactId>
-          <version>[0.0.0,1.0.0]</version>
+          <version>[0,1.0.0]</version>
           <type>gem</type>
         </dependency>
       </dependencies>

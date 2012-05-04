@@ -8,7 +8,6 @@
   </parent>
   <artifactId>ruby-tools</artifactId>
   <name>Ruby Tools</name>
-  <url>http://github.com/mkristian/jruby-maven-plugins</url>
   <dependencies>
     <dependency>
       <groupId>org.jruby</groupId>
@@ -116,8 +115,8 @@
 	  <plugin>
 	    <groupId>de.saumya.mojo</groupId>
 	    <artifactId>rspec-maven-plugin</artifactId>
-            <!-- hardcode it so integration tests run on new version -->
-	    <version>0.28.3</version>
+            <!-- hardcode it though integration tests run on new version -->
+	    <version>0.28.4</version>
 	    <configuration>
 	      <specSourceDirectory>src/test/spec</specSourceDirectory>
 	    </configuration>
@@ -133,6 +132,43 @@
 		<groupId>rubygems</groupId>
 		<artifactId>rspec</artifactId>
 		<version>2.6.0</version>
+		<type>gem</type>
+	      </dependency>
+	    </dependencies>
+	  </plugin>
+	  <plugin>
+	    <groupId>de.saumya.mojo</groupId>
+	    <artifactId>minitest-maven-plugin</artifactId>
+            <!-- hardcode it though integration tests run on new version -->
+	    <version>0.29.0-SNAPSHOT</version>
+	    <configuration>
+	      <specSourceDirectory>spec</specSourceDirectory>
+	      <launchDirectory>src/main/gem/maven-tools</launchDirectory>
+	    </configuration>
+	    <executions>
+	      <execution>
+		<goals>
+		  <goal>spec</goal>
+		</goals>
+	      </execution>
+	    </executions>
+	    <dependencies>
+	      <dependency>
+		<groupId>rubygems</groupId>
+		<artifactId>bundler</artifactId>
+		<version>1.1.3</version>
+		<type>gem</type>
+	      </dependency>
+	      <dependency>
+		<groupId>rubygems</groupId>
+		<artifactId>rake</artifactId>
+		<version>0.9.2.2</version>
+		<type>gem</type>
+	      </dependency>
+	      <dependency>
+		<groupId>rubygems</groupId>
+		<artifactId>minitest</artifactId>
+		<version>2.10.0</version>
 		<type>gem</type>
 	      </dependency>
 	    </dependencies>

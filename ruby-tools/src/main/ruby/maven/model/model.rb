@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'dependencies.rb')
+require 'maven/model/dependencies'
 
 module Maven
   module Model

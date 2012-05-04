@@ -1,7 +1,7 @@
 module Maven
   module Tools
     module Coordinate
-      
+
       def to_coordinate(line)
         if line =~ /^\s*(jar|pom)\s/
           
@@ -12,9 +12,37 @@ module Maven
         end
       end
 
+      def group_artifact(*args)
+        case args.size
+        when 1
+          name = args[0]
+          if name =~ /:/
+            [name.sub(/:[^:]+$/, ''), name.sub(/.*:/, '')]
+          else
+            ["rubygems", name]
+          end
+        else
+          [args[0], args[1]]
+        end
+      end
+
+      def gav(*args)
+        if args[0] =~ /:/
+          [args[0].sub(/:[^:]+$/, ''), args[0].sub(/.*:/, ''), maven_version(*args[1, 2])]
+        else
+          [args[0], args[1], maven_version(*args[2,3])]
+        end
+      end
+
       def to_version(*args)
+        maven_version(*args) || "[0,)"
+      end
+      
+      private
+
+      def maven_version(*args)
         if args.size == 0 || (args.size == 1 && args[0].nil?)
-          "[0,)"
+          nil
         else
           low, high = convert(args[0])
           low, high = convert(args[1], low, high) if args[1] =~ /[=~><]/
@@ -26,8 +54,6 @@ module Maven
         end
       end
       
-      private
-
       def convert(arg, low = nil, high = nil)
         if arg =~ /~>/
           val = arg.sub(/~>\s*/, '')

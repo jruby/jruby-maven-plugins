@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'main', 'ruby', 'maven', 'model', 'model.rb')
+require 'maven/model/model'
 
 describe Maven::Model do
 

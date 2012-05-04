@@ -1,5 +1,4 @@
-require File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'main', 'ruby', 'maven', 'tools', 'rails_project.rb')
-
+require 'maven/tools/rails_project'
 
 describe Maven::Tools::RailsProject do
 

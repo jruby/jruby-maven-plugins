@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+require 'lib/maven/tools/version.rb'
 Gem::Specification.new do |s|
   s.name = 'maven-tools'
-  s.version = '0.1'
+  s.version = Maven::Tools::VERSION
 
   s.summary = 'helpers for maven related tasks'
 

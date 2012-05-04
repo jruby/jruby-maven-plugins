@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'main', 'ruby', 'maven', 'model', 'dependencies.rb')
+require 'maven/model/dependencies'
 
 class A < Maven::Model::Tag
 
@@ -155,7 +155,7 @@ XML
   end
 
   it 'should allow test_jar dependencies with exclusions' do
-    @a.test_jar 'org.jruby', 'jruby-stdlib', '= 1.6.0' do |j|
+    @a.test_jar 'org.jruby', 'jruby-stdlib', '1.6.0' do |j|
       j.exclusions << ["joda", "joda-time"]
       j.exclusions << "rubyzip2"
     end
@@ -220,7 +220,7 @@ XML
   end
 
   it 'should have only one instance of jar dependency' do
-    r1 = @a.jar 'org.jruby:jruby-core', ['=1.6.0']
+    r1 = @a.jar 'org.jruby:jruby-core', ['1.6.0']
     r2 = @a.jar 'org.jruby:jruby-core'
     @a.jar?('org.jruby', 'jruby-core').should be_true
     @a.dependencies.size.should == 1
