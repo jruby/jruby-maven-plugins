@@ -1,5 +1,8 @@
 require 'maven/tools/gem_project'
 
+# keep plugins version for verions test
+PLUGINS_VERSION = Maven::Tools::VERSIONS[:jruby_plugins]
+
 Maven::Tools::VERSIONS = { 
       :jetty_plugin => "@jetty.version@",
       :jruby_rack => "@jruby.rack.version@",
