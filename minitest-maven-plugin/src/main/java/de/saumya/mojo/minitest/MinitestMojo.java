@@ -50,6 +50,9 @@ public class MinitestMojo extends AbstractTestMojo {
     private TestResultManager resultManager;
     private File outputfile;
     
+    //TODO
+    private boolean useBundler = true;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (this.skip || this.skipTests || this.skipMinitests) {
@@ -93,7 +96,7 @@ public class MinitestMojo extends AbstractTestMojo {
     @Override
     protected TestScriptFactory newTestScriptFactory(Mode mode) {
 	// TODO locate minitest gem
-        return new MinitestMavenTestScriptFactory(use18and19 == null ? false : use18and19);
+        return new MinitestMavenTestScriptFactory(use18and19 == null ? false : use18and19, useBundler);
     }
 
 }
