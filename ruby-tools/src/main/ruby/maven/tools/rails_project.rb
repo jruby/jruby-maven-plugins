@@ -101,6 +101,12 @@ module Maven
                 :webAppConfig => {
                   :overrideDescriptor => overrideDescriptor           
                 },
+                :systemProperties => {
+                  :systemProperty => {
+                    :name => 'jbundle.skip',
+                    :value => 'true'
+                  }
+                },
                 :connectors => <<-XML
 
                 <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
