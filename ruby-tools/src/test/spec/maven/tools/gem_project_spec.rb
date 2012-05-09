@@ -407,6 +407,12 @@ XML
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>
+      <artifactId>bundler</artifactId>
+      <version>[0.0.0,)</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
       <artifactId>ixtlan-core</artifactId>
       <type>gem</type>
     </dependency>
@@ -463,6 +469,12 @@ XML
   </dependencies>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>rubygems</groupId>
+        <artifactId>bundler</artifactId>
+        <version>[0,)</version>
+        <type>gem</type>
+      </dependency>
       <dependency>
         <groupId>rubygems</groupId>
         <artifactId>addressable</artifactId>
@@ -573,6 +585,12 @@ XML
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
         <dependencies>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>bundler</artifactId>
+            <version>[0.0.0,)</version>
+            <type>gem</type>
+          </dependency>
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>ixtlan-core</artifactId>

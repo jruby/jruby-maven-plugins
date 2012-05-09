@@ -254,6 +254,12 @@ describe Maven::Tools::RailsProject do
                   <password>123456</password>
                 </connector>
               </connectors>
+              <systemProperties>
+                <systemProperty>
+                  <name>jbundle.skip</name>
+                  <value>true</value>
+                </systemProperty>
+              </systemProperties>
               <webAppConfig>
                 <overrideDescriptor>${project.build.directory}/jetty/override-${rails.env}-web.xml</overrideDescriptor>
               </webAppConfig>
