@@ -270,8 +270,34 @@ module Maven
             end
           end
         end
+        # TODO
+        # pluginManagement   	
+        options = { 
+          :lifecycleMappingMetadata => { 
+            :pluginExecutions => Maven::Model::NamedArray.new(:pluginExecution) do |e|
+              [
+               [:gem, [:initialize]], 
+               [:rails3, [:initialize, :pom]], 
+               [:bundler, [:install]]
+              ].each do |i|
+                if plugin?(i[0])
+                  pconfig = {
+                    :pluginExecutionFilter => {
+                      :groupId => 'de.saumya.mojo',
+                      :artifactId => "#{i[0]}-maven-plugin",
+                      :versionRange => '[0,)',
+                      :goals => Maven::Model::NamedArray.new(:goal, i[1])
+                    },
+                    :action => { :ignore => nil }
+                  }
+                  e << pconfig
+                end
+              end
+            end
+          }
+        }
       end
-
+      
       def add_test_plugin(name, test_dir, goal = 'test')
         unless plugin?(name)
           has_gem = name.nil? ? true : gem?(name)

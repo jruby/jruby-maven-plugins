@@ -104,7 +104,8 @@ EOF
 
     class NamedArray < Array
       attr_reader :name
-      def initialize(name, &block)
+      def initialize(name, a = [], &block)
+        super a
         @name = name.to_s
         if block
           block.call(self)
