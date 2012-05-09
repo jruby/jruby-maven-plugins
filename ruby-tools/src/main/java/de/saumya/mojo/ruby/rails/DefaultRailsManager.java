@@ -268,10 +268,12 @@ public class DefaultRailsManager implements RailsManager {
         final VelocityContext context = new VelocityContext();
         context.put("basedir", launchDirectory.getAbsolutePath());
 
-        // create web.xml
-        filterContent(launchDirectory,
-                      context,
-                      "src/main/webapp/WEB-INF/web.xml");
+        // create web.xml unless it exists neither in maven location nor in rails location
+        if ( !new File(launchDirectory, "src/main/webapp/WEB-INF/web.xml").exists() ) {
+            filterContent(launchDirectory,
+                          context,
+                          "config/web.xml");
+        }
 
         // create override-xyz-web.xml
         filterContent(launchDirectory,

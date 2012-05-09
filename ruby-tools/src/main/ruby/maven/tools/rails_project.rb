@@ -24,10 +24,6 @@ module Maven
         
         rails_gem = dependencies.detect { |d| d.type.to_sym == :gem && d.artifact_id.to_s =~ /^rail.*s$/ } # allow rails or railties
 
-        #if rails_gem && rails_gem.version =~ /^3.1./
-        #  versions[:jruby_rack] = '1.1.0.dev'
-        #end
-
         if !jar?("org.jruby:jruby-complete") && !jar?("org.jruby:jruby-core") && versions[:jruby_version]
           minor = versions[:jruby_version].sub(/[0-9]*\./, '').sub(/\..*/, '')
 
@@ -58,7 +54,8 @@ module Maven
         end
 
         plugin(:war, versions[:war_plugin]) unless plugin?(:war)
-        plugin(:war).with({
+        plugin(:war) do |w|
+          options = {
             :webResources => Maven::Model::NamedArray.new(:resource) do |l|
               l << { :directory => "public" }
               l << { 
@@ -77,7 +74,10 @@ module Maven
                 :includes => ['specifications/**']
               }
             end
-          })
+          }
+          options[:webXml] = '${basedir}/config/web.xml' if File.exists?('config/web.xml')
+          w.with options
+        end
 
         profile(:assets).activation.by_default if profiles.key?(:assets)
         profile(:development).activation.by_default
