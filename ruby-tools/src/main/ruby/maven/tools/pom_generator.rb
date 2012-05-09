@@ -4,10 +4,10 @@ module Maven
     class PomGenerator
       def read_rails(filename, plugin_version = nil, jruby_version = nil)
         proj = Maven::Tools::RailsProject.new
-        proj.load(filename.to_s)
-        proj.load(File.join(File.dirname(filename.to_s), 'Mavenfile'))
+        proj.load_gemfile(filename.to_s)
+        proj.load_jarfile(File.join(File.dirname(filename.to_s), 'Jarfile'))
+        proj.load_gemfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
         proj.add_defaults(versions(plugin_version, jruby_version))
-        proj.dump_loaded_file_list
         proj.to_xml
       end
 
@@ -20,10 +20,10 @@ module Maven
           else
             Maven::Tools::GemProject.new
           end
-        proj.load(filename.to_s)
-        proj.load(File.join(File.dirname(filename.to_s), 'Mavenfile'))
+        proj.load_gemfile(filename.to_s)
+        proj.load_jarfile(File.join(File.dirname(filename.to_s), 'Jarfile'))
+        proj.load_gemfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
         proj.add_defaults(versions(plugin_version, nil))
-        proj.dump_loaded_file_list
         proj.to_xml
       end
 
@@ -31,9 +31,9 @@ module Maven
       def read_gemspec(filename, plugin_version = nil, dummy = nil)
         proj = Maven::Tools::GemProject.new
         proj.load_gemspec(filename.to_s)
-        proj.load(File.join(File.dirname(filename.to_s), 'Mavenfile'))
+        proj.load_jarfile(File.join(File.dirname(filename.to_s), 'Jarfile'))
+        proj.load_gemfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
         proj.add_defaults(versions(plugin_version, nil))
-        proj.dump_loaded_file_list
         proj.to_xml
       end
 

@@ -24,9 +24,9 @@ module Maven
         
         rails_gem = dependencies.detect { |d| d.type.to_sym == :gem && d.artifact_id.to_s =~ /^rail.*s$/ } # allow rails or railties
 
-        if rails_gem && rails_gem.version =~ /^3.1./
-          versions[:jruby_rack] = '1.1.0.dev'
-        end
+        #if rails_gem && rails_gem.version =~ /^3.1./
+        #  versions[:jruby_rack] = '1.1.0.dev'
+        #end
 
         if !jar?("org.jruby:jruby-complete") && !jar?("org.jruby:jruby-core") && versions[:jruby_version]
           minor = versions[:jruby_version].sub(/[0-9]*\./, '').sub(/\..*/, '')

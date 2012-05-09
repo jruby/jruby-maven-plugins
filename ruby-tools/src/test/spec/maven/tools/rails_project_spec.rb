@@ -7,7 +7,7 @@ describe Maven::Tools::RailsProject do
   end
   
   it 'should load Gemfile from a simple rails application with applied defaults' do
-    @project.load(File.join(File.dirname(__FILE__), 'Gemfile.simple'))
+    @project.load_gemfile(File.join(File.dirname(__FILE__), 'Gemfile.simple'))
     @project.name "test"
     @project.add_defaults
     @project.to_xml.should == <<-XML
@@ -325,7 +325,7 @@ XML
   end
 
   it 'should load Gemfile from a rails application"' do
-    @project.load(File.join(File.dirname(__FILE__), 'Gemfile.rails'))
+    @project.load_gemfile(File.join(File.dirname(__FILE__), 'Gemfile.rails'))
     @project.to_xml.should == <<-XML
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>

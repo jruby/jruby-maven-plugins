@@ -30,10 +30,61 @@ describe Maven::Tools::GemProject do
 XML
   end
 
+  describe "Jarfile" do
+
+    it 'should load Jarfile without lockfile' do
+      @project.load_jarfile(File.join(File.dirname(__FILE__), 'Jarfile.without'))
+      @project.to_xml.should == <<-XML
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>rubygems</groupId>
+  <artifactId>test</artifactId>
+  <version>0.0.0</version>
+  <packaging>gem</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>[1.5.6,)</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-default</artifactId>
+      <version>[0,)</version>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+</project>
+XML
+    end
+
+    it 'should load Jarfile with lockfile' do
+      @project.load_jarfile(File.join(File.dirname(__FILE__), 'Jarfile.with'))
+      @project.to_xml.should == <<-XML
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>rubygems</groupId>
+  <artifactId>test</artifactId>
+  <version>0.0.0</version>
+  <packaging>gem</packaging>
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.5.6</version>
+      <type>jar</type>
+    </dependency>
+  </dependencies>
+</project>
+XML
+    end
+  end
+
   describe "Gemfile" do
 
     it 'should load Gemfile with minimal gemspec' do
-      @project.load(File.join(File.dirname(__FILE__), 'Gemfile.minimal'))
+      @project.load_gemfile(File.join(File.dirname(__FILE__), 'Gemfile.minimal'))
       @project.to_xml.should == <<-XML
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -47,7 +98,7 @@ XML
     end
 
     it 'should load Gemfile with "source", "path" and "platform"' do
-      @project.load(File.join(File.dirname(__FILE__), 'Gemfile.ignored'))
+      @project.load_gemfile(File.join(File.dirname(__FILE__), 'Gemfile.ignored'))
       @project.to_xml.should == <<-XML
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -84,7 +135,7 @@ XML
     end
 
     it 'should load Gemfile with simple gems"' do
-      @project.load(File.join(File.dirname(__FILE__), 'Gemfile.gems'))
+      @project.load_gemfile(File.join(File.dirname(__FILE__), 'Gemfile.gems'))
       @project.to_xml.should == <<-XML
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -180,7 +231,7 @@ XML
     end
 
     it 'should load Gemfile with grouped gems and added defaults"' do
-      @project.load(File.join(File.dirname(__FILE__), 'Gemfile.groups'))
+      @project.load_gemfile(File.join(File.dirname(__FILE__), 'Gemfile.groups'))
       @project.name "test"
       @project.add_defaults
       @project.to_xml.should == <<-XML
@@ -343,7 +394,7 @@ XML
     end
 
     it 'should load Gemfile with grouped gems and lock file"' do
-      @project.load(File.join(File.dirname(__FILE__), 'Gemfile.lockfile'))
+      @project.load_gemfile(File.join(File.dirname(__FILE__), 'Gemfile.lockfile'))
       @project.name "test"
       @project.to_xml.should == <<-XML
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">

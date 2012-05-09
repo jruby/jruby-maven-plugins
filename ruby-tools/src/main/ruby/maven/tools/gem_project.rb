@@ -1,9 +1,25 @@
-require File.join(File.dirname(File.dirname(__FILE__)), 'model', 'model.rb')
+require 'maven/model/model'
 require File.join(File.dirname(__FILE__), 'gemfile_lock.rb')
 require File.join(File.dirname(__FILE__), 'versions.rb')
+require 'maven/tools/jarfile'
 
 module Maven
   module Tools
+
+    class ArtifactPassthrough
+
+      def initialize(&block)
+        @block = block
+      end
+
+      def add_artifact(a)
+        @block.call(a)
+      end
+      
+      def add_repository(name, url)
+      end
+    end
+    
     class GemProject < Maven::Model::Project
       tags :dummy
 
@@ -20,14 +36,14 @@ module Maven
         loaded_files.last
       end
 
-      def dump_loaded_file_list
-        if loaded_files.size > 0
-          basedir = File.dirname(loaded_files[0])
-          File.open(loaded_files[0] + ".files", 'w') do |f|
-            loaded_files.each { |i| f.puts i.sub(/^#{basedir}./, '') }
-          end
-        end
-      end
+      # def dump_loaded_file_list
+      #   if loaded_files.size > 0
+      #     basedir = File.dirname(loaded_files[0])
+      #     File.open(loaded_files[0] + ".files", 'w') do |f|
+      #       loaded_files.each { |i| f.puts i.sub(/^#{basedir}./, '') }
+      #     end
+      #   end
+      # end
 
       def add_param(config, name, list, default = [])
         if list.is_a? Array
@@ -134,7 +150,7 @@ module Maven
         end
       end
 
-      def load(file)
+      def load_gemfile(file)
         file = file.path if file.is_a?(File)
         if File.exists? file
           content = File.read(file)
@@ -154,6 +170,18 @@ module Maven
         else
           self
         end
+      end
+
+      def load_jarfile(file)
+        jars = Jarfile.new(file)
+        container = ArtifactPassthrough.new do |a|
+          artifactId, groupId, extension, version = a.split(/:/)
+          send(extension.to_sym, "#{artifactId}:#{groupId}", version)
+        end
+        if !jars.exists_lock? || jars.mtime > jars.mtime_lock
+          jars.populate_unlocked container
+        end
+        jars.populate_locked container
       end
 
       def dir_name
