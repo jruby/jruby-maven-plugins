@@ -38,7 +38,7 @@
 	       <includes>
 		 de/saumya/mojo/jruby/AbstractJRubyMojo.java,
 		 de/saumya/mojo/gem/AbstractGemMojo.java,
-		 de/saumya/mojo/runit/AbstractTestMojo.java
+		 de/saumya/mojo/tests/AbstractTestMojo.java
 	       </includes>
 	       <classifier>sources</classifier>
 	       <outputDirectory>${project.build.directory}/sources</outputDirectory>
@@ -52,7 +52,7 @@
           <excludes>
 	    <exclude>de/saumya/mojo/jruby/**</exclude>
 	    <exclude>de/saumya/mojo/gem/**</exclude>
-	    <exclude>de/saumya/mojo/runit/**</exclude>
+	    <exclude>de/saumya/mojo/tests/**</exclude>
 	  </excludes>
         </configuration>
       </plugin>
