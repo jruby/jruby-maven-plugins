@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    maven-tools (0.1)
+    maven-tools (0.29.0)
 
 GEM
   remote: http://rubygems.org/

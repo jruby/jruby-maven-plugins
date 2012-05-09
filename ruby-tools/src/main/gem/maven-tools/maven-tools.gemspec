@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-require 'lib/maven/tools/version.rb'
+require File.expand_path('lib/maven/tools/version.rb')
 Gem::Specification.new do |s|
   s.name = 'maven-tools'
-  s.version = Maven::Tools::VERSION
+  s.version = Maven::Tools::VERSION.dup
 
   s.summary = 'helpers for maven related tasks'
 

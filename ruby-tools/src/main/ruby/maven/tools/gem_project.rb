@@ -161,6 +161,9 @@ module Maven
               @lock = nil
             else
               loaded_files << file + ".lock"
+              # just make sure bundler is there and has a version
+              gem 'bundler'
+              dependency_management.gem 'bundler', '[0,)'
               @lock.hull.each do |dep|
                 dependency_management.gem dep
               end
@@ -171,7 +174,7 @@ module Maven
           self
         end
       end
-
+      
       def load_jarfile(file)
         jars = Jarfile.new(file)
         container = ArtifactPassthrough.new do |a|
@@ -385,7 +388,6 @@ module Maven
           
           # first collect the missing deps it any
           bundler_deps = []
-          #plugin(:bundler) do |bundler|
           # use a dep with version so just create it from the args
           bundler_deps << args
             
