@@ -56,14 +56,6 @@
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId> 
-	<version>2.3</version>
-      </plugin>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.1</version>
-      </plugin>
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <version>1.4</version>
@@ -110,8 +102,8 @@
 		  <goal>run</goal>
 		</goals>
 		<configuration>
-		  <settingsFile>src/it/settings.xml</settingsFile>
-		  <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+		  <!--settingsFile>src/it/settings.xml</settingsFile>
+		  <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath-->
 		  <pomIncludes>
 		    <pomInclude>*/pom.xml</pomInclude>
 		  </pomIncludes>
