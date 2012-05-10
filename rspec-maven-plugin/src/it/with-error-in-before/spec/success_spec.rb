@@ -1,4 +1,4 @@
-describe "error in before spec" do
+describe "error in before clause" do
 
   before :all do
     nil.unknown

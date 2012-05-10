@@ -1,0 +1,9 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+if ( !log.contains( "Passing...1" ) )
+{
+    throw new RuntimeException( "log file does not contain 'Passing...1'" );
+}

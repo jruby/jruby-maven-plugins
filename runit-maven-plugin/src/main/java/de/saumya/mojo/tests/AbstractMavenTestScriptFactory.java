@@ -68,6 +68,7 @@ public abstract class AbstractMavenTestScriptFactory extends AbstractTestScriptF
     public String getCoreScript() {
         StringBuilder builder = new StringBuilder();
 
+        getPrologScript(builder);
         getConstantsConfigScript(builder);
         getRunnerScript(builder);
 
@@ -151,7 +152,7 @@ public abstract class AbstractMavenTestScriptFactory extends AbstractTestScriptF
      return sanitized;
     }
 
-    private String getPluginClasspathScript() {
+    protected String getPluginClasspathScript() {
 
         String pathToClass = getClass().getName().replaceAll("\\.", "/") + ".class";
         URL here = getClass().getClassLoader().getResource(pathToClass);
