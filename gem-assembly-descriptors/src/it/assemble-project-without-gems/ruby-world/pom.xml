@@ -5,6 +5,14 @@
   <artifactId>ruby-world</artifactId>
   <version>0.0.0</version>
   <packaging>gem</packaging>
+
+  <repositories>
+    <repository>
+      <id>rubygems-releases</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </repository>
+  </repositories>
+
   <build>
     <plugins>
       <plugin>
