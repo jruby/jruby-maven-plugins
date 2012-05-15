@@ -67,6 +67,14 @@ public class InstallMojo extends AbstractGemMojo {
      * @parameter expression="${bundler.local}" default-value="true"
      */
     protected boolean local;
+
+    /** 
+     * Determine if --quiet should used.
+     * 
+     * @parameter expression="${bundler.quiet}" default-value="true"
+     */
+    protected boolean quiet;
+
     
     private String sha1(String text) {
         MessageDigest md = newSha1Digest();
@@ -142,7 +150,9 @@ public class InstallMojo extends AbstractGemMojo {
 
         }
         else {
-            script.addArg("--quiet");
+            if ( this.quiet ) {
+                script.addArg("--quiet");
+            }
             if ( this.local ) {
                 script.addArg("--local");
             }
