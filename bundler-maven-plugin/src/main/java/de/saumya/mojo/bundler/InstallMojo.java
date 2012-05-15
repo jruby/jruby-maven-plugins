@@ -61,6 +61,13 @@ public class InstallMojo extends AbstractGemMojo {
      */
     protected List<String>          classpathElements;
     
+    /** 
+     * Determine if --local should used.
+     * 
+     * @parameter expression="${bundler.local}" default-value="true"
+     */
+    protected boolean local;
+    
     private String sha1(String text) {
         MessageDigest md = newSha1Digest();
         try {
@@ -136,7 +143,9 @@ public class InstallMojo extends AbstractGemMojo {
         }
         else {
             script.addArg("--quiet");
-            script.addArg("--local");
+            if ( this.local ) {
+                script.addArg("--local");
+            }
         }
         if (this.bundlerArgs != null) {
             script.addArgs(this.bundlerArgs);
