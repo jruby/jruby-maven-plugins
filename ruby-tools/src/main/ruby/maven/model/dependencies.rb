@@ -1,5 +1,7 @@
-require 'maven/model/utils'
-require 'maven/tools/coordinate'
+# TODO make nice require after ruby-maven uses the same ruby files
+require File.join(File.dirname(__FILE__), 'utils.rb')
+require File.join(File.dirname(File.dirname(__FILE__)), 'tools', 'coordinate.rb')
+#require 'maven/tools/coordinate'
 
 module Maven
   module Model
@@ -38,6 +40,10 @@ module Maven
       tags :group_id, :artifact_id, :version
       def initialize(*args)
         @group_id, @artifact_id, @version = gav(*args.flatten)
+      end
+
+      def version?
+        !(@version.nil? || @version == '[0,)')
       end
 
       def hash
@@ -186,7 +192,7 @@ module Maven
           if dep
             return dep
           end
-          args[1] = ">= 0.0.0"
+          args[1] = ">= 0"
         end
         add_dependency(Dependency.new_gem(*args), &block)
       end

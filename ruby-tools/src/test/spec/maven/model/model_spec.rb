@@ -231,7 +231,7 @@ XML
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>rspec</artifactId>
-      <version>[0.0.0,)</version>
+      <version>[0,)</version>
       <type>gem</type>
     </dependency>
     <dependency>

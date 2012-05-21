@@ -34,22 +34,6 @@ describe Maven::Tools::RailsProject do
       </snapshots>
     </repository>
   </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>rubygems-releases</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>rubygems-prereleases</id>
-      <url>http://rubygems-proxy.torquebox.org/prereleases</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>
@@ -60,25 +44,24 @@ describe Maven::Tools::RailsProject do
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>activerecord-jdbc-adapter</artifactId>
-      <version>[0.0.0,)</version>
+      <version>[0,)</version>
       <type>gem</type>
     </dependency>
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>jdbc-sqlite3</artifactId>
-      <version>[0.0.0,)</version>
+      <version>[0,)</version>
       <type>gem</type>
     </dependency>
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>bundler</artifactId>
-      <version>[0.0.0,)</version>
       <type>gem</type>
     </dependency>
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>#{defined?(JRUBY_VERSION) ? JRUBY_VERSION : '1.6.5'}</version>
+      <version>${jruby.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
@@ -88,12 +71,23 @@ describe Maven::Tools::RailsProject do
       <type>jar</type>
     </dependency>
   </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>rubygems</groupId>
+        <artifactId>bundler</artifactId>
+        <version>@bundler.version@</version>
+        <type>gem</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <properties>
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.includeRubygemsInTestResources>false</gem.includeRubygemsInTestResources>
     <gem.path>${project.build.directory}/rubygems</gem.path>
     <jetty.version>@jetty.version@</jetty.version>
     <jruby.plugins.version>@project.version@</jruby.plugins.version>
+    <jruby.version>#{defined?(JRUBY_VERSION) ? JRUBY_VERSION : '1.6.5'}</jruby.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <rails.env>development</rails.env>
   </properties>
@@ -103,39 +97,6 @@ describe Maven::Tools::RailsProject do
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
         <version>${jruby.plugins.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>install</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>rails</artifactId>
-            <version>3.0.1</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>activerecord-jdbc-adapter</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>jdbc-sqlite3</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>bundler</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
@@ -178,19 +139,93 @@ describe Maven::Tools::RailsProject do
               </includes>
               <targetPath>WEB-INF/gems</targetPath>
             </resource>
-            <resource>
-              <directory>${gem.path}-bundler-maven-plugin</directory>
-              <includes>
-                <include>specifications/**</include>
-              </includes>
-              <targetPath>WEB-INF/gems</targetPath>
-            </resource>
           </webResources>
         </configuration>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                  <pluginExecutionFilter>
+                    <artifactId>bundler-maven-plugin</artifactId>
+                    <goals>
+                      <goal>install</goal>
+                    </goals>
+                    <groupId>de.saumya.mojo</groupId>
+                    <versionRange>[0,)</versionRange>
+                  </pluginExecutionFilter>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
   <profiles>
+    <profile>
+      <id>assets</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+    <profile>
+      <id>executable</id>
+      <dependencies>
+        <dependency>
+          <groupId>de.saumya.mojo</groupId>
+          <artifactId>gem-assembly-descriptors</artifactId>
+          <version>${jruby.plugins.version}</version>
+          <type>jar</type>
+          <scope>runtime</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.2-beta-5</version>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>de.saumya.mojo.assembly.Main</mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies-and-gems</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+            <executions>
+              <execution>
+                <id>in_phase_package</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>assembly</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>de.saumya.mojo</groupId>
+                <artifactId>gem-assembly-descriptors</artifactId>
+                <version>${jruby.plugins.version}</version>
+                <type>jar</type>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>development</id>
       <activation>
@@ -269,7 +304,7 @@ describe Maven::Tools::RailsProject do
       </build>
     </profile>
     <profile>
-      <id>executable</id>
+      <id>warshell</id>
       <pluginRepositories>
         <pluginRepository>
           <id>kos</id>
@@ -349,7 +384,7 @@ XML
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>activerecord-jdbc-adapter</artifactId>
-      <version>[0.0.0,)</version>
+      <version>[0,)</version>
       <type>gem</type>
     </dependency>
   </dependencies>
@@ -358,38 +393,6 @@ XML
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>rails</artifactId>
-            <version>3.0.1</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>activerecord-jdbc-adapter</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>jdbc-sqlite3</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>rspec</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>jdbc-mysql</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>
@@ -400,13 +403,13 @@ XML
         <dependency>
           <groupId>rubygems</groupId>
           <artifactId>jdbc-sqlite3</artifactId>
-          <version>[0.0.0,)</version>
+          <version>[0,)</version>
           <type>gem</type>
         </dependency>
         <dependency>
           <groupId>rubygems</groupId>
           <artifactId>rspec</artifactId>
-          <version>[0.0.0,)</version>
+          <version>[0,)</version>
           <type>gem</type>
         </dependency>
       </dependencies>
@@ -417,7 +420,7 @@ XML
         <dependency>
           <groupId>rubygems</groupId>
           <artifactId>rspec</artifactId>
-          <version>[0.0.0,)</version>
+          <version>[0,)</version>
           <type>gem</type>
         </dependency>
       </dependencies>
@@ -428,7 +431,7 @@ XML
         <dependency>
           <groupId>rubygems</groupId>
           <artifactId>jdbc-mysql</artifactId>
-          <version>[0.0.0,)</version>
+          <version>[0,)</version>
           <type>gem</type>
         </dependency>
       </dependencies>

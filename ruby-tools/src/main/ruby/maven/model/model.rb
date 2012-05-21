@@ -1,10 +1,44 @@
-require 'maven/model/dependencies'
+# TODO make nice require after ruby-maven uses the same ruby files
+require File.join(File.dirname(__FILE__), 'dependencies.rb')
+#require 'maven/model/dependencies'
 
 module Maven
   module Model
 
     class Build < Tag
-      tags :source_directory, :script_source_directory, :test_source_directory, :output_directory, :test_output_directory, :default_goal, :directory, :final_name, :plugins
+      tags :source_directory, :script_source_directory, :test_source_directory, :output_directory, :test_output_directory, :default_goal, :directory, :final_name, :plugins, :plugin_management
+
+      def plugins(&block)
+        @plugins ||= PluginHash.new
+        if block
+          block.call(@plugins)
+        end
+        @plugins
+      end
+
+      def plugin?(name)
+        plugins.key?(name)
+      end
+
+      def plugin_management(&block)
+        @plugin_management ||= PluginManagement.new
+        if block
+          block.call(@plugin_management)
+        end
+        @plugin_management
+      end
+
+      def to_xml(buf = "", indent = "")
+        if @final_name.nil? && (@plugins.nil? || @plugins.size == 0) && @plugin_management.nil? #TODO check the rest
+          ""
+        else
+          super
+        end
+      end
+    end
+
+    class PluginManagement < Tag
+      tags :plugins
 
       def plugins(&block)
         @plugins ||= PluginHash.new
@@ -19,11 +53,15 @@ module Maven
       end
 
       def to_xml(buf = "", indent = "")
-        if @final_name.nil? && (@plugins.nil? || @plugins.size == 0)
+        if @plugins.nil? || @plugins.size == 0
           ""
         else
           super
         end
+      end
+
+      def _name
+        "pluginManagement"
       end
     end
 

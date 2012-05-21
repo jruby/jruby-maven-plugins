@@ -6,7 +6,7 @@ module Maven
         proj = Maven::Tools::RailsProject.new
         proj.load_gemfile(filename.to_s)
         proj.load_jarfile(File.join(File.dirname(filename.to_s), 'Jarfile'))
-        proj.load_gemfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
+        proj.load_mavenfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
         proj.add_defaults(versions(plugin_version, jruby_version))
         proj.to_xml
       end
@@ -22,7 +22,7 @@ module Maven
           end
         proj.load_gemfile(filename.to_s)
         proj.load_jarfile(File.join(File.dirname(filename.to_s), 'Jarfile'))
-        proj.load_gemfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
+        proj.load_mavenfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
         proj.add_defaults(versions(plugin_version, nil))
         proj.to_xml
       end
@@ -32,7 +32,7 @@ module Maven
         proj = Maven::Tools::GemProject.new
         proj.load_gemspec(filename.to_s)
         proj.load_jarfile(File.join(File.dirname(filename.to_s), 'Jarfile'))
-        proj.load_gemfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
+        proj.load_mavenfile(File.join(File.dirname(filename.to_s), 'Mavenfile'))
         proj.add_defaults(versions(plugin_version, nil))
         proj.to_xml
       end

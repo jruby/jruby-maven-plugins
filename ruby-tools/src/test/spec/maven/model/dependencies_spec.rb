@@ -31,7 +31,7 @@ XML
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>rubyforge</artifactId>
-      <version>[0.0.0,)</version>
+      <version>[0,)</version>
       <type>gem</type>
     </dependency>
   </dependencies>

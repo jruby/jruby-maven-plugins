@@ -6,6 +6,7 @@
       :war_plugin => "@war.version@",
       :jar_plugin => "@jar.version@",
       :jruby_plugins => "@project.version@",
+      :bundler_version => "@bundler.version@",
       :jruby_version => defined?(JRUBY_VERSION) ? JRUBY_VERSION : "@jruby.version@"
     }.freeze
   end

@@ -1,4 +1,4 @@
-require 'maven/tools/coordinate'
+require File.join(File.dirname(__FILE__), 'coordinate.rb')
 module Maven
   module Tools
 
@@ -49,15 +49,17 @@ module Maven
       end
 
       def populate_unlocked(container)
-        File.read(@file).each_line do |line| 
-          if coord = to_coordinate(line)
-            unless locked?(coord)
-              container.add_artifact(coord)
+        if File.exists?(@file)
+          File.read(@file).each_line do |line| 
+            if coord = to_coordinate(line)
+              unless locked?(coord)
+                container.add_artifact(coord)
+              end
+            elsif line =~ /^\s*(repository|source)\s/
+              name, url = line.sub(/.*(repository|source)\s+/, '').gsub(/['":]/,'').split(/,/)
+              url = name unless url
+              container.add_repository(name, url)
             end
-          elsif line =~ /^\s*(repository|source)\s/
-            name, url = line.sub(/.*(repository|source)\s+/, '').gsub(/['":]/,'').split(/,/)
-            url = name unless url
-            container.add_repository(name, url)
           end
         end
       end
@@ -67,9 +69,13 @@ module Maven
       end
 
       def generate_lockfile(dependency_coordinates)
-        File.open(@lockfile, 'w') do |f|
-          dependency_coordinates.each do |d|
-            f.puts d.to_s
+        if dependency_coordinates.empty?
+          FileUtils.rm_f(@lockfile) if exists_lock?
+        else
+          File.open(@lockfile, 'w') do |f|
+            dependency_coordinates.each do |d|
+              f.puts d.to_s
+            end
           end
         end
       end

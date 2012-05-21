@@ -1,7 +1,8 @@
-require 'maven/model/model'
+# TODO make nice require after ruby-maven uses the same ruby files
+require File.join(File.dirname(File.dirname(__FILE__)), 'model', 'model.rb')
 require File.join(File.dirname(__FILE__), 'gemfile_lock.rb')
 require File.join(File.dirname(__FILE__), 'versions.rb')
-require 'maven/tools/jarfile'
+require File.join(File.dirname(__FILE__), 'jarfile.rb')
 
 module Maven
   module Tools
@@ -28,23 +29,6 @@ module Maven
         packaging "gem"
       end
 
-      def loaded_files
-        @files ||= []
-      end
-
-      def current_file
-        loaded_files.last
-      end
-
-      # def dump_loaded_file_list
-      #   if loaded_files.size > 0
-      #     basedir = File.dirname(loaded_files[0])
-      #     File.open(loaded_files[0] + ".files", 'w') do |f|
-      #       loaded_files.each { |i| f.puts i.sub(/^#{basedir}./, '') }
-      #     end
-      #   end
-      # end
-
       def add_param(config, name, list, default = [])
         if list.is_a? Array
           config[name] = list.join(",").to_s unless (list || []) == default
@@ -61,10 +45,10 @@ module Maven
           spec = specfile
         else
           spec = ::Gem::Specification.load(specfile)
-          loaded_files << File.expand_path(specfile)
           @gemspec = specfile
         end
         raise "file not found '#{specfile}'" unless spec
+        @current_file = specfile
         artifact_id spec.name
         version spec.version
         name spec.summary || "#{self.artifact_id} - gem"
@@ -81,7 +65,10 @@ module Maven
         end
 
         config = {}
-        add_param(config, "gemspec", @gemspec) if loaded_files.size == 1
+         if @gemspec
+           relative = File.expand_path(@gemspec).sub(/#{File.expand_path('.')}/, '').sub(/^\//, '')
+           add_param(config, "gemspec", relative)
+         end
         add_param(config, "autorequire", spec.autorequire)
         add_param(config, "defaultExecutable", spec.default_executable)
         add_param(config, "testFiles", spec.test_files)
@@ -150,26 +137,39 @@ module Maven
         end
       end
 
+      def load_mavenfile(file)
+        file = file.path if file.is_a?(File)
+        if File.exists? file
+          @current_file = file
+          content = File.read(file)
+          eval content
+        else
+          self
+        end
+      end
+
       def load_gemfile(file)
         file = file.path if file.is_a?(File)
         if File.exists? file
+          @current_file = file
           content = File.read(file)
-          loaded_files << file
+          #loaded_files << file
           if @lock.nil?
             @lock = GemfileLock.new(file + ".lock")
             if @lock.size == 0
               @lock = nil
             else
-              loaded_files << file + ".lock"
+             # loaded_files << file + ".lock"
               # just make sure bundler is there and has a version
-              gem 'bundler'
-              dependency_management.gem 'bundler', '[0,)'
               @lock.hull.each do |dep|
                 dependency_management.gem dep
               end
             end
           end
           eval content
+
+          # we have a Gemfile so we add the bundler plugin
+          plugin(:bundler)
         else
           self
         end
@@ -177,14 +177,16 @@ module Maven
       
       def load_jarfile(file)
         jars = Jarfile.new(file)
-        container = ArtifactPassthrough.new do |a|
-          artifactId, groupId, extension, version = a.split(/:/)
-          send(extension.to_sym, "#{artifactId}:#{groupId}", version)
+        if jars.exists?
+          container = ArtifactPassthrough.new do |a|
+            artifactId, groupId, extension, version = a.split(/:/)
+            send(extension.to_sym, "#{artifactId}:#{groupId}", version)
+          end
+          if !jars.exists_lock? || jars.mtime > jars.mtime_lock
+            jars.populate_unlocked container
+          end
+          jars.populate_locked container
         end
-        if !jars.exists_lock? || jars.mtime > jars.mtime_lock
-          jars.populate_unlocked container
-        end
-        jars.populate_locked container
       end
 
       def dir_name
@@ -208,7 +210,7 @@ module Maven
             r.releases(:enabled => false)
             r.snapshots(:enabled => true)
           end
-        end
+        end 
 
         # TODO go through all plugins to find out any SNAPSHOT version !!
         if versions[:jruby_plugins] =~ /-SNAPSHOT$/ || properties['jruby.plugins.version'] =~ /-SNAPSHOT$/
@@ -222,7 +224,12 @@ module Maven
         if packaging =~ /gem/ || plugin?(:gem)
           gem = plugin(:gem)
           gem.version = "${jruby.plugins.version}" unless gem.version
-          gem.extensions = true if packaging =~ /gem/
+          if packaging =~ /gem/
+            gem.extensions = true
+            if @gemspec && !(self.gem?('jruby-openssl') || self.gem?('jruby-openssl-maven'))
+              gem.gem('jruby-openssl-maven')
+            end
+          end
           if File.exists?('lib') && File.exists?(File.join('src', 'main', 'java'))
             plugin(:jar) do |j|
               j.version = versions[:jar_plugin] unless j.version
@@ -231,13 +238,48 @@ module Maven
           end
         end
         
+        if @bundler_deps && @bundler_deps.size > 0
+          
+          bdeps = []
+          # first get the locked gems
+          @bundler_deps.each do |args, dep|
+            if @lock
+              # add its dependencies as well to have the version
+              # determine by the dependencyManagement
+              @lock.dependency_hull(dep.artifact_id).map.each do |d|
+                bdeps << d unless has_gem? d[0]
+              end
+            end
+          end
+          # any unlocked gems now
+          @bundler_deps.each do |args, dep|
+            bdeps << args unless has_gem? args[0]
+          end
+          
+          # now add the deps to bundler plugin
+          # avoid to setup bundler if it has no deps
+          if bdeps.size > 0 
+            plugin(:bundler) do |bundler|
+              # install will be triggered on initialize phase
+              bundler.executions.goals << "install"
+              bdeps.each do |d|
+                bundler.gem(d)
+              end
+            end
+          end
+        end
+
         if plugin?(:bundler)
           bundler = plugin(:bundler)
           bundler.version = "${jruby.plugins.version}" unless bundler.version
-          bundler.executions.goals << "install"
           unless gem?(:bundler)
             gem("bundler")
           end
+        end
+
+        if gem?('bundler') && !gem('bundler').version?
+          gem('bundler').version = nil
+          dependency_management.gem 'bundler', versions[:bundler_version]
         end
 
         if versions[:jruby_plugins]
@@ -271,33 +313,55 @@ module Maven
           end
         end
         # TODO
-        # pluginManagement   	
-        options = { 
-          :lifecycleMappingMetadata => { 
-            :pluginExecutions => Maven::Model::NamedArray.new(:pluginExecution) do |e|
-              [
-               [:gem, [:initialize]], 
-               [:rails3, [:initialize, :pom]], 
-               [:bundler, [:install]]
-              ].each do |i|
-                if plugin?(i[0])
-                  pconfig = {
-                    :pluginExecutionFilter => {
-                      :groupId => 'de.saumya.mojo',
-                      :artifactId => "#{i[0]}-maven-plugin",
-                      :versionRange => '[0,)',
-                      :goals => Maven::Model::NamedArray.new(:goal, i[1])
-                    },
-                    :action => { :ignore => nil }
-                  }
-                  e << pconfig
+        configs = {
+          :gem => [:initialize], 
+          :rails3 => [:initialize, :pom], 
+          :bundler => [:install]
+        }.collect do |name, goals|
+          if plugin?(name)
+            {
+              :pluginExecutionFilter => {
+                :groupId => 'de.saumya.mojo',
+                :artifactId => "#{name}-maven-plugin",
+                :versionRange => '[0,)',
+                :goals => goals
+              },
+              :action => { :ignore => nil }
+            }
+          end
+        end
+        configs.delete_if { |c| c.nil? }
+        if configs.size > 0
+          build.plugin_management do |pm|
+            options = { 
+              :lifecycleMappingMetadata => { 
+                :pluginExecutions => Maven::Model::NamedArray.new(:pluginExecution) do |e|
+                  configs.each { |c| e << c }
                 end
-              end
-            end
-          }
-        }
+              }
+            }
+            pm.plugins.get('org.eclipse.m2e:lifecycle-mapping', '1.0.0').configuration(options)
+          end
+        end
+
+        profile('executable') do |exe|
+          exe.jar('de.saumya.mojo:gem-assembly-descriptors', '${jruby.plugins.version}').scope :runtime
+          exe.plugin(:assembly, '2.2-beta-5') do |a|
+            options = {
+              :descriptorRefs => ['jar-with-dependencies-and-gems'],
+              :archive => {:manifest => { :mainClass => 'de.saumya.mojo.assembly.Main' } }
+            }
+            a.configuration(options)
+            a.in_phase(:package).execute_goal(:assembly)
+            a.jar 'de.saumya.mojo:gem-assembly-descriptors', '${jruby.plugins.version}'
+          end
+        end
       end
       
+      def has_gem?(gem)
+        self.gem?(gem)
+      end
+
       def add_test_plugin(name, test_dir, goal = 'test')
         unless plugin?(name)
           has_gem = name.nil? ? true : gem?(name)
@@ -324,9 +388,9 @@ module Maven
 
       def gemspec(name = nil)
         if name
-          load_gemspec(File.join(File.dirname(current_file), name))
+          load_gemspec(File.join(File.dirname(@current_file), name))
         else
-          Dir[File.join(File.dirname(current_file), "*.gemspec")].each do |file|
+          Dir[File.join(File.dirname(@current_file), "*.gemspec")].each do |file|
             load_gemspec(file)
           end
         end
@@ -376,7 +440,7 @@ module Maven
         else
           stack.last.each do |c|
             if c == :default
-              if @lock.nil?
+              if @lock.nil? || args[0]== 'bundler'
                 dep = add_gem(args, &block)
               else
                 dep = add_gem(args[0], &block)
@@ -409,33 +473,11 @@ module Maven
             end
           end
         end
-        if dep && !@gemspec
-          project = self
-          
+        if dep
           # first collect the missing deps it any
-          bundler_deps = []
+          @bundler_deps ||= []
           # use a dep with version so just create it from the args
-          bundler_deps << args
-            
-          #TODO this should be done after all deps are in place - otherwise it depends on order how bundler gets setup
-          if @lock
-            # add its dependencies as well to have the version
-            # determine by the dependencyManagement
-            @lock.dependency_hull(dep.artifact_id).map.each do |d|
-              bundler_deps << d unless project.gem? d[0]
-            end
-          end
-          #end
-          
-          # now add the deps to bundler plugin
-          # avoid to setup bundler if it has no deps
-          if bundler_deps.size > 0 
-            plugin(:bundler) do |bundler|
-              bundler_deps.each do |d|
-                bundler.gem(d)
-              end
-            end
-          end
+          @bundler_deps << [args, dep]
         end
         dep
       end

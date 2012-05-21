@@ -10,6 +10,11 @@ module Maven
         packaging "war"
       end
       
+      def has_gem?(gem)
+        assets = profile(:assets)
+        self.gem?(gem) || (assets && assets.gem?(gem))
+      end
+
       def add_defaults(args = {})
         self.name = "#{dir_name} - rails application" unless name
         
@@ -36,13 +41,14 @@ module Maven
             jar("org.jruby.extras:jffi", '1.0.8', 'native') if versions[:jruby_version] =~ /1.6.[0-2]/
             jar("org.jruby.extras:jaffl", '0.5.10') if versions[:jruby_version] =~ /1.6.[0-2]/
           else
-            jar("org.jruby:jruby-complete", versions[:jruby_version]) 
+            jar("org.jruby:jruby-complete", "${jruby.version}") 
           end
         end
 
         jar("org.jruby.rack:jruby-rack", versions[:jruby_rack]) unless jar?("org.jruby.rack:jruby-rack")
 
         self.properties = {
+          "jruby.version" => versions[:jruby_version],
           "jetty.version" => versions[:jetty_plugin],
           "rails.env" => "development",
           "gem.includeRubygemsInTestResources" => false
@@ -68,14 +74,16 @@ module Maven
                 :targetPath => 'WEB-INF/gems',
                 :includes => ['gems/**', 'specifications/**']
               }
-              l << {
-                :directory => '${gem.path}-bundler-maven-plugin',
-                :targetPath => 'WEB-INF/gems',
-                :includes => ['specifications/**']
-              }
+              if plugin(:bundler).dependencies.detect { |d| d.type.to_sym == :gem }
+                l << {
+                  :directory => '${gem.path}-bundler-maven-plugin',
+                  :targetPath => 'WEB-INF/gems',
+                  :includes => ['specifications/**']
+                }
+              end
             end
           }
-          options[:webXml] = '${basedir}/config/web.xml' if File.exists?('config/web.xml')
+          options[:webXml] = 'config/web.xml' if File.exists?('config/web.xml')
           w.with options
         end
 
@@ -97,7 +105,8 @@ module Maven
           overrideDescriptor = '${project.build.directory}/jetty/override-${rails.env}-web.xml'
           run.activation.by_default
           run.plugin("org.mortbay.jetty:jetty-maven-plugin",
-                       "${jetty.version}").with({
+                       "${jetty.version}") do |jetty|
+            options = {
                 :webAppConfig => {
                   :overrideDescriptor => overrideDescriptor           
                 },
@@ -119,9 +128,12 @@ module Maven
                   <password>123456</password>
                 </connector>
 XML
-              })
+              }
+            options[:webXml] = 'config/web.xml' if File.exists?('config/web.xml')
+            jetty.with options
+          end
         end
-        profile(:executable) do |exec|
+        profile(:warshell) do |exec|
           exec.plugin_repository('kos').url = 'http://opensource.kantega.no/nexus/content/groups/public/'
           exec.plugin('org.simplericity.jettyconsole:jetty-console-maven-plugin', '1.42').execution do |jetty|
             jetty.execute_goal(:createconsole)

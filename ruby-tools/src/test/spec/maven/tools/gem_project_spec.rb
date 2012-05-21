@@ -93,6 +93,21 @@ XML
   <version>1.0.0</version>
   <name><![CDATA[minimal - gem]]></name>
   <packaging>gem</packaging>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <configuration>
+          <gemspec>src/test/spec/maven/tools/minimal.gemspec</gemspec>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>bundler-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>
 XML
     end
@@ -110,7 +125,7 @@ XML
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>ixtlan-core</artifactId>
-      <version>[0.0.0,)</version>
+      <version>[0,)</version>
       <type>gem</type>
     </dependency>
   </dependencies>
@@ -119,14 +134,6 @@ XML
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>ixtlan-core</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>
@@ -147,7 +154,7 @@ XML
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>ixtlan-core</artifactId>
-      <version>[0.0.0,)</version>
+      <version>[0,)</version>
       <type>gem</type>
     </dependency>
   </dependencies>
@@ -156,32 +163,6 @@ XML
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>ixtlan-core</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>dm-sqlite3-adapter</artifactId>
-            <version>[0.10.0,0.10.99999]</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>dm-mysql-adapter</artifactId>
-            <version>[0.10.0,0.10.3)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>dm-hsqldb-adapter</artifactId>
-            <version>[0.10.0,0.10.0.0.0.0.0.1)</version>
-            <type>gem</type>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>
@@ -278,10 +259,19 @@ XML
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>bundler</artifactId>
-      <version>[0.0.0,)</version>
       <type>gem</type>
     </dependency>
   </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>rubygems</groupId>
+        <artifactId>bundler</artifactId>
+        <version>@bundler.version@</version>
+        <type>gem</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <properties>
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.path>${project.build.directory}/rubygems</gem.path>
@@ -305,7 +295,7 @@ XML
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>ixtlan-core</artifactId>
-            <version>[0.0.0,)</version>
+            <version>[0,)</version>
             <type>gem</type>
           </dependency>
           <dependency>
@@ -326,12 +316,6 @@ XML
             <version>[0,1.0.0]</version>
             <type>gem</type>
           </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>bundler</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
         </dependencies>
       </plugin>
       <plugin>
@@ -341,6 +325,47 @@ XML
         <extensions>true</extensions>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                  <pluginExecutionFilter>
+                    <artifactId>gem-maven-plugin</artifactId>
+                    <goals>
+                      <goal>initialize</goal>
+                    </goals>
+                    <groupId>de.saumya.mojo</groupId>
+                    <versionRange>[0,)</versionRange>
+                  </pluginExecutionFilter>
+                </pluginExecution>
+                <pluginExecution>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                  <pluginExecutionFilter>
+                    <artifactId>bundler-maven-plugin</artifactId>
+                    <goals>
+                      <goal>install</goal>
+                    </goals>
+                    <groupId>de.saumya.mojo</groupId>
+                    <versionRange>[0,)</versionRange>
+                  </pluginExecutionFilter>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
   <profiles>
     <profile>
@@ -349,7 +374,7 @@ XML
         <dependency>
           <groupId>rubygems</groupId>
           <artifactId>ixtlan-core</artifactId>
-          <version>[0.0.0,)</version>
+          <version>[0,)</version>
           <type>gem</type>
         </dependency>
       </dependencies>
@@ -360,7 +385,7 @@ XML
         <dependency>
           <groupId>rubygems</groupId>
           <artifactId>ixtlan-core</artifactId>
-          <version>[0.0.0,)</version>
+          <version>[0,)</version>
           <type>gem</type>
         </dependency>
         <dependency>
@@ -388,6 +413,53 @@ XML
         </dependency>
       </dependencies>
     </profile>
+    <profile>
+      <id>executable</id>
+      <dependencies>
+        <dependency>
+          <groupId>de.saumya.mojo</groupId>
+          <artifactId>gem-assembly-descriptors</artifactId>
+          <version>${jruby.plugins.version}</version>
+          <type>jar</type>
+          <scope>runtime</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.2-beta-5</version>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>de.saumya.mojo.assembly.Main</mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies-and-gems</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+            <executions>
+              <execution>
+                <id>in_phase_package</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>assembly</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>de.saumya.mojo</groupId>
+                <artifactId>gem-assembly-descriptors</artifactId>
+                <version>${jruby.plugins.version}</version>
+                <type>jar</type>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
 XML
@@ -405,12 +477,6 @@ XML
   <name><![CDATA[test]]></name>
   <packaging>gem</packaging>
   <dependencies>
-    <dependency>
-      <groupId>rubygems</groupId>
-      <artifactId>bundler</artifactId>
-      <version>[0.0.0,)</version>
-      <type>gem</type>
-    </dependency>
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>ixtlan-core</artifactId>
@@ -469,12 +535,6 @@ XML
   </dependencies>
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>rubygems</groupId>
-        <artifactId>bundler</artifactId>
-        <version>[0,)</version>
-        <type>gem</type>
-      </dependency>
       <dependency>
         <groupId>rubygems</groupId>
         <artifactId>addressable</artifactId>
@@ -584,62 +644,6 @@ XML
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>bundler-maven-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>bundler</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>ixtlan-core</artifactId>
-            <version>[0.0.0,)</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>dm-sqlite-adapter</artifactId>
-            <version>[1.0.0,1.0.99999]</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>dm-mysql-adapter</artifactId>
-            <version>1.0.2</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>do_mysql</artifactId>
-            <version>0.10.3</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>jdbc-mysql</artifactId>
-            <version>5.0.4</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>dm-postgres-adapter</artifactId>
-            <version>1.0.0</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>do_postgres</artifactId>
-            <version>0.10.3</version>
-            <type>gem</type>
-          </dependency>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>jdbc-postgres</artifactId>
-            <version>8.4.702</version>
-            <type>gem</type>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>
@@ -703,7 +707,7 @@ XML
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
         <configuration>
-          <gemspec>/home/kristian/projects/active/maven/jruby-maven-plugins/ruby-tools/src/test/spec/maven/tools/minimal.gemspec</gemspec>
+          <gemspec>src/test/spec/maven/tools/minimal.gemspec</gemspec>
         </configuration>
       </plugin>
     </plugins>
@@ -751,7 +755,7 @@ XML
           <extensions>myext</extensions>
           <extraRdocFiles>README.txt</extraRdocFiles>
           <files>AGPL.txt,README.txt,test/first_test.rb,mybin/hello,myext,lib/first.rb,spec/first_spec.rb,features/first.feature</files>
-          <gemspec>/home/kristian/projects/active/maven/jruby-maven-plugins/ruby-tools/src/test/spec/maven/tools/no-deps.gemspec</gemspec>
+          <gemspec>src/test/spec/maven/tools/no-deps.gemspec</gemspec>
           <platform>java</platform>
           <postInstallMessage><![CDATA[be happy]]></postInstallMessage>
           <rdocOptions>--main,README.txt</rdocOptions>
@@ -807,7 +811,7 @@ XML
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
         <configuration>
-          <gemspec>/home/kristian/projects/active/maven/jruby-maven-plugins/ruby-tools/src/test/spec/maven/tools/deps.gemspec</gemspec>
+          <gemspec>src/test/spec/maven/tools/deps.gemspec</gemspec>
         </configuration>
       </plugin>
     </plugins>
@@ -843,6 +847,22 @@ XML
       </snapshots>
     </repository>
   </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>rubygems-releases</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>rubygems-prereleases</id>
+      <url>http://rubygems-proxy.torquebox.org/prereleases</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
   <properties>
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.path>${project.build.directory}/rubygems</gem.path>
@@ -857,11 +877,96 @@ XML
         <version>${jruby.plugins.version}</version>
         <extensions>true</extensions>
         <configuration>
-          <gemspec>/home/kristian/projects/active/maven/jruby-maven-plugins/ruby-tools/src/test/spec/maven/tools/minimal.gemspec</gemspec>
+          <gemspec>src/test/spec/maven/tools/minimal.gemspec</gemspec>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>jruby-openssl-maven</artifactId>
+            <version>[0,)</version>
+            <type>gem</type>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                  <pluginExecutionFilter>
+                    <artifactId>gem-maven-plugin</artifactId>
+                    <goals>
+                      <goal>initialize</goal>
+                    </goals>
+                    <groupId>de.saumya.mojo</groupId>
+                    <versionRange>[0,)</versionRange>
+                  </pluginExecutionFilter>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
+  <profiles>
+    <profile>
+      <id>executable</id>
+      <dependencies>
+        <dependency>
+          <groupId>de.saumya.mojo</groupId>
+          <artifactId>gem-assembly-descriptors</artifactId>
+          <version>${jruby.plugins.version}</version>
+          <type>jar</type>
+          <scope>runtime</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.2-beta-5</version>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>de.saumya.mojo.assembly.Main</mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies-and-gems</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+            <executions>
+              <execution>
+                <id>in_phase_package</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>assembly</goal>
+                </goals>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>de.saumya.mojo</groupId>
+                <artifactId>gem-assembly-descriptors</artifactId>
+                <version>${jruby.plugins.version}</version>
+                <type>jar</type>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
 XML
     end
