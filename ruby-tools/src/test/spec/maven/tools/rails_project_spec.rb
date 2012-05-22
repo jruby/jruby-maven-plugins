@@ -67,7 +67,7 @@ describe Maven::Tools::RailsProject do
     <dependency>
       <groupId>org.jruby.rack</groupId>
       <artifactId>jruby-rack</artifactId>
-      <version>@jruby.rack.version@</version>
+      <version>_jruby.rack.version_</version>
       <type>jar</type>
     </dependency>
   </dependencies>
@@ -76,7 +76,7 @@ describe Maven::Tools::RailsProject do
       <dependency>
         <groupId>rubygems</groupId>
         <artifactId>bundler</artifactId>
-        <version>@bundler.version@</version>
+        <version>_bundler.version_</version>
         <type>gem</type>
       </dependency>
     </dependencies>
@@ -85,9 +85,9 @@ describe Maven::Tools::RailsProject do
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.includeRubygemsInTestResources>false</gem.includeRubygemsInTestResources>
     <gem.path>${project.build.directory}/rubygems</gem.path>
-    <jetty.version>@jetty.version@</jetty.version>
-    <jruby.plugins.version>@project.version@</jruby.plugins.version>
-    <jruby.version>#{defined?(JRUBY_VERSION) ? JRUBY_VERSION : '1.6.5'}</jruby.version>
+    <jetty.version>_jetty.version_</jetty.version>
+    <jruby.plugins.version>_project.version_</jruby.plugins.version>
+    <jruby.version>_jruby.version_</jruby.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <rails.env>development</rails.env>
   </properties>
@@ -114,7 +114,7 @@ describe Maven::Tools::RailsProject do
       </plugin>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>@war.version@</version>
+        <version>_war.version_</version>
         <configuration>
           <webResources>
             <resource>

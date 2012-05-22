@@ -1,4 +1,4 @@
- module Maven
+module Maven
   module Tools
     VERSIONS = { 
       :jetty_plugin => "@jetty.version@",

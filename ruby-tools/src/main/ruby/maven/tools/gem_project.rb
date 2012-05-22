@@ -239,7 +239,7 @@ module Maven
         end
         
         if @bundler_deps && @bundler_deps.size > 0
-          
+          plugin(:bundler)
           bdeps = []
           # first get the locked gems
           @bundler_deps.each do |args, dep|

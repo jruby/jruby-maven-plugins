@@ -1,15 +1,16 @@
 require 'maven/tools/gem_project'
 
-# keep plugins version for verions test
+# keep plugins version for version test
 PLUGINS_VERSION = Maven::Tools::VERSIONS[:jruby_plugins]
 
 Maven::Tools::VERSIONS = { 
-      :jetty_plugin => "@jetty.version@",
-      :jruby_rack => "@jruby.rack.version@",
-      :war_plugin => "@war.version@",
-      :jar_plugin => "@jar.version@",
-      :jruby_plugins => "@project.version@",
-      :jruby_version => defined?(JRUBY_VERSION) ? JRUBY_VERSION : "@jruby.version@"
+      :jetty_plugin => "_jetty.version_",
+      :jruby_rack => "_jruby.rack.version_",
+      :war_plugin => "_war.version_",
+      :jar_plugin => "_jar.version_",
+      :jruby_plugins => "_project.version_",
+      :bundler_version => "_bundler.version_",
+      :jruby_version => "_jruby.version_"
 }
 
 describe Maven::Tools::GemProject do
@@ -267,7 +268,7 @@ XML
       <dependency>
         <groupId>rubygems</groupId>
         <artifactId>bundler</artifactId>
-        <version>@bundler.version@</version>
+        <version>_bundler.version_</version>
         <type>gem</type>
       </dependency>
     </dependencies>
@@ -275,7 +276,7 @@ XML
   <properties>
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.path>${project.build.directory}/rubygems</gem.path>
-    <jruby.plugins.version>@project.version@</jruby.plugins.version>
+    <jruby.plugins.version>_project.version_</jruby.plugins.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <build>
@@ -866,7 +867,7 @@ XML
   <properties>
     <gem.home>${project.build.directory}/rubygems</gem.home>
     <gem.path>${project.build.directory}/rubygems</gem.path>
-    <jruby.plugins.version>@project.version@</jruby.plugins.version>
+    <jruby.plugins.version>_project.version_</jruby.plugins.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <build>
