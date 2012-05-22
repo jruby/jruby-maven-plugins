@@ -10,7 +10,15 @@
       <!-- include all bin scripts -->
       <directory>${project.basedir}/bin</directory>
       <includes>
-	<include>*</include>
+        <include>*</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <outputDirectory>/</outputDirectory>
+      <!-- include all bin scripts from gems -->
+      <directory>${gem.home}/bin</directory>
+      <includes>
+        <include>*</include>
       </includes>
     </fileSet>
     <fileSet>
