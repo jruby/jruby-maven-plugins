@@ -62,6 +62,9 @@ public class RUnitMojo extends AbstractTestMojo {
         } else {
             outputfile = new File(this.project.getBuild().getDirectory()
                     .replace("${project.basedir}/", ""), "runit.txt");
+            if (outputfile.exists()){
+                outputfile.delete();
+            }
             resultManager = new TestResultManager(project.getName(), "runit", testReportDirectory, summaryReport);
             super.execute();
         }

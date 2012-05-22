@@ -77,6 +77,9 @@ public class CucumberMojo extends AbstractTestMojo {
 	        else {
 	            outputfile = new File(this.project.getBuild().getDirectory()
 	                    .replace("${project.basedir}/", ""), "cucumber.txt");
+	            if (outputfile.exists()){
+	                outputfile.delete();
+	            }
 	            resultManager = new TestResultManager(summaryReport);
 	            getLog().debug("Running Cucumber tests from " + this.cucumberDirectory);
 	            super.execute();

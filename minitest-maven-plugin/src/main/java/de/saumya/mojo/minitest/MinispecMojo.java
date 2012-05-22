@@ -61,6 +61,9 @@ public class MinispecMojo extends AbstractTestMojo {
         } else {
             outputfile = new File(this.project.getBuild().getDirectory()
                     .replace("${project.basedir}/", ""), "minispec.txt");
+            if (outputfile.exists()){
+                outputfile.delete();
+            }
             resultManager = new TestResultManager(project.getName(), "minispec", testReportDirectory, summaryReport);
             super.execute();
         }

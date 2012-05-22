@@ -6,17 +6,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 
-import org.codehaus.plexus.util.FileUtils;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.codehaus.plexus.util.FileUtils;
 
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.tests.AbstractTestMojo;
 import de.saumya.mojo.tests.JRubyRun.Mode;
 import de.saumya.mojo.tests.JRubyRun.Result;
-import de.saumya.mojo.tests.TestResultManager;
 import de.saumya.mojo.tests.TestScriptFactory;
 
 /**
@@ -70,7 +68,10 @@ public class RSpecMojo extends AbstractTestMojo {
         }
         else {
             outputfile = new File(this.project.getBuild().getDirectory()
-                                  .replace("${project.basedir}/", ""), reportName);
+                                  .replace("${project.basedir}/", ""), reportName);   
+            if (outputfile.exists()){
+                outputfile.delete();
+            }
             super.execute();
         }
     }
