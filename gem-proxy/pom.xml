@@ -4,11 +4,9 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.28.4-SNAPSHOT</version>
+    <version>0.29.0-SNAPSHOT</version>
   </parent>
-  <groupId>de.saumya.mojo</groupId>
   <artifactId>gem-proxy</artifactId>
-  <version>0.6-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Rubygems as Maven Repository Webapp</name>
   <url>http://github.com/mkristian/jruby-maven-plugins</url>
