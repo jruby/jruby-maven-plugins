@@ -32,7 +32,7 @@ describe Maven::Tools::Jarfile do
   end
 
   after do
-    FileUtils.rm_rf workdir
+    FileUtils.rm_rf(File.join(workdir, "tmp-*"))
   end
 
   it 'generates lockfile' do
