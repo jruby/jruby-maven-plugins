@@ -38,6 +38,11 @@ public class InstallMojo extends AbstractGemMojo {
      * @parameter default-value="${project.build.directory}/bin" expression="${bundler.binstubs}"
      */
     private File binStubs;
+
+    /**
+     * @parameter default-value="jruby" expression="${bundler.binstubs.shebang}"
+     */
+    private String sheBang;
     
     /**
      * bundler version used when there is no pom. defaults to latest version.
@@ -154,15 +159,7 @@ public class InstallMojo extends AbstractGemMojo {
         if(binStubs != null){
             binStubs.mkdirs();
             {
-                File bundleFile = new File(binStubs, "bundle");
-                // TODO make a stub from resource
-                FileUtils.fileWrite(bundleFile, "#!/usr/bin/env jruby" + System.getProperty("line.separator") +
-                                "require 'pathname'" + System.getProperty("line.separator") +
-                                "load(File.expand_path('../setup', Pathname.new(__FILE__).realpath))" +
-                                System.getProperty("line.separator") + 
-                                "require 'rubygems'" + System.getProperty("line.separator") + 
-                                "load Gem.bin_path('bundler', 'bundle')" + System.getProperty("line.separator"));
-                setExecutable(bundleFile);
+                noBundlerSetupStub("bundler", "bundle", true);
             }
             {
                 File setupFile = new File(binStubs, "setup");
@@ -180,6 +177,18 @@ public class InstallMojo extends AbstractGemMojo {
                 if (f.getName().equals("bundle")){
                     continue;
                 }
+                if (f.getName().equals("rmvn")){
+                    noBundlerSetupStub("ruby-maven", "rmvn", false);
+                    continue;
+                }
+                if (f.getName().equals("gwt")){
+                    noBundlerSetupStub("ruby-maven", "gwt", false);
+                    continue;
+                }
+                if (f.getName().equals("jetty-run")){
+                    noBundlerSetupStub("ruby-maven", "jetty-run", false);
+                    continue;
+                }
                 String[] lines = FileUtils.fileRead(f).split(sep);
                 File binstubFile = new File(binStubs, f.getName());
                 if(!binstubFile.exists()){
@@ -191,6 +200,25 @@ public class InstallMojo extends AbstractGemMojo {
                 }
             }
         }
+    }
+
+    private void noBundlerSetupStub(String gem, String binFile, boolean needsClasspath) throws IOException {
+        File file = new File(binStubs, binFile);
+        // TODO make a stub from resource
+        RubyStringBuilder script = new RubyStringBuilder();
+        script.append("#!/usr/bin/env ").appendLine(sheBang);
+        if (needsClasspath) {
+            script.appendLine("require 'pathname'");
+            script.appendLine("load(File.expand_path('../setup', Pathname.new(__FILE__).realpath))");
+        }
+        this.getHistoryLogScript(script);
+        this.getRubygemsSetupScript(script);
+        script.appendLine("require 'rubygems'"); 
+        script.append("load Gem.bin_path('").append(gem).append("', '").append(binFile).appendLine("')");
+
+        FileUtils.fileWrite(file, script.toString());
+        
+        setExecutable(file);
     }
 
     private void setExecutable(File stubFile) {
@@ -280,14 +308,17 @@ public class InstallMojo extends AbstractGemMojo {
             
             private static final String LINE_SEPARATOR = System.getProperty("line.separator");
             
-            public void append(String val){
+            public RubyStringBuilder append(String val){
                 builder.append(val);
+                return this;
             }
-            public void appendLine(){
+            public RubyStringBuilder appendLine(){
                 builder.append(LINE_SEPARATOR);
+                return this;
             }
-            public void appendLine(String val){
+            public RubyStringBuilder appendLine(String val){
                 builder.append(val).append(LINE_SEPARATOR);
+                return this;
             }
             
             public String toString(){
