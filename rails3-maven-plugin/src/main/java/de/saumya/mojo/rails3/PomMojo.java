@@ -38,6 +38,10 @@ public class PomMojo extends AbstractRailsMojo {
         if (this.gemfile.exists()) {
             if (!(this.pom.exists() && this.gemfile.lastModified() > this.pom.lastModified())
                     || this.force) {
+                long stamp = -1;
+                if (this.pom.exists()) {
+                    stamp = this.pom.lastModified();
+                }
                 if (this.jrubyVerbose) {
                     getLog().info("create pom using following versions:");
                     getLog().info("\tjruby-plugins-version: "
@@ -51,6 +55,10 @@ public class PomMojo extends AbstractRailsMojo {
                     .addArg(this.plugin.getVersion())
                     .addArg(this.jrubyVersion)
                     .executeIn(launchDirectory(), this.pom);
+                
+                if (stamp > -1) {
+                    this.pom.setLastModified(stamp);
+                }
             }
             else {
                 if (this.jrubyVerbose) {
