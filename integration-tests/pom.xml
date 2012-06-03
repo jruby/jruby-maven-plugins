@@ -34,8 +34,8 @@
 		  </pomIncludes>
 		  <pomExcludes>
 		    <pomExclude>big_*/pom.xml</pomExclude>
-		    <pomExclude>*mysql/pom.xml</pomExclude>
-		    <pomExclude>*postgres/pom.xml</pomExclude>
+		    <pomExclude>new_latest_*/pom.xml</pomExclude>
+		    <pomExclude>pending_*/pom.xml</pomExclude>
 		  </pomExcludes>
 		  <settingsFile />
 		  <localRepositoryPath>${localRepositoryPath}</localRepositoryPath>
@@ -55,6 +55,7 @@
 	    <configuration>
 	      <pomExcludes>
 		<pomExclude>big_*/pom.xml</pomExclude>
+		<pomExclude>pending_*/pom.xml</pomExclude>
 		<pomExclude>nothing</pomExclude>
 	      </pomExcludes>
 	    </configuration>
