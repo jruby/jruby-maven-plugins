@@ -101,15 +101,7 @@ public class RUnitMojo extends AbstractTestMojo {
 
     @Override
     protected TestScriptFactory newTestScriptFactory(Mode mode) {
-        final TestScriptFactory scriptFactory;
-        if (mode == Mode._18
-                || (mode == Mode.DEFAULT && (jrubySwitches == null || !jrubySwitches
-                        .contains("--1.9")))) {
-            scriptFactory = new Runit18MavenTestScriptFactory();
-        } else {
-            scriptFactory = new Runit19MavenTestScriptFactory();
-        }
-        return scriptFactory;
+       return new RunitMavenTestScriptFactory();
     }
 
 }
