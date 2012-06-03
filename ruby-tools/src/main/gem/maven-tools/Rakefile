@@ -1,7 +1,0 @@
-task :spec do
-  require 'rubygems'
-  require 'bundler'
-  Bundler.require
-  require 'minitest/autorun'
-  Dir['spec/*_spec.rb'].each { |f| require f }
-end
