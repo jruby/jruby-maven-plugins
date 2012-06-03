@@ -121,7 +121,7 @@ public class DefaultGemManager implements GemManager {
                                                               new DefaultRepositoryLayout(),
                                                               disabled, enabled);
         
-        repos.add(repo);
+        //repos.add(repo);
     }
 
     public void addDefaultGemRepositoryForVersion(final String artifactVersion,
