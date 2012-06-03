@@ -58,8 +58,10 @@ public class RakeMojo extends AbstractGemMojo {
 
         }
         final Script script = this.factory.newScriptFromJRubyJar("rake");
-        script.addArg("-f", this.rakefile);
-
+        if (this.rakefile != null){
+            script.addArg("-f", this.rakefile);
+        }
+        
         if (this.rakeArgs != null) {
             script.addArgs(this.rakeArgs);
         }
