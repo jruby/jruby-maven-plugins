@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
+import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
@@ -50,9 +51,6 @@ public class MinispecMojo extends AbstractTestMojo {
     private TestResultManager resultManager;
     private File outputfile;
 
-    //TODO
-    private boolean useBundler = true;
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (this.skip || this.skipTests || this.skipMinispecs) {
@@ -69,6 +67,12 @@ public class MinispecMojo extends AbstractTestMojo {
         }
     }
 
+    @Override
+    protected void executeWithGems() throws MojoExecutionException,
+            IOException, ScriptException, GemException {
+        
+        super.executeWithGems();
+    }
     protected Result runIt(ScriptFactory factory, Mode mode, String version, TestScriptFactory scriptFactory)
             throws IOException, ScriptException, MojoExecutionException {
         
@@ -101,7 +105,7 @@ public class MinispecMojo extends AbstractTestMojo {
     @Override
     protected TestScriptFactory newTestScriptFactory(Mode mode) {
         // TODO locate minitest gem
-        return new MinitestMavenTestScriptFactory(use18and19 == null ? true : use18and19, useBundler);
+        return new MinitestMavenTestScriptFactory(use18and19 == null ? true : use18and19);
     }
 
 }

@@ -5,11 +5,9 @@ import de.saumya.mojo.tests.AbstractMavenTestScriptFactory;
 public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFactory {
 
     private final boolean useGem;
-    private final boolean useBundler;
 
-    public MinitestMavenTestScriptFactory(boolean useGem, boolean useBundler){
+    public MinitestMavenTestScriptFactory(boolean useGem){
         this.useGem = useGem;
-        this.useBundler = useBundler;
     }
 
     @Override
@@ -39,10 +37,11 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
 
     void getAddTestCases(StringBuilder builder){
         builder.append("require 'rubygems'\n");
-        if (useBundler) {
-            builder.append("require 'bundler'\n");
-            builder.append("Bundler.require\n");
-        }
+        builder.append("begin\n");
+        builder.append("  require 'bundler'\n");
+        builder.append("  Bundler.require\n");
+        builder.append("rescue LoadError\n");
+        builder.append("end\n");
         if (useGem) {
             builder.append("gem 'minitest'\n");
         }
