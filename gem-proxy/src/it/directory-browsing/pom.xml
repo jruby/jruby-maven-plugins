@@ -26,7 +26,7 @@
 		warn "fix load path"
 		c = Crawl.new
 		c.target = "${project.build.directory}/crawl"
-		c.base_url = "http://localhost:8080/releases/rubygems"
+		c.base_url = "http://localhost:8989/releases/rubygems"
 
 		c.load("rails/")
 		c.load("rails/maven-metadata.xml")

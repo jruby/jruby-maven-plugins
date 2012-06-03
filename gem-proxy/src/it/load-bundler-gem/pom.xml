@@ -6,15 +6,15 @@
   <version>0.0.0</version>
   <repositories>
     <repository>
-      <id>rubygems-prereleases</id>
-      <url>http://localhost:8080/prereleases</url>
+      <id>rubygems-releases</id>
+      <url>http://localhost:8989/releases</url>
     </repository>
   </repositories>
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>
-      <artifactId>actionpack</artifactId>
-      <version>3.1.0.rc4</version>
+      <artifactId>bundler</artifactId>
+      <version>1.1.4</version>
       <type>gem</type>
     </dependency>
   </dependencies>
