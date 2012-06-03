@@ -1,6 +1,7 @@
 app_path=rails_app
 rails.args=-f
-gem.includeOpenSSL=false # otherwise there is an NPE
+# otherwise there is an NPE
+gem.includeOpenSSL=false
 jruby.file=pom2pom.rb
 task=db:create db:migrate
 generator=scaffold
