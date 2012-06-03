@@ -9,23 +9,6 @@ if ( !log.contains( expected ) )
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
 
-log = FileUtils.fileRead( new File( basedir, "Gemfile.files" ) );
-expected = "sample.gemspec";
-if ( !log.contains( expected ) )
-{
-    throw new RuntimeException( "files file does not contain '" + expected + "'" );
-}
-expected = "Mavenfile";
-if ( !log.contains( expected ) )
-{
-    throw new RuntimeException( "files file does not contain '" + expected + "'" );
-}
-expected = "Gemfile";
-if ( !log.contains( expected ) )
-{
-    throw new RuntimeException( "files file does not contain '" + expected + "'" );
-}
-
 File f = new File( basedir, "target/sample-0.1.0.gem" );
 if ( !f.exists() )
 {

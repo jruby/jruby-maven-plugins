@@ -15,6 +15,8 @@ public class JavaSassTest {
 
 		ScriptEngineManager manager = new ScriptEngineManager();
 		ScriptEngine engine = manager.getEngineByName("jruby");
+		engine.eval("ENV['GEM_HOME'] = 'unknown'");
+		engine.eval("ENV['GEM_PATH'] = 'unknown'");
 		engine.eval("require 'rubygems'; require 'sass';");
 
 		String sass = ".test\n\tcolor: red";

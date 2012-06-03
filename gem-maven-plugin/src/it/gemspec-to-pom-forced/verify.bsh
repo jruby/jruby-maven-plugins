@@ -11,8 +11,3 @@ if ( f.lastModified() <  new File( basedir, "timestamp" ).lastModified())
 {
     throw new RuntimeException( "file not recreated: " + f );
 }
-f = new File( basedir, "sample.gemspec.files" );
-if ( !f.exists() )
-{
-    throw new RuntimeException( "file does not exists: " + f );
-}

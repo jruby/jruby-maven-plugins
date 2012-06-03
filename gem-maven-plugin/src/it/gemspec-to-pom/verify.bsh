@@ -7,8 +7,3 @@ if ( !f.exists() )
 {
     throw new RuntimeException( "file does not exists: " + f );
 }
-f = new File( basedir, "sample.gemspec.files" );
-if ( !f.exists() )
-{
-    throw new RuntimeException( "file does not exists: " + f );
-}
