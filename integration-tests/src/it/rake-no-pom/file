@@ -1,5 +1,0 @@
-
-desc 'do something meaningful'
-task :something do
-  puts "did something"
-end
