@@ -26,21 +26,6 @@ p. important is to declare the rubygems repository whenever you have gem artifac
 bc.  <repositories>
     <repository>
       <id>rubygems-releases</id>
-      <url>http://gems.saumya.de/releases</url>
-    </repository>
-    <!-- and for prereleased gems
-    <repository>
-      <id>rubygems-prereleases</id>
-      <url>http://gems.saumya.de/prereleases</url>
-    </repository>
-    -->
-  </repositories>
-
-p. alternatively use:
-
-bc.  <repositories>
-    <repository>
-      <id>rubygems-releases</id>
       <url>http://rubygems-proxy.torquebox.org/releases</url>
     </repository>
     <!-- and for prereleased gems
