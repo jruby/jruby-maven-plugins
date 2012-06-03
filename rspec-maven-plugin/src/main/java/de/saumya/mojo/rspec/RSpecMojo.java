@@ -62,7 +62,7 @@ public class RSpecMojo extends AbstractTestMojo {
     
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (this.skipTests || this.skipSpecs) {
+        if (this.skip || this.skipTests || this.skipSpecs) {
             getLog().info("Skipping RSpec tests");
             return;
         }
