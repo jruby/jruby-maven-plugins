@@ -3,7 +3,7 @@ package de.saumya.mojo.assembly;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-class Main {
+public class Main {
 
     public static void main(String... args) throws Exception {
         if (args.length == 0){
