@@ -1,0 +1,4 @@
+* assets:precompile needs env=production to avod respawning rake
+* minispec needs spec dir in load path
+* deprecate rails:new rails:pom gem:pom 
+* allow system gems
