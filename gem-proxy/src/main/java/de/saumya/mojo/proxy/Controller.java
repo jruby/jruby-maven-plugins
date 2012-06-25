@@ -167,8 +167,9 @@ public class Controller {
                             return new FileLocation(filename + " is being generated", Type.TEMP_UNAVAILABLE);
                         }
                     }
-                    if(fileContainsPlatformJava(local)){
-                        filename = filename.replace(".gem", "-java.gem");
+                    String platform = getPlatform(local);
+                    if(platform != null){
+                        filename = filename.replace(".gem", "-" + platform + ".gem");
                     }
                     return new FileLocation(new URL(RUBYGEMS_URL + "/" + filename));
                 }
@@ -230,9 +231,16 @@ public class Controller {
                             + gemname + "-java.gem"));
                 }
                 catch (FileNotFoundException e) {
-                    downloadGemfile(gemfile, new URL(RUBYGEMS_URL + "/"
+                    // there are gem which use "jruby" as platform nstead of "java"
+                    try {
+                        downloadGemfile(gemfile, new URL(RUBYGEMS_URL + "/"
+                                + gemname + "-jruby.gem"));
+                    }
+                    catch (FileNotFoundException ee) {
+                       downloadGemfile(gemfile, new URL(RUBYGEMS_URL + "/"
                             + gemname + ".gem"));
-                }
+                    }
+                } 
 
                 String pom = createPom(gemfile);
 
@@ -258,14 +266,18 @@ public class Controller {
         }
     }
 
-    private boolean fileContainsPlatformJava(File file) throws IOException{
+    private String getPlatform(File file) throws IOException{
+        // hack - once there is another gem like this hardcoded String needs refactoring
+        if (file.getName().startsWith("therubyrhino-1.72.")){
+            return "jruby";
+        }
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
             String line = reader.readLine();
             while(line != null){
                 if(line.contains("<platform>java</platform>")){
-                    return true;
+                    return "java";
                 }
                 line = reader.readLine();
             }
@@ -275,7 +287,7 @@ public class Controller {
                 reader.close();
             }
         }
-        return false;
+        return null;
     }
     
     private void downloadGemfile(File gemfile, URL url) throws IOException {
