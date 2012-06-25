@@ -2,3 +2,4 @@
 * minispec needs spec dir in load path
 * deprecate rails:new rails:pom gem:pom 
 * allow system gems
+* jquery-rails has deps to rails. from version 2.0.0 it is rails-3.2.x, otherwise rails-3.x. that fails maven deps resolution
