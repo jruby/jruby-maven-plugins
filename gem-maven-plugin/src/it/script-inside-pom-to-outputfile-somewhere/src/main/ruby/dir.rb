@@ -1,1 +1,1 @@
-puts Dir.new("..").collect
+puts Dir.entries("..")

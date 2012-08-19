@@ -5,6 +5,15 @@
   <artifactId>application</artifactId>
   <version>0.0.0</version>
   <packaging>gem</packaging>
+
+
+  <repositories>
+    <repository>
+      <id>rubygems-release</id>
+      <url>yhttp://rubygems-proxy.torquebox.org/releases</url>
+    </repository>
+  </repositories>  
+
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>
@@ -18,6 +27,7 @@
       <version>0.0.0</version>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>

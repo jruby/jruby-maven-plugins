@@ -2,28 +2,23 @@ package org.example.javasass;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.SimpleBindings;
+import org.jruby.embed.ScriptingContainer;
 
 import org.junit.Test;
 
 public class JavaSassTest {
 
-	@Test
-	public void testJavaSass() throws Exception {
+    @Test
+    public void testJavaSass() throws Exception {
+        ScriptingContainer container = new ScriptingContainer();
+        container.runScriptlet("require 'rubygems'; require 'sass';");
 
-		ScriptEngineManager manager = new ScriptEngineManager();
-		ScriptEngine engine = manager.getEngineByName("jruby");
-		engine.eval("require 'rubygems'; require 'sass';");
+        String sass = ".test\n\tcolor: red";
+        container.put("str", sass);
+        
+        String css = (String)container.runScriptlet("Sass::Engine.new(str).render");
 
-		String sass = ".test\n\tcolor: red";
-
-		SimpleBindings bindings = new SimpleBindings();
-		bindings.put("str", sass);
-		String css = (String) engine.eval("Sass::Engine.new($str).render", bindings);
-
-		assertEquals(".test {\n  color: red; }\n", css);
-	}
+        assertEquals(".test {\n  color: red; }\n", css);
+    }
 
 }
