@@ -13,11 +13,11 @@ public abstract class AbstractRunitMavenTestScriptFactory extends AbstractMavenT
 
     abstract void getTestRunnerScript(StringBuilder builder);
 
-//
-//    @Override
-//    protected void getResultsScript(StringBuilder builder) {
-//        // not needed - is already done by test runner
-//    }
+
+    @Override
+    protected void getResultsScript(StringBuilder builder) {
+        // just creates error since the tests run on exit hook
+    }
 
     void getTeeClass(StringBuilder builder){
         builder.append("class Tee < File\n");

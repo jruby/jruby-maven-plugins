@@ -4,6 +4,8 @@ public class RunitMavenTestScriptFactory extends AbstractRunitMavenTestScriptFac
 
     @Override
     void getTestRunnerScript(StringBuilder builder) {
+        builder.append("require 'fileutils'\n");
+        builder.append("FileUtils.mkdir_p(File.dirname(REPORT_PATH))\n");
         builder.append("begin\n");
         builder.append("  require 'minitest/autorun'\n");
         builder.append("  MiniTest::Unit.output = Tee.open(REPORT_PATH, 'w')\n");
