@@ -5,14 +5,12 @@
   <artifactId>bundler</artifactId>
   <version>testing</version>  
   
-<!--
   <repositories>
     <repository>
       <id>rubygems-releases</id>
       <url>http://rubygems-proxy.torquebox.org/releases</url>
     </repository>
   </repositories>
--->
 
   <dependencies>
     <dependency>
