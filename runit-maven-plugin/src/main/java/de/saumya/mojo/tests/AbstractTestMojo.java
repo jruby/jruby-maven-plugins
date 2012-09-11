@@ -95,7 +95,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
             else {
                 mode = Mode._18_19;
             }
-            String[] jrubyVersions = versions.split("[\\ ,;]");
+            String[] jrubyVersions = versions.split("[\\ ,;]+");
             for(String version: jrubyVersions){
                 JRubyRun run = new JRubyRun(mode, version);
                 runs.add(run);
