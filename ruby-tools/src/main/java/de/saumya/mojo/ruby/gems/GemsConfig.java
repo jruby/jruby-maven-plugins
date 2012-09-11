@@ -175,7 +175,7 @@ public class GemsConfig {
     public File[] getGemPath() {
         if (this.gemPaths.size() == 0 || systemInstall) {
             if (System.getenv(GEM_PATH) == null) {
-                return null;
+                return new File[0];
             }
             else {
                 return new File[] {new File(System.getenv(GEM_PATH))};

@@ -134,7 +134,7 @@ public class DefaultRailsManager implements RailsManager {
         }
 
         // use a rubygems directory in way that the new application can also use it
-        if(!installer.config.getGemHome().exists()){
+        if(installer.config.getGemHome() == null || !installer.config.getGemHome().exists()){
             installer.config.setGemBase(new File(new File(appPath, "target"),
                     "rubygems"));
         }
@@ -345,12 +345,12 @@ public class DefaultRailsManager implements RailsManager {
             final File launchDirectory, final String environment,
             final String task, final String... args) throws IOException,
             ScriptException, GemException, RailsException {
-        final Script script = installer.factory.newScriptFromJRubyJar("rake");
+        final Script script = installer.factory.newScriptFromSearchPath("rake");
         script.addArgs(task);
         for (final String arg : args) {
             script.addArg(arg);
         }
-        if(environment != null){
+        if(environment != null && environment.trim().length() > 0){
             script.addArg("RAILS_ENV=" + environment);
         }
         script.executeIn(launchDirectory);

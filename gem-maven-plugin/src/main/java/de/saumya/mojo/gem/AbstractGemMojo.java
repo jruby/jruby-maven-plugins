@@ -70,7 +70,18 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected boolean         installRI;
 
     /**
-     * directory of gem home to use when forking JRuby.
+     * use system gems instead of setting up GemPath/GemHome inside the build directory and ignores any set
+     * gemHome and gemPath. you need to have both GEM_HOME and GEM_PATH environment variable set to make it work.
+     * <br/>
+     * Command line -Dgem.useSystem=...
+     *
+     * @parameter expression="${gem.useSystem}" default-value="false"
+     */
+    protected boolean          gemUseSystem;
+
+    /**
+     * directory of gem home to use when forking JRuby. default will be ignored
+     * when gemUseSystem is true.
      * <br/>
      * Command line -Dgem.home=...
      *
@@ -80,7 +91,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected File          gemHome;
 
     /**
-     * directory of JRuby path to use when forking JRuby.
+     * directory of JRuby path to use when forking JRuby. default will be ignored
+     * when gemUseSystem is true.
      * <br/>
      * Command line -Dgem.path=...
      *
@@ -126,7 +138,13 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig = new GemsConfig();
         this.gemsConfig.setGemHome(this.gemHome);
         this.gemsConfig.addGemPath(this.gemPath);
- 
+        if (this.gemUseSystem && 
+                (System.getenv("GEM_HOME") == null || System.getenv( "GEM_PATH") == null) ){
+            throw new MojoExecutionException("with gemUseSystem set to true you need to provide" +
+            		" GEM_HOME and GEM_PATH environment variables !");
+        }
+        this.gemsConfig.setSystemInstall(this.gemUseSystem);
+        
         this.gemsConfig.setAddRdoc(this.installRDoc);
         this.gemsConfig.setAddRI(this.installRI);
         this.gemsConfig.setBinDirectory(this.binDirectory);
@@ -231,7 +249,10 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
             if (hasGems){
                 // install the gems for the plugin
-                File pluginGemHome = new File(this.gemsConfig.getGemHome().getAbsolutePath() + "-" + plugin.getArtifactId());
+                String base = this.gemsConfig.getGemHome() != null ? 
+                        this.gemsConfig.getGemHome().getAbsolutePath() : 
+                            (project.getBuild().getDirectory() + "/rubygems");
+                File pluginGemHome = new File(base + "-" + plugin.getArtifactId());
                 pluginGemHome.mkdirs();
                 // use a common bindir, i.e. the one from the configured gemHome
                 // remove default by setting it explicitly
@@ -240,7 +261,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 File home = this.gemsConfig.getGemHome();
                 // use plugin home for plugin gems
                 this.gemsConfig.setGemHome(pluginGemHome);
-                this.gemsConfig.addGemPath(this.gemsConfig.getGemHome());
+                this.gemsConfig.addGemPath(pluginGemHome);
 
                 this.gemsInstaller.installGems(this.project,
                                                this.plugin.getArtifacts(), 

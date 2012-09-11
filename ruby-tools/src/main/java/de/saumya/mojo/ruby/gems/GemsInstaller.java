@@ -165,15 +165,17 @@ public class GemsInstaller {
 
         if (script != null) {
             script.addArg("--bindir", this.config.getBinDirectory());
-            if(!this.config.getBinDirectory().exists()){
+            if(this.config.getBinDirectory() != null && !this.config.getBinDirectory().exists()){
                 this.config.getBinDirectory().mkdirs();
             }
             script.execute();
             
-            // workaround for unpatched: https://github.com/rubygems/rubygems/commit/21cccd55b823848c5e941093a615b0fdd6cd8bc7
-            for(File spec : new File(this.config.getGemHome(), "specifications").listFiles(FILTER)){
-                String content = FileUtils.fileRead(spec);
-                FileUtils.fileWrite(spec.getAbsolutePath(), content.replaceFirst(" 00:00:00.000000000Z", ""));
+            if (this.config.getGemHome() != null){
+                // workaround for unpatched: https://github.com/rubygems/rubygems/commit/21cccd55b823848c5e941093a615b0fdd6cd8bc7
+                for(File spec : new File(this.config.getGemHome(), "specifications").listFiles(FILTER)){
+                    String content = FileUtils.fileRead(spec);
+                    FileUtils.fileWrite(spec.getAbsolutePath(), content.replaceFirst(" 00:00:00.000000000Z", ""));
+                }
             }
         }
     }
