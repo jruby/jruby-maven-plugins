@@ -59,7 +59,7 @@ public abstract class AbstractMavenTestScriptFactory extends AbstractTestScriptF
         }
         builder.append("\n");
         builder.append("$: << File.join( BASE_DIR, 'lib' )\n");
-        builder.append("$: << SOURCE_DIR\n");
+        builder.append("$: << SOURCE_DIR.sub( /\\*.*$/, '' )\n");
         builder.append("\n");
     }
 
@@ -94,6 +94,7 @@ public abstract class AbstractMavenTestScriptFactory extends AbstractTestScriptF
 
     private void getPrologScript(StringBuilder builder) {
         builder.append("require %(java)\n");
+        builder.append("require %(jruby)\n");
         builder.append("\n");
     }
 
