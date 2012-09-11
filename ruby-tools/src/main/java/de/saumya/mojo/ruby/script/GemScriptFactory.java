@@ -59,7 +59,9 @@ public class GemScriptFactory extends ScriptFactory {
             throws IOException {
         final File script = new File(gemsConfig.getBinDirectory(), scriptName);
         if (script.exists()) {
-            return newScript(script.getAbsoluteFile());
+            Script s = new Script(this);
+            s.add(script.getAbsolutePath());
+            return s;
         }
         else {
             return super.newScriptFromSearchPath(scriptName);
