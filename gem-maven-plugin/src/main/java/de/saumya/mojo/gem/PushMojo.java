@@ -21,6 +21,15 @@ import de.saumya.mojo.ruby.script.ScriptException;
 public class PushMojo extends AbstractGemMojo {
 
     /**
+     * skip the pushng the gem
+     * <br/>
+     * Command line -Dpush.skipp=...
+     * 
+     * @parameter expression="${push.skip}"
+     */
+    protected boolean skip = false;
+
+    /**
      * arguments for the ruby script given through file parameter.
      * <br/>
      * Command line -Dpush.args=...
@@ -43,7 +52,17 @@ public class PushMojo extends AbstractGemMojo {
      * @readonly
      */
     protected RepositorySystemSession repoSession;
-
+    
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException{
+        if (skip){
+            getLog().info( "skipping to push gem" );
+        }
+        else {
+            super.execute();
+        }
+    }
+    
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, MojoFailureException, GemException {
