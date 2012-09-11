@@ -104,8 +104,7 @@ public class MinispecMojo extends AbstractTestMojo {
 
     @Override
     protected TestScriptFactory newTestScriptFactory(Mode mode) {
-        // TODO locate minitest gem
-        return new MinitestMavenTestScriptFactory(use18and19 == null ? true : use18and19);
+        return new MinitestMavenTestScriptFactory();
     }
 
 }
