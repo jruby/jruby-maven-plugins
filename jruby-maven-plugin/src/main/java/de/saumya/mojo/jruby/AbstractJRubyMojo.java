@@ -2,6 +2,7 @@ package de.saumya.mojo.jruby;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -31,9 +32,9 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected static final String JRUBY_CORE = "jruby-core";
 
-    protected static final Object JRUBY_STDLIB = "jruby-stdlib";
+    protected static final String JRUBY_STDLIB = "jruby-stdlib";
 
-    protected static String DEFAULT_JRUBY_VERSION = "1.6.7.2";
+    protected static String DEFAULT_JRUBY_VERSION = "1.6.8";
 
 
     /**
@@ -69,7 +70,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * local/remote maven repository. it overwrites the jruby version from
      * the dependencies if any. i.e. you can easily switch jruby version from the commandline !
      * <br/>
-     * default: 1.6.7.2
+     * default: 1.6.8
      * <br/>
      * Command line -Djruby.version=...
      *
@@ -166,12 +167,18 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected ScriptFactory newScriptFactory(Artifact artifact) throws MojoExecutionException {
         try {
-            final ScriptFactory factory = new ScriptFactory(this.logger,
-                    this.classRealm, 
-                    artifact.getArtifactId().equals(JRUBY_CORE)? null: artifact.getFile(),
-                    artifact.getArtifactId().equals(JRUBY_CORE)? retrieveStdlibArtifact().getFile(): artifact.getFile(),
-                    this.project.getTestClasspathElements(), 
-                    this.jrubyFork);
+            final ScriptFactory factory = JRUBY_CORE.equals(artifact.getArtifactId()) ?
+                    new ScriptFactory(this.logger,
+                            this.classRealm, 
+                            artifact.getFile(),
+                            resolveJRubyStdlibArtifact(artifact).getFile(),
+                            this.project.getTestClasspathElements(), 
+                            this.jrubyFork) :
+                    new ScriptFactory(this.logger,
+                            this.classRealm, 
+                            artifact.getFile(),
+                            this.project.getTestClasspathElements(), 
+                            this.jrubyFork);
             return factory;
         } catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("could not resolve jruby", e);
@@ -182,18 +189,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             throw new MojoExecutionException(
                     "could not initialize script factory", e);
         }
-    }
-
-    protected Artifact retrieveStdlibArtifact() throws DependencyResolutionRequiredException {
-        for (final Dependency artifact : this.project.getDependencies()) {
-            if (artifact.getArtifactId().equals(JRUBY_STDLIB)) {
-                return resolveJRubyArtifact(this.repositorySystem
-                        .createArtifact(artifact.getGroupId(), artifact
-                                .getArtifactId(), artifact.getVersion(),
-                                artifact.getType()));
-            }
-        }
-        return null;
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -295,5 +290,35 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
         // finally fall back on the default version of jruby
         return resolveJRubyCompleteArtifact(DEFAULT_JRUBY_VERSION);
+    }
+
+    protected Artifact resolveJRubyStdlibArtifact(Artifact jruby) throws DependencyResolutionRequiredException,
+            MojoExecutionException {
+        final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+        for (final Dependency artifact : this.project.getDependencies()) {
+            if (artifact.getArtifactId().equals(JRUBY_STDLIB)
+                    // TODO this condition is not needed ?
+                    && !artifact.getScope().equals(Artifact.SCOPE_PROVIDED)
+                    && !artifact.getScope().equals(Artifact.SCOPE_SYSTEM)) {
+                request.setArtifact(this.repositorySystem
+                        .createArtifact(artifact.getGroupId(), artifact
+                                .getArtifactId(), artifact.getVersion(),
+                                artifact.getType()));
+                break;
+            }
+        }
+        if (request.getArtifact() == null){
+            request.setResolveTransitively(true);
+            request.setArtifact(jruby);
+        }
+        request.setLocalRepository(this.localRepository);
+        request.setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+        Set<Artifact> set = this.repositorySystem.resolve(request).getArtifacts();
+        for (Artifact a: set){
+            if (JRUBY_STDLIB.equals(a.getArtifactId())) {
+                return a;
+            }
+        }
+        throw new MojoExecutionException("failed to resolve jruby stdlib artifact");
     }
 }

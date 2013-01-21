@@ -171,7 +171,7 @@ public class PackageMojo extends AbstractGemMojo {
                     gemFile.deleteOnExit();
                 }
                 else {
-                    // keep the gem where it when there is no buildDirectory
+                    // keep the gem where it is when there is no buildDirectory
                     if (this.buildDirectory.exists()) {
                         FileUtils.copyFileIfModified(gemFile,
                                                      new File(this.buildDirectory,

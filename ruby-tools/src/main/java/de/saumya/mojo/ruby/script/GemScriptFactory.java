@@ -22,6 +22,13 @@ public class GemScriptFactory extends ScriptFactory {
     private final GemsConfig   gemsConfig;
 
     public GemScriptFactory(final Logger logger, final ClassRealm classRealm,
+            final File jrubyJar, 
+            final List<String> classpathElements, final boolean fork, final GemsConfig config)
+            throws ScriptException, IOException {
+        this(logger, classRealm, jrubyJar, jrubyJar, classpathElements, fork, config);
+    }
+    
+    public GemScriptFactory(final Logger logger, final ClassRealm classRealm,
             final File jrubyJar, File stdlibJar,
             final List<String> classpathElements, final boolean fork, final GemsConfig config)
             throws ScriptException, IOException {

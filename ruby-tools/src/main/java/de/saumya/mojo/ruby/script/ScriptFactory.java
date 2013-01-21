@@ -26,7 +26,7 @@ public class ScriptFactory {
     final Arguments            jvmArgs      = new Arguments();
 
     private final Map<String, String>  env          = new HashMap<String, String>();
-    private final File stdlibJar;
+    private final File                 jrubyStdlibJar;
 
     final Logger               logger;
     final ClassRealm           classRealm;
@@ -37,16 +37,20 @@ public class ScriptFactory {
     final Launcher             launcher;
 
     public ScriptFactory(final Logger logger, final ClassRealm classRealm,
+            final File jrubyJar,
+            final List<String> classpathElements, final boolean fork) throws ScriptException, IOException {
+        this(logger, classRealm, jrubyJar, jrubyJar, classpathElements, fork);
+    }
+    
+    public ScriptFactory(final Logger logger, final ClassRealm classRealm,
             final File jrubyJar, File stdlibJar,
             final List<String> classpathElements, final boolean fork) throws ScriptException, IOException {
         this.logger = logger;
-        
+        this.jrubyStdlibJar = stdlibJar;
         this.jrubyJar = jrubyJar;
-        this.stdlibJar = stdlibJar;
         if(this.jrubyJar != null){
             this.logger.debug("script uses jruby jar:" + this.jrubyJar.getAbsolutePath());
         }
-        this.logger.debug("script uses jruby stdlib jar:" + this.stdlibJar.getAbsolutePath());
         
         this.classpathElements = classpathElements == null
                 ? NO_CLASSPATH
@@ -91,8 +95,9 @@ public class ScriptFactory {
 
     public Script newScriptFromJRubyJar(final String scriptName)
             throws IOException {
+        // the first part only works on jruby-complete.jar
         URL url = new URL("jar:file:"
-                + this.stdlibJar.getAbsolutePath()
+                + this.jrubyStdlibJar.getAbsolutePath()
                 + "!/META-INF/jruby.home/bin/" + scriptName);
         try {
             url.openConnection().getContent();
