@@ -70,10 +70,7 @@ public class PushMojo extends AbstractGemMojo {
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, MojoFailureException, GemException {
         if ( ! "1.7.1".equals( jrubyVersion ) ) {
-            List<ArtifactRepository> remotes = new LinkedList<ArtifactRepository>();
-            remotes.addAll(project.getPluginArtifactRepositories() );
-            remotes.addAll(project.getRemoteArtifactRepositories() );
-            gemsInstaller.installOpenSSLGem(this.repoSession, localRepository, remotes );
+            gemsInstaller.installOpenSSLGem(this.repoSession, localRepository, getRemoteRepos() );
         }
         final Script script = this.factory.newScriptFromJRubyJar("gem")
                 .addArg("push");

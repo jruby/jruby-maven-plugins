@@ -3,9 +3,12 @@ package de.saumya.mojo.gem;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -313,4 +316,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     abstract protected void executeWithGems() throws MojoExecutionException,
             ScriptException, GemException, IOException, MojoFailureException;
 
+
+    protected List<ArtifactRepository> getRemoteRepos() {
+        List<ArtifactRepository> remotes = new LinkedList<ArtifactRepository>();
+        remotes.addAll(project.getPluginArtifactRepositories() );
+        remotes.addAll(project.getRemoteArtifactRepositories() );
+        return remotes;
+    }
 }

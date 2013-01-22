@@ -2,7 +2,10 @@ package de.saumya.mojo.rake;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.sonatype.aether.RepositorySystemSession;
 
@@ -50,11 +53,12 @@ public class RakeMojo extends AbstractGemMojo {
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, GemException {
         if (this.project.getBasedir() == null) {
-
+            
             this.gemsInstaller.installGem("rake",
                                           this.rakeVersion,
                                           this.repoSession,
-                                          this.localRepository);
+                                          this.localRepository,
+                                          getRemoteRepos() );
 
         }
         final Script script = this.factory.newScriptFromJRubyJar("rake");

@@ -48,7 +48,8 @@ public class UpdateMojo extends AbstractGemMojo {
             this.gemsInstaller.installGem("bundler",
                                           this.bundlerVersion,
                                           this.repoSession,
-                                          this.localRepository);
+                                          this.localRepository,
+                                          getRemoteRepos());
 
         }
         if (this.bundlerArgs != null) {
