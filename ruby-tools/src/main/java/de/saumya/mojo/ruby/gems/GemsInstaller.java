@@ -6,7 +6,6 @@ package de.saumya.mojo.ruby.gems;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.repository.RemoteRepository;
 
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -24,8 +24,8 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class GemsInstaller {
 
-    private static final String OPENSSL_VERSION = "0.7.6.1";
-    private static final String OPENSSL = "jruby-openssl";//"jruby-openssl-maven";
+    private static final String OPENSSL_VERSION = "0.8.2";
+    private static final String OPENSSL = "jruby-openssl";
     
     private static final FileFilter FILTER = new FileFilter() {
         
@@ -59,32 +59,28 @@ public class GemsInstaller {
     }
     
     public MavenProject installOpenSSLGem(final RepositorySystemSession repositorySystemSession,
-            final ArtifactRepository localRepository) throws GemException,
+            final ArtifactRepository localRepository, List<ArtifactRepository> remotes) throws GemException,
             IOException, ScriptException {
-        return installGem(OPENSSL, OPENSSL_VERSION, repositorySystemSession, localRepository);
+        return installGem(OPENSSL, OPENSSL_VERSION, repositorySystemSession, localRepository, remotes);
     }
     
     public MavenProject installGem(final String name, final String version,
             final RepositorySystemSession repositorySystemSession,
-            final ArtifactRepository localRepository) throws GemException,
+            final ArtifactRepository localRepository, List<ArtifactRepository> remoteRepositories) throws GemException,
             IOException, ScriptException {
         final Artifact artifact;
-        final List<ArtifactRepository> remoteRepositories;
         if (version == null) {
-            remoteRepositories = Collections.singletonList(this.manager.defaultGemArtifactRepository());
             artifact = this.manager.createGemArtifactWithLatestVersion(name,
                                                                        localRepository,
                                                                        remoteRepositories);
         }
         else {
-            remoteRepositories = new ArrayList<ArtifactRepository>();
-            this.manager.addDefaultGemRepositories(remoteRepositories);
             artifact = this.manager.createGemArtifact(name, version);
         }
         final MavenProject pom = this.manager.buildPom(artifact,
-                                                       repositorySystemSession,
-                                                       localRepository,
-                                                       remoteRepositories);
+                                                        repositorySystemSession,
+                                                        localRepository,
+                                                        remoteRepositories);
         installPom(pom);
         return pom;
     }

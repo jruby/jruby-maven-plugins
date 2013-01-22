@@ -40,7 +40,7 @@ import org.sonatype.aether.RepositorySystemSession;
 @Component(role = GemManager.class)
 public class DefaultGemManager implements GemManager {
 
-    private static final String       DEFAULT_GEMS_REPOSITORY_BASE_URL = "http://rubygems-proxy.torquebox.org/";
+    public static final String       DEFAULT_GEMS_REPOSITORY_BASE_URL = "http://rubygems-proxy.torquebox.org/";
 
     @Requirement 
     private RepositorySystem          repositorySystem;
@@ -116,10 +116,10 @@ public class DefaultGemManager implements GemManager {
                                                                                  new DefaultRepositoryLayout(),
                                                                                  enabled, disabled);        
         repos.add(repo);
-        repo = this.repositorySystem.createArtifactRepository("rubygems-prereleases",
-                                                              DEFAULT_GEMS_REPOSITORY_BASE_URL + "prereleases",
-                                                              new DefaultRepositoryLayout(),
-                                                              disabled, enabled);
+//        repo = this.repositorySystem.createArtifactRepository("rubygems-prereleases",
+//                                                              DEFAULT_GEMS_REPOSITORY_BASE_URL + "prereleases",
+//                                                              new DefaultRepositoryLayout(),
+//                                                              disabled, enabled);
         
         //repos.add(repo);
     }

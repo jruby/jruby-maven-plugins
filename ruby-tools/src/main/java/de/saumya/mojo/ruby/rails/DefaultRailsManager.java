@@ -12,10 +12,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.InvalidRepositoryException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -32,6 +36,7 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.velocity.VelocityComponent;
 import org.sonatype.aether.RepositorySystemSession;
 
+import de.saumya.mojo.ruby.gems.DefaultGemManager;
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.gems.GemsInstaller;
 import de.saumya.mojo.ruby.script.Script;
@@ -143,10 +148,19 @@ public class DefaultRailsManager implements RailsManager {
             this.logger.info("NOTE: use rails version 3.0.9 to creates a nice platform independent Gemfile." +
                              " change the rails version anytime later");
         }
+        List<ArtifactRepository> remotes = new LinkedList<ArtifactRepository>();
+        ArtifactRepositoryPolicy enabled = new ArtifactRepositoryPolicy(true, "never", "strict");
+        ArtifactRepositoryPolicy disabled = new ArtifactRepositoryPolicy(false, "never", "strict");
+        ArtifactRepository repo = this.repositorySystem.createArtifactRepository("rubygems-releases",
+                                                                                 DefaultGemManager.DEFAULT_GEMS_REPOSITORY_BASE_URL + "releases",
+                                                                                 new DefaultRepositoryLayout(),
+                                                                                 enabled, disabled);
+        remotes.add(repo);
+        //installer.
         railsVersion = installer.installGem("rails",
                                             railsVersion,
                                             repositorySystemSession,
-                                            localRepository()).getVersion();
+                                            localRepository(), remotes).getVersion();
 
         // correct spelling
         if (DATABASES.containsKey(database)) {
@@ -213,11 +227,11 @@ public class DefaultRailsManager implements RailsManager {
                 installer.installGem("activerecord-jdbc" + database + "-adapter",
                                      null,// use the latest version
                                      repositorySystemSession,
-                                     localRepository());
+                                     localRepository(), remotes);
                 installer.installGem("resty-generators",
                                      null,// use the latest versiona
                                      repositorySystemSession,
-                                     localRepository());
+                                     localRepository(), remotes);
                 generate(installer,
                          repositorySystemSession,
                          appPath,
