@@ -128,7 +128,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected GemsConfig    gemsConfig;
 
     protected GemsInstaller gemsInstaller;
-
+    
+    protected JRubyVersion version;
+    
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException{
         if (this.project.getBasedir() == null) {
@@ -153,7 +155,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig.setBinDirectory(this.binDirectory);
         // this.gemsConfig.setUserInstall(userInstall);
         // this.gemsConfig.setSystemInstall(systemInstall);
-        this.gemsConfig.setSkipJRubyOpenSSL(!this.includeOpenSSL);
+        this.version = new JRubyVersion( jrubyVersion );
+        this.gemsConfig.setSkipJRubyOpenSSL( ! (this.includeOpenSSL && version.needsOpenSSL() ) );
 
         super.execute();
     }
@@ -277,7 +280,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 this.gemsInstaller.installGems(this.project,
                                                this.plugin.getArtifacts(), 
                                                this.localRepository, 
-                                               this.project.getPluginArtifactRepositories());
+                                               getRemoteRepos());
 
                 // reset old gem home again
                 this.gemsConfig.setGemHome(home);

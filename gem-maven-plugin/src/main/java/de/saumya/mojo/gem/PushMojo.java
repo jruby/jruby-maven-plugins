@@ -69,7 +69,7 @@ public class PushMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, MojoFailureException, GemException {
-        if ( ! "1.7.1".equals( jrubyVersion ) ) {
+        if ( version.needsOpenSSL() ) {
             gemsInstaller.installOpenSSLGem(this.repoSession, localRepository, getRemoteRepos() );
         }
         final Script script = this.factory.newScriptFromJRubyJar("gem")
@@ -94,13 +94,13 @@ public class PushMojo extends AbstractGemMojo {
         }
         else {
             // no pom artifact and no given gem so search for a gem
-            if (this.gem == null) {
+            if (this.gem == null && null == args ) {
                 for (final File f : this.launchDirectory().listFiles()) {
                     if (f.getName().endsWith(".gem")) {
                         if (this.gem == null) {
                             this.gem = f;
                         }
-                        else {
+                        else {                            
                             throw new MojoFailureException("more than one gem file found, use -Dgem=... to specifiy one");
                         }
                     }
