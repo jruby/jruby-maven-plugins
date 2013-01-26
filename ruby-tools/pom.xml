@@ -64,7 +64,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>maven-tools</artifactId>
-      <version>0.32.0</version>
+      <version>0.32.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -83,19 +83,6 @@
     <resources>
       <resource>
         <directory>${basedir}/src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>${basedir}/src/main/gem/maven-tools/lib</directory>
-      </resource>
-      <resource>
-        <directory>${basedir}/src/main/ruby</directory>
-      </resource>
-      <resource>
-        <directory>${basedir}/src/main/ruby</directory>
-	<filtering>true</filtering>
-        <includes>
-          <include>**/versions.rb</include>
-        </includes>
       </resource>
     </resources>
   </build>
