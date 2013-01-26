@@ -211,7 +211,6 @@ public class GemsInstaller {
                             .addArg(booleanArg(this.config.isVerbose(),
                                                "verbose"));
                 }
-                System.err.println( artifact  + " " + artifact.getFile());
                 if (artifact.getFile() != null)
                 script.addArg(artifact.getFile());
             }

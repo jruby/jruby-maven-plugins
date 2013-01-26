@@ -9,8 +9,6 @@ public class JRubyVersion
         int first = version.indexOf( '.' );
         //this.major = Integer.parseInt( version.substring( 0, first ) );
         this.minor = Integer.parseInt( version.substring( first + 1, version.indexOf( '.', first + 1 ) ) );
-
-        System.err.println( this.minor);
     }
 
     boolean needsOpenSSL()
