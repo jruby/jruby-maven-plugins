@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.codehaus.plexus.util.FileUtils;
 
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -38,6 +39,13 @@ public class PomMojo extends AbstractJRubyMojo {
     protected boolean force = false;
 
     /**
+     * temporary store generated pom.
+     * 
+     * @parameter default-value="${project.build.drectory}/pom.xml"
+     */
+    protected File tmpPom;
+
+    /**
      * use a gemspec file to generate a pom
      * <br/>
      * Command line -Dpom.gemspec=...
@@ -55,67 +63,121 @@ public class PomMojo extends AbstractJRubyMojo {
      *            default-value="Gemfile"
      */
     protected File    gemfile;
+    
+    /**
+     * @parameter
+     */
+    private boolean skipGeneration;
 
     @Override
     public void executeJRuby() throws MojoExecutionException, ScriptException, IOException {
-        if (this.pom.exists() && !this.force) {
-            getLog().info(this.pom.getName()
-                    + " already exists. use '-Dpom.force=true' to overwrite");
-            return;
-        }
-        if (!this.gemfile.exists()){
+        File source = null;
+        if( this.skipGeneration )
+        {
             this.gemfile = null;
-            if (this.gemspec == null) {
-                getLog().debug("no gemspec file given, see if there is single one");
-                for (final File file : (this.project.getBasedir() == null
-                        ? new File(".")
-                        : this.project.getBasedir()).listFiles()) {
-                    if (file.getName().endsWith(".gemspec")) {
-                        if (this.gemspec != null) {
-                            getLog().info("there is no gemspec file given but there are more then one in the current directory.");
-                            getLog().info("use '-Dpom.gemspec=...' to select the gemspec file or -Dpom.gemfile to select a Gemfile to process");
-                            break;
-                        }
-                        this.gemspec = file;
-                    }
+            this.gemspec = null;
+        }
+        else
+        {
+            if ( this.gemfile.exists() )
+            {
+                this.gemspec = null;
+            }
+            else
+            {
+                this.gemfile = null;
+                if (this.gemspec == null)
+                {
+                    this.gemspec = findGemspec();
+                }
+            }
+
+            if (this.gemspec != null)
+            {
+                generatePom( this.gemspec, "gemspec" );
+                source = this.gemspec;
+            }
+            if (this.gemfile != null )
+            {
+                generatePom( this.gemfile,  "gemfile" );
+                source = this.gemspec;
+            }
+        }
+
+        copyGeneratedPom( source );        
+    }
+
+    private void copyGeneratedPom( File source ) throws IOException {
+        if( pom.exists() && tmpPom.exists() )
+        {
+            String pomString = FileUtils.fileRead( pom );
+            String tmpString = FileUtils.fileRead( tmpPom );
+            if ( force ||
+                 // no source then copy on change
+                 ( source == null && ! pomString.equals( tmpString ) ) ||
+                 // with source copy on modification
+                 ( source != null && source.lastModified() > pom.lastModified() ) )
+            {
+                copy();
+            }
+            else if (this.jrubyVerbose)
+            {
+                if ( source != null )
+                {
+                    getLog().info( "skip creation of pom. force creation with -Dpom.force");
+                }
+                else
+                {
+                    tmpPom.delete();
+                    getLog().info( "generated pom up to date - deleted " +
+                            tmpPom.getAbsolutePath().replace( this.project.getBasedir().getAbsolutePath() + "/", "" ) );
                 }
             }
         }
-        if (this.gemspec == null && this.gemfile == null) {
-            getLog().info("no gemspec file or Gemfile. nothing to do.");
-            return;
+        else if ( tmpPom.exists() )
+        {
+            copy();
         }
-        else {
-            File file;
-            String type;
-            if (this.gemspec == null) {
-                file = this.gemfile;
-                type = "gemfile";
-            }
-            else {
-                file = this.gemspec;
-                type = "gemspec";
-            }
-            if (!(this.pom.exists() && file.lastModified() > this.pom.lastModified())
-                    || this.force) {
-                if (this.jrubyVerbose) {
-                    getLog().info("create pom using following versions:");
-                    getLog().info("\tjruby-plugins-version: "
-                            + this.plugin.getVersion());
-                    getLog().info("\tjruby-version: " + this.jrubyVersion);
+    }
+
+    private void copy() throws IOException {
+        //pom.delete();
+        FileUtils.rename( tmpPom, pom );
+        if (this.jrubyVerbose)
+        {
+          getLog().info( "moved " +
+                         tmpPom.getAbsolutePath().replace( this.project.getBasedir().getAbsolutePath() + "/", "" ) + 
+                         " to " + 
+                         pom.getAbsolutePath().replace( this.project.getBasedir().getAbsolutePath() + "/", "" ) );
+        }
+    }
+
+    private void generatePom(File file, String type) throws ScriptException,
+            IOException {
+        this.factory.newScriptFromResource("maven/tools/pom_generator.rb")
+                .addArg(type)
+                .addArg(file)
+                .addArg(this.plugin.getVersion())
+                .addArg(this.jrubyVersion)
+                .executeIn(launchDirectory(), this.tmpPom);
+    }
+
+    private File findGemspec() {
+        getLog().debug("no gemspec file given, see if there is single one");
+        File result = null;
+        File basedir = this.project.getBasedir() == null
+                ? new File(".")
+                : this.project.getBasedir();
+        for (final File file : basedir.listFiles()) {
+            if (file.getName().endsWith(".gemspec")) {
+                if (result != null) {   
+                    getLog().info("there is no gemspec file given but there are more then one in the current directory.");
+                    getLog().info("use '-Dpom.gemspec=...' to select the gemspec file or -Dpom.gemfile to select a Gemfile to process");
+                    return null;
                 }
-                this.factory.newScriptFromResource("maven/tools/pom_generator.rb")
-                        .addArg(type)
-                        .addArg(file)
-                        .addArg(this.plugin.getVersion())
-                        .addArg(this.jrubyVersion)
-                        .executeIn(launchDirectory(), this.pom);
-            }
-            else {
-                if (this.jrubyVerbose) {
-                    getLog().info("pom is newer then " + type + ". skip creation of pom. force creation with -Dpom.force");
-                }
+                result = file;
             }
         }
+        return result;
     }
 }
