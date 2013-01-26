@@ -154,6 +154,12 @@ public class GemsInstaller {
                 for(Artifact a : this.manager.resolve(openssl,
                                                       localRepository,
                                                       remoteRepos, true) ) {
+                    if (a.getFile() == null || !a.getFile().exists()) {
+                        this.manager.resolve(a,
+                                             localRepository,
+                                             remoteRepos);
+
+                    }
                     script = maybeAddArtifact(script, a);
                 }
             }
@@ -205,6 +211,8 @@ public class GemsInstaller {
                             .addArg(booleanArg(this.config.isVerbose(),
                                                "verbose"));
                 }
+                System.err.println( artifact  + " " + artifact.getFile());
+                if (artifact.getFile() != null)
                 script.addArg(artifact.getFile());
             }
         }
