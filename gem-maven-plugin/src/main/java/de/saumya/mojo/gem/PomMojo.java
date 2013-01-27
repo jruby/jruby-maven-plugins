@@ -118,7 +118,7 @@ public class PomMojo extends AbstractJRubyMojo {
                  // with source copy on modification
                  ( source != null && source.lastModified() > pom.lastModified() ) )
             {
-                copy();
+                movePom();
             }
             else if (this.jrubyVerbose)
             {
@@ -136,13 +136,17 @@ public class PomMojo extends AbstractJRubyMojo {
         }
         else if ( tmpPom.exists() )
         {
-            copy();
+            movePom();
         }
     }
 
-    private void copy() throws IOException {
+    private void movePom() throws IOException {
         //pom.delete();
         FileUtils.rename( tmpPom, pom );
+        // helper for ruby-maven to keep the project data valid 
+        if (project.getFile().getAbsolutePath().equals( tmpPom.getAbsolutePath() ) ){
+            project.setFile( pom );
+        }
         if (this.jrubyVerbose)
         {
           getLog().info( "moved " +
