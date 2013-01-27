@@ -128,6 +128,7 @@ public class PomMojo extends AbstractJRubyMojo {
                 }
                 else
                 {
+                    rubyMavenHelper();
                     tmpPom.delete();
                     getLog().info( "generated pom up to date - deleted " +
                             tmpPom.getAbsolutePath().replace( this.project.getBasedir().getAbsolutePath() + "/", "" ) );
@@ -143,16 +144,20 @@ public class PomMojo extends AbstractJRubyMojo {
     private void movePom() throws IOException {
         //pom.delete();
         FileUtils.rename( tmpPom, pom );
-        // helper for ruby-maven to keep the project data valid 
-        if (project.getFile().getAbsolutePath().equals( tmpPom.getAbsolutePath() ) ){
-            project.setFile( pom );
-        }
+        rubyMavenHelper();
         if (this.jrubyVerbose)
         {
           getLog().info( "moved " +
                          tmpPom.getAbsolutePath().replace( this.project.getBasedir().getAbsolutePath() + "/", "" ) + 
                          " to " + 
                          pom.getAbsolutePath().replace( this.project.getBasedir().getAbsolutePath() + "/", "" ) );
+        }
+    }
+
+    private void rubyMavenHelper() {
+        // helper for ruby-maven to keep the project data valid 
+        if (project.getFile().getAbsolutePath().equals( tmpPom.getAbsolutePath() ) ){
+            project.setFile( pom );
         }
     }
 
