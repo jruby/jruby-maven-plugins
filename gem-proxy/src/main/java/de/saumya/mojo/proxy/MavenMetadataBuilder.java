@@ -11,11 +11,12 @@ public class MavenMetadataBuilder extends RubygemsHtmlVisitor {
     
     public static void main(String... args) throws Exception{
         String first = null;
-        for(int i = 1; i < 10; i ++){
+        for(int i = 1; i < 5; i ++){
             long start = System.currentTimeMillis();
             MavenMetadataBuilder visitor = new MavenMetadataBuilder("rails", true, Controller.BROKEN_GEMS.get("rails"));
             visitor.build();
             System.err.println(System.currentTimeMillis() - start);
+            System.out.println(visitor.toXML());
             if(first == null){
                 first = visitor.toXML().replaceFirst(".*<last.*\n", "");
             }
@@ -42,7 +43,7 @@ public class MavenMetadataBuilder extends RubygemsHtmlVisitor {
         xml.append("  <artifactId>").append(this.gemname).append("</artifactId>\n");
         xml.append("  <versioning>\n");
         xml.append("    <versions>\n");
-        accept(new URL("http://rubygems.org/gems/" + this.gemname + "/versions"));
+        accept(new URL("https://rubygems.org/gems/" + this.gemname + "/versions"));
         xml.append("    </versions>\n");
         xml.append("  </versioning>\n");
         xml.append("  <lastUpdated>")

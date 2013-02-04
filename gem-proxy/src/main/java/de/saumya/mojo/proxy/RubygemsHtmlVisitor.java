@@ -67,7 +67,7 @@ public abstract class RubygemsHtmlVisitor {
         }
     }
 
-    private void checkLine(String versionLine) {        
+    private void checkLine(String versionLine) {
         if(!versionLine.contains("yanked") && !versionLine.contains("x86-m")){
             String version = versionLine.replaceFirst("</a>.*$", "")
                     .replaceFirst("^.*>", "").trim();

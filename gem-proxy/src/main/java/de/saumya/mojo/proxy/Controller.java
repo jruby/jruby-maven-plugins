@@ -31,7 +31,7 @@ public class Controller {
     
     private static final String SHA1 = ".sha1";
 
-    private static final String RUBYGEMS_URL = "http://rubygems.org/gems";
+    private static final String RUBYGEMS_URL = "https://rubygems.org/gems";
 
     static final Map<String, Set<String>> BROKEN_GEMS = new HashMap<String, Set<String>>();
     
