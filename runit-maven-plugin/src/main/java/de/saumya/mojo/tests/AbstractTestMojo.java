@@ -71,11 +71,12 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
     protected File summaryReport;
 
     protected void executeWithGems() throws MojoExecutionException, IOException, ScriptException, GemException {
+        
         testReportDirectory = new File(testReportDirectory.getAbsolutePath().replace("${project.basedir}/",""));
         List<JRubyRun> runs = new ArrayList<JRubyRun>();
         if (versions == null){
             final Mode mode = use18and19 == null? Mode.DEFAULT: Mode._18_19;
-            runs.add(new JRubyRun(mode, this.jrubyVersion));
+            runs.add(new JRubyRun(mode, getJrubyVersion().toString()));
         }
         else {
             final Mode mode;
@@ -108,7 +109,6 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         for( JRubyRun run: runs){
             scriptFactory = newTestScriptFactory(run.mode);
             scriptFactory.setBaseDir(project.getBasedir());
-            
             scriptFactory.setGemHome(gemsConfig.getGemHome());
             scriptFactory.setGemPaths(gemsConfig.getGemPath());
             scriptFactory.setOutputDir(outputDir);
@@ -155,7 +155,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
 
     protected void runIt(JRubyRun run, TestScriptFactory testScriptFactory) throws MojoExecutionException, IOException, ScriptException {
         final de.saumya.mojo.ruby.script.ScriptFactory factory;
-        if (this.jrubyVersion.equals(run.version) || run.mode == Mode.DEFAULT){
+        if (getJrubyVersion().toString().equals(run.version) || run.mode == Mode.DEFAULT){
             factory = this.factory;
         }
         else {
