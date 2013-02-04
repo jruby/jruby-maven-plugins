@@ -111,7 +111,7 @@ public class CompileMojo extends AbstractJRubyMojo {
             script.addArg("-t", fixPathSeparator(this.outputDirectory));
         }
 
-        if(jrubyVersion.charAt(2) >= '6' && (this.jrubyVerbose || this.jrubycVerbose)){
+        if( getJrubyVersion().hasJRubycVerbose() && (this.jrubyVerbose || this.jrubycVerbose)){
             script.addArg("--verbose");
         }
         // add current directory

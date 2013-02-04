@@ -34,7 +34,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected static final String JRUBY_STDLIB = "jruby-stdlib";
 
-    protected static final String DEFAULT_JRUBY_VERSION = "1.7.1";
+    protected static final String DEFAULT_JRUBY_VERSION = "1.7.2";
 
 
     /**
@@ -76,7 +76,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      *
      * @parameter expression="${jruby.version}"
      */
-    protected String jrubyVersion;
+    private String jrubyVersion;
 
     /**
      * fork the JRuby execution.
@@ -156,6 +156,17 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected ScriptFactory factory;
 
+    private JRubyVersion jRubyVersion;
+
+    protected JRubyVersion getJrubyVersion()
+    {
+        if (jRubyVersion == null )
+        {
+            this.jRubyVersion = new JRubyVersion( jrubyVersion == null ? DEFAULT_JRUBY_VERSION : jrubyVersion );
+        }
+        return jRubyVersion;
+    }
+    
     protected ScriptFactory newScriptFactory() throws MojoExecutionException {
         try {
             return newScriptFactory(resolveJRubyArtifact());

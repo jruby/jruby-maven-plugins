@@ -167,7 +167,7 @@ public class PomMojo extends AbstractJRubyMojo {
                 .addArg(type)
                 .addArg(file)
                 .addArg(this.plugin.getVersion())
-                .addArg(this.jrubyVersion)
+                .addArg(getJrubyVersion().toString())
                 .executeIn(launchDirectory(), this.tmpPom);
     }
 

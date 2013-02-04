@@ -129,8 +129,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     protected GemsInstaller gemsInstaller;
     
-    protected JRubyVersion version;
-    
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException{
         if (this.project.getBasedir() == null) {
@@ -155,8 +153,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig.setBinDirectory(this.binDirectory);
         // this.gemsConfig.setUserInstall(userInstall);
         // this.gemsConfig.setSystemInstall(systemInstall);
-        this.version = new JRubyVersion( jrubyVersion );
-        this.gemsConfig.setSkipJRubyOpenSSL( ! (this.includeOpenSSL && version.needsOpenSSL() ) );
+        this.gemsConfig.setSkipJRubyOpenSSL( ! (this.includeOpenSSL && getJrubyVersion().needsOpenSSL() ) );
 
         super.execute();
     }
@@ -199,11 +196,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     private File setupNativeSupport() throws MojoExecutionException {
         File target = new File(this.project.getBuild().getDirectory());
-        File jrubyDir = new File(target, "jruby-" + jrubyVersion);
+        File jrubyDir = new File(target, "jruby-" + getJrubyVersion());
         if (!jrubyDir.exists()){
             Artifact dist = manager.createArtifact("org.jruby",
                                                    "jruby-dist",
-                                                   jrubyVersion,
+                                                   getJrubyVersion().toString(),
                                                    "bin",
                                                    "zip");
             try {
@@ -224,7 +221,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             File f = null;
             try {
                 unzip.extract();
-                f = new File(target, "jruby-" + jrubyVersion + "/bin/jruby");
+                f = new File(target, "jruby-" + getJrubyVersion() + "/bin/jruby");
                 // use reflection so it compiles with java1.5 as well but does not set executable
                 Method m = f.getClass().getMethod("setExecutable", boolean.class);
                 m.invoke(f, new Boolean(true));

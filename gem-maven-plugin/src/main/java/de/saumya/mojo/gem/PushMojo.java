@@ -2,10 +2,7 @@ package de.saumya.mojo.gem;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.sonatype.aether.RepositorySystemSession;
@@ -69,7 +66,7 @@ public class PushMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, MojoFailureException, GemException {
-        if ( version.needsOpenSSL() ) {
+        if ( getJrubyVersion().needsOpenSSL() ) {
             gemsInstaller.installOpenSSLGem(this.repoSession, localRepository, getRemoteRepos() );
         }
         final Script script = this.factory.newScriptFromJRubyJar("gem")
