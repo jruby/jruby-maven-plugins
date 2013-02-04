@@ -158,11 +158,14 @@ public class PackageMojo extends AbstractGemMojo {
                         .addArg("build", this.gemspec)
                         .executeIn(launchDirectory());
 
+                // find file with biggest lastModified
                 File gemFile = null;
                 for (final File f : launchDirectory().listFiles()) {
                     if (f.getName().endsWith(".gem")) {
-                        gemFile = f;
-                        break;
+                        if (gemFile == null || gemFile.lastModified() < f.lastModified() )
+                        {
+                            gemFile = f;
+                        }
                     }
                 }
                 if (project.getFile() != null && artifact.isGem()) {
