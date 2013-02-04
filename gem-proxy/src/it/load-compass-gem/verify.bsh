@@ -1,0 +1,15 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+String expected = "Successfully installed compass-0.12.2";
+if ( !log.contains( expected ) )
+{
+    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+expected = "Successfully installed sass-";
+if ( !log.contains( expected ) )
+{
+    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
