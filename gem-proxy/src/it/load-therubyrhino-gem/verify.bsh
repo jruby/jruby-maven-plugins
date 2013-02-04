@@ -3,7 +3,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "2 gems installed";
+String expected = "Successfully installed therubyrhino-1.72.4-java";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
