@@ -25,8 +25,7 @@ public class ConsoleMojo extends AbstractRailsMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (this.jrubyVersion != null
-                && this.jrubyVersion.compareTo("1.5.0") < 0) {
+        if (getJrubyVersion().toString().compareTo("1.5.0") < 0) {
             throw new MojoExecutionException("does not work with jruby version < 1.5.0");
         }
         // make sure the whole things run in the same process

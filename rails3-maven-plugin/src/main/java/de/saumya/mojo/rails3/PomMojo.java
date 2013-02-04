@@ -46,14 +46,14 @@ public class PomMojo extends AbstractRailsMojo {
                     getLog().info("create pom using following versions:");
                     getLog().info("\tjruby-plugins-version: "
                             + this.plugin.getVersion());
-                    getLog().info("\tjruby-version: " + this.jrubyVersion);
+                    getLog().info("\tjruby-version: " + getJrubyVersion());
                 }
 
                 this.factory.newScriptFromResource("maven/tools/pom_generator.rb")
                     .addArg("rails")
                     .addArg(this.gemfile.getAbsoluteFile())
                     .addArg(this.plugin.getVersion())
-                    .addArg(this.jrubyVersion)
+                    .addArg(getJrubyVersion().toString())
                     .executeIn(launchDirectory(), this.pom);
                 
                 if (stamp > -1) {
