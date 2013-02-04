@@ -67,12 +67,6 @@ public class MinispecMojo extends AbstractTestMojo {
         }
     }
 
-    @Override
-    protected void executeWithGems() throws MojoExecutionException,
-            IOException, ScriptException, GemException {
-        
-        super.executeWithGems();
-    }
     protected Result runIt(ScriptFactory factory, Mode mode, String version, TestScriptFactory scriptFactory)
             throws IOException, ScriptException, MojoExecutionException {
         
