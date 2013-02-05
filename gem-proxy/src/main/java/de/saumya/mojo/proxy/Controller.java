@@ -33,12 +33,20 @@ public class Controller {
 
     private static final String RUBYGEMS_URL = "https://rubygems.org/gems";
 
+    private static final String RUBYGEMS_S3_URL = "http://s3.amazonaws.com/production.s3.rubygems.org/gems";
+
     static final Map<String, Set<String>> BROKEN_GEMS = new HashMap<String, Set<String>>();
     
     static {
+         // activeresource-2.0.0 does not exist !!!
         Set<String> rails = new TreeSet<String>();
-        rails.add("2.0.0"); // activeresource-2.0.0 does not exist !!!
+        rails.add("2.0.0");
         BROKEN_GEMS.put("rails", rails);
+
+	// juby-openssl-0.7.6 can not open gem with jruby-1.6.8
+        Set<String> openssl = new TreeSet<String>();
+        openssl.add("0.7.6"); 
+        BROKEN_GEMS.put("jruby-openssl", openssl);
     }
  
     private final File localStorage;
@@ -171,7 +179,7 @@ public class Controller {
                     if(platform != null){
                         filename = filename.replace(".gem", "-" + platform + ".gem");
                     }
-                    return new FileLocation(new URL(RUBYGEMS_URL + "/" + filename));
+                    return new FileLocation(new URL(RUBYGEMS_S3_URL + "/" + filename));
                 }
                 if(filename.endsWith(SHA1) || filename.endsWith(".pom")){
                     File local = new File(localStorage, filename);
