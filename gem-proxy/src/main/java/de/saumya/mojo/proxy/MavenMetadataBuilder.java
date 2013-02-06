@@ -45,11 +45,11 @@ public class MavenMetadataBuilder extends RubygemsHtmlVisitor {
         xml.append("    <versions>\n");
         accept(new URL("https://rubygems.org/gems/" + this.gemname + "/versions"));
         xml.append("    </versions>\n");
-        xml.append("  </versioning>\n");
-        xml.append("  <lastUpdated>")
+        xml.append("    <lastUpdated>")
              // hardcoded timestamp so the dynamic sha1 is correct
             .append("19990909090909")
             .append("</lastUpdated>\n");
+        xml.append("  </versioning>\n");
         xml.append("</metadata>\n");
     }
 
