@@ -2,18 +2,16 @@ package de.saumya.mojo.proxy;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -175,11 +173,16 @@ public class Controller {
                             return new FileLocation(filename + " is being generated", Type.TEMP_UNAVAILABLE);
                         }
                     }
-                    String platform = getPlatform(local);
-                    if(platform != null){
-                        filename = filename.replace(".gem", "-" + platform + ".gem");
+                    String url = RUBYGEMS_S3_URL + "/" + filename.replace(".gem", "-java.gem");
+                    if ( !exists( url ) ) {
+                        // there are gem which use "jruby" as platform instead of "java"
+                        // like therubyrhino-1.72
+                        url = RUBYGEMS_S3_URL + "/" + filename.replace(".gem", "-jruby.gem");
+                        if ( !exists( url ) ) {
+                            url = RUBYGEMS_S3_URL + "/" + filename;
+                        }
                     }
-                    return new FileLocation(new URL(RUBYGEMS_S3_URL + "/" + filename));
+                    return new FileLocation( new URL( url ) );
                 }
                 if(filename.endsWith(SHA1) || filename.endsWith(".pom")){
                     File local = new File(localStorage, filename);
@@ -196,7 +199,23 @@ public class Controller {
         }
         }
     }
-
+     
+    public boolean exists(String url){
+        try {
+           HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+           con.setRequestMethod("HEAD");
+           return con.getResponseCode() == HttpURLConnection.HTTP_OK;
+        }
+        catch (FileNotFoundException e) {
+            //e.printStackTrace();
+            return false;
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
     private FileLocation directory(String gemname, String version, String path) throws IOException {
         HtmlDirectoryBuilder builder = new HtmlDirectoryBuilder();
         
@@ -240,6 +259,7 @@ public class Controller {
                 }
                 catch (FileNotFoundException e) {
                     // there are gem which use "jruby" as platform nstead of "java"
+                    // like therubyrhino-1.72
                     try {
                         downloadGemfile(gemfile, new URL(RUBYGEMS_URL + "/"
                                 + gemname + "-jruby.gem"));
@@ -274,30 +294,6 @@ public class Controller {
         }
     }
 
-    private String getPlatform(File file) throws IOException{
-        // hack - once there is another gem like this hardcoded String needs refactoring
-        if (file.getName().startsWith("therubyrhino-1.72.")){
-            return "jruby";
-        }
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
-            String line = reader.readLine();
-            while(line != null){
-                if(line.contains("<platform>java</platform>")){
-                    return "java";
-                }
-                line = reader.readLine();
-            }
-        }
-        finally {
-            if(reader != null) {
-                reader.close();
-            }
-        }
-        return null;
-    }
-    
     private void downloadGemfile(File gemfile, URL url) throws IOException {
         InputStream input = null;
         OutputStream output = null;
