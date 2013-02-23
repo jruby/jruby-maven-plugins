@@ -4,7 +4,7 @@
   <parent>
     <artifactId>tests-parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.29.4-SNAPSHOT</version>
+    <version>0.29.4</version>
     <relativePath>../tests-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>cucumber-maven-plugin</artifactId>
