@@ -45,9 +45,9 @@
 		</goals>
 		<configuration>
 		  <pomIncludes>
-		    <pomInclude>*/pom.xml</pomInclude>
 		  </pomIncludes>
 		  <pomExcludes>
+		    <pomInclude>*/pom.xml</pomInclude>
 		    <pomExclude>big_*/pom.xml</pomExclude>
 		    <pomExclude>new_latest_*/pom.xml</pomExclude>
 		    <pomExclude>pending_*/pom.xml</pomExclude>

@@ -131,6 +131,9 @@
             <artifactId>maven-invoker-plugin</artifactId>
             <version>1.5</version>
             <configuration>
+	      <pomExcludes>
+		<pomExclude>*/pom.xml</pomExclude>
+	      </pomExcludes>
               <projectsDirectory>src/it</projectsDirectory>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
               <preBuildHookScript>setup.bsh</preBuildHookScript>
