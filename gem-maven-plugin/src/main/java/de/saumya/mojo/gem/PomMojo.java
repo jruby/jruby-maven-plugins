@@ -41,7 +41,7 @@ public class PomMojo extends AbstractJRubyMojo {
     /**
      * temporary store generated pom.
      * 
-     * @parameter default-value="${project.build.drectory}/pom.xml"
+     * @parameter default-value="${project.build.directory}/pom.xml"
      */
     protected File tmpPom;
 
@@ -71,6 +71,10 @@ public class PomMojo extends AbstractJRubyMojo {
 
     @Override
     public void executeJRuby() throws MojoExecutionException, ScriptException, IOException {
+        if (tmpPom.getPath().contains( "${project.basedir}" ) )
+        {
+            tmpPom = new File( tmpPom.getPath().replace( "${project.basedir}/", "" ) );
+        }
         File source = null;
         if( this.skipGeneration )
         {
@@ -156,13 +160,14 @@ public class PomMojo extends AbstractJRubyMojo {
 
     private void rubyMavenHelper() {
         // helper for ruby-maven to keep the project data valid 
-        if (project.getFile().getAbsolutePath().equals( tmpPom.getAbsolutePath() ) ){
+        if (project.getFile() != null && project.getFile().getAbsolutePath().equals( tmpPom.getAbsolutePath() ) ){
             project.setFile( pom );
         }
     }
 
     private void generatePom(File file, String type) throws ScriptException,
             IOException {
+        this.tmpPom.getParentFile().mkdirs();
         this.factory.newScriptFromResource("maven/tools/pom_generator.rb")
                 .addArg(type)
                 .addArg(file)
