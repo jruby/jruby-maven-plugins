@@ -16,8 +16,8 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * to execute an inline script the exec parameters are ignored.
  * 
  * @goal exec
+ * @phase initialize
  * @requiresDependencyResolution test
- * @execute phase="process-resources"
  */
 public class ExecMojo extends AbstractGemMojo {
 
@@ -58,13 +58,7 @@ public class ExecMojo extends AbstractGemMojo {
     protected String execArgs = null;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        this.includeOpenSSL = this.jrubyFork;
-        super.execute();
-    }
-
-    @Override
-    public void executeWithGems() throws MojoExecutionException,
+    protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
         Script s;
         if (this.script != null && this.script.length() > 0) {
