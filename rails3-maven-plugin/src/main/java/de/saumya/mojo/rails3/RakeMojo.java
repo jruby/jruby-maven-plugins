@@ -14,6 +14,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal rake
  * @requiresDependencyResolution test
  */
+@Deprecated
 public class RakeMojo extends AbstractRailsMojo {
 
     /**
@@ -33,6 +34,7 @@ public class RakeMojo extends AbstractRailsMojo {
     @Override
     public void executeRails() throws MojoExecutionException, ScriptException,
             IOException, GemException, RailsException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use rake:rails instead" );
         this.railsManager.rake(this.gemsInstaller,
                           this.repoSession,
                           launchDirectory(),

@@ -10,6 +10,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
 /**
  * @goal pom
  */
+@Deprecated
 public class PomMojo extends AbstractRailsMojo {
 
     /**
@@ -29,6 +30,7 @@ public class PomMojo extends AbstractRailsMojo {
     @Override
     protected void executeRails() throws MojoExecutionException, IOException,
             ScriptException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use gem:pom instead" );
         if (this.pom.exists() && !this.force) {
             getLog().info(this.pom.getName()
                     + " already exists. use '-Dpom.force=true' to overwrite");

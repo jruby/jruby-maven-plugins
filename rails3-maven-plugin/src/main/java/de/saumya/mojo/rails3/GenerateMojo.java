@@ -15,6 +15,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal generate
  * @requiresDependencyResolution test
  */
+@Deprecated
 public class GenerateMojo extends AbstractRailsMojo {
 
     /**
@@ -33,6 +34,7 @@ public class GenerateMojo extends AbstractRailsMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use gem:exec or bundler:exec instead" );
         // make sure the whole things run in the same process
         this.jrubyFork = false;
         super.execute();

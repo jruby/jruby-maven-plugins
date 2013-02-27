@@ -21,6 +21,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  *
  * @goal new
  */
+@Deprecated
 public class NewMojo extends AbstractRailsMojo {
 
     /**
@@ -134,6 +135,7 @@ public class NewMojo extends AbstractRailsMojo {
     @Override
     void executeRails() throws MojoExecutionException, ScriptException,
             IOException, GemException, RailsException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use gem:exec or bundler:exec instead" );
         if(railsVersion != null && !this.railsVersion.startsWith("3.")) {
             throw new MojoExecutionException("given rails version is not rails-3.x.y : "
                                              + this.railsVersion);

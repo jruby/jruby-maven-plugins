@@ -7,6 +7,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @phase initialize
  * @requiresDependencyResolution test
  */
+@Deprecated
 public class InitializeMojo extends AbstractRailsMojo {
 
     @Override

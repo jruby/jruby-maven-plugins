@@ -12,6 +12,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal server
  * @requiresDependencyResolution runtime
  */
+@Deprecated
 public class ServerMojo extends AbstractRailsMojo {
 
     /**
@@ -24,6 +25,7 @@ public class ServerMojo extends AbstractRailsMojo {
     @Override
     protected void executeRails() throws MojoExecutionException,
             ScriptException, IOException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use gem:exec or bundler:exec instead" );
         this.factory.newScript(railsScriptFile())
                 .addArg("server")
                 .addArgs(this.serverArgs)

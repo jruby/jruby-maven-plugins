@@ -12,6 +12,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal dbconsole
  * @requiresDependencyResolution compile
  */
+@Deprecated
 public class DbConsoleMojo extends AbstractRailsMojo {
 
     /**
@@ -33,6 +34,7 @@ public class DbConsoleMojo extends AbstractRailsMojo {
     @Override
     public void executeRails() throws MojoExecutionException,
             ScriptException, IOException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use gem:exec or bundler:exec instead" );
         this.factory.newScript(railsScriptFile())
                 .addArg("dbconsole")
                 .addArgs(this.dbconsoleArgs)

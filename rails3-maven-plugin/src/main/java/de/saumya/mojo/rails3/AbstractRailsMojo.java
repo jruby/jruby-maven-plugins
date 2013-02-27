@@ -16,6 +16,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * abstract rails mojo which provides a few helper methods and the rails.args
  * parameter.
  */
+@Deprecated
 public abstract class AbstractRailsMojo extends AbstractGemMojo {
 
     /**

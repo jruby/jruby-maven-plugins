@@ -14,6 +14,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal console
  * @requiresDependencyResolution compile
  */
+@Deprecated
 public class ConsoleMojo extends AbstractRailsMojo {
 
     /**
@@ -25,6 +26,7 @@ public class ConsoleMojo extends AbstractRailsMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use gem:exec or bundler:exec instead" );
         if (getJrubyVersion().toString().compareTo("1.5.0") < 0) {
             throw new MojoExecutionException("does not work with jruby version < 1.5.0");
         }
