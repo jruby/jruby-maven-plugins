@@ -11,6 +11,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * 
  * @goal gem
  */
+@Deprecated
 public class GemMojo extends AbstractGemMojo {
     /**
      * arguments for the gem command of JRuby.
@@ -24,6 +25,7 @@ public class GemMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use gem:exec instead" );
         this.factory.newScriptFromJRubyJar("gem")
                 .addArgs(this.gemArgs)
                 .addArgs(this.args)

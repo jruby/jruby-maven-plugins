@@ -14,6 +14,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * 
  * @goal execute_in_phase
  */
+@Deprecated
 public class ExecuteInPhaseMojo extends AbstractGemMojo {
 
     /** @parameter expression="${phase.file}" default-value="Mavenfile" */
@@ -25,6 +26,7 @@ public class ExecuteInPhaseMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
+        getLog().warn( "DEPRECATED: just do not use that anymore. use gem:exec instead" );
         this.factory.newScriptFromResource("maven/tools/execute_in_phase.rb")
                 .addArg(this.file.getAbsolutePath())
                 .addArg(this.phase)
