@@ -84,7 +84,8 @@ class AntLauncher extends AbstractLauncher {
         	java.createJvmarg().setValue(arg);	
         }
         
-        if (this.factory.jrubyJar != null){
+        // hack to avoid jruby-core in bootclassloader where as the dependent jars are in system classloader
+        if (this.factory.jrubyJar != null && this.factory.jrubyJar.equals(this.factory.jrubyStdlibJar)){
         java.createJvmarg().setValue("-Xbootclasspath/a:"
                 + this.factory.jrubyJar.getAbsolutePath());
         }

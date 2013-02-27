@@ -26,7 +26,7 @@ public class ScriptFactory {
     final Arguments            jvmArgs      = new Arguments();
 
     private final Map<String, String>  env          = new HashMap<String, String>();
-    private final File                 jrubyStdlibJar;
+    final File                 jrubyStdlibJar;
 
     final Logger               logger;
     final ClassRealm           classRealm;
