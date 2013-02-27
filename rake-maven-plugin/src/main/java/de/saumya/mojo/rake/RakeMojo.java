@@ -2,10 +2,7 @@ package de.saumya.mojo.rake;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.sonatype.aether.RepositorySystemSession;
 
