@@ -30,7 +30,7 @@ public class MinispecMojo extends AbstractTestMojo {
      *
      * @parameter expression="${minispec.dir}" default-value="spec/**\/*_spec.rb"
      */
-    private final String minispecDirectory = null;
+    private String minispecDirectory = null;
 
     /**
      * arguments for the minitest command. <br/>
@@ -38,7 +38,7 @@ public class MinispecMojo extends AbstractTestMojo {
      *
      * @parameter expression="${minispec.args}"
      */
-    private final String minispecArgs = null;
+    private String minispecArgs = null;
 
     /**
      * skip the minispecs <br/>

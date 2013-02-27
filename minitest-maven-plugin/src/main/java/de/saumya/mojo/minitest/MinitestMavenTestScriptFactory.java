@@ -35,7 +35,11 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
         builder.append("  require 'bundler'\n");
         builder.append("  Bundler.require\n");
         builder.append("rescue Exception\n");
-        builder.append("  gem 'minitest'\n");
+        builder.append("  begin\n");
+        builder.append("    gem 'minitest'\n");
+        builder.append("  rescue Exception\n");
+        builder.append("    # assume we run ruby19\n");
+        builder.append("  end\n");
         builder.append("end\n");
         builder.append("require 'minitest/autorun'\n");
         builder.append("Dir[SOURCE_DIR].each { |f| require f if File.file? f }\n");
