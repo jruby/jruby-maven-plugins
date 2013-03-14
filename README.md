@@ -106,7 +106,7 @@ more examples
 
 for more example look into the integration test of the various plugins
 
-* [jruby-maven-plugin/src/it](https://github.com/torquebox/jruby-maven-plugins/tree/master/gem-maven-plugin/src/it)
+* [jruby-maven-plugin/src/it](https://github.com/torquebox/jruby-maven-plugins/tree/master/jruby-maven-plugin/src/it)
 * [gem-maven-plugin/src/it](https://github.com/torquebox/jruby-maven-plugins/tree/master/gem-maven-plugin/src/it)
 * . . .
  
