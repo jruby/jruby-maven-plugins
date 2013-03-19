@@ -77,8 +77,10 @@ public class ExecMojo extends AbstractGemMojo {
         else {
             s = this.factory.newArguments();
         }
-        for( String arg: execArgLines ){
-            s.addArg( arg );
+        if ( execArgLines != null ){
+            for( String arg: execArgLines ){
+                s.addArg( arg );
+            }
         }
         s.addArgs(this.execArgs);
         s.addArgs(this.args);
