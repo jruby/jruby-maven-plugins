@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -49,13 +48,21 @@ public class ExecMojo extends AbstractGemMojo {
     protected File outputFile = null;
 
     /**
-     * arguments for the ruby script given through file parameter.
+     * arguments separated by whitespaces for the ruby script given through file parameter.
+     * no quoting or escaping possible - if needed use execArglines instead.
      * <br/>
      * Command line -Dexec.args=...
      * 
      * @parameter expression="${exec.args}"
      */
     protected String execArgs = null;
+
+    /**
+     * an array of arguments which can contain spaces for the ruby script given through file parameter.
+     * 
+     * @parameter
+     */
+    protected String[] execArgLines = null;
 
     @Override
     protected void executeWithGems() throws MojoExecutionException,
@@ -69,6 +76,9 @@ public class ExecMojo extends AbstractGemMojo {
         }
         else {
             s = this.factory.newArguments();
+        }
+        for( String arg: execArgLines ){
+            s.addArg( arg );
         }
         s.addArgs(this.execArgs);
         s.addArgs(this.args);
