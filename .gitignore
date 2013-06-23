@@ -5,3 +5,6 @@ target
 .settings
 .project
 tmp
+*.iml
+*.ipr
+*.iws

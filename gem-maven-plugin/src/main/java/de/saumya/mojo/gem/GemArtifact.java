@@ -85,7 +85,7 @@ public class GemArtifact implements Artifact {
         else {
             final StringBuilder name = new StringBuilder(getGroupId());
             name.append(".").append(getArtifactId());
-            return name.toString();
+            return name.toString().replace('.', '-');
         }
     }
 
