@@ -4,6 +4,7 @@
 package de.saumya.mojo.ruby.script;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -56,7 +57,7 @@ public class ScriptFactory {
                 ? NO_CLASSPATH
                 : Collections.unmodifiableList(classpathElements);
         this.fork = fork;
-        if (classRealm != null) {
+        if (classRealm != null && jrubyJar != null) {
             ClassRealm jruby;
             try {
                 jruby = classRealm.getWorld().getRealm("jruby");
@@ -76,7 +77,7 @@ public class ScriptFactory {
             this.classRealm = jruby;
         }
         else {
-            this.classRealm = null;
+            this.classRealm = classRealm;
         }
 
         if (fork) {
@@ -95,17 +96,41 @@ public class ScriptFactory {
 
     public Script newScriptFromJRubyJar(final String scriptName)
             throws IOException {
-        // the first part only works on jruby-complete.jar
-        URL url = new URL("jar:file:"
+        try {
+            // the first part only works on jruby-complete.jar
+            URL url = new URL("jar:file:"
                 + this.jrubyStdlibJar.getAbsolutePath()
                 + "!/META-INF/jruby.home/bin/" + scriptName);
-        try {
             url.openConnection().getContent();
             return new Script(this, url);
         }
-        catch (IOException e) {
-            // fallback on classloader
-            return newScriptFromResource("META-INF/jruby.home/bin/" + scriptName);
+        catch (Exception e) {
+            try {
+                // fallback on classloader
+                return newScriptFromResource("META-INF/jruby.home/bin/" + scriptName);
+            }
+            catch (FileNotFoundException ee) {
+                // find jruby-home
+                String base = ".";
+                if ( this.env.containsKey( "JRUBY_HOME" ) ) {
+                    base = this.env.get( "JRUBY_HOME" );
+                }
+                else {
+                    for( String arg : this.jvmArgs.list ){
+                        if (arg.startsWith("-Djruby.home=")){
+                            base = arg.substring("-Djruby.home=".length());
+                            break;
+                        }
+                    }
+                }
+                File f = new File( base, new File( "bin", scriptName ).getPath() );
+                if ( f.exists() ){
+                    return new Script(this, f);
+                }
+                else {
+                    throw ee;
+                }
+            }
         }
     }
 

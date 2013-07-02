@@ -2,6 +2,7 @@ package de.saumya.mojo.jruby;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -34,7 +35,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected static final String JRUBY_STDLIB = "jruby-stdlib";
 
-    protected static final String DEFAULT_JRUBY_VERSION = "1.7.2";
+    protected static final String DEFAULT_JRUBY_VERSION = "1.7.4";
 
 
     /**
@@ -63,6 +64,13 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * @parameter expression="${jruby.switches}"
      */
     protected String jrubySwitches;
+
+    /**
+     * environment values passed on to the jruby process. needs jrubyFork true.
+     * <br/>
+     * @parameter
+     */
+    protected Map<String, String> env;
 
     /**
      * if the pom.xml has no runtime dependency to a jruby-complete.jar then
@@ -167,18 +175,50 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         return jRubyVersion;
     }
     
-    protected ScriptFactory newScriptFactory() throws MojoExecutionException {
-        try {
-            return newScriptFactory(resolveJRubyArtifact());
-        }
-        catch (final DependencyResolutionRequiredException e) {
-            throw new MojoExecutionException("could not resolve jruby", e);
-        }
+    private ScriptFactory newScriptFactory() throws MojoExecutionException {
+    	ScriptFactory factory = createScriptFactory();
+    	if( env != null ){
+    		for( Map.Entry<String, String> entry: env.entrySet() ){
+    			factory.addEnv( entry.getKey(), entry.getValue() );
+    		}
+    	}
+    	return factory;
     }
+
+	private ScriptFactory createScriptFactory() throws MojoExecutionException {
+		try {
+			ClassRealm realm = classRealm.getWorld().newRealm("jruby-all");
+			for (String path : this.project.getTestClasspathElements()) {
+				realm.addConstituent(new File(path).toURI().toURL());
+			}
+			// check if there is jruby present
+			Class<?> clazz = realm.loadClass("org.jruby.runtime.Constants");
+			if ( jrubyVerbose ){
+				String version = clazz.getField( "VERSION" ).get(clazz).toString();
+				getLog().info("found jruby on classpath");
+				getLog().info("jruby version   : " + version);
+			}
+			this.classRealm = realm;
+			return newScriptFactory( null );
+		} catch (final Exception e) {
+			try {
+				return newScriptFactory(resolveJRubyArtifact());
+			} catch (final DependencyResolutionRequiredException ee) {
+				throw new MojoExecutionException("could not resolve jruby", e);
+			}
+		}
+	}
 
     protected ScriptFactory newScriptFactory(Artifact artifact) throws MojoExecutionException {
         try {
-            final ScriptFactory factory = JRUBY_CORE.equals(artifact.getArtifactId()) ?
+            final ScriptFactory factory = 
+            		artifact == null ? 
+                            new ScriptFactory(this.logger,
+                                    this.classRealm, 
+                                    null,
+                                    this.project.getTestClasspathElements(), 
+                                    this.jrubyFork):
+            			(JRUBY_CORE.equals(artifact.getArtifactId()) ?
                     new ScriptFactory(this.logger,
                             this.classRealm, 
                             artifact.getFile(),
@@ -189,7 +229,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                             this.classRealm, 
                             artifact.getFile(),
                             this.project.getTestClasspathElements(), 
-                            this.jrubyFork);
+                            this.jrubyFork) );
             return factory;
         } catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("could not resolve jruby", e);

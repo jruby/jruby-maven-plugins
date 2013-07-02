@@ -161,7 +161,15 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     @Override
     protected ScriptFactory newScriptFactory(Artifact artifact) throws MojoExecutionException {
         try {
-            final GemScriptFactory factory = JRUBY_CORE.equals(artifact.getArtifactId()) ?
+            final GemScriptFactory factory = 
+                    artifact == null ? 
+                            new GemScriptFactory(this.logger,
+                                    this.classRealm, 
+                                    null,
+                                    this.project.getTestClasspathElements(), 
+                                    this.jrubyFork,
+                                    this.gemsConfig):
+                        (JRUBY_CORE.equals(artifact.getArtifactId()) ?
                     new GemScriptFactory(this.logger,
                                   this.classRealm, 
                                   artifact.getFile(),
@@ -174,7 +182,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                   artifact.getFile(),
                                   this.project.getTestClasspathElements(), 
                                   this.jrubyFork, 
-                                  this.gemsConfig);
+                                  this.gemsConfig));
                   
             if(supportNative){
                 factory.addJvmArgs("-Djruby.home=" + setupNativeSupport().getAbsolutePath());

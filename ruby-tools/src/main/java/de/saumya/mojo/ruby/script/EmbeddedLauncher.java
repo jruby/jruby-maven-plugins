@@ -70,7 +70,7 @@ class EmbeddedLauncher extends AbstractLauncher {
             }
             newClassRealm = jruby.createChildRealm("pom");
             for (final String classpath : classpathElements) {
-                if (!classpath.contains("jruby-complete")) {
+                if (!classpath.contains("jruby-complete") || factory.jrubyJar == null) {
                     newClassRealm.addConstituent(new File(classpath).toURI()
                             .toURL());
                 }

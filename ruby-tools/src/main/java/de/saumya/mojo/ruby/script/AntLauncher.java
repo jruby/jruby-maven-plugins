@@ -102,7 +102,7 @@ class AntLauncher extends AbstractLauncher {
         // setup maven.plugin.classpath
         final Path classPath = new Path(project);
         for (final String path : this.factory.classpathElements) {
-            if (!path.contains("jruby-complete")) {
+            if (!path.contains("jruby-complete") || factory.jrubyJar == null) {
                 classPath.add(new Path(project, path));
             }
         }
