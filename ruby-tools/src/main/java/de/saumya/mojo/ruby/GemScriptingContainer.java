@@ -6,6 +6,7 @@ package de.saumya.mojo.ruby;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,12 +50,17 @@ public class GemScriptingContainer extends ScriptingContainer {
 
         // setting the JRUBY_HOME to the one from the jruby jar - ignoring
         // the environment setting !
-        getProvider().getRubyInstanceConfig()
-                .setJRubyHome(Thread.currentThread()
-                        .getContextClassLoader()
-                        .getResource("META-INF/jruby.home")
+        // use lib otherwise the classloader finds META-INF/jruby.home from ruby-tools where there is a bin/rake
+        // as fix for an older jruby jar
+        URL jrubyHome = Thread.currentThread().getContextClassLoader()
+                    .getResource("META-INF/jruby.home/lib");
+        if ( jrubyHome != null ){
+            getProvider().getRubyInstanceConfig()
+                .setJRubyHome( jrubyHome
                         .toString()
-                        .replaceFirst("^jar:", ""));
+                        .replaceFirst("^jar:", "")
+                        .replaceFirst( "/lib$", "" ) );
+        }
     }
 
     public Object runScriptletFromClassloader(final String name,
