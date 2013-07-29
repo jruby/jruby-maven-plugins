@@ -15,7 +15,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
-import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -104,7 +103,7 @@ public class PackageMojo extends AbstractGemMojo {
      * @parameter default-value="${repositorySystemSession}"
      * @readonly
      */
-    protected RepositorySystemSession repositorySession;
+    protected Object repositorySession;
 
     @Override
     public void executeJRuby() throws MojoExecutionException,
@@ -152,7 +151,18 @@ public class PackageMojo extends AbstractGemMojo {
                         getLog().info("use gemspec: " + this.gemspec);
                     }
                 }
-
+                
+                ArtifactResolutionResult jarDependencyArtifacts = includeDependencies(  project,
+                                                                                        artifact );
+                
+                if (jarDependencyArtifacts != null ) {
+                    for (final Object element : jarDependencyArtifacts.getArtifacts()) {
+                        final Artifact dependency = (Artifact) element;
+                        getLog().info(" -- include -- " + dependency);
+                        FileUtils.copyFile( dependency.getFile(), new File( libDirectory, dependency.getFile().getName() ) );
+                    }
+                }
+                
                 // now we have a gemspec file - either found or given
                 this.factory.newScriptFromJRubyJar("gem")
                         .addArg("build", this.gemspec)
@@ -192,7 +202,6 @@ public class PackageMojo extends AbstractGemMojo {
     private void buildFromPom(final MavenProject project, final GemArtifact artifact)
             throws MojoExecutionException, IOException, ScriptException {
         getLog().info("building gem for " + artifact + " . . .");
-        getLog().info("include dependencies? " + this.includeDependencies);
         final File gemDir = new File(this.buildDirectory, artifact.getGemName());
         final File gemSpec = new File(gemDir, artifact.getGemName()
                 + ".gemspec");
@@ -235,40 +244,17 @@ public class PackageMojo extends AbstractGemMojo {
             gemSpecWriter.appendPlatform(this.platform);
         }
 
-        ArtifactResolutionResult jarDependencyArtifacts = null;
-        if (this.includeDependencies) {
-            final ArtifactFilter filter = new ArtifactFilter() {
-                public boolean include(final Artifact candidate) {
-                    if (candidate == artifact) {
-                        return true;
-                    }
-                    final boolean result = (candidate.getType().equals("jar") && ("compile".equals(candidate.getScope()) || "runtime".equals(candidate.getScope())));
-                    return result;
-                }
-
-            };
-
-            // remember file location since resolve will set it to
-            // local-repository location
-            final File artifactFile = artifact.getFile();
-            final ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(project.getArtifact())
-                    .setResolveRoot(false)
-                    .setLocalRepository(this.localRepository)
-                    .setRemoteRepositories(project.getRemoteArtifactRepositories())
-                    .setCollectionFilter(filter)
-                    .setManagedVersionMap(project.getManagedVersionMap())
-                    .setArtifactDependencies(project.getDependencyArtifacts());
-            jarDependencyArtifacts = this.repositorySystem.resolve(request);
+        ArtifactResolutionResult jarDependencyArtifacts = includeDependencies(  project,
+                                                                                artifact );
+        if (jarDependencyArtifacts != null ) {
             for (final Object element : jarDependencyArtifacts.getArtifacts()) {
                 final Artifact dependency = (Artifact) element;
                 getLog().info(" -- include -- " + dependency);
                 gemSpecWriter.appendJarfile(dependency.getFile(),
                                             dependency.getFile().getName());
             }
-            // keep the artifactFile on build directory
-            artifact.setFile(artifactFile);
         }
-
+        
         // TODO make it the maven way (src/main/ruby + src/test/ruby) or the
         // ruby way (lib + spec + test)
         // TODO make a loop or so ;-)
@@ -405,6 +391,39 @@ public class PackageMojo extends AbstractGemMojo {
 
         FileUtils.copyFile(new File(gemDir, gemFilename.toString()),
                            artifact.getFile());
+    }
+
+    private ArtifactResolutionResult includeDependencies( MavenProject project, final GemArtifact artifact)
+            throws IOException {
+        ArtifactResolutionResult jarDependencyArtifacts = null;
+        getLog().info("include dependencies? " + this.includeDependencies);
+        if (this.includeDependencies) {
+            final ArtifactFilter filter = new ArtifactFilter() {
+                public boolean include(final Artifact candidate) {
+                    if (candidate == artifact) {
+                        return true;
+                    }
+                    final boolean result = (candidate.getType().equals("jar") && ("compile".equals(candidate.getScope()) || "runtime".equals(candidate.getScope())));
+                    return result;
+                }
+
+            };
+
+            // remember file location since resolve will set it to
+            // local-repository location
+            final File artifactFile = artifact.getFile();
+            final ArtifactResolutionRequest request = new ArtifactResolutionRequest().setArtifact(project.getArtifact())
+                    .setResolveRoot(false)
+                    .setLocalRepository(this.localRepository)
+                    .setRemoteRepositories(project.getRemoteArtifactRepositories())
+                    .setCollectionFilter(filter)
+                    .setManagedVersionMap(project.getManagedVersionMap())
+                    .setArtifactDependencies(project.getDependencyArtifacts());
+            jarDependencyArtifacts = this.repositorySystem.resolve(request);
+            // keep the artifactFile on build directory
+            artifact.setFile(artifactFile);
+        }
+        return jarDependencyArtifacts;
     }
 
     private String titleizedClassname(final String artifactId) {
