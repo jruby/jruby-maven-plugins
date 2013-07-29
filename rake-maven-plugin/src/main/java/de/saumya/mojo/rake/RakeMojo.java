@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
 import de.saumya.mojo.ruby.gems.GemException;
@@ -44,7 +43,7 @@ public class RakeMojo extends AbstractGemMojo {
      * @parameter default-value="${repositorySystemSession}"
      * @readonly
      */
-    private RepositorySystemSession repoSession;
+    private Object repoSession;
 
     @Override
     public void executeWithGems() throws MojoExecutionException,

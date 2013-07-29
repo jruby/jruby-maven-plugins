@@ -6,7 +6,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.MavenProject;
-import org.sonatype.aether.RepositorySystemSession;
+import org.apache.maven.project.ProjectBuildingRequest;
 
 public interface GemManager {
 
@@ -74,13 +74,16 @@ public interface GemManager {
             final String artifactId, final String version, final String classifier, final String type);
     
     public MavenProject buildModel(Artifact artifact,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories, boolean resolve)
             throws GemException;
+    
+    public void setRepositorySession( ProjectBuildingRequest pomRequest, Object repositorySystemSession )
+            throws GemException;
 
     public MavenProject buildPom(Artifact artifact,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories)
             throws GemException;

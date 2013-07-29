@@ -6,6 +6,7 @@ package de.saumya.mojo.ruby.gems;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,7 +36,6 @@ import org.apache.maven.repository.legacy.metadata.MetadataResolutionRequest;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.util.IOUtil;
-import org.sonatype.aether.RepositorySystemSession;
 
 @Component(role = GemManager.class)
 public class DefaultGemManager implements GemManager {
@@ -215,7 +215,7 @@ public class DefaultGemManager implements GemManager {
     }
 
     public MavenProject buildModel(final Artifact artifact,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories, boolean resolve)
             throws GemException {
@@ -224,8 +224,8 @@ public class DefaultGemManager implements GemManager {
                 .setLocalRepository(localRepository)
                 .setRemoteRepositories(remoteRepositories)
                 .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
-                .setRepositorySession(repositorySystemSession)
                 .setResolveDependencies(resolve);
+        setRepositorySession(pomRequest, repositorySystemSession);
         try {
 
             return this.builder.build(artifact, pomRequest).getProject();
@@ -237,8 +237,25 @@ public class DefaultGemManager implements GemManager {
         }
     }
 
+    public void setRepositorySession( ProjectBuildingRequest pomRequest, Object repositorySystemSession ) throws GemException {
+        Class<?> clazz;
+        try {
+            try {
+                clazz = Thread.currentThread().getContextClassLoader().loadClass( "org.sonatype.aether.RepositorySystemSession" );
+            }
+            catch (ClassNotFoundException e1) {
+                // TODO use eclipse aether here
+                clazz = Thread.currentThread().getContextClassLoader().loadClass( "org.sonatype.aether.RepositorySystemSession" );
+            }
+            Method m = pomRequest.getClass().getMethod("setRepositorySession", clazz );
+            m.invoke( pomRequest, repositorySystemSession );
+        }
+        catch ( Exception e ) {
+            throw new GemException("error building POM", e);
+        }  
+    }
     public MavenProject buildPom(final Artifact artifact,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final ArtifactRepository localRepository,
             final List<ArtifactRepository> remoteRepositories)
             throws GemException {

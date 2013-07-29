@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.Script;
@@ -51,7 +50,7 @@ public class PushMojo extends AbstractGemMojo {
      * @parameter default-value="${repositorySystemSession}"
      * @readonly
      */
-    protected RepositorySystemSession repoSession;
+    protected Object repoSession;
     
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException{

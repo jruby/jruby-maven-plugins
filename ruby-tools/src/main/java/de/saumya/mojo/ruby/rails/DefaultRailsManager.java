@@ -11,6 +11,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +36,6 @@ import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.velocity.VelocityComponent;
-import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.ruby.gems.DefaultGemManager;
 import de.saumya.mojo.ruby.gems.GemException;
@@ -118,7 +119,7 @@ public class DefaultRailsManager implements RailsManager {
     }
 
     public void createNew(final GemsInstaller installer,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final File appPath, String database, String railsVersion,
             ORM orm, final String... args) throws RailsException, GemException,
             IOException, ScriptException {
@@ -127,7 +128,7 @@ public class DefaultRailsManager implements RailsManager {
     }
 
     public void createNew(final GemsInstaller installer,
-                final RepositorySystemSession repositorySystemSession,
+                final Object repositorySystemSession,
                 final File appPath, String database, String railsVersion,
                 final ORM orm, final String template, final GwtOptions gwt,
                 final String... args)
@@ -180,11 +181,11 @@ public class DefaultRailsManager implements RailsManager {
         if (database != null) {
             script.addArg("-d", database);
         }
-        if (repositorySystemSession.isOffline()) {
+        if (isOffline( repositorySystemSession )) {
             this.logger.info("system is offline: using jruby rails templates from jar file - might be outdated");
         }
         if (template != null || (gwt != null && gwt.packageName != null)){
-            String tmp = templateFrom(orm, repositorySystemSession.isOffline(), railsVersion);
+            String tmp = templateFrom(orm, isOffline( repositorySystemSession ), railsVersion);
             if(tmp != null ){
                 System.setProperty("maven.rails.basetemplate", tmp);
             }
@@ -197,7 +198,7 @@ public class DefaultRailsManager implements RailsManager {
             script.addArg("-m", templateFromResource("templates"));
         }
         else {
-            script.addArg("-m", templateFrom(orm, repositorySystemSession.isOffline(), railsVersion));
+            script.addArg("-m", templateFrom(orm, isOffline( repositorySystemSession ), railsVersion));
         }
 
         // skip bundler
@@ -240,6 +241,28 @@ public class DefaultRailsManager implements RailsManager {
                          railsBooleanOption(gwt.session, "session"),
                          railsBooleanOption(gwt.menu, "menu"));
             }
+        }
+    }
+    
+    private boolean isOffline( Object repositorySystemSession ){
+        try {
+            Method m = repositorySystemSession.getClass().getMethod( "isOffline", Boolean.class );
+            return (Boolean) m.invoke( repositorySystemSession );
+        }
+        catch (IllegalAccessException e) {
+            throw new RuntimeException( "error in calling isOffline", e );
+        }
+        catch (IllegalArgumentException e) {
+            throw new RuntimeException( "error in calling isOffline", e );
+        }
+        catch (InvocationTargetException e) {
+            throw new RuntimeException( "error in calling isOffline", e );
+        }
+        catch (NoSuchMethodException e) {
+            throw new RuntimeException( "error in calling isOffline", e );
+        }
+        catch (SecurityException e) { 
+            throw new RuntimeException( "error in calling isOffline", e );
         }
     }
 
@@ -355,7 +378,7 @@ public class DefaultRailsManager implements RailsManager {
     }
 
     public void rake(final GemsInstaller installer,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final File launchDirectory, final String environment,
             final String task, final String... args) throws IOException,
             ScriptException, GemException, RailsException {
@@ -371,7 +394,7 @@ public class DefaultRailsManager implements RailsManager {
     }
 
     public void generate(final GemsInstaller installer,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final File launchDirectory, final String generator,
             final String... args) throws IOException, ScriptException,
             GemException, RailsException {
@@ -387,14 +410,15 @@ public class DefaultRailsManager implements RailsManager {
     }
 
     public void installGems(final GemsInstaller gemsInstaller,
-            final RepositorySystemSession repositorySystemSession)
+            final Object repositorySystemSession)
             throws IOException, ScriptException, GemException, RailsException {
         final ArtifactRepository localRepository = localRepository();
 
         final ProjectBuildingRequest pomRequest = new DefaultProjectBuildingRequest().setLocalRepository(localRepository)
-                .setRepositorySession(repositorySystemSession)
                 .setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_STRICT)
                 .setResolveDependencies(true);
+
+        gemsInstaller.manager.setRepositorySession(pomRequest, repositorySystemSession);
 
         MavenProject pom;
         try {

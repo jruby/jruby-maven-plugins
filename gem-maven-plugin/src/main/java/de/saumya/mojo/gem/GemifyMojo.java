@@ -21,8 +21,8 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.StringUtils;
-import org.sonatype.aether.RepositorySystemSession;
 
+import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -68,7 +68,7 @@ public class GemifyMojo extends AbstractGemMojo {
      * @parameter default-value="${repositorySystemSession}"
      * @readonly
      */
-    private RepositorySystemSession   repositorySession;
+    private Object   repositorySession;
 
     /** @component */
     protected ProjectBuilder          builder;
@@ -127,6 +127,10 @@ public class GemifyMojo extends AbstractGemMojo {
                     throw new MojoExecutionException("error building project object model",
                             e);
                 }
+                catch (final GemException e) {
+                    throw new MojoExecutionException("error building project object model",
+                            e);
+                }
             }
             else {
                 throw new MojoExecutionException("not all three artifactId, groupId and version are given");
@@ -167,6 +171,10 @@ public class GemifyMojo extends AbstractGemMojo {
                     getLog().error("skipping: " + artifact.getFile().getName(),
                                    e);
                 }
+                catch (final GemException e) {
+                    getLog().error("skipping: " + artifact.getFile().getName(),
+                                   e);
+                }
             }
         }
         if (this.skipGemInstall) {
@@ -190,11 +198,13 @@ public class GemifyMojo extends AbstractGemMojo {
     }
 
     private MavenProject projectFromArtifact(final Artifact artifact)
-            throws ProjectBuildingException {
+            throws ProjectBuildingException, GemException {
 
         final ProjectBuildingRequest request = new DefaultProjectBuildingRequest().setLocalRepository(this.localRepository)
-                .setRemoteRepositories(this.project.getRemoteArtifactRepositories())
-                .setRepositorySession(this.repositorySession);
+                .setRemoteRepositories(this.project.getRemoteArtifactRepositories());
+        
+        manager.setRepositorySession(request, this.repositorySession );
+        
         final MavenProject project = this.builder.build(artifact, request)
                 .getProject();
         if (project.getDistributionManagement() != null
@@ -259,6 +269,11 @@ public class GemifyMojo extends AbstractGemMojo {
                     dependency.setVersion(arti.getVersion());
                 }
                 catch (final ProjectBuildingException e) {
+                    throw new MojoExecutionException("error building project for "
+                            + arti,
+                            e);
+                }
+                catch (final GemException e) {
                     throw new MojoExecutionException("error building project for "
                             + arti,
                             e);

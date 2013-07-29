@@ -11,7 +11,6 @@ import java.util.List;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
-import org.sonatype.aether.RepositorySystemSession;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
 import de.saumya.mojo.ruby.gems.GemException;
@@ -55,7 +54,7 @@ public class InstallMojo extends AbstractGemMojo {
      * @parameter default-value="${repositorySystemSession}"
      * @readonly
      */
-    private RepositorySystemSession repoSession;
+    private Object repoSession;
 
     /**
      * The classpath elements of the project being tested.

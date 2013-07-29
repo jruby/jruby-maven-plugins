@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
@@ -15,8 +14,6 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.repository.RemoteRepository;
 
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -38,7 +35,7 @@ public class GemsInstaller {
 
     public final ScriptFactory  factory;
 
-    private final GemManager    manager;
+    public final GemManager    manager;
 
     public GemsInstaller(final GemsConfig config, final ScriptFactory factory,
             final GemManager manager) {
@@ -58,14 +55,14 @@ public class GemsInstaller {
         installGems(pom, localRepository);
     }
     
-    public MavenProject installOpenSSLGem(final RepositorySystemSession repositorySystemSession,
+    public MavenProject installOpenSSLGem(final Object repositorySystemSession,
             final ArtifactRepository localRepository, List<ArtifactRepository> remotes) throws GemException,
             IOException, ScriptException {
         return installGem(OPENSSL, OPENSSL_VERSION, repositorySystemSession, localRepository, remotes);
     }
     
     public MavenProject installGem(final String name, final String version,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final ArtifactRepository localRepository, List<ArtifactRepository> remoteRepositories) throws GemException,
             IOException, ScriptException {
         final Artifact artifact;

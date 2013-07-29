@@ -6,8 +6,6 @@ package de.saumya.mojo.ruby.rails;
 import java.io.File;
 import java.io.IOException;
 
-import org.sonatype.aether.RepositorySystemSession;
-
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.gems.GemManager;
 import de.saumya.mojo.ruby.gems.GemsInstaller;
@@ -18,10 +16,10 @@ public class RailsService {
     private final GemsInstaller           installer;
     private final RailsManager            manager;
     private final RailsState              state;
-    private final RepositorySystemSession session;
+    private final Object session;
 
     public RailsService(final RailsState state,
-            final RepositorySystemSession repositorySystemSession,
+            final Object repositorySystemSession,
             final ScriptFactory factory, final GemManager gemManager,
             final RailsManager manager) throws RailsException, IOException {
         assert state != null;
