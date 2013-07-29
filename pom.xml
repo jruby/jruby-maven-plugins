@@ -110,6 +110,7 @@
     <module>runit-maven-plugin</module>
     <module>minitest-maven-plugin</module>
     <module>bundler-maven-plugin</module>
+    <module>gem-extension</module>
 <!--
     <module>integration-tests</module>
 -->
