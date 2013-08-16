@@ -33,10 +33,12 @@ public class RakeMojo extends AbstractGemMojo {
     private final String            rakeArgs    = null;
 
     /**
-     * rake version used when there is no pom. defaults to latest version
+     * rake version used when there is no pom. defaults to latest version.
+     * DEPRECATED: declare a gem dependency with the desired version instead
      * 
      * @parameter default-value="${rake.version}"
      */
+    @Deprecated
     private final String            rakeVersion = null;
 
     /**

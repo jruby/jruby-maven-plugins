@@ -99,12 +99,6 @@ public class PackageMojo extends AbstractGemMojo {
      */
     boolean                           includeDependencies;
 
-    /**
-     * @parameter default-value="${repositorySystemSession}"
-     * @readonly
-     */
-    protected Object repositorySession;
-
     @Override
     public void executeJRuby() throws MojoExecutionException,
             MojoFailureException, ScriptException {

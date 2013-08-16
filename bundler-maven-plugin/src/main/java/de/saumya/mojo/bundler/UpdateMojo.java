@@ -25,9 +25,11 @@ public class UpdateMojo extends AbstractGemMojo {
     
     /**
      * bundler version used when there is no pom. defaults to latest version.
+     * DEPRECATED: declare a gem dependency with the desired version instead
      * 
      * @parameter default-value="${bundler.version}"
      */
+    @Deprecated
     private String            bundlerVersion;
 
     /**
