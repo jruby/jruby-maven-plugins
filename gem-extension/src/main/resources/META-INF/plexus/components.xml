@@ -41,7 +41,7 @@
         <type>gem</type>
         <packaging>gem</packaging>
         <language>ruby</language>
-        <addedToClasspath>true</addedToClasspath>
+        <addedToClasspath>false</addedToClasspath>
         <includesDependencies>false</includesDependencies>
       </configuration>
     </component>
