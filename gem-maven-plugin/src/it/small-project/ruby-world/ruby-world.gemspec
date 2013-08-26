@@ -5,6 +5,7 @@ Gem::Specification.new do |s|
 
   s.summary = 'ruby-world'
 
+  s.author = 'author'
 
   s.files = Dir['lib/**/*']
 end

@@ -5,6 +5,7 @@ Gem::Specification.new do |s|
 
   s.summary = 'application'
 
+  s.author = 'author'
 
   s.add_dependency 'ruby-world', '0.0.0'
 end

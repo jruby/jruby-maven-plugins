@@ -5,6 +5,7 @@ Gem::Specification.new do |s|
 
   s.summary = 'pom_first'
 
+  s.author = 'author'
 
   s.files = Dir['lib/**/*']
 end
