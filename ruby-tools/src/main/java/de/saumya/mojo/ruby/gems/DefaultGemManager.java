@@ -245,7 +245,7 @@ public class DefaultGemManager implements GemManager {
             }
             catch (ClassNotFoundException e1) {
                 // TODO use eclipse aether here
-                clazz = Thread.currentThread().getContextClassLoader().loadClass( "org.sonatype.aether.RepositorySystemSession" );
+                clazz = Thread.currentThread().getContextClassLoader().loadClass( "org.eclipse.aether.RepositorySystemSession" );
             }
             Method m = pomRequest.getClass().getMethod("setRepositorySession", clazz );
             m.invoke( pomRequest, repositorySystemSession );
