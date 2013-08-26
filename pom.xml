@@ -9,7 +9,7 @@
   <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-maven-plugins</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0-beta-1-SNAPSHOT</version>
+  <version>1.0.0-rc-SNAPSHOT</version>
   <name>JRuby Maven Mojos</name>
   <description>
     aggregation project for various jruby related maven plugins
