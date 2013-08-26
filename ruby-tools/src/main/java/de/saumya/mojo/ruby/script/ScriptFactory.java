@@ -115,6 +115,9 @@ public class ScriptFactory {
                 if ( this.env.containsKey( "JRUBY_HOME" ) ) {
                     base = this.env.get( "JRUBY_HOME" );
                 }
+                else if ( System.getProperty( "jruby.home" ) != null ) {
+                    base = System.getProperty( "jruby.home" );
+                }
                 else {
                     for( String arg : this.jvmArgs.list ){
                         if (arg.startsWith("-Djruby.home=")){
