@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>1.0.0-rc-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>gem-proxy</artifactId>
   <version>1.0.0-SNAPSHOT</version>
