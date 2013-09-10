@@ -180,13 +180,16 @@ public class GemsInstaller {
     }
 
     private boolean exists(Artifact artifact) {
+        // check if the specifications exists
         String basename = artifact.getArtifactId() + "-"
                 + artifact.getVersion();
-        String javaBasename = basename + "-java";
+        String javaBasename = basename + "-java.gemspec";
+        String rubyBasename = basename + ".gemspec";
 
         for (File dir : this.config.getGemsDirectory()) {
-            if (new File(dir, basename).exists()
-                    || new File(dir, javaBasename).exists()) {
+            File specs  = new File( dir.getParentFile(), "specifications" );
+            if (new File(specs, rubyBasename).exists()
+                    || new File(specs, javaBasename).exists()) {
                 return true;
             }
         }
