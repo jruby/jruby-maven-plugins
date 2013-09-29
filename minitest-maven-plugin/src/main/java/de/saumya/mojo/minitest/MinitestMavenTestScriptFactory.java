@@ -21,6 +21,7 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
         builder.append("  def write(*args)\n");
         builder.append("    super\n" );
         builder.append("    STDOUT.write *args\n" );
+        builder.append("    flush\n" );
         builder.append("  end\n");
         builder.append("  def flush(*args)\n" );
         builder.append("    super\n" );
@@ -46,7 +47,11 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
     }
 
     private void getTestRunnerScript(StringBuilder builder) {
-        builder.append("MiniTest::Unit.output = Tee.open(REPORT_PATH, 'w')\n");
+        builder.append("if MiniTest::Unit.respond_to? :output\n");
+        builder.append("  MiniTest::Unit.output = Tee.open(REPORT_PATH, 'w')\n");
+        builder.append("else\n");
+        builder.append("  $stdout = Tee.open(REPORT_PATH, 'w')\n");
+        builder.append("end\n");
         builder.append("\n");
    }
 
