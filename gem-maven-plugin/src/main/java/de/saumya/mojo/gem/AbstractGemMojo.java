@@ -152,8 +152,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig.addGemPath(this.gemPath);
         if (this.gemUseSystem && 
                 (System.getenv("GEM_HOME") == null || System.getenv( "GEM_PATH") == null) ){
-            throw new MojoExecutionException("with gemUseSystem set to true you need to provide" +
-            		" GEM_HOME and GEM_PATH environment variables !");
+            getLog().warn("with gemUseSystem set to true and no GEM_HOME and GEM_PATH is set, " +
+            		" then some maven goals might not work as expected");
         }
         this.gemsConfig.setSystemInstall(this.gemUseSystem);
         
