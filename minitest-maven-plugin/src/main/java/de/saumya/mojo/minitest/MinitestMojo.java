@@ -6,11 +6,12 @@ import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
+import de.saumya.mojo.jruby.JRubyVersion;
+import de.saumya.mojo.jruby.JRubyVersion.Mode;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
 import de.saumya.mojo.tests.AbstractTestMojo;
-import de.saumya.mojo.tests.JRubyRun.Mode;
 import de.saumya.mojo.tests.JRubyRun.Result;
 import de.saumya.mojo.tests.TestResultManager;
 import de.saumya.mojo.tests.TestScriptFactory;
@@ -65,7 +66,7 @@ public class MinitestMojo extends AbstractTestMojo {
         }
     }
 
-    protected Result runIt(ScriptFactory factory, Mode mode, String version, TestScriptFactory scriptFactory)
+    protected Result runIt(ScriptFactory factory, Mode mode, JRubyVersion version, TestScriptFactory scriptFactory)
             throws IOException, ScriptException, MojoExecutionException {
         scriptFactory.setOutputDir(outputfile.getParentFile());
         scriptFactory.setReportPath(outputfile);
@@ -94,7 +95,7 @@ public class MinitestMojo extends AbstractTestMojo {
     }
 
     @Override
-    protected TestScriptFactory newTestScriptFactory(Mode mode) {
+    protected TestScriptFactory newTestScriptFactory() {
         // TODO locate minitest gem
         return new MinitestMavenTestScriptFactory();
     }

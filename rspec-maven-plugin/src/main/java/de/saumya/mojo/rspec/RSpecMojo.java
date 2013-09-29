@@ -4,16 +4,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
 
+import de.saumya.mojo.jruby.JRubyVersion;
+import de.saumya.mojo.jruby.JRubyVersion.Mode;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.tests.AbstractTestMojo;
-import de.saumya.mojo.tests.JRubyRun.Mode;
 import de.saumya.mojo.tests.JRubyRun.Result;
 import de.saumya.mojo.tests.TestScriptFactory;
 
@@ -76,7 +77,7 @@ public class RSpecMojo extends AbstractTestMojo {
         }
     }
     
-    protected Result runIt(de.saumya.mojo.ruby.script.ScriptFactory factory, Mode mode, String version, TestScriptFactory scriptFactory)
+    protected Result runIt(de.saumya.mojo.ruby.script.ScriptFactory factory, Mode mode, JRubyVersion version, TestScriptFactory scriptFactory)
             throws IOException, ScriptException, MojoExecutionException {
         
         scriptFactory.setOutputDir(outputfile.getParentFile());
@@ -104,7 +105,7 @@ public class RSpecMojo extends AbstractTestMojo {
 
         String reportPath = outputfile.getAbsolutePath();
       final File reportFile;
-      if (mode != Mode.DEFAULT) {
+      if (version.defaultMode() == mode) {
           reportFile = new File(reportPath.replace(".html", "-" + version
                   + mode.name() + ".html"));
       }
@@ -118,10 +119,9 @@ public class RSpecMojo extends AbstractTestMojo {
       new File(reportPath).renameTo(reportFile);
 
       Result result = new Result();
-      Reader in = null;
+      BufferedReader reader = null;
       try {
-          in = new FileReader(reportFile);
-          final BufferedReader reader = new BufferedReader(in);
+          reader = new BufferedReader(new FileReader(reportFile));
 
           String line = null;
 
@@ -139,14 +139,7 @@ public class RSpecMojo extends AbstractTestMojo {
                   + reportFile);
       }
       finally {
-          if (in != null) {
-              try {
-                  in.close();
-              }
-              catch (final IOException e) {
-                  throw new MojoExecutionException(e.getMessage());
-              }
-          }
+          IOUtil.close(reader);
       }
 
       if (result.message == null) {
@@ -173,7 +166,7 @@ public class RSpecMojo extends AbstractTestMojo {
     }
 
     @Override
-    protected TestScriptFactory newTestScriptFactory(Mode mode) {
+    protected TestScriptFactory newTestScriptFactory() {
         return new RSpecMavenTestScriptFactory();
     }
 }

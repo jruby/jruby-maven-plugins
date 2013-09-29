@@ -6,7 +6,8 @@ import java.text.MessageFormat;
 
 import org.codehaus.plexus.util.FileUtils;
 
-import de.saumya.mojo.tests.JRubyRun.Mode;
+import de.saumya.mojo.jruby.JRubyVersion;
+import de.saumya.mojo.jruby.JRubyVersion.Mode;
 import de.saumya.mojo.tests.JRubyRun.Result;
 
 public class TestResultManager {
@@ -31,7 +32,7 @@ public class TestResultManager {
         this.summaryReport = summaryReport;
     }
     
-    public Result generateReports(Mode mode, String version,
+    public Result generateReports(Mode mode, JRubyVersion version,
             final File outputfile) throws IOException {
         Result result = new Result();
         String time = null;
@@ -66,8 +67,7 @@ public class TestResultManager {
                     if (filename != null) {
                         testReportDirectory.mkdirs();
                         String filename = this.filename
-                                + (mode.flag == null ? "" : "-" + version
-                                        + mode.flag) + ".xml";
+                                + (version == null ? "" : "-" + version ) + (mode == null ? "" : mode.flag) + ".xml";
                         FileUtils.fileWrite(new File(testReportDirectory,
                                 filename).getAbsolutePath(), "UTF-8",
                                 surefireXml);

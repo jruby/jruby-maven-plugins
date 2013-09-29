@@ -9,10 +9,11 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
+import de.saumya.mojo.jruby.JRubyVersion;
+import de.saumya.mojo.jruby.JRubyVersion.Mode;
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
-import de.saumya.mojo.tests.JRubyRun.Mode;
 import de.saumya.mojo.tests.JRubyRun.Result;
 
 /**
@@ -48,11 +49,21 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
      * run tests for both ruby 1.8 and 1.9
      * <br/>
      * Command line -Djruby.18and19=...
+     * @deprecated
      *
      * @parameter expression="${jruby.18and19}"
      */
     protected Boolean use18and19;
 
+
+    /**
+     * run tests with list of ruby modes 1.8, 1.9, 2.0 
+     * <br/>
+     * Command line -Djruby.modes=1.9,2.0
+     *
+     * @parameter expression="${jruby.modes}"
+     */
+    protected String modes;
 
     /**
      * run tests with a several versions of jruby
@@ -74,32 +85,39 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         
         testReportDirectory = new File(testReportDirectory.getAbsolutePath().replace("${project.basedir}/",""));
         List<JRubyRun> runs = new ArrayList<JRubyRun>();
-        if (versions == null){
-            final Mode mode = use18and19 == null? Mode.DEFAULT: Mode._18_19;
-            runs.add(new JRubyRun(mode, getJrubyVersion().toString()));
+        if (versions == null && use18and19 == null && modes == null){
+//            final Mode mode; = use18and19 == null? Mode.DEFAULT: Mode._18_19;
+            runs.add(new JRubyRun( getJrubyVersion() ) );
         }
         else {
-            final Mode mode;
-            if(use18and19 == null || use18and19 == false){
+            final Mode[] modes;
+            if( (use18and19 == null && this.modes == null) || use18and19 == false){
                 if(jrubySwitches != null) { 
                     if (jrubySwitches.contains("--1.9")){
-                        mode = Mode._19;
+                        modes = new Mode[] { Mode._19 };
                     }
                     else {
-                        mode = Mode._18;
+                        modes = new Mode[] { Mode._18 };
                     }
                 }
                 else {
-                    mode = Mode.DEFAULT;
+                    modes = new Mode[ 0 ];
                 }
             }
             else {
-                mode = Mode._18_19;
+                modes = new Mode[] { Mode._18, Mode._19 };
             }
-            String[] jrubyVersions = versions.split("[\\ ,;]+");
-            for(String version: jrubyVersions){
-                JRubyRun run = new JRubyRun(mode, version);
-                runs.add(run);
+            if ( versions == null )
+            {
+                runs.add(new JRubyRun( getJrubyVersion(), modes ) );
+            }
+            else
+            {
+                String[] jrubyVersions = versions.split("[\\ ,;]+");
+                for(String version: jrubyVersions){
+                    JRubyRun run = new JRubyRun( version, modes );
+                    runs.add(run);
+                }
             }
         }
 
@@ -107,7 +125,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
                 .replace("${project.basedir}/", ""));
         TestScriptFactory scriptFactory = null;
         for( JRubyRun run: runs){
-            scriptFactory = newTestScriptFactory(run.mode);
+            scriptFactory = newTestScriptFactory();
             scriptFactory.setBaseDir(project.getBasedir());
             scriptFactory.setGemHome(gemsConfig.getGemHome());
             scriptFactory.setGemPaths(gemsConfig.getGemPath());
@@ -136,7 +154,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         }
         boolean failure = false;
         for( JRubyRun run: runs){
-            for(Mode mode: run.asSingleModes()){
+            for(Mode mode: run.modes){
                 if(hasOverview){
                     getLog().info("\t" + run.toString(mode));
                 }
@@ -155,7 +173,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
 
     protected void runIt(JRubyRun run, TestScriptFactory testScriptFactory) throws MojoExecutionException, IOException, ScriptException {
         final de.saumya.mojo.ruby.script.ScriptFactory factory;
-        if (getJrubyVersion().toString().equals(run.version) || run.mode == Mode.DEFAULT){
+        if (getJrubyVersion().equals(run.version) ){//|| run.isDefaultModeOnly()){
             factory = this.factory;
         }
         else {
@@ -166,22 +184,26 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
             }
         }
 
-        for (Mode mode : run.asSingleModes()) {
+        for (Mode mode : run.modes) {
+            JRubyVersion version = null;
             getLog().info("");
-            if (mode != Mode.DEFAULT) {
+            if (!run.isDefaultModeOnly()) {
                 factory.addSwitch(mode.flag);
                 getLog().info("\trun with jruby " + run.version + " in mode " + mode);
+                version = run.version;
             }
             else {
                 getLog().info("\trun with jruby " + run.version);
+                version = null;
+                mode = null;
             }
             getLog().info("");
-            run.setResult(mode, runIt(factory, mode, run.version.toString(), testScriptFactory));
+            run.setResult(mode, runIt(factory, mode, version, testScriptFactory));
         }
     }
 
-    protected abstract TestScriptFactory newTestScriptFactory(Mode mode);
+    protected abstract TestScriptFactory newTestScriptFactory();//Mode mode);
     
-    protected abstract Result runIt(ScriptFactory factory, Mode mode, String version, TestScriptFactory testScriptFactory)
+    protected abstract Result runIt(ScriptFactory factory, Mode mode, JRubyVersion version, TestScriptFactory testScriptFactory)
         throws IOException, ScriptException, MojoExecutionException;
 }
