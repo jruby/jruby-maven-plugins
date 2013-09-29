@@ -39,6 +39,17 @@ public class ExecMojo extends AbstractGemMojo {
     protected File   file     = null;
 
     /**
+     * ruby file found on search path which gets executed. the search path
+     * includes the executable scripts which were installed via the given
+     * gem-artifacts.
+     * <br/>
+     * Command line -Dexec.filename=...
+     *
+     * @parameter expression="${exec.filename}"
+     */
+    protected String filename = null;
+
+    /**
      * output file where the standard out will be written
      * <br/>
      * Command line -Dexec.outputFile=...
@@ -73,6 +84,9 @@ public class ExecMojo extends AbstractGemMojo {
         }
         else if (this.file != null) {
             s = this.factory.newScript(this.file);
+        }
+        else if (this.filename != null) {
+            s = this.factory.newScriptFromSearchPath( this.filename );
         }
         else {
             s = this.factory.newArguments();

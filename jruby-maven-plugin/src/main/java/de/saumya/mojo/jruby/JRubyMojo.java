@@ -44,6 +44,15 @@ public class JRubyMojo extends AbstractJRubyMojo {
     protected File file = null;
 
     /**
+     * ruby file found on search path which gets executed.
+     * <br/>
+     * Command line -Djruby.filename=...
+     *
+     * @parameter expression="${jruby.filename}"
+     */
+    protected String filename = null;
+
+    /**
      * output file where the standard out will be written
      * <br/>
      * Command line -Djruby.outputFile=...
@@ -72,13 +81,23 @@ public class JRubyMojo extends AbstractJRubyMojo {
      */
     protected File          gemPath;
 
+    /**
+     * use system gems instead of setting up GemPath/GemHome inside the build directory and ignores any set
+     * gemHome and gemPath. you need to have both GEM_HOME and GEM_PATH environment variable set to make it work.
+     * <br/>
+     * Command line -Dgem.useSystem=...
+     *
+     * @parameter expression="${gem.useSystem}" default-value="false"
+     */
+    protected boolean          gemUseSystem;
+
     @Override
     public void executeJRuby() throws MojoExecutionException, IOException,
             ScriptException {
-        if (gemHome != null){
+        if (gemHome != null && !gemUseSystem){
             factory.addEnv("GEM_HOME", this.gemHome);
         }
-        if (gemPath != null){
+        if (gemPath != null && !gemUseSystem){
             factory.addEnv("GEM_PATH", this.gemPath);
         }
         Script s;
@@ -86,6 +105,8 @@ public class JRubyMojo extends AbstractJRubyMojo {
             s = this.factory.newScript(this.script);
         } else if (this.file != null) {
             s = this.factory.newScript(this.file);
+        } else if (this.filename != null) {
+            s = this.factory.newScriptFromSearchPath( this.filename );
         } else {
             s = this.factory.newArguments();
         }
