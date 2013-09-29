@@ -81,43 +81,80 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
      */
     protected File summaryReport;
 
+    private Mode[] calculateModes( Mode defaultMode )
+    {
+        List<Mode> result = new ArrayList<Mode>();
+        if( use18and19 != null && use18and19 == true )
+        {
+            getLog().warn( "use18and19 is deprecated - use modes instead" );
+            result.add( Mode._18 );
+            result.add( Mode._19 );
+        }
+        else if (jrubySwitches != null )
+        {
+            for ( Mode m: Mode.values() )
+            {
+                if ( jrubySwitches.contains( m.flag ) )
+                {
+                    result.add( m );
+                }
+            }
+        }
+        if (this.modes != null )
+        {
+            String[] modes = this.modes.split( "[\\ ,;]+" );
+            for( String m : modes )
+            {
+                Mode mode = Mode.valueOf( "--" + m );
+                if ( ! result.contains( mode ) )
+                {
+                    result.add( mode );
+                }
+            }
+        }
+        if ( result.size() == 0)
+        {
+            result.add( defaultMode );
+        }
+        return result.toArray( new Mode[ result.size() ] );
+    }
+    
+    private JRubyVersion[] calculateVersions()
+    {
+        if ( versions == null )
+        {
+            return new JRubyVersion[] { getJrubyVersion() };
+        }
+        else
+        {
+            String[] jrubyVersions = versions.split("[\\ ,;]+");
+            JRubyVersion[] result = new JRubyVersion[ jrubyVersions.length ];
+            int i = 0;
+            for( String version: jrubyVersions ){
+                result[ i++ ] = new JRubyVersion( version );
+            }
+            return result;
+        }
+    }
+    
     protected void executeWithGems() throws MojoExecutionException, IOException, ScriptException, GemException {
         
         testReportDirectory = new File(testReportDirectory.getAbsolutePath().replace("${project.basedir}/",""));
         List<JRubyRun> runs = new ArrayList<JRubyRun>();
-        if (versions == null && use18and19 == null && modes == null){
-//            final Mode mode; = use18and19 == null? Mode.DEFAULT: Mode._18_19;
-            runs.add(new JRubyRun( getJrubyVersion() ) );
+        
+        JRubyVersion[] versions = calculateVersions();
+        Mode[] modes = calculateModes( getJrubyVersion().defaultMode() );
+
+        if ( versions.length == 1 && versions[ 0 ].equals( getJrubyVersion() ) &&
+             modes.length == 1 && modes[0] == getJrubyVersion().defaultMode() )
+        {
+            runs.add( new JRubyRun( getJrubyVersion() ) );
         }
-        else {
-            final Mode[] modes;
-            if( (use18and19 == null && this.modes == null) || use18and19 == false){
-                if(jrubySwitches != null) { 
-                    if (jrubySwitches.contains("--1.9")){
-                        modes = new Mode[] { Mode._19 };
-                    }
-                    else {
-                        modes = new Mode[] { Mode._18 };
-                    }
-                }
-                else {
-                    modes = new Mode[ 0 ];
-                }
-            }
-            else {
-                modes = new Mode[] { Mode._18, Mode._19 };
-            }
-            if ( versions == null )
+        else
+        {
+            for( JRubyVersion version : versions )
             {
-                runs.add(new JRubyRun( getJrubyVersion(), modes ) );
-            }
-            else
-            {
-                String[] jrubyVersions = versions.split("[\\ ,;]+");
-                for(String version: jrubyVersions){
-                    JRubyRun run = new JRubyRun( version, modes );
-                    runs.add(run);
-                }
+                runs.add( new JRubyRun( version, modes ) );
             }
         }
 
@@ -187,15 +224,15 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         for (Mode mode : run.modes) {
             JRubyVersion version = null;
             getLog().info("");
-            if (!run.isDefaultModeOnly()) {
+            if ( !run.isDefaultModeOnly ) {
                 factory.addSwitch(mode.flag);
                 getLog().info("\trun with jruby " + run.version + " in mode " + mode);
                 version = run.version;
             }
             else {
                 getLog().info("\trun with jruby " + run.version);
-                version = null;
                 mode = null;
+                version = null;
             }
             getLog().info("");
             run.setResult(mode, runIt(factory, mode, version, testScriptFactory));

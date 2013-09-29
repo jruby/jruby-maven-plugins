@@ -77,7 +77,8 @@ public class RSpecMojo extends AbstractTestMojo {
         }
     }
     
-    protected Result runIt(de.saumya.mojo.ruby.script.ScriptFactory factory, Mode mode, JRubyVersion version, TestScriptFactory scriptFactory)
+    protected Result runIt(de.saumya.mojo.ruby.script.ScriptFactory factory, Mode mode, 
+                JRubyVersion version, TestScriptFactory scriptFactory)
             throws IOException, ScriptException, MojoExecutionException {
         
         scriptFactory.setOutputDir(outputfile.getParentFile());
@@ -105,11 +106,11 @@ public class RSpecMojo extends AbstractTestMojo {
 
         String reportPath = outputfile.getAbsolutePath();
       final File reportFile;
-      if (version.defaultMode() == mode) {
+      if (version != null && version.defaultMode() == mode) {
           reportFile = new File(reportPath.replace(".html", "-" + version
                   + mode.name() + ".html"));
       }
-      else if (getJrubyVersion().toString().equals(version)) {
+      else if (getJrubyVersion().equals(version)) {
           reportFile = new File(reportPath);
       }
       else {
@@ -152,15 +153,17 @@ public class RSpecMojo extends AbstractTestMojo {
         }
       }
       else {
-	  String filename = "TEST-rspec"
-	      + (mode.flag == null ? "" : "-" + version
-		 + mode.flag) + ".xml";
-	  File xmlReport = new File(this.testReportDirectory, filename);
-	  new File(this.testReportDirectory, "TEST-rspec.xml").renameTo(xmlReport);
-	  if (this.summaryReport != null) {
-	      FileUtils.copyFile(xmlReport, this.summaryReport);
-	  }
-	  result.success = result.message.contains("0 failures");
+          String filename = "TEST-rspec"
+                  + ( mode == null ? "" : ( version == null ? "" : "-" + version + mode.flag ) ) 
+                  + ".xml";
+          System.out.println( filename );
+
+          File xmlReport = new File(this.testReportDirectory, filename);
+          new File(this.testReportDirectory, "TEST-rspec.xml").renameTo(xmlReport);
+          if (this.summaryReport != null) {
+              FileUtils.copyFile(xmlReport, this.summaryReport);
+          }
+          result.success = result.message.contains("0 failures");
       }
       return result;
     }

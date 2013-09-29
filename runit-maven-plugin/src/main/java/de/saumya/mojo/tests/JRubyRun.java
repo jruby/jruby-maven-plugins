@@ -17,42 +17,36 @@ public class JRubyRun {
 
     public final JRubyVersion version;
 
-    final Result[] results = new Result[Mode.values().length];
+    public final boolean isDefaultModeOnly;
 
-    private static Mode[] toModes( String modes )
+    final Result[] results = new Result[Mode.values().length];
+    
+    private static Mode[] filter( JRubyVersion version, Mode[] modes )
     {
-        String[] m = modes.split( "[\\ ,;]+" );
-        Mode[] result = new Mode[ m.length ];
-        int i = 0;
-        for( String mode : m )
+        List<Mode> result = new ArrayList<Mode>();
+        for( Mode m: modes )
         {
-            result[ i++ ] = Mode.valueOf( "--" + mode );
+            if ( version.hasMode( m ) )
+            {
+                result.add( m );
+            }
         }
-        return result;
+        return result.toArray( new Mode[ result.size() ] );
     }
 
     public JRubyRun( JRubyVersion version ){
-        this( version, version.defaultMode() );
-    }
-     
-    public JRubyRun( String version, String modes ){
-        this( version, toModes( modes ) );
-    }
-
-    public JRubyRun( String version, Mode... modes ){
-        this( new JRubyVersion( version ), modes );
+        this( true, version, version.defaultMode() );
     }
 
     public JRubyRun( JRubyVersion version, Mode... modes ){
-        this.modes = modes.length == 0 ? new Mode[] { version.defaultMode() }: modes;
+        this( false, version, modes );
+    }
+    public JRubyRun( boolean isDefault, JRubyVersion version, Mode... modes ){
+        this.modes = modes.length == 0 ? new Mode[] { version.defaultMode() }: filter( version, modes );
         this.version = version;
+        this.isDefaultModeOnly = isDefault;
     }
     
-    public boolean isDefaultModeOnly()
-    {
-        return modes.length == 1 && version.defaultMode() == modes[ 0 ];  
-    }
-
     public Result result(Mode mode){
         return results[ mode.ordinal() ];
     }

@@ -44,19 +44,19 @@ public class JRubyVersion
         }
     }
     
-    public boolean hasMode18()
+    public boolean hasMode( Mode mode )
     {
-        return true;
-    }
-
-    public boolean hasMode19()
-    {
-        return this.minor > 5;
-    }
-
-    public boolean hasMode20()
-    {
-        return this.minor > 6;
+        switch( mode )
+        {
+        case _18:
+            return true;
+        case _19:
+            return this.minor > 5;
+        case _20:
+            return this.minor > 6;
+         default:
+             throw new RuntimeException( "BUG" );
+        }
     }
 
     public boolean needsOpenSSL()
