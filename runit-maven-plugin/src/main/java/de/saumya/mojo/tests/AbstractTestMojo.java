@@ -160,7 +160,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         }
         else {
             try {
-                factory = newScriptFactory(resolveJRubyCompleteArtifact(run.version));
+                factory = newScriptFactory(resolveJRubyCompleteArtifact(run.version.toString()));
             } catch (DependencyResolutionRequiredException e) {
                 throw new MojoExecutionException("could not resolve jruby", e);
             }
@@ -176,7 +176,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
                 getLog().info("\trun with jruby " + run.version);
             }
             getLog().info("");
-            run.setResult(mode, runIt(factory, mode, run.version, testScriptFactory));
+            run.setResult(mode, runIt(factory, mode, run.version.toString(), testScriptFactory));
         }
     }
 

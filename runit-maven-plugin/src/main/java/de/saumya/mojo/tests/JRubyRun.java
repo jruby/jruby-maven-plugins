@@ -1,9 +1,14 @@
 package de.saumya.mojo.tests;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import de.saumya.mojo.jruby.JRubyVersion;
+
 public class JRubyRun {
 
     public enum Mode {
-        _19("--1.9"), _18("--1.8"), _18_19, DEFAULT;
+        _20("--2.0"), _19("--1.9"), _18("--1.8"), _18_19, _18_19_20, DEFAULT;
 
         public final String flag;
 
@@ -27,32 +32,48 @@ public class JRubyRun {
 
     public final Mode mode;
 
-    public final String version;
+    public final JRubyVersion version;
 
-    final Result[] results = new Result[4];
+    final Result[] results = new Result[Mode.values().length];
 
     public JRubyRun(Mode mode, String version){
         this.mode = mode;
-        this.version = version;
-    }
-
-    boolean doesVersionAllow19(){
-        // only for jruby version bigger then 1.6.0 has 1.9 support
-        return version == null ? false : version.charAt(2) >= '6';
+        this.version = new JRubyVersion( version );
     }
 
     public JRubyRun.Mode[] asSingleModes(){
         switch (mode){
+        case _18_19_20:
+            List<JRubyRun.Mode> modes = new ArrayList<JRubyRun.Mode>();            
+            if ( version.hasMode18() ) {
+                modes.add(  Mode._18 );
+            }
+            if ( version.hasMode19() ) {
+                modes.add(  Mode._19 );
+            }
+            if ( version.hasMode20() ) {
+                modes.add(  Mode._20 );
+            }
+            return modes.toArray( new JRubyRun.Mode[ modes.size() ] );
         case _18_19:
-            if(doesVersionAllow19()) {
-                return new JRubyRun.Mode[] {Mode._18, Mode._19};
+            modes = new ArrayList<JRubyRun.Mode>();            
+            if ( version.hasMode18() ) {
+                modes.add(  Mode._18 );
+            }
+            if ( version.hasMode19() ) {
+                modes.add(  Mode._19 );
+            }
+            return modes.toArray( new JRubyRun.Mode[ modes.size() ] );
+        case _19:
+            if(version.hasMode19()) {
+                return new JRubyRun.Mode[] {Mode._19};
             }
             else {
-                return new JRubyRun.Mode[] {Mode._18};
+                return new JRubyRun.Mode[0];
             }
-        case _19:
-            if(doesVersionAllow19()) {
-                return new JRubyRun.Mode[] {Mode._19};
+        case _18:
+            if(version.hasMode18()) {
+                return new JRubyRun.Mode[] {Mode._18};
             }
             else {
                 return new JRubyRun.Mode[0];
