@@ -148,8 +148,15 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         }
 
         this.gemsConfig = new GemsConfig();
-        this.gemsConfig.setGemHome(this.gemHome);
-        this.gemsConfig.addGemPath(this.gemPath);
+        try {
+            this.gemsConfig.setGemHome(this.gemHome.getCanonicalFile());
+            this.gemsConfig.addGemPath(this.gemPath.getCanonicalFile());
+        }
+        catch (IOException e) {
+            // fallback to the given files
+            this.gemsConfig.setGemHome(this.gemHome);
+            this.gemsConfig.addGemPath(this.gemPath);
+        }
         if (this.gemUseSystem && 
                 (System.getenv("GEM_HOME") == null || System.getenv( "GEM_PATH") == null) ){
             getLog().warn("with gemUseSystem set to true and no GEM_HOME and GEM_PATH is set, " +
