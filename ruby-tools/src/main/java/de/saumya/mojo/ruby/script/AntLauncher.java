@@ -86,8 +86,18 @@ class AntLauncher extends AbstractLauncher {
         
         // hack to avoid jruby-core in bootclassloader where as the dependent jars are in system classloader
         if (this.factory.jrubyJar != null && this.factory.jrubyJar.equals(this.factory.jrubyStdlibJar)){
-        java.createJvmarg().setValue("-Xbootclasspath/a:"
+            java.createJvmarg().setValue("-Xbootclasspath/a:"
                 + this.factory.jrubyJar.getAbsolutePath());
+        }
+        if ( this.factory.jrubyJar  == null ){
+            // assume we have jruby.home and jruby.lib system properties to setup a jruby launch
+            final Variable v = new Variable();
+            v.setKey( "jruby.home" );
+            v.setValue( System.getProperty( "jruby.home" ) );
+            java.addSysproperty( v );
+            File jrubyJar = new File( System.getProperty("jruby.lib"), "jruby.jar" );
+            java.createJvmarg().setValue("-Xbootclasspath/a:"
+                    + jrubyJar.getAbsolutePath());
         }
         
         if (outputFile != null) {
