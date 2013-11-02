@@ -95,7 +95,9 @@ class AntLauncher extends AbstractLauncher {
             v.setKey( "jruby.home" );
             v.setValue( System.getProperty( "jruby.home" ) );
             java.addSysproperty( v );
-            File jrubyJar = new File( System.getProperty("jruby.lib"), "jruby.jar" );
+            File lib =  System.getProperty("jruby.lib") != null ? new File( System.getProperty("jruby.lib") ) :
+                new File( System.getProperty("jruby.home"), "lib" );
+            File jrubyJar = new File( lib, "jruby.jar" );
             java.createJvmarg().setValue("-Xbootclasspath/a:"
                     + jrubyJar.getAbsolutePath());
         }
