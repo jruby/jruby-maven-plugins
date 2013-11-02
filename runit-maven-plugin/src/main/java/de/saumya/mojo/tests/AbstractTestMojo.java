@@ -105,7 +105,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
             String[] modes = this.modes.split( "[\\ ,;]+" );
             for( String m : modes )
             {
-                Mode mode = Mode.valueOf( "--" + m );
+                Mode mode = Mode.valueOf( "_" + m.replace( ".", "" ) );
                 if ( ! result.contains( mode ) )
                 {
                     result.add( mode );
@@ -183,7 +183,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
 
         scriptFactory.emit();
 
-        boolean hasOverview = this.versions != null || (use18and19 != null && use18and19);
+        boolean hasOverview = this.versions != null || modes != null || (use18and19 != null && use18and19);
         if(hasOverview){
             getLog().info("");
             getLog().info("\tOverall Summary");
