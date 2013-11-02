@@ -6,7 +6,6 @@
     <artifactId>oss-parent</artifactId>
     <version>7</version>
   </parent>
-
   <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-maven-plugins</artifactId>
   <packaging>pom</packaging>
