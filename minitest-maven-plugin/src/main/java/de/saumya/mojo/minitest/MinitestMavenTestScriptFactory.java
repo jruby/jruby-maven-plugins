@@ -47,6 +47,8 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
     }
 
     private void getTestRunnerScript(StringBuilder builder) {
+        builder.append("require 'fileutils'\n");
+        builder.append("FileUtils.mkdir_p( File.dirname( REPORT_PATH ) )\n");
         builder.append("if MiniTest::Unit.respond_to? :output\n");
         builder.append("  MiniTest::Unit.output = Tee.open(REPORT_PATH, 'w')\n");
         builder.append("else\n");
