@@ -4,7 +4,7 @@ public class JRubyVersion
 {
     public enum Mode {
         
-        _20( "--2.0" ), _19( "--1.9" ), _18( "--1.8" );
+        _21( "--2.1" ), _20( "--2.0" ), _19( "--1.9" ), _18( "--1.8" );
 
         public final String flag;
 
@@ -21,26 +21,41 @@ public class JRubyVersion
         }
     }
     
-    private int minor;
+    private final int minor;
     private final String version;
+    private final int major;
     
     public JRubyVersion( String version )
     {
         this.version = version;
-        int first = this.version.indexOf( '.' );
-        //this.major = Integer.parseInt( version.substring( 0, first ) );
-        this.minor = Integer.parseInt( this.version.substring( first + 1, this.version.indexOf( '.', first + 1 ) ) );
+        String v = version.replace( "-SNAPSHOT", "" );
+        int first = v.indexOf( '.' );
+        this.major = Integer.parseInt( first < 0 ? v : v.substring( 0, first ) );
+        int second = v.indexOf( '.', first + 1 );
+        if ( first < 0 )
+        {
+            this.minor = 0;
+        }
+        else
+        {
+            this.minor = Integer.parseInt( v.substring( first + 1, second ) );
+        }
     }
 
     public Mode defaultMode()
     {
-        if (this.minor < 7)
-        {
-            return Mode._18;
+        if ( this.major == 1 ) {
+            if (this.minor < 7)
+            {
+                return Mode._18;
+            }
+            else
+            {
+                return Mode._19;
+            }
         }
-        else
-        {
-            return Mode._19;
+        else {
+            return Mode._21;
         }
     }
     
@@ -49,11 +64,13 @@ public class JRubyVersion
         switch( mode )
         {
         case _18:
-            return true;
+            return this.major == 1;
         case _19:
-            return this.minor > 5;
+            return this.major == 1 && this.minor > 5;
         case _20:
-            return this.minor > 6;
+            return this.major == 1 && this.minor > 6;
+        case _21:
+            return this.major > 1;
          default:
              throw new RuntimeException( "BUG" );
         }
@@ -61,12 +78,12 @@ public class JRubyVersion
 
     public boolean needsOpenSSL()
     {
-        return this.minor < 7;
+        return this.major == 1 && this.minor < 7;
     }
     
     public boolean hasJRubycVerbose()
     {
-        return this.minor > 5;
+        return this.major == 1 && this.minor > 5;
     }
     
     public String toString()
