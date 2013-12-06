@@ -75,6 +75,9 @@ public abstract class RubygemsHtmlVisitor {
                     || (prereleases
                             && version.matches("^[0-9]+(\\.[0-9a-zA-Z]+)*$") && version.matches(".*[a-zA-Z].*")))
                     && !versions.contains(version) && (brokenVersions == null || !brokenVersions.contains(version))) {
+                if ( prereleases ){
+                    version += "-SNAPSHOT";
+                }
                 addVersion(version);
                 versions.add(version);
             }

@@ -160,7 +160,7 @@ public class Controller {
                     return notFound("not found");
                 }
             case 5:
-                String filename = parts[4];
+                String filename = parts[4].replace("-SNAPSHOT", "");
                 if("index.html".equals(filename)){
                     return directory(parts[2], parts[3], path);
                 }
@@ -169,8 +169,12 @@ public class Controller {
                     filename = filename.replace("-java.gem", ".gem");
                     File local = new File(localStorage, filename.replace(".gem", ".pom"));
                     if(!local.exists()){
-                        if (!createFiles(parts[2], parts[3])){
-                            return new FileLocation(filename + " is being generated", Type.TEMP_UNAVAILABLE);
+                        try {
+                            if (!createFiles(parts[2], parts[3])){
+                                return new FileLocation(filename + " is being generated", Type.TEMP_UNAVAILABLE);
+                            }
+                        } catch (FileNotFoundException e) {
+                            return notFound("not found");
                         }
                     }
                     String url = RUBYGEMS_S3_URL + "/" + filename.replace(".gem", "-java.gem");
@@ -239,7 +243,7 @@ public class Controller {
     }
     
     private boolean createFiles(String name, String version) throws IOException {    
-        String gemname = name + "-" + version;
+        String gemname = name + "-" + version.replace( "-SNAPSHOT", "" );
         try {
             synchronized (fileLocks) {
                 if (fileLocks.contains(gemname)) {
