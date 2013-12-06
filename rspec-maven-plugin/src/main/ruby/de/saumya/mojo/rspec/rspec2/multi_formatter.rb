@@ -17,8 +17,12 @@ class MultiFormatter
   
   def method_missing(sym, *args)
     @formatters.each do |formatter|
-      formatter.send( sym, *args )
+      formatter.send( sym, *args ) if formatter.respond_to? sym
     end
+  end
+
+  def respond_to? method
+    true
   end
   
 end

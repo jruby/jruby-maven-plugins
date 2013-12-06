@@ -106,11 +106,11 @@ public class RSpecMojo extends AbstractTestMojo {
 
         String reportPath = outputfile.getAbsolutePath();
       final File reportFile;
-      if (version != null && version.defaultMode() == mode) {
+      if ( version != null && modes != null ) {
           reportFile = new File(reportPath.replace(".html", "-" + version
                   + mode.name() + ".html"));
       }
-      else if (getJrubyVersion().equals(version)) {
+      else if ( versions == null ) {
           reportFile = new File(reportPath);
       }
       else {

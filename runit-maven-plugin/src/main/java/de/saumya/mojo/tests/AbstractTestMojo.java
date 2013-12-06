@@ -72,7 +72,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
      *
      * @parameter expression="${jruby.versions}"
      */
-    private String versions;
+    protected String versions;
 
     /**
      * The name of the summary (xml-)report which can be used by TeamCity and Co.
