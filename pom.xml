@@ -9,7 +9,7 @@
   <groupId>de.saumya.mojo</groupId>
   <artifactId>jruby-maven-plugins</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0-rc5-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>JRuby Maven Mojos</name>
   <description>
     aggregation project for various jruby related maven plugins
@@ -43,18 +43,20 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <!--distributionManagement>
+
+  <repositories>
     <repository>
-      <id>sonatype-nexus-staging</id>
-      <name>Nexus Release Repository</name>
-      <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
-    <snapshotRepository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement-->
+  </repositories>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <invoker.skip>true</invoker.skip>
