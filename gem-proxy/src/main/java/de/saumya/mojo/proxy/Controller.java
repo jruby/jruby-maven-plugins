@@ -187,8 +187,12 @@ public class Controller {
                 if(filename.endsWith(SHA1) || filename.endsWith(".pom")){
                     File local = new File(localStorage, filename);
                     if(!local.exists()){
-                        if (!createFiles(parts[2], parts[3])){
-                            return new FileLocation(filename + " is being generated", Type.TEMP_UNAVAILABLE);
+                        try {
+                            if (!createFiles(parts[2], parts[3])){
+                                return new FileLocation(filename + " is being generated", Type.TEMP_UNAVAILABLE);
+                            }
+                        } catch (FileNotFoundException e) {
+                            return notFound("not found");
                         }
                     }
                     return new FileLocation(local, filename.endsWith(SHA1)? Type.ASCII_FILE: Type.XML_FILE);
