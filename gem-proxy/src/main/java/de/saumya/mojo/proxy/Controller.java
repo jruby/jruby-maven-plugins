@@ -32,6 +32,20 @@ public class Controller {
     private static final String RUBYGEMS_URL = "https://rubygems.org/gems";
 
     private static final String RUBYGEMS_S3_URL = "http://s3.amazonaws.com/production.s3.rubygems.org/gems";
+    
+    public static final String[] PLATFORMS = { "-universal-java-1.5",
+                                               "-universal-java-1.6",
+                                               "-universal-java-1.7",
+                                               "-universal-java-1.8",
+                                               "-universal-java",
+                                               "-universal-jruby-1.2",
+                                               "-jruby",
+                                               "-java",
+                                               "-universal-ruby-1.8.7",
+                                               "-universal-ruby-1.9.2",
+                                               "-universal-ruby-1.9.3",
+                                               "-universal-ruby",
+                                               "" };
 
     static final Map<String, Set<String>> BROKEN_GEMS = new HashMap<String, Set<String>>();
     
@@ -177,14 +191,13 @@ public class Controller {
                             return notFound("not found");
                         }
                     }
-                    String url = RUBYGEMS_S3_URL + "/" + filename.replace(".gem", "-java.gem");
-                    if ( !exists( url ) ) {
-                        // there are gem which use "jruby" as platform instead of "java"
-                        // like therubyrhino-1.72
-                        url = RUBYGEMS_S3_URL + "/" + filename.replace(".gem", "-jruby.gem");
-                        if ( !exists( url ) ) {
-                            url = RUBYGEMS_S3_URL + "/" + filename;
-                        }
+                    String url = null;
+		    for( String platform : PLATFORMS )
+		    {
+			url = RUBYGEMS_S3_URL + "/" + filename.replace(".gem", platform + ".gem");
+			if ( exists( url ) ) {
+			    break;
+			}
                     }
                     return new FileLocation( new URL( url ) );
                 }
@@ -261,22 +274,17 @@ public class Controller {
             File pomfileSha = new File(this.localStorage, gemname + ".pom" + SHA1);
 
             if (!(gemfileSha.exists() && pomfile.exists() && pomfileSha.exists())) {
-                try {
-                    downloadGemfile(gemfile, new URL(RUBYGEMS_URL + "/"
-                            + gemname + "-java.gem"));
-                }
-                catch (FileNotFoundException e) {
-                    // there are gem which use "jruby" as platform nstead of "java"
-                    // like therubyrhino-1.72
-                    try {
-                        downloadGemfile(gemfile, new URL(RUBYGEMS_URL + "/"
-                                + gemname + "-jruby.gem"));
-                    }
-                    catch (FileNotFoundException ee) {
-                       downloadGemfile(gemfile, new URL(RUBYGEMS_URL + "/"
-                            + gemname + ".gem"));
-                    }
-                } 
+		String url = null;
+		for( String platform : PLATFORMS )
+		{
+		    url = RUBYGEMS_URL + "/" + gemname + platform + ".gem";
+		    try {
+			downloadGemfile(gemfile, new URL(url));
+			break;
+		    }
+		    catch (FileNotFoundException ignore) {
+		    }
+		}
 
                 String pom = createPom(gemfile);
 
