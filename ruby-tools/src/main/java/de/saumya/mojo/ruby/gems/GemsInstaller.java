@@ -182,14 +182,16 @@ public class GemsInstaller {
     private boolean exists(Artifact artifact) {
         // check if the specifications exists
         String basename = artifact.getArtifactId() + "-"
-                + artifact.getVersion();
+                + artifact.getVersion().replaceFirst("-SNAPSHOT$", "");
+        String universalJavaBasename = basename + "-universal-java.gemspec";
         String javaBasename = basename + "-java.gemspec";
         String rubyBasename = basename + ".gemspec";
 
         for (File dir : this.config.getGemsDirectory()) {
             File specs  = new File( dir.getParentFile(), "specifications" );
             if (new File(specs, rubyBasename).exists()
-                    || new File(specs, javaBasename).exists()) {
+                    || new File(specs, javaBasename).exists()
+                    || new File(specs, universalJavaBasename).exists()) {
                 return true;
             }
         }
