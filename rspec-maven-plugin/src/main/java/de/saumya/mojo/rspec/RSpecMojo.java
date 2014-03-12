@@ -110,7 +110,7 @@ public class RSpecMojo extends AbstractTestMojo {
           reportFile = new File(reportPath.replace(".html", "-" + version
                   + mode.name() + ".html"));
       }
-      else if ( versions == null ) {
+      else if ( versions == null || versions.isEmpty() || version == null ) {
           reportFile = new File(reportPath);
       }
       else {
