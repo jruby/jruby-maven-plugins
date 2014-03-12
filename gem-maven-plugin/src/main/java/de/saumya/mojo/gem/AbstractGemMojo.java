@@ -62,6 +62,15 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      */
     protected boolean       includeRubygemsInResources;
 
+    /**
+     * flag whether to include file under the lib directory
+     * <br/>
+     * Command line -Dgem.includeRubygemsInResources=...
+     *
+     * @parameter expression="${gem.includeRubygemsInResources}" default-value="false"
+     */
+    protected boolean       includeLibDirectoryInResources;
+
     
     /**
      * flag whether to install rdocs of the used gems or not
@@ -342,6 +351,16 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             }
         }
 
+        if (this.includeLibDirectoryInResources) {
+            if (jrubyVerbose) {
+                getLog().info("add to classpath: "
+                        + libDirectory.getAbsolutePath());
+            }
+            // add it to the classpath so java classes can find the ruby files
+            Resource resource = new Resource();
+            resource.setDirectory(libDirectory.getAbsolutePath());
+            project.getBuild().getResources().add(resource);
+        }
         try {
 
             executeWithGems();
