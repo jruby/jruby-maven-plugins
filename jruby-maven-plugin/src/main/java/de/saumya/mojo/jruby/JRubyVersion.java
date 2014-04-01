@@ -32,13 +32,22 @@ public class JRubyVersion
         int first = v.indexOf( '.' );
         this.major = Integer.parseInt( first < 0 ? v : v.substring( 0, first ) );
         int second = v.indexOf( '.', first + 1 );
-        if ( first < 0 )
+        if ( first < 0 || second < 0 )
         {
             this.minor = 0;
         }
         else
         {
-            this.minor = Integer.parseInt( v.substring( first + 1, second ) );
+            int m = 0;
+            try
+            {
+                m = Integer.parseInt( v.substring( first + 1, second ) );
+            }
+            catch( NumberFormatException e )
+            {
+		// ignore
+            }
+	    this.minor = m;
         }
     }
 
