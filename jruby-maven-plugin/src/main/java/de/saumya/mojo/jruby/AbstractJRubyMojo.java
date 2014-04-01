@@ -17,6 +17,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.classworlds.ClassRealm;
+import org.codehaus.classworlds.NoSuchRealmException;
 
 import de.saumya.mojo.ruby.Logger;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -35,7 +36,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected static final String JRUBY_STDLIB = "jruby-stdlib";
 
-    protected static final String DEFAULT_JRUBY_VERSION = "1.7.6";
+    protected static final String DEFAULT_JRUBY_VERSION = "1.7.11";
 
 
     /**
@@ -78,7 +79,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * local/remote maven repository. it overwrites the jruby version from
      * the dependencies if any. i.e. you can easily switch jruby version from the commandline !
      * <br/>
-     * default: 1.7.6
+     * default: 1.7.11
      * <br/>
      * Command line -Djruby.version=...
      *
@@ -187,6 +188,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
 	private ScriptFactory createScriptFactory() throws MojoExecutionException {
 		try {
+		    try
+		    {
+		        classRealm.getWorld().disposeRealm("jruby-all");
+		    }
+		    catch( NoSuchRealmException ignore )
+		    {
+		        // ignore
+		    }
 			ClassRealm realm = classRealm.getWorld().newRealm("jruby-all");
 			for (String path : this.project.getTestClasspathElements()) {
 				realm.addConstituent(new File(path).toURI().toURL());
@@ -201,6 +210,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 			this.classRealm = realm;
 			return newScriptFactory( null );
 		} catch (final Exception e) {
+		    //TODO debug
+		    e.printStackTrace();
 			try {
 				return newScriptFactory(resolveJRubyArtifact());
 			} catch (final DependencyResolutionRequiredException ee) {
