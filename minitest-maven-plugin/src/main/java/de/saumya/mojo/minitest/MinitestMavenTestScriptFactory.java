@@ -42,7 +42,11 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
         builder.append("    # assume we run ruby19\n");
         builder.append("  end\n");
         builder.append("end\n");
-        builder.append("require 'minitest/autorun'\n");
+        builder.append("begin\n");
+        builder.append("  require 'minitest/autorun'\n");
+        builder.append("rescue\n");
+        builder.append("  raise 'looks like minitest gem is missing'\n");
+        builder.append("end\n");
         builder.append("Dir[SOURCE_DIR].each { |f| require f if File.file? f }\n");
     }
 
