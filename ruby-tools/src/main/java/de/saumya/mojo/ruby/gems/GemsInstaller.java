@@ -52,7 +52,13 @@ public class GemsInstaller {
     public void installPom(final MavenProject pom,
             final ArtifactRepository localRepository) throws IOException,
             ScriptException, GemException {
-        installGems(pom, localRepository);
+        installPom(pom, localRepository, null);
+    }
+    
+    public void installPom(final MavenProject pom,
+            final ArtifactRepository localRepository, String scope) throws IOException,
+            ScriptException, GemException {
+        installGems(pom, localRepository, scope);
     }
     
     public MavenProject installOpenSSLGem(final Object repositorySystemSession,
@@ -81,35 +87,53 @@ public class GemsInstaller {
         installPom(pom);
         return pom;
     }
-
-    public void installGems(final MavenProject pom, final ArtifactRepository localRepository) 
+    
+    public void installGems(final MavenProject pom,
+            final ArtifactRepository localRepository)  
+                    throws IOException, ScriptException, GemException
+    {
+        installGems(pom, localRepository, null);
+        
+    }
+    
+    public void installGems(final MavenProject pom,
+            final ArtifactRepository localRepository, String scope ) 
         throws IOException, ScriptException, GemException {
-        installGems(pom, (Collection<Artifact>)null, localRepository);
+        installGems(pom, (Collection<Artifact>)null, localRepository, scope);
     }
     
     public void installGems(final MavenProject pom, PluginDescriptor plugin,
             final ArtifactRepository localRepository) throws IOException,
             ScriptException, GemException {
-        installGems(pom, plugin.getArtifacts(), localRepository);
+        installGems(pom, plugin.getArtifacts(), localRepository, (String) null);
     }
 
     public void installGems(final MavenProject pom, final Collection<Artifact> artifacts,
-            final ArtifactRepository localRepository) throws IOException,
+            final ArtifactRepository localRepository, String scope) throws IOException,
             ScriptException, GemException {
-        installGems(pom, artifacts, localRepository, pom.getRemoteArtifactRepositories());
+        installGems(pom, artifacts, localRepository, pom.getRemoteArtifactRepositories(), scope);
+    }
+    public void installGems(final MavenProject pom, final Collection<Artifact> artifacts,
+            final ArtifactRepository localRepository, List<ArtifactRepository> remoteRepos)
+                    throws IOException, ScriptException, GemException {
+        installGems( pom, artifacts, localRepository, remoteRepos, null );
     }
     
     public void installGems(final MavenProject pom, final Collection<Artifact> artifacts,
-                final ArtifactRepository localRepository, List<ArtifactRepository> remoteRepos) throws IOException,
+                final ArtifactRepository localRepository, List<ArtifactRepository> remoteRepos,
+                String scope ) throws IOException,
                 ScriptException, GemException {
-        // start with empty script. 
-        // script will be create when first un-installed gem is found
+        // start without script object. 
+        // script object will be created when first un-installed gem is found
         Script script = null;
         if (pom != null) {
             boolean hasAlreadyOpenSSL = false;
             for (final Artifact artifact : pom.getArtifacts()) {
                 // assume pom.getBasedir() != null indicates the project pom
-                if ("compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope()) || pom.getBasedir() != null) {
+                if ( ( "compile".equals(artifact.getScope()) || 
+                       "runtime".equals(artifact.getScope()) ||
+                       pom.getBasedir() != null ) && 
+                      ( scope == null || scope.equals(artifact.getScope()) ) ) {
                     if (!artifact.getFile().exists()) {
                         this.manager.resolve(artifact,
                                              localRepository,
@@ -214,7 +238,9 @@ public class GemsInstaller {
                                                "verbose"));
                 }
                 if (artifact.getFile() != null)
-                script.addArg(artifact.getFile());
+                {
+                    script.addArg(artifact.getFile());
+                }
             }
         }
         return script;

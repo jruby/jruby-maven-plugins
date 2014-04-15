@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>gems-test</artifactId>
+  <version>0.0.0</version>
+  <repositories>
+    <repository>
+      <id>rubygems-release</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>compass</artifactId>
+      <version>0.12.5</version>
+      <type>gem</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>minitest</artifactId>
+      <version>5.3.2</version>
+      <type>gem</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>virtus</artifactId>
+      <version>1.0.1</version>
+      <type>gem</type>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>de.saumya.mojo</groupId>
+	<artifactId>gem-maven-plugin</artifactId>
+        <version>@project.version@</version>
+        <executions>
+          <execution>
+	    <id>init</id>
+            <goals>
+              <goal>initialize</goal>
+            </goals>
+            <configuration>
+	      <includeRubygemsInResources>true</includeRubygemsInResources>
+	    </configuration>
+	  </execution>
+          <execution>
+	    <id>compass</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <execArgs>${project.build.directory}/rubygems/bin/compass compile ${basedir}/src/main/webapp/resources</execArgs>
+            </configuration>
+          </execution>
+	</executions>
+      </plugin>  
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <artifactItems>
+            <artifactItem>
+              <groupId>org.jruby</groupId>
+              <artifactId>jruby-complete</artifactId>
+              <version>1.7.11</version>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+            </artifactItem>
+          </artifactItems>
+        </configuration>
+      </plugin>
+ 
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2</version>
+	<configuration>
+	  <executable>java</executable>
+	  <environmentVariables>
+	    <PATH>${basedir}</PATH>
+	    <HOME>${basedir}</HOME>
+	    <GEM_PATH>${basedir}</GEM_PATH>
+	    <GEM_HOME>${basedir}</GEM_HOME>
+	  </environmentVariables>
+	</configuration>
+	<executions>
+	  <execution>
+	    <id>count installed gems</id>
+	    <phase>install</phase>
+	    <goals>
+              <goal>exec</goal>
+            </goals>
+	    <configuration>
+	      <arguments>
+		<argument>-cp</argument>
+		<argument>${project.build.directory}/jruby-complete-1.7.11.jar${path.separator}${project.build.directory}/gems-test-0.0.0.jar</argument>
+		<argument>org.jruby.Main</argument>
+		<argument>-e</argument>
+		<argument>
+		  require 'stringio'
+		  require 'rubygems/commands/list_command'
+		  require 'rubygems/user_interaction'
+		  s = StringIO.new
+		  l = Gem::Commands::ListCommand.new
+		  l.ui= Gem::StreamUI.new( STDIN, s, STDERR, true )
+		  l.execute
+		  c = s.string.split( /\n/ ).count
+		  puts 'gems count ' + c.to_s
+		</argument>
+	      </arguments>
+	    </configuration>
+	  </execution>
+	</executions>
+	<dependencies>
+	  <dependency>
+	    <groupId>org.jruby</groupId>
+	    <artifactId>jruby-complete</artifactId>
+	    <version>1.7.11</version>
+	    <type>jar</type>
+	  </dependency>
+	</dependencies>
+      </plugin>
+    </plugins>
+  </build>
+</project>

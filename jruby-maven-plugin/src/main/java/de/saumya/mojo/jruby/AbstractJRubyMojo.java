@@ -211,7 +211,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 			return newScriptFactory( null );
 		} catch (final Exception e) {
 		    //TODO debug
-		    e.printStackTrace();
+		    //e.printStackTrace();
 			try {
 				return newScriptFactory(resolveJRubyArtifact());
 			} catch (final DependencyResolutionRequiredException ee) {
@@ -241,6 +241,21 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                             artifact.getFile(),
                             this.project.getTestClasspathElements(), 
                             this.jrubyFork) );
+
+            if(libDirectory != null && libDirectory.exists()){
+                if(jrubyVerbose){
+                    getLog().info("add to ruby loadpath: " + libDirectory.getAbsolutePath());
+                }
+                // add it to the load path for all scripts using that factory
+                factory.addSwitch("-I", libDirectory.getAbsolutePath());
+            }
+            if(rubySourceDirectory != null && rubySourceDirectory.exists()){
+                if(jrubyVerbose){
+                    getLog().info("add to ruby loadpath: " + rubySourceDirectory.getAbsolutePath());
+                }
+                // add it to the load path for all scripts using that factory
+                factory.addSwitch("-I", rubySourceDirectory.getAbsolutePath());
+            }
             return factory;
         } catch (final DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("could not resolve jruby", e);
@@ -263,22 +278,12 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
         if(rubySourceDirectory != null && rubySourceDirectory.exists()){
             if(jrubyVerbose){
-                getLog().info("add to java classpath and ruby loadpath: " + rubySourceDirectory.getAbsolutePath());
+                getLog().info("add to java classpath: " + rubySourceDirectory.getAbsolutePath());
             }
-            // add it to the load path for all scripts using that factory
-            this.factory.addSwitch("-I", rubySourceDirectory.getAbsolutePath());
             // add it to the classpath so java classes can find the ruby files
             Resource resource = new Resource();
             resource.setDirectory(rubySourceDirectory.getAbsolutePath());
             project.getBuild().getResources().add(resource);
-        }
-
-        if(libDirectory != null && libDirectory.exists()){
-            if(jrubyVerbose){
-                getLog().info("add to ruby loadpath: " + libDirectory.getAbsolutePath());
-            }
-            // add it to the load path for all scripts using that factory
-            this.factory.addSwitch("-I", libDirectory.getAbsolutePath());
         }
 
         try {

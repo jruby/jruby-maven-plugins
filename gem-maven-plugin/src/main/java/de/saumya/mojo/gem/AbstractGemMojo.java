@@ -212,6 +212,22 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             if(supportNative){
                 factory.addJvmArgs("-Djruby.home=" + setupNativeSupport().getAbsolutePath());
             }
+            if(rubySourceDirectory != null && rubySourceDirectory.exists()){
+                if(jrubyVerbose){
+                    getLog().info("add to ruby loadpath: " + rubySourceDirectory.getAbsolutePath());
+                }
+                // add it to the load path for all scripts using that factory
+                factory.addSwitch("-I", rubySourceDirectory.getAbsolutePath());
+            }
+
+            if(libDirectory != null && libDirectory.exists()){
+                if(jrubyVerbose){
+                    getLog().info("add to ruby loadpath: " + libDirectory.getAbsolutePath());
+                }
+                // add it to the load path for all scripts using that factory
+                factory.addSwitch("-I", libDirectory.getAbsolutePath());
+            }
+
             return factory;
         }
         catch (final DependencyResolutionRequiredException e) {
@@ -278,46 +294,58 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 this.factory,
                 this.manager);
 
+        // remember gem_home
+        File home = this.gemsConfig.getGemHome();
+        // use a common bindir, i.e. the one from the configured gemHome
+        // remove default by setting it explicitly
+        this.gemsConfig.setBinDirectory(this.gemsConfig.getBinDirectory());
+
+        // use gemHome as base for other gems installation directories
+        String base = this.gemsConfig.getGemHome() != null ? 
+                this.gemsConfig.getGemHome().getAbsolutePath() : 
+                    (project.getBuild().getDirectory() + "/rubygems");
+
         try {
             // install the gem dependencies from the pom
+	    getLog().info("installing gems for compile scope . . .");
             this.gemsInstaller.installPom(this.project, 
-                                          this.localRepository);
-
-            // has the plugin gem dependencies ?
-            boolean hasGems = false;
-            for(Artifact artifact: plugin.getArtifacts()){
-                if (artifact.getType().contains("gem")){
-                    hasGems = true;
-                    break;
-                }
+                                          this.localRepository, "compile");
+	    getLog().info("installing gems for runtime scope . . .");
+            this.gemsInstaller.installPom(this.project, 
+                                          this.localRepository, "runtime");
+            String[] SCOPES = new String[] { "provided", "test" };
+            for( String scope: SCOPES ){
+                File gemHome = new File(base + "-" + scope);
+                this.gemsConfig.setGemHome(gemHome);
+                this.gemsConfig.addGemPath(gemHome);
+                
+                getLog().info("installing gems for " + scope + " scope . . .");
+                // install the gem dependencies from the pom
+                this.gemsInstaller.installPom(this.project, 
+                                              this.localRepository, 
+                                              scope);
+               
             }
-            if (hasGems){
-                // install the gems for the plugin
-                String base = this.gemsConfig.getGemHome() != null ? 
-                        this.gemsConfig.getGemHome().getAbsolutePath() : 
-                            (project.getBuild().getDirectory() + "/rubygems");
-                File pluginGemHome = new File(base + "-" + plugin.getArtifactId());
-                pluginGemHome.mkdirs();
-                // use a common bindir, i.e. the one from the configured gemHome
-                // remove default by setting it explicitly
-                this.gemsConfig.setBinDirectory(this.gemsConfig.getBinDirectory());
-                // remember gem_home
-                File home = this.gemsConfig.getGemHome();
-                // use plugin home for plugin gems
-                this.gemsConfig.setGemHome(pluginGemHome);
-                this.gemsConfig.addGemPath(pluginGemHome);
-
-                this.gemsInstaller.installGems(this.project,
-                                               this.plugin.getArtifacts(), 
-                                               this.localRepository, 
-                                               getRemoteRepos());
-
-                // reset old gem home again
-                this.gemsConfig.setGemHome(home);
-            }
+ 
+            File pluginGemHome = new File(base + "-" + plugin.getArtifactId());
+            // use plugin home for plugin gems
+            this.gemsConfig.setGemHome(pluginGemHome);
+            this.gemsConfig.addGemPath(pluginGemHome);
+               
+            getLog().info("installing gems for plugin " + plugin.getGroupId() + ":" + plugin.getArtifactId() 
+                          + " . . .");
+            this.gemsInstaller.installGems(this.project,
+                                           this.plugin.getArtifacts(), 
+                                           this.localRepository, 
+                                           getRemoteRepos());
         }
         catch (final GemException e) {
             throw new MojoExecutionException("error in installing gems", e);
+        }
+        finally
+        {
+            // reset old gem home again
+            this.gemsConfig.setGemHome(home);
         }
 
         if (this.includeRubygemsInTestResources) {
@@ -337,18 +365,16 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         }
 
         if (this.includeRubygemsInResources) {
-            for (File path : this.gemsConfig.getGemPath()) {
-                if (jrubyVerbose) {
-                    getLog().info("add gems to classpath from: "
-                            + path.getAbsolutePath());
-                }
-                // add it to the classpath so java classes can find the ruby files
-                Resource resource = new Resource();
-                resource.setDirectory(path.getAbsolutePath());
-                resource.addInclude("gems/**");
-                resource.addInclude("specifications/**");
-                project.getBuild().getResources().add(resource);
+            if (jrubyVerbose) {
+                getLog().info("add gems to classpath from: "
+                        + home.getAbsolutePath());
             }
+            // add it to the classpath so java classes can find the ruby files
+            Resource resource = new Resource();
+            resource.setDirectory(home.getAbsolutePath());
+            resource.addInclude("gems/**");
+            resource.addInclude("specifications/**");
+            project.getBuild().getResources().add(resource);
         }
 
         if (this.includeLibDirectoryInResources) {
