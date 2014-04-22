@@ -61,7 +61,27 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter expression="${gem.includeRubygemsInResources}" default-value="false"
      */
     protected boolean       includeRubygemsInResources;
+    
+    /**
+     * flag whether to include all gems to resources, i.e. to classpath or not.
+     * the difference to the <code>includeRubygemsInResources</code> is that it 
+     * does not depend on rubygems during runtime since the required_path of the 
+     * gems gets added to resources. note that it expect the required_path of the 
+     * gem to be <b>lib</b> which is the default BUT that is not true for all gems.
+     * in this sense this feature is incomplete and might not work for you !!!
+     * 
+     * this feature can be helpful in situations where the classloader does not work
+     * for rubygems due to rubygems uses file system globs to find the gems and this
+     * only works if the classloader reveals the jar url of its jars (i.e. URLClassLoader).
+     * for example OSGi classloader can not work with rubygems !! 
+     * <br/>
+     * Command line -Dgem.includeGemsInResources=...
+     *
+     * @parameter expression="${gem.includeGemsInResources}" default-value="false"
+     */
+    protected boolean       includeGemsInResources;
 
+    /**
     /**
      * flag whether to include file under the lib directory
      * <br/>
@@ -350,17 +370,19 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
         if (this.includeRubygemsInTestResources) {
             for (File path : this.gemsConfig.getGemPath()) {
-                if (jrubyVerbose) {
-                    getLog().info("add gems to test-classpath from: "
-                            + path.getAbsolutePath());
+                if ( path.exists() ) {
+                    if (jrubyVerbose) {
+                        getLog().info("add gems to test-classpath from: "
+                                + path.getAbsolutePath());
+                    }
+                    // add it to the classpath so java classes can find the ruby
+                    // files
+                    Resource resource = new Resource();
+                    resource.setDirectory(path.getAbsolutePath());
+                    resource.addInclude("gems/**");
+                    resource.addInclude("specifications/**");
+                    project.getBuild().getTestResources().add(resource);
                 }
-                // add it to the classpath so java classes can find the ruby
-                // files
-                Resource resource = new Resource();
-                resource.setDirectory(path.getAbsolutePath());
-                resource.addInclude("gems/**");
-                resource.addInclude("specifications/**");
-                project.getBuild().getTestResources().add(resource);
             }
         }
 
@@ -387,6 +409,20 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             resource.setDirectory(libDirectory.getAbsolutePath());
             project.getBuild().getResources().add(resource);
         }
+        if (this.includeGemsInResources) {
+            File gems = new File(home.getAbsoluteFile(), "gems");
+            for( File g : gems.listFiles() ) {
+                File lib = new File(g, "lib");
+                if (jrubyVerbose) {
+                    getLog().info("add to resource: "
+                            + lib.getAbsolutePath());
+                }
+                Resource resource = new Resource();
+                resource.setDirectory(lib.getAbsolutePath());
+                project.getBuild().getResources().add(resource);
+            }
+        }   
+         
         try {
 
             executeWithGems();
