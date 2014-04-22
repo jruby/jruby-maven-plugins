@@ -4,7 +4,7 @@
   <parent>
     <artifactId>parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>gem-parent-mojo</artifactId>
