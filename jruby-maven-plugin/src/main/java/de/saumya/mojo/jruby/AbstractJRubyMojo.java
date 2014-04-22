@@ -36,7 +36,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected static final String JRUBY_STDLIB = "jruby-stdlib";
 
-    protected static final String DEFAULT_JRUBY_VERSION = "1.7.11";
+    protected static final String DEFAULT_JRUBY_VERSION = "1.7.12";
 
 
     /**
@@ -79,7 +79,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * local/remote maven repository. it overwrites the jruby version from
      * the dependencies if any. i.e. you can easily switch jruby version from the commandline !
      * <br/>
-     * default: 1.7.11
+     * default: 1.7.12
      * <br/>
      * Command line -Djruby.version=...
      *
