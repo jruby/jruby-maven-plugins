@@ -63,12 +63,20 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected boolean       includeRubygemsInResources;
     
     /**
+     * EXPERIMENTAL
+     * 
+     * this gives the scope of the gems which shall be included to resources.
+     * 
      * flag whether to include all gems to resources, i.e. to classpath or not.
      * the difference to the <code>includeRubygemsInResources</code> is that it 
      * does not depend on rubygems during runtime since the required_path of the 
      * gems gets added to resources. note that it expect the required_path of the 
      * gem to be <b>lib</b> which is the default BUT that is not true for all gems.
      * in this sense this feature is incomplete and might not work for you !!!
+     * 
+     * IMPORTANT: it only adds the gems with <b>provided</b> scope since they are packed
+     * with the jar and then the pom.xml will not have them (since they are marked 
+     * 'provided') as transitive dependencies.
      * 
      * this feature can be helpful in situations where the classloader does not work
      * for rubygems due to rubygems uses file system globs to find the gems and this
@@ -77,9 +85,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.includeGemsInResources=...
      *
-     * @parameter expression="${gem.includeGemsInResources}" default-value="false"
+     * @parameter expression="${gem.includeGemsInResources}"
      */
-    protected boolean       includeGemsInResources;
+    protected String       includeGemsInResources;
 
     /**
     /**
@@ -327,10 +335,10 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
         try {
             // install the gem dependencies from the pom
-	    getLog().info("installing gems for compile scope . . .");
+            getLog().info("installing gems for compile scope . . .");
             this.gemsInstaller.installPom(this.project, 
                                           this.localRepository, "compile");
-	    getLog().info("installing gems for runtime scope . . .");
+            getLog().info("installing gems for runtime scope . . .");
             this.gemsInstaller.installPom(this.project, 
                                           this.localRepository, "runtime");
             String[] SCOPES = new String[] { "provided", "test" };
@@ -409,8 +417,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             resource.setDirectory(libDirectory.getAbsolutePath());
             project.getBuild().getResources().add(resource);
         }
-        if (this.includeGemsInResources) {
-            File gems = new File(home.getAbsoluteFile(), "gems");
+        if (this.includeGemsInResources != null ) {
+            String dir = "compile".equals( includeGemsInResources ) ? base : base + "-" + includeGemsInResources;
+            File gems = new File(dir, "gems");
             for( File g : gems.listFiles() ) {
                 File lib = new File(g, "lib");
                 if (jrubyVerbose) {
