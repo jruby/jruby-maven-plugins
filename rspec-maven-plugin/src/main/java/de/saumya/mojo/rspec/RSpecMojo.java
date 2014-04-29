@@ -98,9 +98,11 @@ public class RSpecMojo extends AbstractTestMojo {
             script.addArgs(this.args);
         }
 
+        Exception error = null;
         try {
             script.executeIn(launchDirectory());
         } catch (Exception e) {
+            error = e;
             getLog().debug("exception in running specs", e);
         }
 
@@ -144,8 +146,14 @@ public class RSpecMojo extends AbstractTestMojo {
       }
 
       if (result.message == null) {
-        if(reportFile.length() == 0){
-            result.success = true;
+        if(reportFile.length() == 0 ){
+            if ( error == null ){
+                result.success = true;
+            }
+            else{
+                result.message = "An error occurred";
+                result.success = false;                
+            }                
         }
         else { // this means the report file partial and thus an error occured
             result.message = "An unknown error occurred";
