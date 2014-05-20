@@ -6,6 +6,7 @@ package de.saumya.mojo.ruby.script;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,23 +59,7 @@ public class ScriptFactory {
                 : Collections.unmodifiableList(classpathElements);
         this.fork = fork;
         if (classRealm != null && jrubyJar != null) {
-            ClassRealm jruby;
-            try {
-                jruby = classRealm.getWorld().getRealm("jruby");
-            }
-            catch (final NoSuchRealmException e) {
-                try {
-                    jruby = classRealm.getWorld().newRealm("jruby");
-                    if(jrubyJar != null){
-                        jruby.addConstituent(jrubyJar.toURI().toURL());
-                    }
-                }
-                catch (final DuplicateRealmException ee) {
-                    throw new ScriptException("could not setup classrealm for jruby",
-                            ee);
-                }
-            }
-            this.classRealm = jruby;
+            this.classRealm = getOrCreateClassRealm(classRealm, jrubyJar);
         }
         else {
             this.classRealm = classRealm;
@@ -88,6 +73,26 @@ public class ScriptFactory {
             this.launcher = new EmbeddedLauncher(logger, this);
         }
     }
+
+	private static synchronized ClassRealm getOrCreateClassRealm(final ClassRealm classRealm, final File jrubyJar) throws MalformedURLException, ScriptException {
+		ClassRealm jruby;
+		try {
+			jruby = classRealm.getWorld().getRealm("jruby");
+		}
+		catch (final NoSuchRealmException e) {
+			try {
+				jruby = classRealm.getWorld().newRealm("jruby");
+				if(jrubyJar != null){
+					jruby.addConstituent(jrubyJar.toURI().toURL());
+				}
+			}
+			catch (final DuplicateRealmException ee) {
+				throw new ScriptException("could not setup classrealm for jruby",
+										  ee);
+			}
+		}
+		return jruby;
+	}
 
     public Script newScriptFromSearchPath(final String scriptName)
             throws IOException {
