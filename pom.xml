@@ -30,7 +30,7 @@
   <developers>
     <developer>
       <id>mkristian</id>
-      <name>Kristian Meier</name>
+      <name>Christian Meier</name>
       <email>m.kristian@web.de</email>
       <timezone>IST</timezone>
     </developer>
@@ -113,6 +113,7 @@
     <module>minitest-maven-plugin</module>
     <module>bundler-maven-plugin</module>
     <module>gem-extension</module>
+    <module>gem-with-jar-extension</module>
 <!--
     <module>integration-tests</module>
 -->
