@@ -306,7 +306,8 @@ public class Controller {
     private String createPom(File gemfile) {
         // protect the script container
         synchronized (script) {
-            return script.callMethod(createPom, "create", gemfile.getAbsolutePath(), String.class);            
+            return script.callMethod(createPom, "create", gemfile.getAbsolutePath(), String.class)
+                         .replaceAll("&", "&amp;").replaceAll("&amp;amp;", "&amp;");            
         }
     }
 
