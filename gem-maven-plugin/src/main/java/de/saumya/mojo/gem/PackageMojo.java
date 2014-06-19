@@ -99,6 +99,13 @@ public class PackageMojo extends AbstractGemMojo {
      */
     boolean                           includeDependencies;
 
+    /**
+     * use repository layout for included dependencies
+     * @parameter default-value="false"
+     */
+    boolean                           useRepositoryLayout;
+
+    
     @Override
     public void executeJRuby() throws MojoExecutionException,
             MojoFailureException, ScriptException {
@@ -148,12 +155,27 @@ public class PackageMojo extends AbstractGemMojo {
                 
                 ArtifactResolutionResult jarDependencyArtifacts = includeDependencies(  project,
                                                                                         artifact );
-                
+
                 if (jarDependencyArtifacts != null ) {
+                    getLog().info("use repository layout? " + this.useRepositoryLayout);
                     for (final Object element : jarDependencyArtifacts.getArtifacts()) {
                         final Artifact dependency = (Artifact) element;
                         getLog().info(" -- include -- " + dependency);
-                        FileUtils.copyFile( dependency.getFile(), new File( libDirectory, dependency.getFile().getName() ) );
+                        File target;
+                        if ( useRepositoryLayout )
+                        {   
+                            StringBuilder path = new StringBuilder( libDirectory.getAbsolutePath() );
+                            path.append( File.separatorChar ).append( dependency.getGroupId().replace( ".", File.separator ) );
+                            path.append( File.separatorChar ).append( dependency.getArtifactId() );
+                            path.append( File.separatorChar ).append( dependency.getVersion() );
+                            target = new File( path.toString(), dependency.getFile().getName() );
+                            target.getParentFile().mkdirs();
+                        }
+                        else
+                        {
+                            target = new File( libDirectory, dependency.getFile().getName() );
+                        }
+                        FileUtils.copyFile( dependency.getFile(), target );
                     }
                 }
                 
