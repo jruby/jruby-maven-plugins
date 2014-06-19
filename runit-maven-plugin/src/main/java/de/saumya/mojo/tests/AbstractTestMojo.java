@@ -179,9 +179,16 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
             }
             
             runIt(run, scriptFactory);
-        }
 
-        scriptFactory.emit();
+            if (run.modes.length == 0)
+            {
+                getLog().warn( "JRuby version " + run.version + " can not run any of the given modes: " + this.modes );
+            }
+            else
+            {
+                scriptFactory.emit();
+            }
+        }
 
         boolean hasOverview = this.versions != null || modes != null || (use18and19 != null && use18and19);
         if(hasOverview){
