@@ -3,6 +3,7 @@ package de.saumya.mojo.tests;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -182,7 +183,8 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
 
             if (run.modes.length == 0)
             {
-                getLog().warn( "JRuby version " + run.version + " can not run any of the given modes: " + this.modes );
+                getLog().warn( "JRuby version " + run.version + " can not run any of the given modes: " + 
+                               ( this.modes == null ? Arrays.toString( modes ) : this.modes ) );
             }
             else
             {
