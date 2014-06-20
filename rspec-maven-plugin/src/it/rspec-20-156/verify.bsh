@@ -3,7 +3,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "JRuby version 1.5.6 can not run any of the given modes: [2.1]";
+String expected = "JRuby version 1.5.6 can not run any of the given modes: [2.0]";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
