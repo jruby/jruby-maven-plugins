@@ -335,10 +335,17 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
         try {
             // install the gem dependencies from the pom
-            getLog().info("installing gems for compile scope . . .");
+            if ( jrubyVerbose )
+            {
+                getLog().info("installing gems for compile scope . . .");
+            }
             this.gemsInstaller.installPom(this.project, 
                                           this.localRepository, "compile");
-            getLog().info("installing gems for runtime scope . . .");
+
+            if ( jrubyVerbose )
+            {
+                getLog().info("installing gems for runtime scope . . .");
+            }
             this.gemsInstaller.installPom(this.project, 
                                           this.localRepository, "runtime");
             String[] SCOPES = new String[] { "provided", "test" };
@@ -347,7 +354,10 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 this.gemsConfig.setGemHome(gemHome);
                 this.gemsConfig.addGemPath(gemHome);
                 
-                getLog().info("installing gems for " + scope + " scope . . .");
+                if ( jrubyVerbose )
+                {
+                    getLog().info("installing gems for " + scope + " scope . . .");
+                }
                 // install the gem dependencies from the pom
                 this.gemsInstaller.installPom(this.project, 
                                               this.localRepository, 
@@ -359,9 +369,12 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             // use plugin home for plugin gems
             this.gemsConfig.setGemHome(pluginGemHome);
             this.gemsConfig.addGemPath(pluginGemHome);
-               
-            getLog().info("installing gems for plugin " + plugin.getGroupId() + ":" + plugin.getArtifactId() 
-                          + " . . .");
+
+            if ( jrubyVerbose )
+            {
+                getLog().info("installing gems for plugin " + plugin.getGroupId() + ":" + plugin.getArtifactId() 
+                              + " . . .");
+            }
             this.gemsInstaller.installGems(this.project,
                                            this.plugin.getArtifacts(), 
                                            this.localRepository, 
