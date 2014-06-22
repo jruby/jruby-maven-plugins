@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.saumya.mojo</groupId>
+  <artifactId>dummy</artifactId>
+  <version>testing</version>
+
+  <repositories>
+    <repository>
+      <id>rubygems-releases</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <plugins>
+      <plugin>
+	<artifactId>maven-clean-plugin</artifactId>
+	<executions>
+	  <execution>
+	    <goals><goal>clean</goal></goals>
+	    <phase>validate</phase>
+	  </execution>
+	</executions>
+      </plugin>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+	<version>1.0.4-SNAPSHOT</version>
+	<executions>
+	  <execution>
+	    <goals>
+	      <goal>sets</goal>
+	    </goals>
+	    <configuration>
+	      <scope>test</scope>
+	      <gems>
+		<maven-tools>1.0.0.rc5</maven-tools>
+		<virtus>1.0.2</virtus>
+		<descendants_tracker>0.0.4</descendants_tracker>
+		<thread_safe>0.3.4</thread_safe>
+		<coercible>1.0.0</coercible>
+		<axiom-types>0.1.1</axiom-types>
+		<ice_nine>0.11.0</ice_nine>
+	      </gems>
+	    </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
