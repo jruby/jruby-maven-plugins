@@ -67,6 +67,10 @@ public class RSpecMojo extends AbstractTestMojo {
             getLog().info("Skipping RSpec tests");
             return;
         }
+        else if (!new File(this.specSourceDirectory).isDirectory()) {
+            getLog().info("given " + specSourceDirectory + " does not exists - skipping RSpec test'" );
+            return;
+        }
         else {
             outputfile = new File(this.project.getBuild().getDirectory()
                                   .replace("${project.basedir}/", ""), reportName);   
