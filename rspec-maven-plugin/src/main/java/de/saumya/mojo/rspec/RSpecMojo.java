@@ -60,6 +60,8 @@ public class RSpecMojo extends AbstractTestMojo {
     private String                reportName;
 
     private File outputfile;
+
+    private File specsDir;
     
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -67,14 +69,20 @@ public class RSpecMojo extends AbstractTestMojo {
             getLog().info("Skipping RSpec tests");
             return;
         }
-        else if (!new File(this.specSourceDirectory).isDirectory()) {
-            getLog().info("given " + specSourceDirectory + " does not exists - skipping RSpec test'" );
-            return;
-        }
-        else {
-            outputfile = new File(this.project.getBuild().getDirectory()
-                                  .replace("${project.basedir}/", ""), reportName);   
-            if (outputfile.exists()){
+        else 
+        {
+            this.specsDir = specSourceDirectory.startsWith( launchDirectory().getAbsolutePath() ) ?
+                            new File( specSourceDirectory ) : 
+                            new File( launchDirectory(), specSourceDirectory );
+            if ( !this.specsDir.isDirectory() )
+            {
+                getLog().info("given " + specSourceDirectory + " does not exists - skipping RSpec test'" );
+                return;
+            }
+            outputfile = new File( this.project.getBuild().getDirectory().replace( "${project.basedir}/", ""),
+                                   reportName );   
+            if (outputfile.exists())
+            {
                 outputfile.delete();
             }
             super.execute();
@@ -85,14 +93,9 @@ public class RSpecMojo extends AbstractTestMojo {
                 JRubyVersion version, TestScriptFactory scriptFactory)
             throws IOException, ScriptException, MojoExecutionException {
         
-        scriptFactory.setOutputDir(outputfile.getParentFile());
-        scriptFactory.setReportPath(outputfile);
-        if(specSourceDirectory.startsWith(launchDirectory().getAbsolutePath())){
-            scriptFactory.setSourceDir(new File(specSourceDirectory));
-        }
-        else{
-            scriptFactory.setSourceDir(new File(launchDirectory(), specSourceDirectory));
-        }
+        scriptFactory.setOutputDir( outputfile.getParentFile() );
+        scriptFactory.setReportPath( outputfile );
+        scriptFactory.setSourceDir( specsDir );
 
         final Script script = factory.newScript(scriptFactory.getCoreScript());
         if (this.rspecArgs != null) {
