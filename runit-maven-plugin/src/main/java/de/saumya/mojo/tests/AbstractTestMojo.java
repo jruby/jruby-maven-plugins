@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -225,6 +226,12 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         else {
             try {
                 factory = newScriptFactory(resolveJRubyCompleteArtifact(run.version.toString()));
+                // TODO remove this - it should have been already taken care of :(
+                if( env != null ){
+                    for( Map.Entry<String, String> entry: env.entrySet() ){
+                        factory.addEnv( entry.getKey(), entry.getValue() );
+                    }
+                }
             } catch (DependencyResolutionRequiredException e) {
                 throw new MojoExecutionException("could not resolve jruby", e);
             }
