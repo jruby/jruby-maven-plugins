@@ -158,9 +158,11 @@ public class GemsInstaller {
                             || artifact.getArtifactId().equals(OPENSSL);
                 }
             }
-            if (pom.getArtifact().getFile() != null
-            // to filter out target/classes
-                    && pom.getArtifact().getFile().isFile()) {
+            if ( pom.getArtifact().getFile() != null
+                 // to filter out target/classes
+                 && pom.getArtifact().getFile().isFile() 
+                 // have only gem files
+                 && pom.getArtifact().getFile().getName().endsWith(".gem") ) {
                 script = maybeAddArtifact(script, pom.getArtifact());
             }
             if (!this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL && script != null) {
