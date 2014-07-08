@@ -4,7 +4,7 @@
   <parent>
     <artifactId>tests-parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <relativePath>../tests-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>minitest-maven-plugin</artifactId>
