@@ -76,6 +76,7 @@ public class RUnitMojo extends AbstractTestMojo {
 
         scriptFactory.setOutputDir(outputfile.getParentFile());
         scriptFactory.setReportPath(outputfile);
+        outputfile.delete();
         if(runitDirectory.startsWith(launchDirectory().getAbsolutePath())){
             scriptFactory.setSourceDir(new File(runitDirectory));
         }
