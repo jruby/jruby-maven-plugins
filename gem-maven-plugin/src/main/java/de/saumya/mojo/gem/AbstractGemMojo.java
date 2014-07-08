@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -93,9 +94,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * flag whether to include file under the lib directory
      * <br/>
-     * Command line -Dgem.includeRubygemsInResources=...
+     * Command line -Dgem.includeLibDirectoryInResources=...
      *
-     * @parameter expression="${gem.includeRubygemsInResources}" default-value="false"
+     * @parameter expression="${gem.iincludeLibDirectoryInResources}" default-value="false"
      */
     protected boolean       includeLibDirectoryInResources;
 
@@ -126,7 +127,17 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      *
      * @parameter expression="${gem.useSystem}" default-value="false"
      */
-    protected boolean          gemUseSystem;
+    protected boolean           gemUseSystem;
+
+    /**
+     * map different install locations for rubygems (GEM_HOME) to a directory. examples are
+     * the different scopes like <b>provided</b> and <b>test</b> as well when installed inside
+     * a plugin declaration, where the key is the <code>artifactId</code> of the plugin.
+     * <br/>
+     *
+     * @parameter
+     */
+    protected Map<String, File> gemHomes;
 
     /**
      * directory of gem home to use when forking JRuby. default will be ignored
@@ -137,7 +148,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * @parameter expression="${gem.home}"
      *            default-value="${project.build.directory}/rubygems"
      */
-    protected File          gemHome;
+    protected File               gemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby. default will be ignored
@@ -247,8 +258,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                 // add it to the load path for all scripts using that factory
                 factory.addSwitch("-I", rubySourceDirectory.getAbsolutePath());
             }
-
-            if(libDirectory != null && libDirectory.exists()){
+            if( libDirectory != null && libDirectory.exists() ){
                 if(jrubyVerbose){
                     getLog().info("add to ruby loadpath: " + libDirectory.getAbsolutePath());
                 }
@@ -314,6 +324,10 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         return jrubyDir;
     }
 
+    protected File gemHome( String base, String key )
+    {
+       return new File(base + "-" + key);
+    }
     @Override
     protected void executeJRuby() throws MojoExecutionException,
         MojoFailureException, IOException, ScriptException {
@@ -350,9 +364,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                           this.localRepository, "runtime");
             String[] SCOPES = new String[] { "provided", "test" };
             for( String scope: SCOPES ){
-                File gemHome = new File(base + "-" + scope);
-                this.gemsConfig.setGemHome(gemHome);
-                this.gemsConfig.addGemPath(gemHome);
+                File gemHome = gemHome( base, scope );
+                this.gemsConfig.setGemHome( gemHome );
+                this.gemsConfig.addGemPath( gemHome );
                 
                 if ( jrubyVerbose )
                 {
@@ -365,7 +379,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                
             }
  
-            File pluginGemHome = new File(base + "-" + plugin.getArtifactId());
+            File pluginGemHome = gemHome( base, plugin.getArtifactId() );
             // use plugin home for plugin gems
             this.gemsConfig.setGemHome(pluginGemHome);
             this.gemsConfig.addGemPath(pluginGemHome);
@@ -433,15 +447,18 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         if (this.includeGemsInResources != null ) {
             String dir = "compile".equals( includeGemsInResources ) ? base : base + "-" + includeGemsInResources;
             File gems = new File(dir, "gems");
-            for( File g : gems.listFiles() ) {
-                File lib = new File(g, "lib");
-                if (jrubyVerbose) {
-                    getLog().info("add to resource: "
-                            + lib.getAbsolutePath());
+            if ( gems.exists() )
+            {
+                for( File g : gems.listFiles() ) {
+                    File lib = new File(g, "lib");
+                    if (jrubyVerbose) {
+                        getLog().info("add to resource: "
+                                + lib.getAbsolutePath());
+                    }
+                    Resource resource = new Resource();
+                    resource.setDirectory(lib.getAbsolutePath());
+                    project.getBuild().getResources().add(resource);
                 }
-                Resource resource = new Resource();
-                resource.setDirectory(lib.getAbsolutePath());
-                project.getBuild().getResources().add(resource);
             }
         }   
          
