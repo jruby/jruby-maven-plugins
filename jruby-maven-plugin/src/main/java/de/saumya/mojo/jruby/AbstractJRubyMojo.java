@@ -187,20 +187,24 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
 	private ScriptFactory createScriptFactory() throws MojoExecutionException {
-		try {
-		    try
-		    {
-		        classRealm.getWorld().disposeRealm("jruby-all");
-		    }
-		    catch( NoSuchRealmException ignore )
-		    {
-		        // ignore
-		    }
+        try
+        {
+            classRealm.getWorld().disposeRealm("jruby-all");
+        }
+        catch( NoSuchRealmException ignore )
+        {
+            // ignore
+        }
+        try {
 			ClassRealm realm = classRealm.getWorld().newRealm("jruby-all");
 			for (String path : this.project.getTestClasspathElements()) {
 				realm.addConstituent(new File(path).toURI().toURL());
 			}
-			// check if there is jruby present
+			if (this.jrubyVersion != null) {
+	            // preference to command line or property version
+	            return newScriptFactory( resolveJRubyCompleteArtifact(this.jrubyVersion) );
+	        } 
+	        // check if there is jruby present
 			Class<?> clazz = realm.loadClass("org.jruby.runtime.Constants");
 			if ( jrubyVerbose ){
 				String version = clazz.getField( "VERSION" ).get(clazz).toString();
