@@ -9,7 +9,7 @@ public class RSpecMavenTestScriptFactory extends AbstractMavenTestScriptFactory 
         builder.append("# Use reasonable default arguments or ARGV is passed in from command-line\n");
         builder.append("\n");
 
-	builder.append(getPluginClasspathScript());
+        builder.append(getPluginClasspathScript());
 
         builder.append("\n");
         builder.append("run_args = [ SOURCE_DIR ]\n");

@@ -178,7 +178,7 @@ public class RSpecMojo extends AbstractTestMojo {
           if (this.summaryReport != null) {
               FileUtils.copyFile(xmlReport, this.summaryReport);
           }
-          result.success = result.message.contains("0 failures");
+          result.success = result.message.contains("0 failures") || result.message.contains("Failing...0");
       }
       return result;
     }
