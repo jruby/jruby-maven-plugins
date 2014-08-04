@@ -202,6 +202,10 @@ public class GemsInstaller {
                     FileUtils.fileWrite(spec.getAbsolutePath(), content.replaceFirst(" 00:00:00.000000000Z", ""));
                 }
             }
+
+            this.factory.newScript( "require 'jruby/commands'; JRuby::Commands.generate_dir_info '" +
+                    this.config.getGemHome() +
+                    "' if JRuby::Commands.respond_to? :generate_dir_info" ).execute();
         }
     }
 
