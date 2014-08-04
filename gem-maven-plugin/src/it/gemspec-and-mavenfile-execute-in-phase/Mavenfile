@@ -1,3 +1,0 @@
-execute_in_phase(:install) do
-puts "hello"
-end
