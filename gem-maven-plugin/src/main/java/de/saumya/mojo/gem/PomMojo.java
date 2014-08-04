@@ -2,6 +2,7 @@ package de.saumya.mojo.gem;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
@@ -167,13 +168,12 @@ public class PomMojo extends AbstractJRubyMojo {
 
     private void generatePom(File file, String type) throws ScriptException,
             IOException {
-        this.tmpPom.getParentFile().mkdirs();
-        this.factory.newScriptFromResource("maven/tools/pom_generator.rb")
-                .addArg(type)
-                .addArg(file)
-                .addArg(this.plugin.getVersion())
-                .addArg(getJrubyVersion().toString())
-                .executeIn(launchDirectory(), this.tmpPom);
+        this.tmpPom.getParentFile().mkdirs();  
+        URL url = Thread.currentThread().getContextClassLoader().getResource("maven/tools/pom.rb");
+        this.factory.newScript("$LOAD_PATH << '" + url.toString().replace("maven/tools/pom.rb", "")+"';"
+                + "require 'maven/tools/pom';"
+                + "puts Maven::Tools::POM.new('" + file.getAbsolutePath() + "').to_s")
+            .execute(tmpPom);
     }
 
     private File findGemspec() {

@@ -3,6 +3,7 @@ package de.saumya.mojo.gem;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.Date;
 
 import org.apache.maven.artifact.Artifact;
@@ -105,6 +106,13 @@ public class PackageMojo extends AbstractGemMojo {
      */
     boolean                           useRepositoryLayout;
 
+    private void generatePom(File source, File target) throws ScriptException, IOException {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("maven/tools/pom.rb");
+        this.factory.newScript("$LOAD_PATH << '" + url.toString().replace("maven/tools/pom.rb", "")+"';"
+                + "require 'maven/tools/pom';"
+                + "puts Maven::Tools::POM.new('" + source.getAbsolutePath() + "').to_s")
+            .executeIn(launchDirectory(), target);
+    }
     
     @Override
     public void executeJRuby() throws MojoExecutionException,
@@ -184,6 +192,10 @@ public class PackageMojo extends AbstractGemMojo {
                         .addArg("build", this.gemspec)
                         .executeIn(launchDirectory());
 
+                File newPom = new File( this.gemspec.getParentFile(), "pom-" + this.gemspec.getName() + ".xml");
+                generatePom(this.gemspec, newPom);
+                project.setFile(newPom);
+                
                 // find file with biggest lastModified
                 File gemFile = null;
                 for (final File f : launchDirectory().listFiles()) {
