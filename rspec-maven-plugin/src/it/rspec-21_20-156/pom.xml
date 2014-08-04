@@ -28,7 +28,7 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>rspec-maven-plugin</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>@project.version@</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>
