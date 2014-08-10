@@ -431,6 +431,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             resource.setDirectory(home.getAbsolutePath());
             resource.addInclude("gems/**");
             resource.addInclude("specifications/**");
+            // no java sources since resins application server tries to compile those
+            resource.addExclude("gems/**/*.java");
             project.getBuild().getResources().add(resource);
         }
 
