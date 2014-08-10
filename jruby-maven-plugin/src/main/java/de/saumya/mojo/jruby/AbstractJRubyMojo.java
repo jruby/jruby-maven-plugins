@@ -276,7 +276,10 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         System.setProperty("jbundle.skip", "true");
         this.logger = new MojoLogger(this.jrubyVerbose, getLog());
         this.factory = newScriptFactory();
+        // skip installing jars via jbundler
         this.factory.addEnv("JBUNDLE_SKIP", "true");
+        // skip installing jars via jar-dependencies
+        this.factory.addEnv("JARS_SKIP", "true");
         this.factory.addJvmArgs(this.jrubyJvmArgs);
         this.factory.addSwitches(this.jrubySwitches);
 
