@@ -76,6 +76,8 @@ public abstract class AbstractMavenTestScriptFactory extends AbstractTestScriptF
     }
 
     protected void getResultsScript(StringBuilder builder) {
+        builder.append("exit RESULT if defined? RESULT\n");
+        builder.append("\n");
         builder.append("# A little exit code magic\n");
         builder.append("\n");
 

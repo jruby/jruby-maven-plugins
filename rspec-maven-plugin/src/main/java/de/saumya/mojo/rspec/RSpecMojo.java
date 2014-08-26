@@ -171,7 +171,6 @@ public class RSpecMojo extends AbstractTestMojo {
           String filename = "TEST-rspec"
                   + ( mode == null ? "" : ( version == null ? "" : "-" + version + mode.flag ) ) 
                   + ".xml";
-          System.out.println( filename );
 
           File xmlReport = new File(this.testReportDirectory, filename);
           new File(this.testReportDirectory, "TEST-rspec.xml").renameTo(xmlReport);
