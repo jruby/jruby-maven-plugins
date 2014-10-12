@@ -1,0 +1,14 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+
+File f = new File( basedir, "target/first.gem" );
+if ( !f.exists() )
+{
+    throw new RuntimeException( "file does not exists: " + f );
+}
+f = new File( basedir, "pom.pom_first.gemspec.xml" );
+if ( !f.exists() )
+{
+    throw new RuntimeException( "file does not exists: " + f );
+}

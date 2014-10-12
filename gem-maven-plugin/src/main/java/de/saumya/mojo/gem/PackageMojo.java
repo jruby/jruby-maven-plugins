@@ -212,7 +212,7 @@ public class PackageMojo extends AbstractGemMojo {
                 if (project.getFile() != null && artifact.isGem()) {
                     // only when the pom exist there will be an artifact
                     FileUtils.copyFileIfModified(gemFile, artifact.getFile());
-                    gemFile.deleteOnExit();
+                    gemFile.delete();
                 }
                 else {
                     // keep the gem where it is when there is no buildDirectory

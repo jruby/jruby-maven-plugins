@@ -70,7 +70,7 @@ public class GemArtifact implements Artifact {
         this.artifact = project.getArtifact();
         this.jarFile = this.artifact.getFile();
         if (isGem()) {
-            if ( project.getBuild().getFinalName() == null ) {
+            if ( project.getBuild().getFinalName() == null || !project.getGroupId().equals("rubygems")) {
                 this.artifact.setFile(new File(new File(project.getBuild()
                                                         .getDirectory()), getGemFile()));
             }
