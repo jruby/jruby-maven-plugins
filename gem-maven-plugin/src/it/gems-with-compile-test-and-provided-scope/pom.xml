@@ -36,6 +36,12 @@
     </dependency>
   </dependencies>
 
+  <properties>
+    <root.dir>${basedir}/../../../../</root.dir>
+    <gem.home>${root.dir}/target/rubygems</gem.home>
+    <gem.path>${root.dir}/target/rubygems</gem.path>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -59,7 +65,7 @@
             </goals>
             <phase>compile</phase>
             <configuration>
-              <execArgs>${project.build.directory}/rubygems/bin/compass compile ${basedir}/src/main/webapp/resources</execArgs>
+              <execArgs>${gem.home}/bin/compass compile ${basedir}/src/main/webapp/resources</execArgs>
             </configuration>
           </execution>
 	</executions>

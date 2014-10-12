@@ -58,6 +58,9 @@
   </repositories>
 
   <properties>
+    <root.dir>${basedir}</root.dir>
+    <gem.home>${root.dir}/target/rubygems</gem.home>
+    <gem.path>${root.dir}/target/rubygems</gem.path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <invoker.skip>true</invoker.skip>
     <maven.version>3.0.3</maven.version>

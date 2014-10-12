@@ -6,10 +6,15 @@
   <version>0.0.0</version>
   <pluginRepositories>
     <pluginRepository>
-      <id>rubygems-releases</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
+      <id>target/rubygems-releases</id>
+      <url>http://target/rubygems-proxy.torquebox.org/releases</url>
     </pluginRepository>
   </pluginRepositories>
+  <properties>
+    <root.dir>${basedir}/../../../../</root.dir>
+    <gem.home>${root.dir}/target/rubygems</gem.home>
+    <gem.path>${root.dir}/target/rubygems</gem.path>
+  </properties>
   <build>
     <plugins>
       <plugin>
@@ -23,7 +28,7 @@
             </goals>
             <phase>compile</phase>
             <configuration>
-              <execArgs>${project.build.directory}/rubygems/bin/compass compile ${basedir}/src/main/webapp/resources/sass</execArgs>
+              <execArgs>${project.build.directory}/target/rubygems/bin/compass compile ${basedir}/src/main/webapp/resources/sass</execArgs>
             </configuration>
           </execution>
         </executions>

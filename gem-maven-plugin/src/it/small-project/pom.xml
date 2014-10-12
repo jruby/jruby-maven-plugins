@@ -6,6 +6,12 @@
   <packaging>pom</packaging>
   <version>0.0.0</version>
   <name>play ground for gem testing</name>
+
+  <properties>
+    <root.dir>${basedir}/../../../../</root.dir>
+    <gem.home>${root.dir}/target/rubygmes</gem.home>
+    <gem.path>${root.dir}/target/rubygmes</gem.path>
+  </properties>
   
   <modules>
     <module>java-world</module>

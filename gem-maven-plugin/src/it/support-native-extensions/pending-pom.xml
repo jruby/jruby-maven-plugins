@@ -5,8 +5,8 @@
   <version>0.0.0</version>
   <repositories>
     <repository>
-      <id>rubygems-releases</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
+      <id>target/rubygems-releases</id>
+      <url>http://target/rubygems-proxy.torquebox.org/releases</url>
     </repository>
   </repositories>
   <dependencies>
@@ -17,6 +17,11 @@
       <type>gem</type>
     </dependency>
   </dependencies>
+  <properties>
+    <root.dir>${basedir}/../../../../</root.dir>
+    <gem.home>${root.dir}/target/rubygems</gem.home>
+    <gem.path>${root.dir}/target/rubygems</gem.path>
+  </properties>
   <build>
     <plugins>
       <plugin>

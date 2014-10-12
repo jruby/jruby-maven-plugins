@@ -74,6 +74,9 @@
     <jruby.versions>1.5.6,1.6.5.1,1.6.7.2,1.7.0.preview1</jruby.versions>
     <jruby.18and19>true</jruby.18and19>
     <plexus.version>1.5.4</plexus.version>
+    <root.dir>${basedir}/..</root.dir>
+    <gem.home>${root.dir}/target/rubygems</gem.home>
+    <gem.path>${root.dir}/target/rubygems</gem.path>
   </properties>
   <build>
     <resources>

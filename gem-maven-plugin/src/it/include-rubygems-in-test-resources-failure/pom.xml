@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
-  <artifactId>rubygems-in-test-resources</artifactId>
+  <artifactId>target/rubygems-in-test-resources</artifactId>
   <version>testing</version>
   <repositories>
     <repository>
-      <id>rubygems-release</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
+      <id>target/rubygems-release</id>
+      <url>http://target/rubygems-proxy.torquebox.org/releases</url>
     </repository>
   </repositories>
   <dependencies>
@@ -30,6 +30,11 @@
       <version>1.6.2</version>
     </dependency>
   </dependencies>
+  <properties>
+    <root.dir>${basedir}/../../../../</root.dir>
+    <gem.home>${root.dir}/target/rubygems</gem.home>
+    <gem.path>${root.dir}/target/rubygems</gem.path>
+  </properties>
   <build>
     <plugins>
       <plugin>

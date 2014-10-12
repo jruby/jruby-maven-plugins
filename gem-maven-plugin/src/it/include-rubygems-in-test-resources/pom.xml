@@ -7,8 +7,8 @@
   <version>testing</version>
   <repositories>
     <repository>
-      <id>rubygems-release</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
+      <id>target/rubygems-release</id>
+      <url>http://target/rubygems-proxy.torquebox.org/releases</url>
     </repository>
   </repositories>
   <dependencies>
@@ -30,6 +30,11 @@
       <version>1.6.3</version>
     </dependency>
   </dependencies>
+  <properties>
+    <root.dir>${basedir}/../../../../</root.dir>
+    <gem.home>${root.dir}/target/rubygems</gem.home>
+    <gem.path>${root.dir}/target/rubygems</gem.path>
+  </properties>
   <build>
     <plugins>
       <plugin>

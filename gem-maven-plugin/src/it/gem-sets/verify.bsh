@@ -3,7 +3,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "installing gem sets for test scope into target/rubygems-test";
+String expected = "installing gem sets for test scope into ";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
