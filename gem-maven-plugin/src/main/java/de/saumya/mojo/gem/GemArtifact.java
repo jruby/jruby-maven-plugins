@@ -70,8 +70,14 @@ public class GemArtifact implements Artifact {
         this.artifact = project.getArtifact();
         this.jarFile = this.artifact.getFile();
         if (isGem()) {
-            this.artifact.setFile(new File(new File(project.getBuild()
-                    .getDirectory()), getGemFile()));
+            if ( project.getBuild().getFinalName() == null ) {
+                this.artifact.setFile(new File(new File(project.getBuild()
+                                                        .getDirectory()), getGemFile()));
+            }
+            else {
+                this.artifact.setFile(new File(new File(project.getBuild()
+                                                        .getDirectory()), project.getBuild().getFinalName() + ".gem" ) );
+            }
         }
         // allow maven2 to do the right thing with the classifier
         project.setArtifact(this);
