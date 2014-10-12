@@ -7,18 +7,12 @@
   <packaging>gem</packaging>
   <build>
     <finalName>first</finalName>
-    <extensions>
-      <extension>
-        <groupId>de.saumya.mojo</groupId>
-        <artifactId>gem-extension</artifactId>
-	<version>@project.version@</version>
-      </extension>
-    </extensions>
     <plugins>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
 	<version>@project.version@</version>
+        <extension>true</extension>
         <configuration><gemspec>pom_first.gemspec</gemspec></configuration>
       </plugin>
     </plugins>
