@@ -12,7 +12,7 @@
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
 	<version>@project.version@</version>
-        <extension>true</extension>
+        <extensions>true</extensions>
         <configuration><gemspec>pom_first.gemspec</gemspec></configuration>
       </plugin>
     </plugins>
