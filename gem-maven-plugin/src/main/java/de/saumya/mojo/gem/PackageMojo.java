@@ -108,7 +108,10 @@ public class PackageMojo extends AbstractGemMojo {
 
     private void generatePom(File source, File target) throws ScriptException, IOException {
         URL url = Thread.currentThread().getContextClassLoader().getResource("maven/tools/pom.rb");
-        this.factory.newScript("$LOAD_PATH << '" + url.toString().replace("maven/tools/pom.rb", "")+"';"
+        String baseUrl = url.toExternalForm().replace("/maven/tools/pom.rb", "");
+        // this assumes to get an url JRuby understands !!
+        this.factory.newScript("$LOAD_PATH << '" + baseUrl + "';"
+                + "$LOAD_PATH << 'uri:" + baseUrl + "';"
                 + "require 'maven/tools/pom';"
                 + "puts Maven::Tools::POM.new('" + source.getAbsolutePath() + "').to_s")
             .executeIn(launchDirectory(), target);
@@ -192,7 +195,7 @@ public class PackageMojo extends AbstractGemMojo {
                         .addArg("build", this.gemspec)
                         .executeIn(launchDirectory());
 
-                File newPom = new File( this.gemspec.getParentFile(), "pom-" + this.gemspec.getName() + ".xml");
+                File newPom = new File( this.gemspec.getParentFile(), "pom." + this.gemspec.getName() + ".xml");
                 generatePom(this.gemspec, newPom);
                 project.setFile(newPom);
                 
