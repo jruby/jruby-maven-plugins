@@ -10,6 +10,20 @@
   <artifactId>cucumber-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Cucumber Maven Mojo</name>
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <properties>
+	<invoker.skip>true</invoker.skip>
+      </properties>
+    </profile>
+    <profile>
+      <id>all</id>
+      <properties>
+	<invoker.skip>false</invoker.skip>
+      </properties>
+    </profile>
+  </profiles>
   <build>
     <pluginManagement>
       <plugins>

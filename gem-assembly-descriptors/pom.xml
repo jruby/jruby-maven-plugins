@@ -82,7 +82,7 @@
     <profile>
       <id>integration-test</id>
       <properties>
-	<invoker.skip>false</invoker.skip>
+	<invoker.skip>true</invoker.skip>
       </properties>
       <build>
         <defaultGoal>install</defaultGoal>
@@ -112,6 +112,12 @@
 	  </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>all</id>
+      <properties>
+	<invoker.skip>false</invoker.skip>
+      </properties>
     </profile>
   </profiles>
 </project>
