@@ -11,6 +11,20 @@
   <packaging>maven-plugin</packaging>
   <name>Bundler Maven Mojo</name>
   <properties><invoker.skip>true</invoker.skip></properties>
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <properties>
+	<invoker.skip>true</invoker.skip>
+      </properties>
+    </profile>
+    <profile>
+      <id>all</id>
+      <properties>
+	<invoker.skip>false</invoker.skip>
+      </properties>
+    </profile>
+  </profiles>
   <build>
     <pluginManagement>
       <plugins>
