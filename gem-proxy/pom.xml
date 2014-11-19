@@ -30,10 +30,6 @@
           <artifactId>maven-model</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.yaml</groupId>
-          <artifactId>snakeyaml</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>org.codehaus.plexus</groupId>
           <artifactId>plexus-velocity</artifactId>
         </exclusion>
