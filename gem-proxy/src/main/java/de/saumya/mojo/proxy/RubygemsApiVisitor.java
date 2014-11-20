@@ -39,9 +39,11 @@ public abstract class RubygemsApiVisitor {
             List<Map<String, Object>> versionsYaml = (List<Map<String, Object>>) yaml.load(reader);
             for (Map<String, Object> versionYaml : versionsYaml) {
                 String number = versionYaml.get("number").toString();
+                String platform = versionYaml.get("platform").toString();
                 boolean prerelease = (Boolean) versionYaml.get("prerelease");
                 if ((!prereleases && !prerelease) || (prereleases && prerelease)) {
-                    if (!versions.contains(number) && (brokenVersions == null || !brokenVersions.contains(number))) {
+                    if (!versions.contains(number) && (brokenVersions == null || !brokenVersions.contains(number))
+                            && !platform.contains("x86-m")) {
                         if (prereleases) {
                             number += "-SNAPSHOT";
                         }
