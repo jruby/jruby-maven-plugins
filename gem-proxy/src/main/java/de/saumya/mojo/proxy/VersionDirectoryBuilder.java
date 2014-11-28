@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 
-public class VersionDirectoryBuilder extends RubygemsHtmlVisitor {
+public class VersionDirectoryBuilder extends RubygemsApiVisitor {
     
     public static void main(String... args) throws Exception{
         String first = null;
@@ -39,7 +39,7 @@ public class VersionDirectoryBuilder extends RubygemsHtmlVisitor {
     }
 
     public void build() throws IOException{
-        accept(new URL("http://rubygems.org/gems/" + this.gemname + "/versions"));
+        accept(new URL("http://rubygems.org/api/v1/versions/" + this.gemname + ".yaml"));
     }
 
     protected void addVersion(String version) {

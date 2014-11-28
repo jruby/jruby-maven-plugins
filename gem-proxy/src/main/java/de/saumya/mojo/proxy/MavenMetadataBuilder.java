@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 
-public class MavenMetadataBuilder extends RubygemsHtmlVisitor {
+public class MavenMetadataBuilder extends RubygemsApiVisitor {
     
     public static void main(String... args) throws Exception{
         String first = null;
@@ -43,7 +43,7 @@ public class MavenMetadataBuilder extends RubygemsHtmlVisitor {
         xml.append("  <artifactId>").append(this.gemname).append("</artifactId>\n");
         xml.append("  <versioning>\n");
         xml.append("    <versions>\n");
-        accept(new URL("https://rubygems.org/gems/" + this.gemname + "/versions"));
+        accept(new URL("https://rubygems.org/api/v1/versions/" + this.gemname + ".yaml"));
         xml.append("    </versions>\n");
         xml.append("    <lastUpdated>")
              // hardcoded timestamp so the dynamic sha1 is correct
