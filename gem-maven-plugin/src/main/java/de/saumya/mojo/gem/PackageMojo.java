@@ -110,8 +110,7 @@ public class PackageMojo extends AbstractGemMojo {
         URL url = Thread.currentThread().getContextClassLoader().getResource("maven/tools/pom.rb");
         String baseUrl = url.toExternalForm().replace("/maven/tools/pom.rb", "");
         // this assumes to get an url JRuby understands !!
-        this.factory.newScript("$LOAD_PATH << '" + baseUrl + "';"
-                + "$LOAD_PATH << 'uri:" + baseUrl + "';"
+        this.factory.newScript("def warn(*args);end;$LOAD_PATH << '" + baseUrl + "';"
                 + "require 'maven/tools/pom';"
                 + "puts Maven::Tools::POM.new('" + source.getAbsolutePath() + "').to_s")
             .executeIn(launchDirectory(), target);
