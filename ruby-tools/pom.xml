@@ -104,7 +104,7 @@
                   <overWrite>false</overWrite>
                   <outputDirectory>${project.build.directory}</outputDirectory>
                 </artifactItem>
-	      </artifactItems>.
+	      </artifactItems>
 	    </configuration>
 	  </execution>
           <execution>
