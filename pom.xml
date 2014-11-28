@@ -116,9 +116,5 @@
     <module>bundler-maven-plugin</module>
     <module>gem-extension</module>
     <module>gem-with-jar-extension</module>
-<!--
-    <module>gem-proxy</module>
-    <module>integration-tests</module>
--->
   </modules>
 </project>
