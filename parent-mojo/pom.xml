@@ -4,9 +4,9 @@
   <parent>
     <groupId>de.saumya.mojo</groupId>
     <artifactId>jruby-maven-plugins</artifactId>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>1.0.7</version>
   </parent>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>1.0.7</version>
   <artifactId>parent-mojo</artifactId>
   <packaging>pom</packaging>
   <name>Mojo Parent</name>
