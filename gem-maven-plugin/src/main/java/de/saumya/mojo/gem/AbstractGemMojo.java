@@ -130,14 +130,16 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected boolean           gemUseSystem;
 
     /**
-     * map different install locations for rubygems (GEM_HOME) to a directory. examples are
-     * the different scopes like <b>provided</b> and <b>test</b> as well when installed inside
-     * a plugin declaration, where the key is the <code>artifactId</code> of the plugin.
+     * map different install locations for rubygems (GEM_HOME) to a directory. for example
+     * compile dependencies will be installed in ${project.build.directory}/rubygems and
+     * provided dependencies in ${project.build.directory}/rubygems-provided, and 
+     * ${project.build.directory}/rubygems-test for the test scope. this mapping here allows
+     * to map those different directories onto a single one, i.e.: test => ${gem.home}, provided => ${gem.home}
      * <br/>
      *
      * @parameter
      */
-    protected Map<String, File> gemHomes;
+    protected Map<String, String> gemHomes;
 
     /**
      * directory of gem home to use when forking JRuby. default will be ignored
@@ -326,8 +328,14 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     protected File gemHome( String base, String key )
     {
-       return new File(base + "-" + key);
+       if (gemHomes != null && gemHomes.containsKey(key)) {
+           return new File(gemHomes.get(key));
+       }
+       else {
+           return new File(base + "-" + key);
+       }
     }
+
     @Override
     protected void executeJRuby() throws MojoExecutionException,
         MojoFailureException, IOException, ScriptException {
@@ -416,7 +424,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                     resource.setDirectory(path.getAbsolutePath());
                     resource.addInclude("gems/**");
                     resource.addInclude("specifications/**");
-                    project.getBuild().getTestResources().add(resource);
+                    addResource(project.getBuild().getTestResources(), resource);
                 }
             }
         }
@@ -433,7 +441,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             resource.addInclude("specifications/**");
             // no java sources since resins application server tries to compile those
             resource.addExclude("gems/**/*.java");
-            project.getBuild().getResources().add(resource);
+            addResource(project.getBuild().getResources(), resource);
         }
 
         if (this.includeLibDirectoryInResources) {
@@ -444,7 +452,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
             // add it to the classpath so java classes can find the ruby files
             Resource resource = new Resource();
             resource.setDirectory(libDirectory.getAbsolutePath());
-            project.getBuild().getResources().add(resource);
+            addResource(project.getBuild().getResources(), resource);
         }
         if (this.includeGemsInResources != null ) {
             String dir = "compile".equals( includeGemsInResources ) ? base : base + "-" + includeGemsInResources;
@@ -472,6 +480,19 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         catch (final GemException e) {
             throw new MojoExecutionException("error in executing with gems", e);
         }
+    }
+
+    protected void addResource(List<Resource> resources, Resource resource) {
+        String ref = resource.toString();
+        for( Resource r : resources ) {
+            if (r.toString().equals(ref)) {
+                return;
+            }
+        }
+        if (jrubyVerbose) {
+            logger.info("add resource: " + resource);
+        }
+        resources.add(resource);
     }
 
     abstract protected void executeWithGems() throws MojoExecutionException,
