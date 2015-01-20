@@ -22,7 +22,7 @@ public class PushMojo extends AbstractGemMojo {
     /**
      * skip the pushng the gem
      * <br/>
-     * Command line -Dpush.skipp=...
+     * Command line -Dpush.skip=...
      * 
      * @parameter expression="${push.skip}"
      */
