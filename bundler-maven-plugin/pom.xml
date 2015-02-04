@@ -4,7 +4,7 @@
   <parent>
     <artifactId>gem-parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>1.0.8-SNAPSHOT</version>
+    <version>1.0.8</version>
     <relativePath>../gem-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>bundler-maven-plugin</artifactId>
