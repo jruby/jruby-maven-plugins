@@ -2,6 +2,8 @@ package de.saumya.mojo.jruby;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -142,6 +144,12 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     protected MavenProject project;
 
     /**
+     * add project test class path to JVM classpath.
+     * @parameter default-value=true expression="${gem.addProjectClasspath}"
+     */
+    protected boolean addProjectClasspath;
+    
+    /**
      * local repository for internal use.
      *
      * @parameter default-value="${localRepository}"
@@ -197,7 +205,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
         }
         try {
 			ClassRealm realm = classRealm.getWorld().newRealm("jruby-all");
-			for (String path : this.project.getTestClasspathElements()) {
+			for (String path : getProjectClasspath()) {
 				realm.addConstituent(new File(path).toURI().toURL());
 			}
 			if (this.jrubyVersion != null) {
@@ -231,19 +239,19 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
                             new ScriptFactory(this.logger,
                                     this.classRealm, 
                                     null,
-                                    this.project.getTestClasspathElements(), 
+                                    getProjectClasspath(), 
                                     this.jrubyFork):
             			(JRUBY_CORE.equals(artifact.getArtifactId()) ?
                     new ScriptFactory(this.logger,
                             this.classRealm, 
                             artifact.getFile(),
                             resolveJRubyStdlibArtifact(artifact).getFile(),
-                            this.project.getTestClasspathElements(), 
+                            getProjectClasspath(), 
                             this.jrubyFork) :
                     new ScriptFactory(this.logger,
                             this.classRealm, 
                             artifact.getFile(),
-                            this.project.getTestClasspathElements(), 
+                            getProjectClasspath(), 
                             this.jrubyFork) );
 
             if(libDirectory != null && libDirectory.exists()){
@@ -394,5 +402,13 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             }
         }
         throw new MojoExecutionException("failed to resolve jruby stdlib artifact");
+    }
+    
+    protected List<String> getProjectClasspath() throws DependencyResolutionRequiredException {
+    	if (addProjectClasspath) {
+    		return project.getTestClasspathElements();
+    	} else {
+    		return new ArrayList<String>();
+    	}
     }
 }

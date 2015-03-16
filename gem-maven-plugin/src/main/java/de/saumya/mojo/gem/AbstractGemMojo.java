@@ -232,7 +232,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                             new GemScriptFactory(this.logger,
                                     this.classRealm, 
                                     null,
-                                    this.project.getTestClasspathElements(), 
+                                    getProjectClasspath(), 
                                     this.jrubyFork,
                                     this.gemsConfig):
                         (JRUBY_CORE.equals(artifact.getArtifactId()) ?
@@ -240,13 +240,13 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
                                   this.classRealm, 
                                   artifact.getFile(),
                                   resolveJRubyStdlibArtifact(artifact).getFile(),
-                                  this.project.getTestClasspathElements(), 
+                                  getProjectClasspath(), 
                                   this.jrubyFork, 
                                   this.gemsConfig) :
                     new GemScriptFactory(this.logger,
                                   this.classRealm, 
                                   artifact.getFile(),
-                                  this.project.getTestClasspathElements(), 
+                                  getProjectClasspath(), 
                                   this.jrubyFork, 
                                   this.gemsConfig));
                   
