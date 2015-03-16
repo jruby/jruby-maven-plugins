@@ -1,0 +1,6 @@
+import java.io.*;
+
+new File( basedir, "Jars.lock" ).delete();
+new File( basedir, "target/jars/joda-time/joda-time/2.7/joda-time-2.7.jar" ).delete();
+
+true;

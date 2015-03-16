@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>rubygems</groupId>
+  <artifactId>dummy</artifactId>
+  <version>testing</version>
+  <repositories>
+    <repository>
+      <id>rubygems-release</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </repository>
+  </repositories>
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>leafy-complete</artifactId>
+      <version>0.2.1</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hbase</groupId>
+      <artifactId>hbase-annotations</artifactId>
+      <version>0.98.7-hadoop2</version>
+    </dependency> 
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>[1.6, 2.0)</version>
+    </dependency>
+  </dependencies>
+  <properties>
+    <root.dir>${basedir}/../../../../</root.dir>
+    <gem.home>${root.dir}/target/rubygems</gem.home>
+    <gem.path>${root.dir}/target/rubygems</gem.path>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>1.0.9-SNAPSHOT</version>
+        <executions>
+          <execution>
+	    <id>create</id>
+            <goals><goal>jars-lock</goal></goals>
+          </execution>
+          <execution>
+	    <id>is up to date</id>
+            <goals><goal>jars-lock</goal></goals>
+          </execution>
+          <execution>
+	    <id>has outdated artifact</id>
+            <goals><goal>jars-lock</goal></goals>
+	    <configuration>
+	      <jarsLock>Jars2.lock</jarsLock>
+	    </configuration>
+          </execution>
+          <execution>
+	    <id>just warn on update of unknown artifact</id>
+            <goals><goal>jars-lock</goal></goals>
+	    <configuration>
+	      <update>unknown</update>
+	    </configuration>
+          </execution>
+          <execution>
+	    <id>update artifact</id>
+            <goals><goal>jars-lock</goal></goals>
+	    <configuration>
+	      <jarsLock>Jars2.lock</jarsLock>
+	      <update>slf4j-simple</update>
+	    </configuration>
+          </execution>
+          <execution>
+	    <id>update</id>
+            <goals><goal>jars-lock</goal></goals>
+	    <configuration>
+	      <jarsLock>Jars3.lock</jarsLock>
+	    </configuration>
+          </execution>
+          <execution>
+	    <id>vendor jars</id>
+            <goals><goal>jars-lock</goal></goals>
+	    <configuration>
+	      <jarsLock>Jars4.lock</jarsLock>
+	      <jarsHome>${project.build.directory}/jars</jarsHome>
+	    </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
