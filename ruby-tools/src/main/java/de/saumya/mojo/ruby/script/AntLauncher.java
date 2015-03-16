@@ -72,9 +72,10 @@ class AntLauncher extends AbstractLauncher {
         java.createJvmarg()
                 .setPath((Path) this.project.getReference(MAVEN_CLASSPATH));
 
-        if (!factory.jvmArgs.matches("(-client|-server)")) {
-        	java.createJvmarg().setValue("-client");	
-        } 
+        // Does not work on all JVMs
+//        if (!factory.jvmArgs.matches("(-client|-server)")) {
+//        	java.createJvmarg().setValue("-client");	
+//        }
         
         if (!factory.jvmArgs.matches("-Xmx\\d+m")) {
         	java.createJvmarg().setValue(DEFAULT_XMX);	
