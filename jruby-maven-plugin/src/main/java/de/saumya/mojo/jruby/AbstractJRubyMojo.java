@@ -1,8 +1,10 @@
 package de.saumya.mojo.jruby;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +22,8 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.classworlds.ClassRealm;
 import org.codehaus.classworlds.NoSuchRealmException;
+import org.codehaus.plexus.util.Scanner;
+import org.sonatype.plexus.build.incremental.BuildContext;
 
 import de.saumya.mojo.ruby.Logger;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -175,6 +179,16 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     private JRubyVersion jRubyVersion;
 
+    /** @component */
+    private BuildContext buildContext;
+    
+    
+    /** @parameter expression="${m2e.jruby.watch}" */
+    protected List<String> eclipseWatches = new ArrayList<String>();
+    
+    /** @parameter expression="${m2e.jruby.refresh}" */
+    protected List<String> eclipseRefresh = new ArrayList<String>(); 
+    
     protected JRubyVersion getJrubyVersion()
     {
         if (jRubyVersion == null )
@@ -281,6 +295,12 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+    	boolean shouldCheckChanges = buildContext.isIncremental() && !eclipseWatches.isEmpty();    	
+    	if (shouldCheckChanges && !buildContext.hasDelta(eclipseWatches)) {
+    		return;
+    	}
+    	
+    	 
         System.setProperty("jbundle.skip", "true");
         this.logger = new MojoLogger(this.jrubyVerbose, getLog());
         this.factory = newScriptFactory();
@@ -309,6 +329,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             throw new MojoExecutionException("error in executing jruby", e);
         } catch (final ScriptException e) {
             throw new MojoExecutionException("error in executing jruby", e);
+        } finally {
+        	// ensure that eclipse update any changes, include errors reports
+        	if (!eclipseRefresh.isEmpty()) {
+        		for (String fileName : eclipseRefresh) {
+        			File file = new File(fileName);
+        			buildContext.refresh(file);;
+        		}
+        	}
         }
     }
 
@@ -411,4 +439,5 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     		return new ArrayList<String>();
     	}
     }
+    
 }
