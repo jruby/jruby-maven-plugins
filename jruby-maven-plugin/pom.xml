@@ -4,7 +4,7 @@
   <parent>
     <artifactId>parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>1.0.9-SNAPSHOT</version>
+    <version>1.0.9</version>
     <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>jruby-maven-plugin</artifactId>
@@ -95,7 +95,7 @@
 				</goals>
 			</pluginExecutionFilter>
 			<action>
-				<ignore></ignore>
+				<ignore />
 			</action>
 		</pluginExecution>
 	      </pluginExecutions>
