@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.AbstractMojo;
@@ -85,6 +87,14 @@ public class JarsLockMojo extends AbstractMojo {
      */
     public String update;
 
+    /**
+     * list of gems. one line one gem: {gemname}:{version}:{scope}
+     * or {gemname}:{version} where scope defaults to compile.
+     *
+     * @parameter
+     */
+    public List<String>  gems = Collections.emptyList();
+
     /** @component */
     protected RepositorySystem repositorySystem;
     
@@ -107,7 +117,7 @@ public class JarsLockMojo extends AbstractMojo {
     }
 
     void processJarsLock() throws MojoExecutionException {
-    	List<String> lines = toLines( project.getArtifacts() );
+        List<String> lines = toLines( getArtifacts() );
     	
     	try {
         	
@@ -116,6 +126,7 @@ public class JarsLockMojo extends AbstractMojo {
     			getLog().info( jarsLock() + " has outdated dependencies" );
     			break;
     		case CAN_UPDATE:
+                // means Jars.lock misses some dependencies which can be safely updated
     			updateJarsLock(lines);
     			break;
     		case UP_TO_DATE:
@@ -128,6 +139,32 @@ public class JarsLockMojo extends AbstractMojo {
     	} catch (IOException e) {
     		throw new MojoExecutionException( "can not read " + jarsLock, e );
 		}
+    }
+
+    private Set<Artifact> getArtifacts() {
+        Set<Artifact> artifacts = project.getArtifacts();
+        for( String gem: gems ) {
+            if (!gem.endsWith(":")) gem += ":";
+            ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+            // TODO instead of transitive just resolve pom and get the dependency from it
+            // via MavenProject and then resolve the jar dependencies transitively. or similar.
+            request.setResolveTransitively(true);
+            request.setCollectionFilter(new ArtifactFilter() {
+
+                public boolean include(Artifact artifact) {
+                    return artifact.getDependencyTrail() == null || artifact.getType().equals("jar");
+                }
+            });
+            request.setResolveRoot(true);
+            // type pom is enough here
+            request.setArtifact(createArtifact("rubygems:" + gem, "pom"));
+            request.setLocalRepository(localRepository);
+            request.setRemoteRepositories(project.getRemoteArtifactRepositories());
+            ArtifactResolutionResult result = repositorySystem.resolve( request );
+            artifacts.addAll(result.getArtifacts());
+        }
+
+        return artifacts;
     }
 
 	private void updateJarsLock(List<String> lines) throws MojoExecutionException {
@@ -158,7 +195,7 @@ public class JarsLockMojo extends AbstractMojo {
 	}
 
 	private void updateArtifact() throws MojoExecutionException {
-		ArtifactResolutionResult result = resolve();
+		ArtifactResolutionResult result = resolveUpdate();
 		if ( result == null ) {
 			getLog().error( "no such artifact in " + jarsLock() + ": " + update );
 		}
@@ -181,13 +218,13 @@ public class JarsLockMojo extends AbstractMojo {
 		}
 	}
 
-	private ArtifactResolutionResult resolve() throws MojoExecutionException {
+	private ArtifactResolutionResult resolveUpdate() throws MojoExecutionException {
 		List<String> jars = loadJarsLock();
 		ArtifactResolutionRequest request = new ArtifactResolutionRequest();
 		Set<Artifact> artifacts = new HashSet<Artifact>();
 		boolean hasUpdate = false;
 		for( String jar: jars) {
-			Artifact a = createArtifact(jar);
+			Artifact a = createArtifact(jar, "jar");
 			if ( a != null ) {
 				if ( a.getArtifactId().equals( update ) ) {
 					try {
@@ -209,20 +246,23 @@ public class JarsLockMojo extends AbstractMojo {
 		request.setArtifact(project.getArtifact());
 		request.setLocalRepository(localRepository);
 		request.setRemoteRepositories(project.getRemoteArtifactRepositories());
-		ArtifactResolutionResult result = repositorySystem.resolve( request );
-		return result;
+		return repositorySystem.resolve( request );
 	}
 
-	private Artifact createArtifact(String jar) {
-		if ( !jar.endsWith( ":" ) || jar.startsWith( "#" ) ) return null;
-		String[] parts = jar.split( ":" );
+    private Artifact createArtifact(String jar, String type) {
+        if ( !jar.endsWith( ":" ) || jar.startsWith( "#" ) ) return null;
+        String[] parts = jar.split( ":" );
+		if ( parts.length == 3 ) {
+            return repositorySystem.createArtifact( parts[0],
+                    parts[1], parts[2],  "compile", type );
+        }
 		if ( parts.length == 4 ) { 
-			return repositorySystem.createArtifact( parts[0], 
-				parts[1], parts[2],  parts[3], "jar" );
+			return repositorySystem.createArtifact( parts[0],
+			        parts[1], parts[2],  parts[3], type );
 		}
 		if ( parts.length == 5 ) { 
-			Artifact a = repositorySystem.createArtifactWithClassifier( parts[0], 
-					parts[1], parts[3], "jar", parts[2] );
+			Artifact a = repositorySystem.createArtifactWithClassifier( parts[0],
+			        parts[1], parts[3], type, parts[2] );
 			a.setScope( parts[4] );
 			return a;
 		}
@@ -247,7 +287,7 @@ public class JarsLockMojo extends AbstractMojo {
 		if ( jarsHome == null || ! jarsHome.exists() || ! jarsHome.isDirectory() ) {
 			return;
 		}
-    	for( Artifact a: project.getArtifacts() ) {
+        for( Artifact a: getArtifacts() ) {
         	if ( a.getType().equals( "jar" ) && ! a.getScope().equals( Artifact.SCOPE_SYSTEM ) ) {
         		File target = new File( jarsHome, a.getGroupId().replace(".", File.separator) + File.separator +
         				a.getArtifactId() + File.separator + a.getVersion() + File.separator +

@@ -27,7 +27,7 @@ if ( !log.contains( expected ) )
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
 
-expected = "updated org.slf4j:slf4j-simple:jar:1.7.10:compile";
+expected = "updated org.slf4j:slf4j-simple:jar:1.7.12:compile";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
@@ -46,6 +46,12 @@ if ( !log.contains( expected ) )
 }
 
 File file = new File( basedir, "target/jars/joda-time/joda-time/2.7/joda-time-2.7.jar" );
+if ( !file.exists() )
+{
+    throw new RuntimeException( "expected file does not exists '" + file + "'" );
+}
+
+file = new File( basedir, "target/jars/org/apache/kafka/kafka_2.10/0.8.1.1/kafka_2.10-0.8.1.1.jar" );
 if ( !file.exists() )
 {
     throw new RuntimeException( "expected file does not exists '" + file + "'" );

@@ -85,6 +85,18 @@
 	      <jarsHome>${project.build.directory}/jars</jarsHome>
 	    </configuration>
           </execution>
+          <execution>
+	    <id>with gemslist</id>
+            <goals><goal>jars-lock</goal></goals>
+	    <configuration>
+	      <jarsLock>Jars5.lock</jarsLock>
+	      <jarsHome>${project.build.directory}/jars</jarsHome>
+	      <gems>
+		<gem>hermann:0.20.2</gem>
+		<gem>jruby-openssl:0.9.6:provided</gem>
+	      </gems>
+	    </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>

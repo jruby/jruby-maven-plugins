@@ -38,4 +38,4 @@ jdk.tools:jdk.tools:1.7:system:${java.home}/../lib/tools.jar
 com.github.stephenc.findbugs:findbugs-annotations:1.3.9-1:compile:
 log4j:log4j:1.2.17:compile:
 junit:junit:4.11:compile:
-org.slf4j:slf4j-api:1.7.10:compile:
+org.slf4j:slf4j-api:1.7.12:compile:
