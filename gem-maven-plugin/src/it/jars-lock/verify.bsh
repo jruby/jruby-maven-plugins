@@ -56,3 +56,9 @@ if ( !file.exists() )
 {
     throw new RuntimeException( "expected file does not exists '" + file + "'" );
 }
+
+file = new File( basedir, "target/jars/org/bouncycastle/bcprov-jdk15on/1.49/bcprov-jdk15on-1.49.jar" );
+if ( !file.exists() )
+{
+    throw new RuntimeException( "expected file does not exists '" + file + "'" );
+}
