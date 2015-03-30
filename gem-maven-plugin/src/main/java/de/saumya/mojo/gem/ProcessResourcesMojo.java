@@ -1,7 +1,9 @@
 package de.saumya.mojo.gem;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -24,16 +26,37 @@ public class ProcessResourcesMojo extends AbstractGemMojo {
     protected List<String> includeRubyResources;
 
     /** @parameter  */
-    protected List<String> excludeRubyResources;
-
+    protected List<String> excludeRubyResources = Collections.emptyList();
+    
     @Override
     protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, GemException {
-        if ( includeRubyResources != null) {
-            DirectoryScanner scanner = scan();
-            processBaseDirectory(scanner);
+        File jrubydir = new File(project.getBuild().getOutputDirectory(), ".jrubydir");
+        if ( includeRubyResources != null ) {
+            jrubydir.delete();
+            DirectoryScanner scanner = scan(includeRubyResources.toArray(new String[includeRubyResources.size()]),
+                    excludeRubyResources.toArray(new String[excludeRubyResources.size()])      );
+            processBaseDirectory(scanner, jrubydir);
             processNestedDiretories(scanner);
-        }    
+        }
+        if ( rubySourceDirectory.exists() ) {
+            File[] dirs = rubySourceDirectory.listFiles(new FileFilter() {
+                
+                public boolean accept(File f) {
+                    return f.isDirectory();
+                }
+            });
+            String[] includes = new String[ dirs.length + 1 ];
+            includes[ 0 ] =  "*";
+            int index = 1;
+            for( File dir: dirs ) {
+                includes[ index ++ ] = dir.getName() + "/*";
+            }
+            DirectoryScanner scanner = scan(includes, new String[0]);
+           
+            processBaseDirectory(scanner, jrubydir);
+            processNestedDiretories(scanner);            
+        }
     }
 
     private void processNestedDiretories(DirectoryScanner scanner) throws IOException, ScriptException {
@@ -41,7 +64,6 @@ public class ProcessResourcesMojo extends AbstractGemMojo {
         if (directories.length > 0) {
             StringBuilder script = new StringBuilder("require 'jruby/commands';");
             for( String dir: directories) {
-                System.err.println(dir);
                 if (!dir.contains("/")) {   
                     script.append("JRuby::Commands.generate_dir_info('" +
                            new File( project.getBuild().getOutputDirectory(), dir ).getAbsolutePath() + "', false);");
@@ -52,30 +74,33 @@ public class ProcessResourcesMojo extends AbstractGemMojo {
         }
     }
 
-    private void processBaseDirectory(DirectoryScanner scanner)
+    private void processBaseDirectory(DirectoryScanner scanner, File jrubydir)
             throws IOException {
         String[] files = scanner.getIncludedFiles();
         if (files.length > 0) {
-            StringBuilder fileList = new StringBuilder(".\n");
+            StringBuilder fileList;
+            if (jrubydir.exists()) {
+                fileList = new StringBuilder(FileUtils.fileRead(jrubydir));
+            }
+            else {
+                fileList = new StringBuilder(".\n");
+            }
             for (String file: files) {
                 if (!file.contains("/")) {
                     fileList.append(file).append("\n");
                 }
             }
-            FileUtils.fileWrite(new File(project.getBuild().getOutputDirectory(), ".jrubydir"), fileList.toString());
+            FileUtils.fileWrite(jrubydir, fileList.toString());
         }
     }
 
-    private DirectoryScanner scan() {
+    private DirectoryScanner scan(String[] includes, String[] excludes) {
         DirectoryScanner scanner = new DirectoryScanner();
 
         scanner.setBasedir(project.getBuild().getOutputDirectory());
-        scanner.setIncludes(includeRubyResources.toArray(new String[includeRubyResources.size()]));
-
-        if ( excludeRubyResources != null )
-        {
-            scanner.setIncludes(excludeRubyResources.toArray(new String[excludeRubyResources.size()]));
-        }
+        scanner.addDefaultExcludes();
+        scanner.setIncludes(includes);
+        scanner.setExcludes(excludes);
         scanner.scan();
         return scanner;
     }
