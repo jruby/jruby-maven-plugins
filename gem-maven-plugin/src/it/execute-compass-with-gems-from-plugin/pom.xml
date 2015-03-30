@@ -6,8 +6,8 @@
   <version>0.0.0</version>
   <pluginRepositories>
     <pluginRepository>
-      <id>target/rubygems-releases</id>
-      <url>http://target/rubygems-proxy.torquebox.org/releases</url>
+      <id>rubygems-releases</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
     </pluginRepository>
   </pluginRepositories>
   <properties>

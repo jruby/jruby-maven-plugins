@@ -6,8 +6,8 @@
   <version>testing</version>
   <repositories>
     <repository>
-      <id>target/rubygems-release</id>
-      <url>http://target/rubygems-proxy.torquebox.org/releases</url>
+      <id>rubygems-release</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
     </repository>
   </repositories>
 
