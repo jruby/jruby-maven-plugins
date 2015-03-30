@@ -4,7 +4,7 @@ public class JRubyVersion
 {
     public enum Mode {
         
-        _21( "--2.1" ), _20( "--2.0" ), _19( "--1.9" ), _18( "--1.8" );
+        _22( "" ), _21( "" ), _20( "--2.0" ), _19( "--1.9" ), _18( "--1.8" );
 
         public final String flag;
 
@@ -64,7 +64,7 @@ public class JRubyVersion
             }
         }
         else {
-            return Mode._21;
+            return Mode._22;
         }
     }
     
@@ -78,7 +78,7 @@ public class JRubyVersion
             return this.major == 1 && this.minor > 5;
         case _20:
             return this.major == 1 && this.minor > 6;
-        case _21:
+        case _22:
             return this.major > 1;
          default:
              throw new RuntimeException( "BUG" );
