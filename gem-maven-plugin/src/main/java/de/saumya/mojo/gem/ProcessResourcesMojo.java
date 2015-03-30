@@ -40,23 +40,31 @@ public class ProcessResourcesMojo extends AbstractGemMojo {
             processNestedDiretories(scanner);
         }
         if ( rubySourceDirectory.exists() ) {
-            File[] dirs = rubySourceDirectory.listFiles(new FileFilter() {
-                
-                public boolean accept(File f) {
-                    return f.isDirectory();
-                }
-            });
-            String[] includes = new String[ dirs.length + 1 ];
-            includes[ 0 ] =  "*";
-            int index = 1;
-            for( File dir: dirs ) {
-                includes[ index ++ ] = dir.getName() + "/*";
-            }
-            DirectoryScanner scanner = scan(includes, new String[0]);
-           
-            processBaseDirectory(scanner, jrubydir);
-            processNestedDiretories(scanner);            
+            processDir(jrubydir, rubySourceDirectory);            
         }
+        if ( libDirectory.exists() && includeLibDirectoryInResources ) {
+            processDir(jrubydir, libDirectory);            
+        }
+    }
+
+    private void processDir(File jrubydir, File dir) throws IOException,
+            ScriptException {
+        File[] dirs = dir.listFiles(new FileFilter() {
+            
+            public boolean accept(File f) {
+                return f.isDirectory();
+            }
+        });
+        String[] includes = new String[ dirs.length + 1 ];
+        includes[ 0 ] =  "*";
+        int index = 1;
+        for( File d: dirs ) {
+            includes[ index ++ ] = d.getName() + "/*";
+        }
+        DirectoryScanner scanner = scan(includes, new String[0]);
+         
+        processBaseDirectory(scanner, jrubydir);
+        processNestedDiretories(scanner);
     }
 
     private void processNestedDiretories(DirectoryScanner scanner) throws IOException, ScriptException {
