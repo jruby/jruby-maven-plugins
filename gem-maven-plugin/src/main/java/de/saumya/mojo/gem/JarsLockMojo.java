@@ -95,6 +95,12 @@ public class JarsLockMojo extends AbstractMojo {
      */
     public List<String> gems = Collections.emptyList();
 
+    /**
+     * output-file for the messages.
+     * @parameter expression="${jars.outputFile}"
+     */
+    File outputFile;
+    
     /** @component */
     protected RepositorySystem repositorySystem;
 
@@ -120,9 +126,9 @@ public class JarsLockMojo extends AbstractMojo {
 
         try {
 
-            switch (needsForcedUpdate(lines)) {
+            switch (checkForUpdates(lines)) {
             case NEEDS_FORCED_UPDATE:
-                getLog().info(jarsLock() + " has outdated dependencies");
+                getLog().info(message(jarsLock() + " has outdated dependencies"));
                 break;
             case CAN_UPDATE:
                 // means Jars.lock misses some dependencies which can be safely
@@ -130,14 +136,14 @@ public class JarsLockMojo extends AbstractMojo {
                 updateJarsLock(lines);
                 break;
             case UP_TO_DATE:
-                getLog().info(jarsLock() + " is up to date");
+                getLog().info(message(jarsLock() + " is up to date"));
                 // ensure jars are vendored
                 vendorJars();
             default:
             }
 
         } catch (IOException e) {
-            throw new MojoExecutionException("can not read " + jarsLock, e);
+            throw exception("can not read " + jarsLock, e);
         }
     }
 
@@ -178,16 +184,31 @@ public class JarsLockMojo extends AbstractMojo {
         try {
             writeJarsLock(lines);
         } catch (IOException e) {
-            throw new MojoExecutionException("can not write " + jarsLock, e);
+            throw exception("can not write " + jarsLock(), e);
         }
         try {
             // vendor new jars
             vendorJars();
         } catch (IOException e) {
-            throw new MojoExecutionException("can not vendor jars from "
-                    + jarsLock, e);
+            throw exception("can not vendor jars from "
+                    + jarsLock(), e);
         }
-        getLog().info(jarsLock() + " " + action);
+        getLog().info(message(jarsLock() + " " + action));
+    }
+
+    private MojoExecutionException exception(String text, IOException e) {
+        return new MojoExecutionException(message(text), e);
+    }
+
+    private String message(String text) {
+        if (outputFile != null){
+            try {
+                FileUtils.fileAppend(outputFile.getPath(), text + "\n");
+            } catch (IOException e) {
+                throw new RuntimeException("error writing text to output-file: " + text, e);
+            }
+        }
+        return text;
     }
 
     private List<String> toLines(Set<Artifact> artifacts) {
@@ -203,21 +224,21 @@ public class JarsLockMojo extends AbstractMojo {
     private void updateArtifact() throws MojoExecutionException {
         ArtifactResolutionResult result = resolveUpdate();
         if (result == null) {
-            getLog().error("no such artifact in " + jarsLock() + ": " + update);
+            getLog().error(message("no such artifact in " + jarsLock() + ": " + update));
         } else if (result.isSuccess()) {
             for (Artifact a : result.getArtifacts()) {
                 if (a.getArtifactId().equals(update)) {
-                    getLog().info("updated " + a);
+                    getLog().info(message("updated " + a));
                     break;
                 }
             }
             updateJarsLock(toLines(result.getArtifacts()));
         } else {
             for (Exception e : result.getExceptions()) {
-                getLog().error(e.getMessage());
+                getLog().error(message(e.getMessage()));
             }
             for (Artifact a : result.getMissingArtifacts()) {
-                getLog().error("missing artifact: " + a);
+                getLog().error(message("missing artifact: " + a));
             }
         }
     }
@@ -276,7 +297,7 @@ public class JarsLockMojo extends AbstractMojo {
             a.setScope(parts[4]);
             return a;
         }
-        getLog().warn("ignore :" + jar);
+        getLog().warn(message("ignore :" + jar));
         return null;
     }
 
@@ -297,6 +318,7 @@ public class JarsLockMojo extends AbstractMojo {
         if (jarsHome == null || !jarsHome.exists() || !jarsHome.isDirectory()) {
             return;
         }
+        getLog().info(message("vendor jars:"));
         for (Artifact a : getArtifacts()) {
             if (a.getType().equals("jar")
                     && !a.getScope().equals(Artifact.SCOPE_SYSTEM)) {
@@ -308,13 +330,14 @@ public class JarsLockMojo extends AbstractMojo {
                         + a.getVersion()
                         + File.separator
                         + a.getFile().getName());
-                if (force || a.getFile().length() != target.length()) {
-                    getLog().debug("* vendor " + a);
+                if (force || a.getFile().length() != target.length() && !a.getFile().equals(target)) {
+                    getLog().info(message("\t- create " + target));
                     FileUtils.copyFile(a.getFile(), target);
                 } else {
-                    getLog().debug("* up to date " + a);
+                    getLog().info(message("\t- exists " + target));
                 }
             }
+            getLog().info(message(""));
         }
     }
 
@@ -334,7 +357,7 @@ public class JarsLockMojo extends AbstractMojo {
         CAN_UPDATE, NEEDS_FORCED_UPDATE, UP_TO_DATE
     }
 
-    private Status needsForcedUpdate(List<String> lines) throws IOException,
+    private Status checkForUpdates(List<String> lines) throws IOException,
             MojoExecutionException {
         if (force) {
             return Status.CAN_UPDATE;
@@ -356,7 +379,7 @@ public class JarsLockMojo extends AbstractMojo {
         try {
             return FileUtils.loadFile(jarsLock);
         } catch (IOException e) {
-            throw new MojoExecutionException("can not read " + jarsLock, e);
+            throw exception("can not read " + jarsLock, e);
         }
     }
 
