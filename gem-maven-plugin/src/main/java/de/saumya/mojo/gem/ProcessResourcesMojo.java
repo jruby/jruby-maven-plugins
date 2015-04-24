@@ -74,7 +74,7 @@ public class ProcessResourcesMojo extends AbstractGemMojo {
             for( String dir: directories) {
                 if (!dir.contains("/")) {   
                     script.append("JRuby::Commands.generate_dir_info('" +
-                           new File( project.getBuild().getOutputDirectory(), dir ).getAbsolutePath() + "', false);");
+                           new File( project.getBuild().getOutputDirectory(), dir ).getAbsolutePath() + "', false) if JRuby::Commands.respond_to? :generate_dir_info;" );
                 }
             }
             Script s = this.factory.newScript(script.toString());
