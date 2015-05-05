@@ -1,0 +1,10 @@
+import java.io.*;
+import org.codehaus.plexus.util.FileUtils;
+
+
+String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
+String expected = ":jar:";
+if ( log.contains( expected ) )
+{
+    throw new RuntimeException( "found jar dependencies in log file" );
+}
