@@ -1,6 +1,6 @@
 # jruby maven plugin
 
-the plugin is modeled after [http://jruby-gradle.github.io/](jruby-gradle) and uses the old jruby maven plugins under the hood but it needs jruby-1.7.19 or newer (including jruby-9.0.0.0 serie).
+the plugin is modeled after [jruby-gradle](http://jruby-gradle.github.io/) and uses the old jruby maven plugins under the hood but it needs jruby-1.7.19 or newer (including jruby-9.0.0.0 serie).
 
 even if the plugin depends on the old jruby-maven-plugins BUT has a different version.
 
@@ -21,6 +21,8 @@ or to display some help
 ## jruby exec
 
 it installs all the declared gems from the dependencies section as well the plugin dependencies. all jars are loaded with JRuby via ```require``` which loads them in to the JRubyClassLoader.
+
+the complete pom for the samples below is in [src/it/jrubyExecExample/pom.xml](src/it/jrubyExecExample/pom.xml)
 
 the gem-artifacts are coming from the torquebox rubygems proxy
 
