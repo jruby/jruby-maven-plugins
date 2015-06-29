@@ -88,13 +88,12 @@ public class DefaultGemPackager implements GemPackager {
                         final Throwable throwable) {
                 }
             });
-            final TarCompressionMethod compression = new TarCompressionMethod();
+
             File dataTarGz = null;
             if (!gem.getGemFiles().isEmpty()) {
                 // tar.gz the content into data.tar.gz
                 dataTarGz = new File(gemWorkdir, "data.tar.gz");
-                compression.setValue("gzip");
-                tar.setCompression(compression);
+                tar.setCompression(TarCompressionMethod.gzip);
                 tar.setDestFile(dataTarGz);
                 for (final GemFileEntry entry : gem.getGemFiles()) {
                     if (entry.getSource().isFile()) {
@@ -111,8 +110,7 @@ public class DefaultGemPackager implements GemPackager {
             // and finally create gem by tar.gz-ing data.tar.gz and metadata.gz
             final File gemFile = new File(target, gem.getGemFilename());
             tar.setDestFile(gemFile);
-            compression.setValue("none");
-            tar.setCompression(compression);
+            tar.setCompression(TarCompressionMethod.none);
             if (dataTarGz != null) {
                 tar.addFile(dataTarGz, dataTarGz.getName());
             }
