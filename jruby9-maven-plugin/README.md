@@ -74,7 +74,6 @@ the plugin declaration
         <plugin>
          <groupId>de.saumya.mojo</groupId>
          <artifactId>jruby9-maven-plugin</artifactId>
-         <version>@project.version@</version>
          <executions>
 	       <execution>
              <id>simple</id>
