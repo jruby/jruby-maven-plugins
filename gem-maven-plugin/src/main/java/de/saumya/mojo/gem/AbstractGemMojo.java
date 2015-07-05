@@ -14,6 +14,8 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.UnArchiver;
 
@@ -30,10 +32,10 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
  */
 public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
-    /** @component role-hint="zip" */
+    @Component( hint="zip" )
     protected UnArchiver unzip;
-    
-    /** @parameter expression="${plugin}" @readonly */
+
+    @Parameter( defaultValue = "${plugin}", readonly = true )
     protected PluginDescriptor  plugin;
 
     /**
@@ -41,8 +43,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.includeOpenSSL=...
      * 
-     * @parameter expression="${gem.includeOpenSSL}" default-value="true"
      */
+    @Parameter( defaultValue = "false", property = "gem.includeOpenSSL" )
+    @Deprecated
     protected boolean       includeOpenSSL;
 
     /**
@@ -50,8 +53,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.includeRubygemsInTestResources=...
      * 
-     * @parameter expression="${gem.includeRubygemsInTestResources}" default-value="true"
      */
+    @Parameter( defaultValue = "true", property = "gem.includeRubygemsInTestResources" )
     protected boolean       includeRubygemsInTestResources;
 
     /**
@@ -59,8 +62,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.includeRubygemsInResources=...
      *
-     * @parameter expression="${gem.includeRubygemsInResources}" default-value="false"
      */
+    @Parameter( defaultValue = "false", property = "gem.includeRubygemsInResources" )
     protected boolean       includeRubygemsInResources;
 
     /**
@@ -70,6 +73,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      *
      * @parameter expression="${gem.includeProvidedRubygemsInResources}" default-value="false"
      */
+    @Parameter( defaultValue = "false", property = "gem.includeProvidedRubygemsInResources" )
     protected boolean       includeProvidedRubygemsInResources;
     
     /**
@@ -95,8 +99,9 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.includeGemsInResources=...
      *
-     * @parameter expression="${gem.includeGemsInResources}"
      */
+    @Parameter( property = "gem.includeGemsInResources" )
+    @Deprecated
     protected String       includeGemsInResources;
 
     /**
@@ -105,8 +110,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.includeLibDirectoryInResources=...
      *
-     * @parameter expression="${gem.iincludeLibDirectoryInResources}" default-value="false"
      */
+    @Parameter( defaultValue = "false", property = "gem.includeLibDirectoryInResources" )
     protected boolean       includeLibDirectoryInResources;
 
     
@@ -115,8 +120,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.installRDoc=...
      * 
-     * @parameter expression="${gem.installRDoc}" default-value="false"
      */
+    @Parameter( defaultValue = "false", property = "gem.installRDoc" )
     protected boolean         installRDoc;
 
     /**
@@ -124,8 +129,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.installRDoc=...
      * 
-     * @parameter expression="${gem.installRI}" default-value="false"
      */
+    @Parameter( defaultValue = "false", property = "gem.installRI" )
     protected boolean         installRI;
 
     /**
@@ -134,8 +139,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.useSystem=...
      *
-     * @parameter expression="${gem.useSystem}" default-value="false"
      */
+    @Parameter( defaultValue = "false", property = "gem.useSystem" )
     protected boolean           gemUseSystem;
 
     /**
@@ -146,8 +151,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * to map those different directories onto a single one, i.e.: test => ${gem.home}, provided => ${gem.home}
      * <br/>
      *
-     * @parameter
      */
+    @Parameter( property = "gem.homes" )
     protected Map<String, String> gemHomes;
 
     /**
@@ -156,9 +161,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.home=...
      *
-     * @parameter expression="${gem.home}"
-     *            default-value="${project.build.directory}/rubygems"
      */
+    @Parameter( property = "gem.home", defaultValue = "${project.build.directory}/rubygems" )
     protected File               gemHome;
 
     /**
@@ -167,9 +171,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.path=...
      *
-     * @parameter expression="${gem.path}"
-     *            default-value="${project.build.directory}/rubygems"
      */
+    @Parameter( property = "gem.path", defaultValue = "${project.build.directory}/rubygems" )
     protected File          gemPath;
 
     /**
@@ -177,8 +180,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * <br/>
      * Command line -Dgem.binDirectory=...
      *
-     * @parameter expression="${gem.binDirectory}"
      */
+    @Parameter( property = "gem.binDirectory" )
     protected File          binDirectory;
 
     /**
@@ -188,9 +191,11 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * 
      * @parameter expression="${gem.supportNative}" default-value="false"
      */
+    @Parameter( defaultValue = "false", property = "gem.supportNative" )
+    @Deprecated
     protected boolean        supportNative;
     
-    /** @component */
+    @Component
     protected GemManager    manager;
 
     protected GemsConfig    gemsConfig;

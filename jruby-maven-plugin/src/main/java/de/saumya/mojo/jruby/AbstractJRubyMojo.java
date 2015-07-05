@@ -1,10 +1,8 @@
 package de.saumya.mojo.jruby;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,11 +16,13 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.classworlds.ClassRealm;
 import org.codehaus.classworlds.NoSuchRealmException;
-import org.codehaus.plexus.util.Scanner;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 import de.saumya.mojo.ruby.Logger;
@@ -31,9 +31,8 @@ import de.saumya.mojo.ruby.script.ScriptFactory;
 
 /**
  * Base for all JRuby mojos.
- *
- * @requiresProject false
  */
+//@Mojo( requiresProject = true )
 public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected static final String JRUBY_COMPLETE = "jruby-complete";
@@ -42,7 +41,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected static final String JRUBY_STDLIB = "jruby-stdlib";
 
-    protected static final String DEFAULT_JRUBY_VERSION = "1.7.19";
+    protected static final String DEFAULT_JRUBY_VERSION = "1.7.20";
 
 
     /**
@@ -50,8 +49,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * <br/>
      * Command line -Dargs=...
      *
-     * @parameter expression="${args}"
      */
+    @Parameter( property = "args")
     protected String args;
 
     /**
@@ -59,8 +58,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * <br/>
      * Command line -Djruby.jvmargs=...
      *
-     * @parameter expression="${jruby.jvmargs}"
      */
+    @Parameter( property = "jruby.jvmargs")
     protected String jrubyJvmArgs;
 
     /**
@@ -68,15 +67,15 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * <br/>
      * Command line -Djruby.switches=...
      *
-     * @parameter expression="${jruby.switches}"
      */
+    @Parameter( property = "jruby.switches")
     protected String jrubySwitches;
 
     /**
      * environment values passed on to the jruby process. needs jrubyFork true.
      * <br/>
-     * @parameter
      */
+    @Parameter( property = "jruby.env")
     protected Map<String, String> env;
 
     /**
@@ -89,8 +88,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * <br/>
      * Command line -Djruby.version=...
      *
-     * @parameter expression="${jruby.version}"
      */
+    @Parameter( property = "jruby.version")
     private String jrubyVersion;
 
     /**
@@ -98,8 +97,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * <br/>
      * Command line -Djruby.fork=...
      *
-     * @parameter expression="${jruby.fork}" default-value="true"
      */
+    @Parameter( property = "jruby.fork", defaultValue = "true")
     protected boolean jrubyFork;
 
     /**
@@ -107,8 +106,8 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * <br/>
      * Command line -Djruby.verbose=...
      *
-     * @parameter expression="${jruby.verbose}" default-value="false"
      */
+    @Parameter( property = "jruby.verbose", defaultValue = "false")
     protected boolean jrubyVerbose;
 
     /**
@@ -118,6 +117,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      *
      * @parameter expression="${jruby.sourceDirectory}" default-value="src/main/ruby"
      */
+    @Parameter( property = "jruby.sourceDirectory", defaultValue = "src/main/ruby")
     protected File rubySourceDirectory;
 
     /**
@@ -127,6 +127,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      *
      * @parameter expression="${jruby.lib}" default-value="lib"
      */
+    @Parameter( property = "jruby.lib", defaultValue = "lib")
     protected File libDirectory;
 
     /**
@@ -134,43 +135,37 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * <br/>
      * Command line -Djruby.launchDirectory=...
      *
-     * @parameter default-value="${project.basedir}" expression="${jruby.launchDirectory}"
      */
+    @Parameter( property = "jruby.launchDirectory", defaultValue = "${project.basedir}")
     private File launchDirectory;
 
     /**
      * reference to maven project for internal use.
      *
-     * @parameter expression="${project}"
-     * @required
-     * @readOnly
      */
+    @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
 
     /**
-     * add project test class path to JVM classpath.
-     * @parameter default-value=true expression="${gem.addProjectClasspath}"
+     * add project class path to JVM classpath on executing jruby.
      */
+    @Parameter( defaultValue = "true", property = "jruby.addProjectClasspath" )
     protected boolean addProjectClasspath;
     
     /**
      * local repository for internal use.
-     *
-     * @parameter default-value="${localRepository}"
-     * @required
-     * @readonly
      */
+    @Parameter( readonly = true, defaultValue="${localRepository}" )
     protected ArtifactRepository localRepository;
 
     /**
      * classrealm for internal use.
      *
-     * @parameter expression="${dummyExpression}"
-     * @readonly
      */
+    @Parameter( readonly = true, defaultValue="${dummy}" )
     protected ClassRealm classRealm;
 
-    /** @component */
+    @Component
     protected RepositorySystem repositorySystem;
 
     protected Logger logger;
@@ -179,14 +174,14 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     private JRubyVersion jRubyVersion;
 
-    /** @component */
+    @Component
     private BuildContext buildContext;
     
     
-    /** @parameter expression="${m2e.jruby.watch}" */
+    @Parameter( property="m2e.jruby.watch" )
     protected List<String> eclipseWatches = new ArrayList<String>();
     
-    /** @parameter expression="${m2e.jruby.refresh}" */
+    @Parameter( property="m2e.jruby.refresh" )
     protected List<String> eclipseRefresh = new ArrayList<String>(); 
     
     protected JRubyVersion getJrubyVersion()
