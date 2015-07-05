@@ -8,13 +8,17 @@
   </parent>
   <artifactId>jruby9-exec-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>JRuby Exec Maven Mojo</name>
+  <name>JRuby9 Exec Maven Mojo</name>
 
   <dependencies>
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>jruby9-common</artifactId>
-      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -22,73 +26,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-invoker-plugin</artifactId>
-        <configuration>
-          <streamLogs>true</streamLogs>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-        </configuration>
       </plugin>
     </plugins>
-    <pluginManagement>
-      <plugins>
-	<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-	<plugin>
-	  <groupId>org.eclipse.m2e</groupId>
-	  <artifactId>lifecycle-mapping</artifactId>
-	  <version>1.0.0</version>
-	  <configuration>
-	    <lifecycleMappingMetadata>
-	      <pluginExecutions>
-		<pluginExecution>
-		  <pluginExecutionFilter>
-		    <groupId>
-		      org.apache.maven.plugins
-		    </groupId>
-		    <artifactId>
-		      maven-dependency-plugin
-		    </artifactId>
-		    <versionRange>
-		      [2.1,)
-		    </versionRange>
-		    <goals>
-		      <goal>
-			unpack-dependencies
-		      </goal>
-		    </goals>
-		  </pluginExecutionFilter>
-		  <action>
-		    <ignore />
-		  </action>
-		</pluginExecution>
-		<pluginExecution>
-		  <pluginExecutionFilter>
-		    <groupId>
-		      org.codehaus.mojo
-		    </groupId>
-		    <artifactId>
-		      build-helper-maven-plugin
-		    </artifactId>
-		    <versionRange>
-		      [1.4,)
-		    </versionRange>
-		    <goals>
-		      <goal>add-source</goal>
-		    </goals>
-		  </pluginExecutionFilter>
-		  <action>
-		    <ignore />
-		  </action>
-		</pluginExecution>
-	      </pluginExecutions>
-	    </lifecycleMappingMetadata>
-	  </configuration>
-	</plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 </project>

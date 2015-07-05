@@ -21,15 +21,20 @@ public class ArtifactHelper {
     private final ArtifactRepository localRepo;
     private final List<ArtifactRepository> remoteRepos;
     private final File target;
-    
+
     public ArtifactHelper(String outputDirectory, UnArchiver archiver, RepositorySystem system,
+            ArtifactRepository localRepo, List<ArtifactRepository> remoteRepos) {
+        this(new File(outputDirectory), archiver, system, localRepo, remoteRepos);
+    }
+
+    public ArtifactHelper(File outputDirectory, UnArchiver archiver, RepositorySystem system,
             ArtifactRepository localRepo, List<ArtifactRepository> remoteRepos) {
         this.system = system;
         this.localRepo = localRepo;
         this.remoteRepos = remoteRepos;
         this.archiver = archiver;
         
-        target = new File(outputDirectory);
+        target = outputDirectory;
         target.mkdirs();
 
         archiver.setDestDirectory(target);
