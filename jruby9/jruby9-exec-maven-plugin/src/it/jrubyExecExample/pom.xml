@@ -48,7 +48,7 @@
     <plugins>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
-        <artifactId>jruby9-maven-plugin</artifactId>
+        <artifactId>jruby9-exec-maven-plugin</artifactId>
         <version>@project.version@</version>
 	    <executions>
 	      <execution>
