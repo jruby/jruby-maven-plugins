@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>de.saumya.mojo.jruby.exec</groupId>
+  <groupId>de.saumya.mojo.jruby9</groupId>
   <artifactId>test</artifactId>
   <version>testing</version>  
   
@@ -44,7 +44,6 @@
   </properties>
 
   <build>
-    <finalName>runnable</finalName>
     <resources>
       <resource>
         <directory>${basedir}</directory>
@@ -58,10 +57,12 @@
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
-          <excludes><exclude>**/*</exclude></excludes>
-          <finalName>dummy</finalName>
-        </configuration>
+	    <executions>
+	      <execution>
+            <id>default-jar</id>
+            <phase>omit</phase>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>de.saumya.mojo</groupId>
@@ -72,7 +73,7 @@
         </configuration>
 	    <executions>
 	      <execution>
-            <id>jruby-jar</id>
+            <id>default-jar</id>
 	        <goals>
               <goal>generate</goal>
               <goal>process</goal>
@@ -117,7 +118,7 @@
             <configuration>
               <arguments>
                 <argument>-jar</argument>
-                <argument>runnable.jar</argument>
+                <argument>${project.build.finalName}.jar</argument>
                 <argument>-rjars/setup</argument>
                 <argument>-e</argument>
                 <argument>
@@ -137,7 +138,7 @@
             <configuration>
               <arguments>
                 <argument>-jar</argument>
-                <argument>runnable.jar</argument>
+                <argument>${project.build.finalName}.jar</argument>
                 <argument>-S</argument>
                 <argument>rspec</argument>
               </arguments>
@@ -150,7 +151,7 @@
             <configuration>
               <arguments>
                 <argument>-jar</argument>
-                <argument>runnable.jar</argument>
+                <argument>${project.build.finalName}.jar</argument>
                 <!-- the uri:classloader prefix can be omit with newer
                      jruby -->
                 <argument>test.rb</argument>
