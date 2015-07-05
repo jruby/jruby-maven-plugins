@@ -1,10 +1,10 @@
-# jruby jar maven plugin
+# jruby jar extension
 
 it packs a ruby application as runnable jar, i.e. all the ruby code and the gems and jars (which ruby loads via require) are packed inside the jar. the jar will include jruby-complete and jruby-mains to execute the ruby application via, i.e.
 
     java -jar my.jar -S rake
 
-there is more compact configuration using an maven extensions: [../jruby9-jar-extension](jruby9-jar-extension)
+the extension uses the mojos from [../jruby9-jar-maven-plugin](jruby9-jar-maven-plugin)
 
 ## general command line switches
 
@@ -26,6 +26,10 @@ or to display some help
 it installs all the declared gems and jars from the dependencies section as well the plugin dependencies.
 
 the complete pom for the samples below is in [src/it/jrubyJarExample/pom.xml](src/it/jrubyJarExample/pom.xml) and more details on how it can be executed.
+
+the extension is used by declaring the right packaging
+
+    <packaging>jrubyJar</packaging>
 
 the gem-artifacts are coming from the torquebox rubygems proxy
 
@@ -82,58 +86,13 @@ adding ruby resources to your jar
         </resource>
       </resources>
 
-the plugin declarations. first we want to omit the regular jar packing
+and pick the extension
 
-    <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-	    <executions>
-	      <execution>
-            <id>default-jar</id>
-            <phase>omit</phase>
-          </execution>
-        </executions>
-      </plugin>
-
-the tell the jruby-jar mojo to pack the jar
-
-      <plugin>
-        <groupId>de.saumya.mojo</groupId>
-        <artifactId>jruby9-jar-maven-plugin</artifactId>
-        <version>@project.version@</version>
-        <configuration>
-          <jrubyVersion>${j.version}</jrubyVersion>
-        </configuration>
-	    <executions>
-	      <execution>
-            <id>jruby-jar</id>
-	        <goals>
-              <goal>generate</goal>
-              <goal>process</goal>
-              <goal>jar</goal>
-            </goals>
-	      </execution>
-	    </executions>
-
-now the plugin does also pack those gem declared inside the plugin sections
-
-        <dependencies>
-          <dependency>
-            <groupId>rubygems</groupId>
-            <artifactId>rspec</artifactId>
-            <version>3.3.0</version>
-            <type>gem</type>
-          </dependency>
-
-the main dependencies section does use leafy-rack and for its logging you need a slf4j logger.
-
-          <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.6</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-    </plugins>
-
+      <extensions>
+        <extension>
+          <groupId>de.saumya.mojo</groupId>
+          <artifactId>jruby9-jar-extension</artifactId>
+          <version>@project.version@</version>
+        </extension>
+      </extensions>
+    </build>
