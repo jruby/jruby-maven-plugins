@@ -1,31 +1,32 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
+  <!--parent>
     <artifactId>gem-parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
     <version>1.0.10</version>
-  </parent>
-  <artifactId>jruby9-maven-plugin</artifactId>
-  <version>0.1.0</version>
-  <packaging>maven-plugin</packaging>
-  <name>JRuby Exec Maven Mojo</name>
+  </parent-->
+    <groupId>de.saumya.mojo</groupId>
+  <artifactId>jruby9</artifactId>
+  <version>0.2.0</version>
+  <packaging>pom</packaging>
+  <name>JRuby Next Generation Maven Mojo</name>
+
+  <modules>
+    <module>jruby9-common</module>
+    <module>jruby9-exec-maven-plugin</module>
+    <module>jruby9-jar-maven-plugin</module>
+  </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>gem-maven-plugin</artifactId>
+      <version>1.0.11-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
   <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-invoker-plugin</artifactId>
-        <configuration>
-          <streamLogs>true</streamLogs>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-        </configuration>
-      </plugin>
-    </plugins>
     <pluginManagement>
       <plugins>
 	<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->

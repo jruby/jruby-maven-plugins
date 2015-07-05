@@ -1,0 +1,66 @@
+package de.saumya.mojo.jruby9.jar;
+
+import java.lang.reflect.Field;
+
+import org.apache.maven.archiver.MavenArchiveConfiguration;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.repository.RepositorySystem;
+import org.codehaus.plexus.archiver.UnArchiver;
+
+import de.saumya.mojo.jruby9.ArtifactHelper;
+
+/**
+ * TODO
+ */
+@Mojo( name = "jar", defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true, threadSafe = true,
+requiresDependencyResolution = ResolutionScope.RUNTIME )
+public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
+
+    @Parameter( defaultValue = "de.saumya.mojo.mains.JarMain", required = true )
+    private String mainClass;
+
+    @Parameter( defaultValue = "1.7.20", property = "jruby.version", required = true )
+    private String jrubyVersion;
+
+    @Parameter( defaultValue = "0.3.0", property = "jruby-mains.version", required = true )
+    private String jrubyMainsVersion;
+
+    @Parameter( readonly = true, required = true, defaultValue="${localRepository}" )
+    protected ArtifactRepository localRepository;
+    
+    @Component
+    RepositorySystem system;
+    
+    @Component( hint = "zip" )
+    UnArchiver unzip;
+
+    @Override
+    public void execute() throws MojoExecutionException {
+        MavenArchiveConfiguration archive = getArchive();
+        archive.getManifest().setMainClass(mainClass);
+
+        ArtifactHelper unzipper = new ArtifactHelper(getProject().getBuild().getOutputDirectory(),
+                unzip, system,
+                localRepository, getProject().getRemoteArtifactRepositories());
+        unzipper.unzip("org.jruby", "jruby-complete", jrubyVersion);
+        unzipper.unzip("de.saumya.mojo", "jruby-mains", jrubyMainsVersion);
+       
+        super.execute();
+    }
+
+    private MavenArchiveConfiguration getArchive() throws MojoExecutionException {
+        try {
+             Field archiveField = getClass().getSuperclass().getSuperclass().getDeclaredField("archive");
+             archiveField.setAccessible(true);
+             return (MavenArchiveConfiguration) archiveField.get(this);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw new MojoExecutionException("can not use reflection", e);
+        }
+    }
+}

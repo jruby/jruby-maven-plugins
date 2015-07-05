@@ -1,4 +1,4 @@
-package de.saumya.mojo.jruby9;
+package de.saumya.mojo.jruby9.exec;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +7,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.gem.AbstractGemMojo;
+import de.saumya.mojo.jruby9.JarDependencies;
+import de.saumya.mojo.jruby9.JarDependencies.Filter;
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -87,20 +89,23 @@ public class ExecMojo extends AbstractGemMojo {
     @Override
     protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
-        JarDependencies jars = new JarDependencies();
-        for(Artifact a: plugin.getArtifacts()) {
-            if (a.getScope().equals("runtime") &&
-                    !project.getArtifactMap().containsKey(a.getGroupId() +":" + a.getArtifactId())){
-                jars.add(a);
+        JarDependencies jars = new JarDependencies(project.getBuild().getDirectory(),
+                "Jars_" + plugin.getGoalPrefix() + ".lock");
+        jars.addAll(plugin.getArtifacts(), new Filter(){
+
+            @Override
+            public boolean addIt(Artifact a) {
+                return a.getScope().equals("runtime") &&
+                        !project.getArtifactMap().containsKey(a.getGroupId() +":" + a.getArtifactId());
             }
-        }
-        for(Artifact a: project.getArtifacts()) {
-            jars.add(a);
-        }
-        File jarsLock = new File(project.getBuild().getDirectory(), "Jars_" + plugin.getGoalPrefix() + ".lock");
-        jars.generateJarsLock(jarsLock);
+            
+        });
+
+        jars.addAll(project.getArtifacts());
+        jars.generateJarsLock();
+        
         factory.addEnv("JARS_HOME", localRepository.getBasedir());
-        factory.addEnv("JARS_LOCK", jarsLock.getAbsolutePath());
+        factory.addEnv("JARS_LOCK", jars.lockFilePath());
         factory.addSwitch("-r", "jars/setup");
 
         Script s;
