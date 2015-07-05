@@ -16,6 +16,7 @@
     <module>jruby9-common</module>
     <module>jruby9-exec-maven-plugin</module>
     <module>jruby9-jar-maven-plugin</module>
+    <module>jruby9-jar-extension</module>
   </modules>
 
   <dependencies>
