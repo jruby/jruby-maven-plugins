@@ -28,12 +28,12 @@ import de.saumya.mojo.jruby9.ArtifactHelper;
 requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
 
-    enum Type { ARCHIVE, RUNNABLE, JETTY, UNDERTOW }
+    enum Type { ARCHIVE, RUNNABLE, JETTY }//, UNDERTOW }
 
     @Parameter( defaultValue = "ARCHIVE", required = true )
     private Type type;
 
-    @Parameter( defaultValue = "de.saumya.mojo.mains.WarMain", required = true )
+    @Parameter( required = false )
     private String mainClass;
 
     @Parameter( defaultValue = "1.7.20", property = "jruby.version", required = true )
@@ -45,6 +45,9 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
     @Parameter( defaultValue = "1.1.18", property = "jruby-rack.version", required = true )
     private String jrubyRackVersion;
 
+    @Parameter( defaultValue = "8.1.14.v20131031", property = "jetty.version", required = true )
+    private String jettyVersion;
+    
     @Parameter( readonly = true, required = true, defaultValue="${localRepository}" )
     protected ArtifactRepository localRepository;
     
@@ -56,33 +59,42 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (type != Type.ARCHIVE) {
+        ArtifactHelper helper = new ArtifactHelper(unzip, system,
+                localRepository, getProject().getRemoteArtifactRepositories());
+        File jrubyWar = new File(getProject().getBuild().getDirectory(), "jrubyWar");
+        File jrubyWarLib = new File(jrubyWar, "lib");
+        File webXml = new File(jrubyWar, "web.xml");
+        File jrubyWarClasses = new File(jrubyWar, "classes");
+        
+        switch(type) {
+        case JETTY:
+            helper.unzip(jrubyWarClasses, "org.eclipse.jetty", "jetty-server", jettyVersion);
+            helper.unzip(jrubyWarClasses, "org.eclipse.jetty", "jetty-webapp", jettyVersion);
+            if (mainClass == null ) mainClass = "de.saumya.mojo.mains.JettyRunMain";
+//        case UNDERTOW:
+//            //helper.unzip(jrubyWarClasses, "de.saumya.mojo", "jruby-mains", jettyVersion);
+//            if (mainClass == null ) mainClass = "de.saumya.mojo.mains.UndertowMain";
+        case RUNNABLE:
+            helper.unzip(jrubyWarClasses, "de.saumya.mojo", "jruby-mains", jrubyMainsVersion);
+            if (mainClass == null ) mainClass = "de.saumya.mojo.mains.WarMain";
+            
             MavenArchiveConfiguration archive = getArchive();
             archive.getManifest().setMainClass(mainClass);
+            
+            createAndAddResource(jrubyWarClasses, "");
+        case ARCHIVE:
+        default:
         }
         
-        File jrubyWar = new File(getProject().getBuild().getDirectory(), "jrubyWar");
-        File output = new File(jrubyWar, "lib");
-        ArtifactHelper unzipper = new ArtifactHelper( output,
-                unzip, system,
-                localRepository, getProject().getRemoteArtifactRepositories());
-        unzipper.copy("org.jruby", "jruby-complete", jrubyVersion);
-        unzipper.copy("org.jruby.rack", "jruby-rack", jrubyRackVersion);
+        helper.copy(jrubyWarLib, "org.jruby", "jruby-complete", jrubyVersion);
+        helper.copy(jrubyWarLib, "org.jruby.rack", "jruby-rack", jrubyRackVersion, "org.jruby:jruby-complete");
        
+        // we bundle jar dependencies the ruby way
         getProject().getArtifacts().clear();
 
-        Resource[] webResources = getWebResources();
-        if (webResources == null) {
-            webResources = new Resource[1];
-        }
-        else {
-            webResources = Arrays.copyOf(webResources, webResources.length + 1);
-        }
-        webResources[webResources.length - 1] = createResource(output.getAbsolutePath(), "WEB-INF/lib");
-        setWebResources(webResources);
+        createAndAddResource(jrubyWarLib, "WEB-INF/lib");
         
         if (getWebXml() == null) {
-            File webXml = new File(jrubyWar, "web.xml");
             try {
                 IOUtil.copy(getClass().getClassLoader().getResourceAsStream("web.xml"),
                         new FileOutputStream(webXml));
@@ -98,10 +110,30 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         super.execute();
     }
 
+    private void createAndAddResource(File source, String target){
+        addResource(createResource(source.getAbsolutePath(), target));
+    }
+
+    private void addResource(Resource resource) {
+        Resource[] webResources = getWebResources();
+        if (webResources == null) {
+            webResources = new Resource[1];
+        }
+        else {
+            webResources = Arrays.copyOf(webResources, webResources.length + 1);
+        }
+        webResources[webResources.length - 1] = resource;
+        setWebResources(webResources);
+    }
+
     protected Resource createResource(String source, String target) {
         Resource resource = new Resource();
         resource.setDirectory(source);
         resource.addInclude("**/*");
+        resource.addExclude("jetty.css");
+        resource.addExclude("about.html");
+        resource.addExclude("about_files/*");
+        resource.addExclude("META-INF/*");
         resource.setTargetPath(target);
         return resource;
     }

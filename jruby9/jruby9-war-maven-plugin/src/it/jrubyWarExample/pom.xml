@@ -80,6 +80,7 @@
         <version>@project.version@</version>
         <configuration>
           <jrubyVersion>${j.version}</jrubyVersion>
+          <type>JETTY</type>
         </configuration>
 	    <executions>
 	      <execution>

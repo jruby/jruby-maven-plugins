@@ -1,5 +1,6 @@
 package de.saumya.mojo.jruby9.jar;
 
+import java.io.File;
 import java.lang.reflect.Field;
 
 import org.apache.maven.archiver.MavenArchiveConfiguration;
@@ -45,11 +46,12 @@ public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
         MavenArchiveConfiguration archive = getArchive();
         archive.getManifest().setMainClass(mainClass);
 
-        ArtifactHelper unzipper = new ArtifactHelper(getProject().getBuild().getOutputDirectory(),
-                unzip, system,
+        ArtifactHelper helper = new ArtifactHelper(unzip, system,
                 localRepository, getProject().getRemoteArtifactRepositories());
-        unzipper.unzip("org.jruby", "jruby-complete", jrubyVersion);
-        unzipper.unzip("de.saumya.mojo", "jruby-mains", jrubyMainsVersion);
+        File output = new File( getProject().getBuild().getOutputDirectory());
+                
+        helper.unzip(output, "org.jruby", "jruby-complete", jrubyVersion);
+        helper.unzip(output, "de.saumya.mojo", "jruby-mains", jrubyMainsVersion);
        
         super.execute();
     }

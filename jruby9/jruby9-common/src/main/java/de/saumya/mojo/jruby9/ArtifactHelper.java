@@ -9,6 +9,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.archiver.ArchiverException;
@@ -20,51 +21,65 @@ public class ArtifactHelper {
     private final RepositorySystem system;
     private final ArtifactRepository localRepo;
     private final List<ArtifactRepository> remoteRepos;
-    private final File target;
 
-    public ArtifactHelper(String outputDirectory, UnArchiver archiver, RepositorySystem system,
-            ArtifactRepository localRepo, List<ArtifactRepository> remoteRepos) {
-        this(new File(outputDirectory), archiver, system, localRepo, remoteRepos);
-    }
-
-    public ArtifactHelper(File outputDirectory, UnArchiver archiver, RepositorySystem system,
+    public ArtifactHelper(UnArchiver archiver, RepositorySystem system,
             ArtifactRepository localRepo, List<ArtifactRepository> remoteRepos) {
         this.system = system;
         this.localRepo = localRepo;
         this.remoteRepos = remoteRepos;
         this.archiver = archiver;
-        
-        target = outputDirectory;
-        target.mkdirs();
-
-        archiver.setDestDirectory(target);
     }
 
     public Set<Artifact> resolve(String groupId, String artifactId, String version)
             throws MojoExecutionException {
+        return resolve(groupId, artifactId, version, null);
+    }
+
+    public Set<Artifact> resolve(String groupId, String artifactId, String version, final String exclusion)
+            throws MojoExecutionException {
         ArtifactResolutionRequest request = new ArtifactResolutionRequest()
-        .setArtifact(system.createArtifact(groupId, artifactId, version, "jar"))
-        .setLocalRepository(this.localRepo)
-        .setRemoteRepositories(remoteRepos);
+            .setResolveTransitively(true)
+            .setResolveRoot(true)
+            .setArtifact(system.createArtifact(groupId, artifactId, version, "jar"))
+            .setLocalRepository(this.localRepo)
+            .setRemoteRepositories(remoteRepos).setCollectionFilter(new ArtifactFilter() {
+                
+                @Override
+                public boolean include(Artifact artifact) {
+                    if (exclusion != null && 
+                            (artifact.getGroupId() + ":" + artifact.getArtifactId()).equals(exclusion)) {
+                        return false;
+                    }
+                    return artifact.getScope() == null || artifact.getScope().equals("compile") || artifact.getScope().equals("runtime");
+                }
+            });
 
         ArtifactResolutionResult result = system.resolve(request);  
         // TODO error handling
         return result.getArtifacts();
     }
 
-    public void copy(String groupId, String artifactId, String version)
+    public void copy(File output, String groupId, String artifactId, String version)
             throws MojoExecutionException {
-        for(Artifact artifact: resolve(groupId, artifactId, version)) {
+        copy(output, groupId, artifactId, version, null);
+    }
+
+    public void copy(File output, String groupId, String artifactId, String version, String exclusion)
+            throws MojoExecutionException {
+        output.mkdirs();
+        for(Artifact artifact: resolve(groupId, artifactId, version, exclusion)) {
             try {
-                FileUtils.copyFile(artifact.getFile(), new File(target, artifact.getFile().getName()));
+                FileUtils.copyFile(artifact.getFile(), new File(output, artifact.getFile().getName()));
             } catch (IOException e) {
                 throw new MojoExecutionException("could not copy: " + artifact, e);
             }
         }
     }
 
-    public void unzip(String groupId, String artifactId, String version)
+    public void unzip(File output, String groupId, String artifactId, String version)
             throws MojoExecutionException {
+        output.mkdirs();
+        archiver.setDestDirectory(output);
         for(Artifact artifact: resolve(groupId, artifactId, version)) {
             archiver.setSourceFile(artifact.getFile());
             try {
