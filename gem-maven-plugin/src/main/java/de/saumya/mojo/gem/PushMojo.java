@@ -5,6 +5,9 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.Script;
@@ -12,44 +15,30 @@ import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to push a given gem or a gem artifact to rubygems.org via the 
- * command "gem push {gemfile}"
- * 
- * @goal push
- * @phase deploy
+ * command "gem push {gem}"
  */
+@Mojo( name = "push", defaultPhase = LifecyclePhase.DEPLOY )
 public class PushMojo extends AbstractGemMojo {
 
     /**
      * skip the pushng the gem
-     * <br/>
-     * Command line -Dpush.skip=...
-     * 
-     * @parameter expression="${push.skip}"
      */
-    protected boolean skip = false;
+    @Parameter( property = "push.skip", defaultValue = "false" )
+    protected boolean skip;
 
     /**
      * arguments for the ruby script given through file parameter.
-     * <br/>
-     * Command line -Dpush.args=...
-     * 
-     * @parameter expression="${push.args}"
      */
-    protected String pushArgs = null;
+    @Parameter( property = "push.args" )
+    protected String pushArgs;
 
     /**
      * arguments for the ruby script given through file parameter.
-     * <br/>
-     * Command line -Dgem=...
-     * 
-     * @parameter expression="${gem}"
      */
+    @Parameter( property = "gem" )
     protected File gem;
     
-    /**
-     * @parameter default-value="${repositorySystemSession}"
-     * @readonly
-     */
+    @Parameter( defaultValue = "${repositorySystemSession}", readonly = true )
     protected Object repoSession;
     
     @Override

@@ -5,25 +5,26 @@ import java.util.List;
 
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * installs a set of given gems without resolving any transitive dependencies
- * 
- * @goal generate-resources
- * @phase generate-resources
  */
+@Mojo( name = "generate-resources", defaultPhase = LifecyclePhase.GENERATE_RESOURCES )
 public class GenerateResourcesMojo extends AbstractGemMojo {
 
-    /** @parameter  */
+    @Parameter
     protected List<String> includeRubyResources;
 
-    /** @parameter  */
+    @Parameter
     protected List<String> excludeRubyResources;
 
-    /** @parameter  */
+    @Parameter
     protected boolean includeBinStubs = false;
 
     @Override

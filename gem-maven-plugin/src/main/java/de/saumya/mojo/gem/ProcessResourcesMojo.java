@@ -7,6 +7,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -16,16 +19,14 @@ import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * installs a set of given gems without resolving any transitive dependencies
- * 
- * @goal process-resources
- * @phase process-resources
  */
+@Mojo( name = "process-resources", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
 public class ProcessResourcesMojo extends AbstractGemMojo {
 
-    /** @parameter  */
+    @Parameter
     protected List<String> includeRubyResources;
 
-    /** @parameter  */
+    @Parameter
     protected List<String> excludeRubyResources = Collections.emptyList();
     
     @Override

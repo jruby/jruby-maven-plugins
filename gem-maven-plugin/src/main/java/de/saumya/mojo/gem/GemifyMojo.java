@@ -14,6 +14,10 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Relocation;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
@@ -28,49 +32,31 @@ import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to convert that artifact into a gem.
- * 
- * @goal gemify
- * @requiresDependencyResolution test
  */
+@Mojo( name = "gemify", requiresDependencyResolution = ResolutionScope.TEST, requiresProject = true )
 public class GemifyMojo extends AbstractGemMojo {
 
-    /**
-     * @parameter default-value="${artifactId}"
-     */
+    @Parameter( property = "artifactId", defaultValue="${artifactId}" )
     String                            artifactId;
 
-    /**
-     * @parameter default-value="${groupId}"
-     */
+    @Parameter( property = "groupId", defaultValue="${groupId}" )
     String                            groupId;
 
-    /**
-     * @parameter default-value="${version}"
-     */
+    @Parameter( property = "version", defaultValue="${version}" )
     String                            version;
 
-    /**
-     * @parameter default-value="${project.build.directory}/gemify"
-     */
+    @Parameter( defaultValue="${project.build.directory}/gemify" )
     File                              gemify;
 
-    /**
-     * @parameter default-value="${project.build.directory}"
-     */
+    @Parameter( defaultValue="${project.build.directory}" )
     File                              buildDirectory;
-
-    /**
-     * @parameter default-value="${skipGemInstall}"
-     */
+    @Parameter( property = "skipGemInstall", defaultValue="${skipGemInstall}" )
     public boolean                    skipGemInstall = false;
 
-    /**
-     * @parameter default-value="${repositorySystemSession}"
-     * @readonly
-     */
+    @Parameter( defaultValue="${repositorySystemSession}", readonly = true )
     private Object   repositorySession;
 
-    /** @component */
+    @Component
     protected ProjectBuilder          builder;
 
     private final Map<String, String> relocationMap  = new HashMap<String, String>();

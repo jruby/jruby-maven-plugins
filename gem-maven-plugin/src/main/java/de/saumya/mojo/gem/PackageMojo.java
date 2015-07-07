@@ -13,6 +13,9 @@ import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
@@ -21,89 +24,77 @@ import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to convert that artifact into a gem or uses a given gemspec to build a gem.
- * 
- * @goal package
- * @requiresDependencyResolution test
  */
+@Mojo( name = "package", requiresDependencyResolution = ResolutionScope.TEST )
 public class PackageMojo extends AbstractGemMojo {
 
-    /**
-     * @parameter expression="${project.build.directory}"
-     */
+    @Parameter( defaultValue = "${project.build.directory}" )
     File                              buildDirectory;
 
     /**
      * the gemspec to use for building the gem
-     * <br/>
-     * Command line -Dgemspec=...
-     * 
-     * @parameter default-value="${gemspec}"
      */
+    @Parameter( property = "gemspec" )
     File                              gemspec;
 
     /**
      * use the pom to generate a gemspec and overwrite the one in lauchDirectory.
-     * <br/>
-     * Command line -Dgemspec.overwrite=...
-     * 
-     * @parameter default-value="${gemspec.overwrite}"
      */
+    @Parameter( property = "gemspec.overwrite" )
     boolean                           gemspecOverwrite = false;
 
-    /** @parameter */
+    @Parameter
     private String                    date;
 
-    /** @parameter */
+    @Parameter
     private String                    extraRdocFiles;
 
-    /** @parameter */
+    @Parameter
     private String                    extraFiles;
 
-    /** @parameter */
+    @Parameter
     private String                    rdocOptions;
 
-    /** @parameter */
+    @Parameter
     private String                    requirePaths;
 
-    /** @parameter */
+    @Parameter
     private String                    rubyforgeProject;
 
-    /** @parameter */
+    @Parameter
     private String                    rubygemsVersion;
 
-    /** @parameter */
+    @Parameter
     private String                    requiredRubygemsVersion;
 
-    /** @parameter */
+    @Parameter
     private String                    bindir;
 
-    /** @parameter */
+    @Parameter
     private String                    requiredRubyVersion;
 
-    /** @parameter */
+    @Parameter
     private String                    postInstallMessage;
 
-    /** @parameter */
+    @Parameter
     private String                    executables;
 
-    /** @parameter */
+    @Parameter
     private String                    extensions;
 
-    /** @parameter */
+    @Parameter
     private String                    platform;
 
-    /** @parameter default-value="gem_hook.rb" */
+    @Parameter( defaultValue = "gem_hook.rb" )
     private String                    gemHook;
 
-    /**
-     * @parameter default-value="false"
-     */
+    @Parameter( defaultValue = "false" )
     boolean                           includeDependencies;
 
     /**
      * use repository layout for included dependencies
-     * @parameter default-value="false"
      */
+    @Parameter( defaultValue = "false" )
     boolean                           useRepositoryLayout;
 
     private void generatePom(File source, File target) throws ScriptException, IOException {

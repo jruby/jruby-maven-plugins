@@ -4,91 +4,69 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * executes the jruby command.
- *
- * @goal jruby
- * @requiresDependencyResolution test
+ * 
+ * Deprecated: use the exec goal from gem-maven-plugin
  */
+@Mojo( name = "jruby", requiresDependencyResolution = ResolutionScope.TEST )
+@Deprecated
 public class JRubyMojo extends AbstractJRubyMojo {
 
     /**
      * arguments for the jruby command.
-     * <br/>
-     * Command line -Djruby.args=...
-     *
-     * @parameter expression="${jruby.args}"
      */
+    @Parameter( property = "jruby.args" )
     protected String jrubyArgs = null;
 
     /**
      * ruby code which gets executed.
-     * <br/>
-     * Command line -Djruby.script=...
-     *
-     * @parameter expression="${jruby.script}"
      */
+    @Parameter( property = "jruby.script" )
     protected String script = null;
 
     /**
      * ruby file which gets executed.
-     * <br/>
-     * Command line -Djruby.file=...
-     *
-     * @parameter expression="${jruby.file}"
      */
+    @Parameter( property = "jruby.file" )
     protected File file = null;
 
     /**
      * ruby file found on search path which gets executed.
-     * <br/>
-     * Command line -Djruby.filename=...
-     *
-     * @parameter expression="${jruby.filename}"
      */
+    @Parameter( property = "jruby.filename" )
     protected String filename = null;
 
     /**
      * output file where the standard out will be written
-     * <br/>
-     * Command line -Djruby.outputFile=...
-     *
-     * @parameter expression="${jruby.outputFile}"
      */
+    @Parameter( property = "jruby.outputFile" )
     protected File outputFile = null;
 
     /**
      * directory of gem home to use when forking JRuby.
-     * <br/>
-     * Command line -Dgem.home=...
-     *
-     * @parameter expression="${gem.home}"
-     *            default-value="${project.build.directory}/rubygems"
      */
+    @Parameter( property = "gem.home",  defaultValue="${project.build.directory}/rubygems" )
     protected File          gemHome;
 
     /**
      * directory of JRuby path to use when forking JRuby.
-     * <br/>
-     * Command line -Dgem.path=...
-     *
-     * @parameter expression="${gem.path}"
-     *            default-value="${project.build.directory}/rubygems"
      */
+    @Parameter( property = "gem.path",  defaultValue="${project.build.directory}/rubygems" )
     protected File          gemPath;
 
     /**
      * use system gems instead of setting up GemPath/GemHome inside the build directory and ignores any set
      * gemHome and gemPath. you need to have both GEM_HOME and GEM_PATH environment variable set to make it work.
-     * <br/>
-     * Command line -Dgem.useSystem=...
-     *
-     * @parameter expression="${gem.useSystem}" default-value="false"
      */
+    @Parameter( property = "gem.useSystem",  defaultValue="false" )
     protected boolean          gemUseSystem;
 
     @Override

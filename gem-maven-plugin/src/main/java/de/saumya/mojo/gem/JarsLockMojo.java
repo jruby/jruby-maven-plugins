@@ -22,6 +22,11 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.util.FileUtils;
@@ -29,88 +34,64 @@ import org.codehaus.plexus.util.IOUtil;
 
 /**
  * installs a set of given gems without resolving any transitive dependencies
- * 
- * @goal jars-lock
- * @phase initialize
- * @requiresDependencyResolution test
  */
+@Mojo( name ="jars-lock", defaultPhase = LifecyclePhase.INITIALIZE,
+       requiresDependencyResolution = ResolutionScope.TEST )
 public class JarsLockMojo extends AbstractMojo {
 
     private static final String JARS_HOME = "JARS_HOME";
 
     /**
      * reference to maven project for internal use.
-     *
-     * @parameter expression="${project}"
-     * @required
-     * @readOnly
      */
+    @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
 
     /**
      * Jars.lock file to be updated or created.
-     *
-     * <br/>
-     * Command line -Djars.lock=...
-     * 
-     * @parameter expression="${jars.lock}" default-value="Jars.lock"
      */
+    @Parameter( defaultValue = "Jars.lock", property = "jars.lock" )
     public File jarsLock;
 
     /**
      * where to copy the jars - default to JARS_HOME environment if set.
-     *
-     * <br/>
-     * Command line -Djars.home=...
-     * 
-     * @parameter expression="${jars.home}"
      */
+    @Parameter( property = "jars.home" )
     public File jarsHome;
 
     /**
      * force update of Jars.lock file.
-     *
-     * <br/>
-     * Command line -Djars.force=...
-     * 
-     * @parameter expression="${jars.force}" default-value="false"
      */
+    @Parameter( defaultValue = "false", property = "jars.force" )
     public boolean force;
 
     /**
      * update of Jars.lock file for a given artifactId
-     *
-     * <br/>
-     * Command line -Djars.update=...
-     * 
-     * @parameter expression="${jars.update}"
      */
+    @Parameter( property = "jars.update" )
     public String update;
 
     /**
      * list of gems. one line one gem: {gemname}:{version}:{scope} or
      * {gemname}:{version} where scope defaults to compile.
-     *
-     * @parameter
      */
+    @Parameter
     public List<String> gems = Collections.emptyList();
 
     /**
-     * output-file for the messages.
+     * log output file.
      * @parameter expression="${jars.outputFile}"
      */
+    @Parameter( property = "jars.outputFile" )
     File outputFile;
     
-    /** @component */
+    @Component
     protected RepositorySystem repositorySystem;
 
     /**
      * local repository for internal use.
-     *
-     * @parameter default-value="${localRepository}"
-     * @required
-     * @readonly
      */
+    @Parameter( defaultValue = "${localRepository}", readonly = true )
     protected ArtifactRepository localRepository;
 
     public void execute() throws MojoExecutionException, MojoFailureException {

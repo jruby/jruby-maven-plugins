@@ -17,7 +17,6 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
@@ -46,34 +45,24 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * common arguments
-     * <br/>
-     * Command line -Dargs=...
-     *
      */
     @Parameter( property = "args")
     protected String args;
 
     /**
      * jvm arguments for the java command executing jruby
-     * <br/>
-     * Command line -Djruby.jvmargs=...
-     *
      */
     @Parameter( property = "jruby.jvmargs")
     protected String jrubyJvmArgs;
 
     /**
      * switches for the jruby command, like '--1.9'
-     * <br/>
-     * Command line -Djruby.switches=...
-     *
      */
     @Parameter( property = "jruby.switches")
     protected String jrubySwitches;
 
     /**
      * environment values passed on to the jruby process. needs jrubyFork true.
-     * <br/>
      */
     @Parameter( property = "jruby.env")
     protected Map<String, String> env;
@@ -83,65 +72,45 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
      * this version is used to resolve the jruby-complete dependency from the
      * local/remote maven repository. it overwrites the jruby version from
      * the dependencies if any. i.e. you can easily switch jruby version from the commandline !
-     * <br/>
-     * default: 1.7.19
-     * <br/>
-     * Command line -Djruby.version=...
-     *
+     * 
+     * default see {@code DEFAULT_JRUBY_VERSION}
      */
-    @Parameter( property = "jruby.version")
+    // no defaultVersion here since we treat null as default later on
+    @Parameter( property = "jruby.version" )
     private String jrubyVersion;
 
     /**
      * fork the JRuby execution.
-     * <br/>
-     * Command line -Djruby.fork=...
-     *
      */
     @Parameter( property = "jruby.fork", defaultValue = "true")
     protected boolean jrubyFork;
 
     /**
      * verbose jruby related output
-     * <br/>
-     * Command line -Djruby.verbose=...
-     *
      */
     @Parameter( property = "jruby.verbose", defaultValue = "false")
     protected boolean jrubyVerbose;
 
     /**
      * directory with ruby sources - added to java classpath and ruby loadpath
-     * <br/>
-     * Command line -Djruby.sourceDirectory=...
-     *
-     * @parameter expression="${jruby.sourceDirectory}" default-value="src/main/ruby"
      */
     @Parameter( property = "jruby.sourceDirectory", defaultValue = "src/main/ruby")
     protected File rubySourceDirectory;
 
     /**
      * directory with ruby sources - added to ruby loadpath only
-     * <br/>
-     * Command line -Djruby.lib=...
-     *
-     * @parameter expression="${jruby.lib}" default-value="lib"
      */
     @Parameter( property = "jruby.lib", defaultValue = "lib")
     protected File libDirectory;
 
     /**
      * the launch directory for the JRuby execution.
-     * <br/>
-     * Command line -Djruby.launchDirectory=...
-     *
      */
     @Parameter( property = "jruby.launchDirectory", defaultValue = "${project.basedir}")
     private File launchDirectory;
 
     /**
      * reference to maven project for internal use.
-     *
      */
     @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
@@ -160,7 +129,6 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     /**
      * classrealm for internal use.
-     *
      */
     @Parameter( readonly = true, defaultValue="${dummy}" )
     protected ClassRealm classRealm;

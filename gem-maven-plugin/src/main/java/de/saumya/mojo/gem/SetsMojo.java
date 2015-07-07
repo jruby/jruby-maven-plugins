@@ -11,30 +11,29 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * installs a set of given gems without resolving any transitive dependencies
- * 
- * @goal sets
- * @phase initialize
  */
+@Mojo( name = "sets", defaultPhase = LifecyclePhase.INITIALIZE )
 public class SetsMojo extends AbstractGemMojo {
     
     /**
      * the scope under which the gems get installed
-     * 
-     * @parameter default-value="compile"
      */
+    @Parameter( defaultValue = "compile" )
     protected String scope;
 
     /**
      * map of gemname to version, i.e. it is a "list" of gems with fixed version
-     * 
-     * @parameter
      */
+    @Parameter
     protected Map<String, String>  gems = Collections.emptyMap();
     
     @Override

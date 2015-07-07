@@ -6,6 +6,8 @@ import java.net.URL;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.FileUtils;
 
 import de.saumya.mojo.jruby.AbstractJRubyMojo;
@@ -13,61 +15,44 @@ import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to converts a gemspec file into pom.xml.
- * 
- * @goal pom
  */
+@Mojo( name = "pom", requiresProject = false )
 public class PomMojo extends AbstractJRubyMojo {
 
-    /** @parameter expression="${plugin}" @readonly */
+    @Parameter( defaultValue = "${plugin}", readonly = true )
     PluginDescriptor  plugin;
 
     /**
      * the pom file to generate
-     * <br/>
-     * Command line -Dpom=...
-     * 
-     * @parameter expression="${pom}" default-value="pom.xml"
      */
+    @Parameter( property ="pom", defaultValue = "pom.xml" )
     protected File    pom;
 
     /**
      * force overwrite of an existing pom
-     * <br/>
-     * Command line -Dpom.force=...
-     * 
-     * @parameter default-value="${pom.force}"
      */
-    protected boolean force = false;
+    @Parameter( property ="pom.force", defaultValue = "false" )
+    protected boolean force;
 
     /**
      * temporary store generated pom.
-     * 
-     * @parameter default-value="${project.build.directory}/pom.xml"
      */
+    @Parameter( defaultValue = "${project.build.directory}/pom.xml" )
     protected File tmpPom;
 
     /**
      * use a gemspec file to generate a pom
-     * <br/>
-     * Command line -Dpom.gemspec=...
-     * 
-     * @parameter default-value="${pom.gemspec}"
      */
+    @Parameter( property ="pom.gemspec", defaultValue = "gemspec" )
     protected File    gemspec;
 
     /**
      * use Gemfile to generate a pom
-     * <br/>
-     * Command line -Dpom.gemfile=...
-     * 
-     * @parameter expression="${pom.gemfile}"
-     *            default-value="Gemfile"
      */
+    @Parameter( property ="pom.gemfile", defaultValue = "Gemfile" )
     protected File    gemfile;
     
-    /**
-     * @parameter
-     */
+    @Parameter
     private boolean skipGeneration;
 
     @Override

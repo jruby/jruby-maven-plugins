@@ -6,7 +6,6 @@
     <artifactId>jruby-maven-plugins</artifactId>
     <version>1.0.11-SNAPSHOT</version>
   </parent>
-    <version>1.0.11-SNAPSHOT</version>
   <artifactId>parent-mojo</artifactId>
   <packaging>pom</packaging>
   <name>Mojo Parent</name>
@@ -51,7 +50,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>2.5.1</version>
+        <version>3.4</version>
         <executions>
           <execution>
             <phase>process-sources</phase>
@@ -61,113 +60,92 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/sources</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
     <pluginManagement>
-    	<plugins>
-    		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-    		<plugin>
-    			<groupId>org.eclipse.m2e</groupId>
-    			<artifactId>lifecycle-mapping</artifactId>
-    			<version>1.0.0</version>
-    			<configuration>
-    				<lifecycleMappingMetadata>
-    					<pluginExecutions>
-    						<pluginExecution>
-    							<pluginExecutionFilter>
-    								<groupId>
-    									org.apache.maven.plugins
-    								</groupId>
-    								<artifactId>
-    									maven-plugin-plugin
-    								</artifactId>
-    								<versionRange>
-    									[2.5.1,)
-    								</versionRange>
-    								<goals>
-    									<goal>helpmojo</goal>
-    									<goal>descriptor</goal>
-    								</goals>
-    							</pluginExecutionFilter>
-    							<action>
-    								<ignore />
-    							</action>
-    						</pluginExecution>
-    					</pluginExecutions>
-    				</lifecycleMappingMetadata>
-    			</configuration>
-    		</plugin>
-    	</plugins>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      org.apache.maven.plugins
+                    </groupId>
+                    <artifactId>
+                      maven-plugin-plugin
+                    </artifactId>
+                    <versionRange>
+                      [3.4,)
+                    </versionRange>
+                    <goals>
+                      <goal>helpmojo</goal>
+                      <goal>descriptor</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
     </pluginManagement>
   </build>
   <profiles>
     <profile>
       <id>integration-test</id>
       <properties>
-	<invoker.skip>false</invoker.skip>
+        <invoker.skip>false</invoker.skip>
       </properties>
       <build>
         <defaultGoal>install</defaultGoal>
         <plugins>
-	  <plugin>
-	    <artifactId>maven-invoker-plugin</artifactId>
-	    <version>1.5</version>
-	    <configuration>
-	      <projectsDirectory>src/it</projectsDirectory>
-	      <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-	      <preBuildHookScript>setup.bsh</preBuildHookScript>
-	      <postBuildHookScript>verify.bsh</postBuildHookScript>
-	      <streamLogs>true</streamLogs>
-	    </configuration>
-	    <executions>
-	      <execution>
-		<id>integration-test</id>
-		<goals>
-		  <goal>install</goal>
-		  <goal>run</goal>
-		</goals>
-		<configuration>
-		  <!--settingsFile>src/it/settings.xml</settingsFile>
-		  <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath-->
-		  <pomIncludes>
-		    <pomInclude>*/pom.xml</pomInclude>
-		  </pomIncludes>
-		  <pomExcludes>
-		    <pomExclude>*-no-pom/pom.xml</pomExclude>
-		  </pomExcludes>
-		</configuration>
-	      </execution>
-	      <execution>
-		<id>integration-test-no-pom</id>
-		<goals>
-		  <goal>run</goal>
-		</goals>
-		<configuration>
-		  <pomIncludes>
-		    <pomInclude>*-no-pom/pom.xml</pomInclude>
-		  </pomIncludes>
-		</configuration>
-	      </execution>
-	    </executions>
-	  </plugin>
+          <plugin>
+            <artifactId>maven-invoker-plugin</artifactId>
+            <version>1.5</version>
+            <configuration>
+              <projectsDirectory>src/it</projectsDirectory>
+              <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+              <preBuildHookScript>setup.bsh</preBuildHookScript>
+              <postBuildHookScript>verify.bsh</postBuildHookScript>
+              <streamLogs>true</streamLogs>
+            </configuration>
+            <executions>
+              <execution>
+                <id>integration-test</id>
+                <goals>
+                  <goal>install</goal>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <pomIncludes>
+                    <pomInclude>*/pom.xml</pomInclude>
+                  </pomIncludes>
+                  <pomExcludes>
+                    <pomExclude>*-no-pom/pom.xml</pomExclude>
+                  </pomExcludes>
+                </configuration>
+              </execution>
+              <execution>
+                <id>integration-test-no-pom</id>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <pomIncludes>
+                    <pomInclude>*-no-pom/pom.xml</pomInclude>
+                  </pomIncludes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
     </profile>

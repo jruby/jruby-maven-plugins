@@ -5,36 +5,32 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import de.saumya.mojo.ruby.script.Script;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to locally install a given gem
- * 
- * @goal install
- * @phase install
  */
+@Mojo( name ="install", defaultPhase = LifecyclePhase.INSTALL )
 public class InstallMojo extends AbstractGemMojo {
 
     /**
      * arguments for the "gem install" command.
-     * <br/>
-     * Command line -Dinstall.args=...
-     * 
-     * @parameter default-value="${install.args}"
      */
+    @Parameter( property = "install.args" )
     protected String installArgs = null;
 
     /**
      * gem file to install locally.<br/>
      * <b>Note:</b> this will install the gem in ${gem.home} so in general that is only
      * useful if some other goal does something with it
-     * <br/>
-     * Command line -Dgem=...
-     * 
-     * @parameter default-value="${gem}"
      */
+    @Parameter( property = "gem" )
     protected File   gem         = null;
 
     @Override

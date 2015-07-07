@@ -16,26 +16,26 @@
       <artifactId>ruby-tools</artifactId>
       <version>${project.parent.version}</version>
       <exclusions>
-	<exclusion>
-	  <groupId>org.codehaus.plexus</groupId>
-	  <artifactId>plexus-velocity</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.yaml</groupId>
-	  <artifactId>snakeyaml</artifactId>
-	</exclusion>
-	<exclusion>
-	  <groupId>org.jruby</groupId>
-	  <artifactId>jruby-complete</artifactId>
-	</exclusion>
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-velocity</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.yaml</groupId>
+          <artifactId>snakeyaml</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jruby</groupId>
+          <artifactId>jruby-complete</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
-	<dependency>
-		<groupId>org.sonatype.plexus</groupId>
-		<artifactId>plexus-build-api</artifactId>
-		<version>0.0.7</version>
-	</dependency>
+    <dependency>
+      <groupId>org.sonatype.plexus</groupId>
+      <artifactId>plexus-build-api</artifactId>
+      <version>0.0.7</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -46,62 +46,35 @@
           <goalPrefix>ruby</goalPrefix>
         </configuration>
       </plugin>
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.1.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
-	<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-	<plugin>
-	  <groupId>org.eclipse.m2e</groupId>
-	  <artifactId>lifecycle-mapping</artifactId>
-	  <version>1.0.0</version>
-	  <configuration>
-	    <lifecycleMappingMetadata>
-	      <pluginExecutions>
-		<pluginExecution>
-		  <pluginExecutionFilter>
-		    <groupId>org.codehaus.mojo</groupId>
-		    <artifactId>
-		      build-helper-maven-plugin
-		    </artifactId>
-		    <versionRange>[1.4,)</versionRange>
-		    <goals>
-		      <goal>add-source</goal>
-		    </goals>
-		  </pluginExecutionFilter>
-		  <action>
-		    <ignore />
-		  </action>
-		</pluginExecution>
-		<pluginExecution>
-			<pluginExecutionFilter>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-plugin-plugin</artifactId>
-				<versionRange>[2.5.1,)</versionRange>
-				<goals>
-					<goal>helpmojo</goal>
-					<goal>descriptor</goal>
-				</goals>
-			</pluginExecutionFilter>
-			<action>
-				<ignore />
-			</action>
-		</pluginExecution>
-	      </pluginExecutions>
-	    </lifecycleMappingMetadata>
-	  </configuration>
-	</plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <versionRange>[2.5.1,)</versionRange>
+                    <goals>
+                      <goal>helpmojo</goal>
+                      <goal>descriptor</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
