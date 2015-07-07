@@ -7,7 +7,10 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import de.saumya.mojo.jruby9.AbstractGenerateMojo;
 
 /**
- * TODO
+ * add the gems and jars to resources. @see AbstractGenerateMojo
+ * 
+ * @author christian
+ *
  */
 @Mojo( name = "generate", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresProject = true,
        threadSafe = true, requiresDependencyResolution = ResolutionScope.RUNTIME )

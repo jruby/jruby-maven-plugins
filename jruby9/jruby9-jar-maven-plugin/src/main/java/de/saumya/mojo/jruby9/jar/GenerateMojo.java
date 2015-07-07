@@ -14,19 +14,23 @@ import de.saumya.mojo.jruby9.AbstractGenerateMojo;
 import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
- * TODO
+ * add the gems and jars to resources. @see AbstractGenerateMojo
+ * 
+ * <br/>
+ * 
+ * also copies the bootstrap script to the resources if set.
+ * 
+ * @author christian
  */
 @Mojo( name = "generate", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresProject = true,
        threadSafe = true, requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class GenerateMojo extends AbstractGenerateMojo {
 
     /**
-     * TODO
-     * <br/>
-     * Command line -Djar.bootstrap=...
+     * if set this file will be copied as 'jar-bootstrap.rb' to the resources.
      */
     @Parameter( property = "jar.bootstrap" )
-    protected File bootstrap  = null;
+    protected File bootstrap;
 
     @Override
     protected void executeWithGems() throws MojoExecutionException,

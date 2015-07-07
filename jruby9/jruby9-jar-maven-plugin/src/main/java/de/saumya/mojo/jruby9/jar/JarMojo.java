@@ -17,10 +17,27 @@ import org.codehaus.plexus.archiver.UnArchiver;
 import de.saumya.mojo.jruby9.ArtifactHelper;
 
 /**
- * TODO
+ * packs a ruby application into runnable jar.
+ *
+ * <li>shaded jruby-complete.jar</li>
+ * <li>shaded jruby-mains.jar</li>
+ * <li>all declared gems and transitive gems and jars</li>
+ * <li>all declared jars and transitive jars</li>
+ * <li>all declared resource</li>
+ * 
+ * the main class sets up the GEM_HOME, GEM_PATH and JARS_HOME and takes arguments
+ * for executing jruby. any bin stubs from the gem are available via '-S' or any
+ * script relative to jar's root can be found as the current directory is inside the jar.
+ * 
+ * <br/>
+ * 
+ * if there is a 'jar-bootstrap.rb' in the root of the jar, then the default main class will
+ * execute this script and pass all the arguments to bootstrap script.
+ * 
+ * @author christian
  */
 @Mojo( name = "jar", defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true, threadSafe = true,
-requiresDependencyResolution = ResolutionScope.RUNTIME )
+       requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
 
     @Parameter( defaultValue = "de.saumya.mojo.mains.JarMain", required = true )
@@ -32,7 +49,7 @@ public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
     @Parameter( defaultValue = "0.3.0", property = "jruby-mains.version", required = true )
     private String jrubyMainsVersion;
 
-    @Parameter( readonly = true, required = true, defaultValue="${localRepository}" )
+    @Parameter( readonly = true, defaultValue="${localRepository}" )
     protected ArtifactRepository localRepository;
     
     @Component

@@ -11,6 +11,24 @@ import de.saumya.mojo.gem.AbstractGemMojo;
 import de.saumya.mojo.jruby9.JarDependencies.Filter;
 import de.saumya.mojo.ruby.script.ScriptException;
 
+/**
+ * setup the jars in jruby way:
+ * 
+ * <li>copy the jars into a local repo inside the jar under the 'jars' directory</li>
+ * <li>create 'Jars.lock' which jruby uses to load the jars</li>
+ * 
+ * <br/>
+ * 
+ * setup the gems
+ * 
+ * <li>copy the 'gems' directory to the resources</li>
+ * <li>copy the 'specifications' directory to the resources</li>
+ * <li>copy the 'bin' directory to the resources</li>
+ * 
+ * 
+ * @author christian
+ *
+ */
 public abstract class AbstractGenerateMojo extends AbstractGemMojo {
 
     @Override

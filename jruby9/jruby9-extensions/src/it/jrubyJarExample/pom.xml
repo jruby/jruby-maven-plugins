@@ -69,7 +69,7 @@
     <extensions>
       <extension>
         <groupId>de.saumya.mojo</groupId>
-        <artifactId>jruby9-jar-extension</artifactId>
+        <artifactId>jruby9-extensions</artifactId>
         <version>@project.version@</version>
       </extension>
     </extensions>

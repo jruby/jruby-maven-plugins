@@ -9,6 +9,13 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 
+/**
+ * generates ".jrubydir" files for all resource and gems to allow jruby
+ * to perform directory globs inside the jar.
+ *  
+ * @author christian
+ *
+ */
 public abstract class AbstractProcessMojo extends AbstractMojo {
 
     @Parameter( defaultValue = "${project.build.outputDirectory}", readonly = true )

@@ -28,8 +28,6 @@ public class ExecMojo extends AbstractGemMojo {
 
     /**
      * ruby code from the pom configuration part which gets executed.
-     * <br/>
-     * Command line -Dexec.script=...
      */
     @Parameter(property = "exec.script")
     protected String script   = null;

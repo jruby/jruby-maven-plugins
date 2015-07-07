@@ -6,9 +6,9 @@
     <groupId>de.saumya.mojo</groupId>
     <version>0.2.0</version>
   </parent>
-  <artifactId>jruby9-jar-extension</artifactId>
+  <artifactId>jruby9-extensions</artifactId>
   <packaging>jar</packaging>
-  <name>JRuby9 Jar Extension</name>
+  <name>JRuby9 Extensions</name>
 
   <build>
     <plugins>
