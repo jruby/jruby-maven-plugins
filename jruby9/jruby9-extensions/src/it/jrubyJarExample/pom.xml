@@ -62,7 +62,7 @@
   </dependencies>
 
   <properties>
-    <jruby.version>1.7.21-SNAPSHOT</jruby.version>
+    <jruby.version>1.7.21</jruby.version>
   </properties>
 
   <build>

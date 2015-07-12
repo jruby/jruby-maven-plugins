@@ -50,7 +50,7 @@
   </dependencies>
 
   <properties>
-    <j.version>1.7.21-SNAPSHOT</j.version>
+    <j.version>1.7.21</j.version>
   </properties>
 
   <build>

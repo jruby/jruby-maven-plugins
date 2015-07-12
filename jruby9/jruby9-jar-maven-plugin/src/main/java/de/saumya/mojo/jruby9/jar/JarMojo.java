@@ -15,6 +15,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.archiver.UnArchiver;
 
 import de.saumya.mojo.jruby9.ArtifactHelper;
+import de.saumya.mojo.jruby9.Versions;
 
 /**
  * packs a ruby application into runnable jar.
@@ -43,10 +44,10 @@ public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
     @Parameter( defaultValue = "de.saumya.mojo.mains.JarMain", required = true )
     private String mainClass;
 
-    @Parameter( defaultValue = "1.7.20", property = "jruby.version", required = true )
+    @Parameter( defaultValue = Versions.JRUBY, property = "jruby.version", required = true )
     private String jrubyVersion;
 
-    @Parameter( defaultValue = "0.3.0", property = "jruby-mains.version", required = true )
+    @Parameter( defaultValue = Versions.JRUBY_MAINS, property = "jruby-mains.version", required = true )
     private String jrubyMainsVersion;
 
     @Parameter( readonly = true, defaultValue="${localRepository}" )
