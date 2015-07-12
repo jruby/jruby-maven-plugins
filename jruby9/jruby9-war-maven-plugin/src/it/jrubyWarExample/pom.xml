@@ -10,16 +10,6 @@
       <id>rubygems-releases</id>
       <url>http://rubygems-proxy.torquebox.org/releases</url>
     </repository>
-    <repository>
-      <id>sonatype</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
   </repositories>
    
   <pluginRepositories>
@@ -50,7 +40,7 @@
   </dependencies>
 
   <properties>
-    <j.version>1.7.21-SNAPSHOT</j.version>
+    <j.version>1.7.21</j.version>
   </properties>
 
   <build>
@@ -80,7 +70,7 @@
         <version>@project.version@</version>
         <configuration>
           <jrubyVersion>${j.version}</jrubyVersion>
-          <type>JETTY</type>
+          <type>RUNNABLE</type>
         </configuration>
 	    <executions>
 	      <execution>
@@ -106,7 +96,7 @@
           </dependency>
         </dependencies>
       </plugin>
-      <!--plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2</version>
@@ -129,7 +119,7 @@
             <configuration>
               <arguments>
                 <argument>-jar</argument>
-                <argument>${project.build.finalName}.jar</argument>
+                <argument>${project.build.finalName}.war</argument>
                 <argument>-rjars/setup</argument>
                 <argument>-e</argument>
                 <argument>
@@ -149,7 +139,7 @@
             <configuration>
               <arguments>
                 <argument>-jar</argument>
-                <argument>${project.build.finalName}.jar</argument>
+                <argument>${project.build.finalName}.war</argument>
                 <argument>-S</argument>
                 <argument>rspec</argument>
               </arguments>
@@ -162,13 +152,13 @@
             <configuration>
               <arguments>
                 <argument>-jar</argument>
-                <argument>${project.build.finalName}.jar</argument>
+                <argument>${project.build.finalName}.war</argument>
                 <argument>test.rb</argument>
               </arguments>
             </configuration>
 	      </execution>
 	    </executions>
-      </plugin-->
+      </plugin>
     </plugins>
   </build>
 </project>
