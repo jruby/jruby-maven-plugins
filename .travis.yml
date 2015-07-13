@@ -1,0 +1,3 @@
+language: java
+install: cd jruby9;mvn validate -Dmaven.test.skip -Dmaven.invoker.skip
+script: cd jruby;mvn verify
