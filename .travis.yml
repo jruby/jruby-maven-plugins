@@ -1,3 +1,4 @@
 language: java
+sudo: false
 install: cd jruby9;mvn install -Dmaven.test.skip -Dinvoker.skip
 script: cd jruby;mvn verify
