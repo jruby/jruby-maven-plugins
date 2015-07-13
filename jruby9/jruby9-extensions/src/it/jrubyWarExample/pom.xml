@@ -41,7 +41,7 @@
   </dependencies>
 
   <properties>
-    <j.version>1.7.21</j.version>
+    <j.version>9.0.0.0.rc2</j.version>
   </properties>
 
   <build>
@@ -111,12 +111,6 @@
                 <argument>-rjars/setup</argument>
                 <argument>-e</argument>
                 <argument>
-                  p Gem.dir
-                  p $LOAD_PATH
-                  p Gem::Specification.dirs
-                  ENV.each {|k,v| p "#{k} : #{v}" }
-                  p JRuby.runtime.get_jruby_class_loader.parent.getURLs()
-                  p Dir[ "uri:classloader://specifications/*" ]
                   p JRUBY_VERSION
                   p $CLASSPATH.size
                   expected = 10
