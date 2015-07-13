@@ -67,7 +67,7 @@
             org.apache.maven.plugins:maven-surefire-plugin:test
           </test>
 	      <package>
-	        de.saumya.mojo:jruby9-war-maven-plugin:jar
+	        de.saumya.mojo:jruby9-war-maven-plugin:war
 	      </package>
 	      <install>
 	        org.apache.maven.plugins:maven-install-plugin:install

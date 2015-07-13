@@ -10,7 +10,7 @@ describe 'something' do
 
   it 'runs from the jar' do
     __FILE__.must_equal 'test.rb'
-    Dir.pwd.must_equal 'uri:classloader://WEB-INF/classes/'
+    Dir.pwd.must_equal 'uri:classloader://'
   end
 
   it 'can use logger' do

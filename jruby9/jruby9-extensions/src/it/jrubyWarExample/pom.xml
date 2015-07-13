@@ -4,6 +4,7 @@
   <groupId>de.saumya.mojo.jruby9</groupId>
   <artifactId>test</artifactId>
   <version>testing</version>  
+  <packaging>jrubyWar</packaging>
   
   <repositories>
     <repository>
@@ -44,6 +45,13 @@
   </properties>
 
   <build>
+    <extensions>
+      <extension>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>jruby9-extensions</artifactId>
+        <version>@project.version@</version>
+      </extension>
+    </extensions>
     <resources>
       <resource>
         <directory>${basedir}</directory>
@@ -55,34 +63,13 @@
     </resources>
     <plugins>
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-	    <executions>
-	      <execution>
-            <id>default-jar</id>
-            <phase>omit</phase>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>jruby9-war-maven-plugin</artifactId>
         <version>@project.version@</version>
         <configuration>
           <jrubyVersion>${j.version}</jrubyVersion>
           <type>RUNNABLE</type>
-          <jrubyMainsVersion>0.3.1-SNAPSHOT</jrubyMainsVersion>
         </configuration>
-	    <executions>
-	      <execution>
-            <id>jruby-war</id>
-	        <goals>
-              <goal>generate</goal>
-              <goal>process</goal>
-              <goal>war</goal>
-            </goals>
-	      </execution>
-	    </executions>
         <dependencies>
           <dependency>
             <groupId>rubygems</groupId>
@@ -127,9 +114,9 @@
                   p Gem.dir
                   p $LOAD_PATH
                   p Gem::Specification.dirs
-                  p ENV["GEM_PATH"]
+                  ENV.each {|k,v| p "#{k} : #{v}" }
                   p JRuby.runtime.get_jruby_class_loader.parent.getURLs()
-                  p Dir[ "uri:classloader://WEB-INF/classes/specifications/*" ]
+                  p Dir[ "uri:classloader://specifications/*" ]
                   p JRUBY_VERSION
                   p $CLASSPATH.size
                   expected = 10

@@ -80,10 +80,10 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
     @Parameter( defaultValue = Versions.JRUBY, property = "jruby.version", required = true )
     private String jrubyVersion;
 
-    @Parameter( defaultValue = Versions.JRUBY_MAINS, property = "jruby-mains.version", required = true )
+    @Parameter( defaultValue = Versions.JRUBY_MAINS, property = "jruby.mains.version", required = true )
     private String jrubyMainsVersion;
 
-    @Parameter( defaultValue = Versions.JRUBY_RAKE, property = "jruby-rack.version", required = true )
+    @Parameter( defaultValue = Versions.JRUBY_RAKE, property = "jruby.rack.version", required = true )
     private String jrubyRackVersion;
 
     @Parameter( defaultValue = Versions.JETTY, property = "jetty.version", required = true )
@@ -120,6 +120,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
             archive.getManifest().setMainClass(mainClass);
             
             createAndAddWebResource(jrubyWarClasses, "");
+            createAndAddWebResource(new File(getProject().getBuild().getOutputDirectory(), "bin"), "bin");
         case ARCHIVE:
         default:
         }
@@ -132,7 +133,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         getProject().getArtifacts().clear();
 
         createAndAddWebResource(jrubyWarLib, "WEB-INF/lib");
-        
+
         if (defaultResource) {
             addCommonRackApplicationResources();
         }
@@ -197,7 +198,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         resource.addExclude("jetty.css");
         resource.addExclude("about.html");
         resource.addExclude("about_files/*");
-        resource.addExclude("META-INF/**/*");
+        resource.addExclude("META-INF/*/**/*");
         resource.addExclude("WEB-INF/**/*");
         resource.addExclude("**/web.xml");
         if (target != null) resource.setTargetPath(target);
