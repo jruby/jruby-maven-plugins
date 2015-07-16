@@ -7,7 +7,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import de.saumya.mojo.gem.AbstractGemMojo;
 import de.saumya.mojo.jruby9.JarDependencies.Filter;
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -29,7 +28,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @author christian
  *
  */
-public abstract class AbstractGenerateMojo extends AbstractGemMojo {
+public abstract class AbstractGenerateMojo extends AbstractJRuby9Mojo {
 
     @Override
     protected void executeWithGems() throws MojoExecutionException,

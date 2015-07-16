@@ -152,11 +152,15 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
     @Parameter( property="m2e.jruby.refresh" )
     protected List<String> eclipseRefresh = new ArrayList<String>(); 
     
+    protected String getDefaultJRubyVersion() {
+        return DEFAULT_JRUBY_VERSION;
+    }
+
     protected JRubyVersion getJrubyVersion()
     {
         if (jRubyVersion == null )
         {
-            this.jRubyVersion = new JRubyVersion( jrubyVersion == null ? DEFAULT_JRUBY_VERSION : jrubyVersion );
+            this.jRubyVersion = new JRubyVersion( jrubyVersion == null ? getDefaultJRubyVersion() : jrubyVersion );
         }
         return jRubyVersion;
     }
@@ -362,7 +366,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
             }
         }
         // finally fall back on the default version of jruby
-        return resolveJRubyCompleteArtifact(DEFAULT_JRUBY_VERSION);
+        return resolveJRubyCompleteArtifact(getDefaultJRubyVersion());
     }
 
     protected Artifact resolveJRubyStdlibArtifact(Artifact jruby) throws DependencyResolutionRequiredException,

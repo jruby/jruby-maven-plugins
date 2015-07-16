@@ -9,7 +9,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
-import de.saumya.mojo.gem.AbstractGemMojo;
+import de.saumya.mojo.jruby9.AbstractJRuby9Mojo;
 import de.saumya.mojo.jruby9.JarDependencies;
 import de.saumya.mojo.jruby9.JarDependencies.Filter;
 import de.saumya.mojo.ruby.script.Script;
@@ -24,7 +24,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  */
 @Mojo( name = "exec", requiresProject = true, threadSafe = true,
        requiresDependencyResolution = ResolutionScope.TEST )
-public class ExecMojo extends AbstractGemMojo {
+public class ExecMojo extends AbstractJRuby9Mojo {
 
     /**
      * ruby code from the pom configuration part which gets executed.
