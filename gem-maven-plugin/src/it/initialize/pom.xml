@@ -25,7 +25,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <root.dir>${basedir}/../../../../</root.dir>
+    <root.dir>${basedir}</root.dir>
     <gem.home>${root.dir}/target/rubygems</gem.home>
     <gem.path>${root.dir}/target/rubygems</gem.path>
   </properties>

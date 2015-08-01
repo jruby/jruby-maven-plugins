@@ -3,7 +3,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "Successfully installed compass-0.12.2";
+String expected = "Successfully installed compass-";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
@@ -13,8 +13,8 @@ if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
-//expected = "Nothing to compile.";
-//if ( !log.contains( expected ) )
-//{
-//    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-//}
+expected = "Compass can't find any Sass files to compile.";
+if ( !log.contains( expected ) )
+{
+    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}

@@ -11,7 +11,7 @@
     </pluginRepository>
   </pluginRepositories>
   <properties>
-    <root.dir>${basedir}/../../../../</root.dir>
+    <root.dir>${basedir}</root.dir>
     <gem.home>${root.dir}/target/rubygems</gem.home>
     <gem.path>${root.dir}/target/rubygems</gem.path>
   </properties>
@@ -28,7 +28,7 @@
             </goals>
             <phase>compile</phase>
             <configuration>
-              <execArgs>${project.build.directory}/target/rubygems/bin/compass compile ${basedir}/src/main/webapp/resources/sass</execArgs>
+              <execArgs>${project.build.directory}/rubygems/bin/compass compile ${basedir}/src/main/webapp/resources/sass</execArgs>
             </configuration>
           </execution>
         </executions>
@@ -36,7 +36,7 @@
           <dependency>
             <groupId>rubygems</groupId>
             <artifactId>compass</artifactId>
-            <version>0.12.2</version>
+            <version>1.0.3</version>
             <type>gem</type>
           </dependency>
         </dependencies>

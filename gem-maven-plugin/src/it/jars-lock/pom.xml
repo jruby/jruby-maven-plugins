@@ -38,7 +38,7 @@
       <plugin>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>gem-maven-plugin</artifactId>
-        <version>1.0.9-SNAPSHOT</version>
+        <version>@project.version@</version>
         <executions>
           <execution>
 	    <id>create</id>

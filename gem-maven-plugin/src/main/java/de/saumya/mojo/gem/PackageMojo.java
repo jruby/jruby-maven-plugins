@@ -25,7 +25,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
 /**
  * goal to convert that artifact into a gem or uses a given gemspec to build a gem.
  */
-@Mojo( name = "package", requiresDependencyResolution = ResolutionScope.TEST )
+@Mojo( name = "package", requiresDependencyResolution = ResolutionScope.TEST, requiresProject = false )
 public class PackageMojo extends AbstractGemMojo {
 
     @Parameter( defaultValue = "${project.build.directory}" )

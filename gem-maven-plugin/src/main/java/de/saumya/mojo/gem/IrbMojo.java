@@ -16,7 +16,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * DEPRECATED - DO NOT USE
  */
 @Deprecated
-@Mojo( name = "irb", requiresDependencyResolution = ResolutionScope.TEST )
+@Mojo( name = "irb", requiresDependencyResolution = ResolutionScope.TEST, requiresProject = false )
 public class IrbMojo extends AbstractGemMojo {
 
     /**
