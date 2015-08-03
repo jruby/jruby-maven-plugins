@@ -9,6 +9,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -19,66 +23,38 @@ import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * maven wrapper around the bundler install command.
- * 
- * @goal install
- * @phase initialize
- * @requiresDependencyResolution test
  */
+@Mojo(name = "install", defaultPhase = LifecyclePhase.INITIALIZE, requiresDependencyResolution = ResolutionScope.TEST)
 public class InstallMojo extends AbstractGemMojo {
 
     /**
      * arguments for the bundler command.
-     * 
-     * @parameter default-value="${bundler.args}"
      */
+    @Parameter(property = "bundler.args")
     private String            bundlerArgs;
 
-    /**
-     * @parameter default-value="${project.build.directory}/bin" expression="${bundler.binstubs}"
-     */
+    @Parameter(property = "bundler.binstubs", defaultValue = "${project.build.directory}/bin")
     private File binStubs;
 
-    /**
-     * @parameter default-value="jruby" expression="${bundler.binstubs.shebang}"
-     */
+    @Parameter( property = "bundler.binstubs.shebang", defaultValue = "jruby")
     private String sheBang;
-    
-    /**
-     * bundler version used when there is no pom. defaults to latest version.
-     * DEPRECATED: declare a gem dependency with the desired version instead
-     * 
-     * @parameter default-value="${bundler.version}"
-     */
-    @Deprecated
-    private String            bundlerVersion;
-
-    /**
-     * @parameter default-value="${repositorySystemSession}"
-     * @readonly
-     */
-    private Object repoSession;
 
     /**
      * The classpath elements of the project being tested.
-     * 
-     * @parameter expression="${project.testClasspathElements}"
-     * @required
-     * @readonly
      */
+    @Parameter(defaultValue = "${project.testClasspathElements", required = true, readonly = true)
     protected List<String>          classpathElements;
     
     /** 
      * Determine if --local should used.
-     * 
-     * @parameter expression="${bundler.local}" default-value="true"
      */
+    @Parameter(property = "bundler.local", defaultValue = "true")
     protected boolean local;
 
     /** 
      * Determine if --quiet should used.
-     * 
-     * @parameter expression="${bundler.quiet}" default-value="true"
      */
+    @Parameter( property = "bundler.quiet", defaultValue = "true")
     protected boolean quiet;
 
     
@@ -147,23 +123,12 @@ public class InstallMojo extends AbstractGemMojo {
         }
         final Script script = this.factory.newScriptFromSearchPath("bundle");
         script.addArg("install");
-        if (this.project.getBasedir() == null) {
-
-            this.gemsInstaller.installGem("bundler",
-                                          this.bundlerVersion,
-                                          this.repoSession,
-                                          this.localRepository,
-                                          getRemoteRepos());
-
-        }
-        else {
             if ( this.quiet ) {
                 script.addArg("--quiet");
             }
             if ( this.local ) {
                 script.addArg("--local");
             }
-        }
         if (this.bundlerArgs != null) {
             script.addArgs(this.bundlerArgs);
         }

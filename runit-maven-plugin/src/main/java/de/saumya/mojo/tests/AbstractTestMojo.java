@@ -17,82 +17,52 @@ import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
 import de.saumya.mojo.ruby.script.ScriptFactory;
 import de.saumya.mojo.tests.JRubyRun.Result;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * maven wrapper around some test command.
- *
- * @phase test
- * @requiresDependencyResolution test
  */
 public abstract class AbstractTestMojo extends AbstractGemMojo {
 
     /**
-     * @parameter expression="${project.build.directory}/surefire-reports"
      */
+    @Parameter( defaultValue = "${project.build.directory}/surefire-reports")
     protected File testReportDirectory;
 
     /**
      * skip all tests
-     * <br/>
-     * Command line -DskipTests=...
-     * @parameter expression="${skipTests}" default-value="false"
      */
+    @Parameter( property = "skipTests", defaultValue = "false")
     protected boolean skipTests;
 
     /**
      * skip all tests
-     * <br/>
-     * Command line -Dmaven.test.skip=...
-     * @parameter expression="${maven.test.skip}" default-value="false"
      */
+    @Parameter(property = "maven.test.skip", defaultValue = "false")
     protected boolean skip;
 
     /**
-     * run tests for both ruby 1.8 and 1.9
-     * <br/>
-     * Command line -Djruby.18and19=...
-     * @deprecated
-     *
-     * @parameter expression="${jruby.18and19}"
+     * run tests with list of ruby modes 1.8, 1.9, 2.0, 2.2
      */
-    protected Boolean use18and19;
-
-
-    /**
-     * run tests with list of ruby modes 1.8, 1.9, 2.0 
-     * <br/>
-     * Command line -Djruby.modes=1.9,2.0
-     *
-     * @parameter expression="${jruby.modes}"
-     */
+    @Parameter(property = "jruby.modes")
     protected String modes;
 
     /**
      * run tests with a several versions of jruby
-     * <br/>
-     * Command line -Djruby.versions=...
-     *
-     * @parameter expression="${jruby.versions}"
      */
+    @Parameter( property = "jruby.versions")
     protected String versions;
 
     /**
      * The name of the summary (xml-)report which can be used by TeamCity and Co.
-     *
-     * @parameter
      */
+    @Parameter
     protected File summaryReport;
 
     private Mode[] calculateModes( Mode defaultMode )
     {
         List<Mode> result = new ArrayList<Mode>();
-        if( use18and19 != null && use18and19 == true )
-        {
-            getLog().warn( "use18and19 is deprecated - use modes instead" );
-            result.add( Mode._18 );
-            result.add( Mode._19 );
-        }
-        else if (jrubySwitches != null )
+        if (jrubySwitches != null )
         {
             for ( Mode m: Mode.values() )
             {
@@ -193,7 +163,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
             }
         }
 
-        boolean hasOverview = this.versions != null || modes != null || (use18and19 != null && use18and19);
+        boolean hasOverview = this.versions != null || modes != null;
         if(hasOverview){
             getLog().info("");
             getLog().info("\tOverall Summary");

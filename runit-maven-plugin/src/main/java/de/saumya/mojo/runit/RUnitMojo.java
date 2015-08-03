@@ -15,13 +15,15 @@ import de.saumya.mojo.tests.AbstractTestMojo;
 import de.saumya.mojo.tests.JRubyRun.Result;
 import de.saumya.mojo.tests.TestResultManager;
 import de.saumya.mojo.tests.TestScriptFactory;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * maven wrapper around the runit/testcase command.
- *
- * @goal test
- * @phase test
  */
+@Mojo( name = "test", defaultPhase = LifecyclePhase.TEST, requiresDependencyResolution = ResolutionScope.TEST)
 public class RUnitMojo extends AbstractTestMojo {
 
     enum ResultEnum {
@@ -29,27 +31,21 @@ public class RUnitMojo extends AbstractTestMojo {
     }
 
     /**
-     * runit directory with glob to be used for the ruby unit command. <br/>
-     * Command line -Drunit.dir=...
-     *
-     * @parameter expression="${runit.dir}" default-value="test/**\/*_test.rb"
+     * runit directory with glob to be used for the ruby unit command.
      */
+    @Parameter(property = "runit.dir", defaultValue = "test/**/*_test.rb")
     private final String runitDirectory = null;
 
     /**
-     * arguments for the runit command. <br/>
-     * Command line -Drunit.args=...
-     *
-     * @parameter expression="${runit.args}"
+     * arguments for the runit command.
      */
+    @Parameter(property = "runit.args" )
     private final String runitArgs = null;
 
     /**
-     * skip the ruby unit tests <br/>
-     * Command line -DskipRunit=...
-     *
-     * @parameter expression="${skipRunit}" default-value="false"
+     * skip the ruby unit tests
      */
+    @Parameter(property = "skipRunit", defaultValue = "false")
     protected boolean skipRunit;
 
     private TestResultManager resultManager;

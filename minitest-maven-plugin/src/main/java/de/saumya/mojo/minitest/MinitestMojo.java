@@ -15,37 +15,32 @@ import de.saumya.mojo.tests.AbstractTestMojo;
 import de.saumya.mojo.tests.JRubyRun.Result;
 import de.saumya.mojo.tests.TestResultManager;
 import de.saumya.mojo.tests.TestScriptFactory;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * maven wrapper around minitest.
- *
- * @goal test
- * @phase test
  */
+@Mojo( name = "test", defaultPhase = LifecyclePhase.TEST)
 public class MinitestMojo extends AbstractTestMojo {
 
     /**
-     * minitest directory with glob to speficy the test files. <br/>
-     * Command line -Dminitest.dir=...
-     *
-     * @parameter expression="${minitest.dir}" default-value="test/**\/*_test.rb"
+     * minitest directory with glob to speficy the test files.
      */
+    @Parameter( property = "minitest.dir", defaultValue = "test/**/*_test.rb" )
     private final String minitestDirectory = null;
 
     /**
-     * arguments for the minitest command. <br/>
-     * Command line -Drunit.args=...
-     *
-     * @parameter expression="${minitest.args}"
+     * arguments for the minitest command.
      */
+    @Parameter( property = "minitest.args" )
     private final String minitestArgs = null;
 
     /**
-     * skip the minitests <br/>
-     * Command line -DskipMinitests=...
-     *
-     * @parameter expression="${skipMinitests}" default-value="false"
+     * skip the minitests
      */
+    @Parameter( property = "skipMinitests", defaultValue = "false" )
     protected boolean skipMinitests;
     
     private TestResultManager resultManager;

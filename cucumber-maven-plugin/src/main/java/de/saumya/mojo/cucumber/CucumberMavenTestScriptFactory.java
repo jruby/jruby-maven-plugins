@@ -43,15 +43,6 @@ public class CucumberMavenTestScriptFactory extends AbstractMavenTestScriptFacto
 
     @Override
     protected void getResultsScript(StringBuilder builder) {
-//        builder.append("# A little exit code magic\n");
-//        builder.append("\n");
-//
-//        builder.append("if File.new(cucumber_summary).read =~ /, 0 failures/ \n");
-//        builder.append("  exit 0\n" );
-//        builder.append("else\n");
-//        builder.append("  exit 1\n" );
-//        builder.append("end\n");
-//        builder.append("\n");
     }
 
     @Override

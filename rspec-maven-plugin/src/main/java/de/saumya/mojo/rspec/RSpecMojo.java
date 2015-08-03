@@ -7,6 +7,10 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -20,43 +24,33 @@ import de.saumya.mojo.tests.TestScriptFactory;
 
 /**
  * executes the jruby command.
- * 
- * @goal test
- * @phase test
- * @requiresDependencyResolution test
  */
+@Mojo(name ="test", defaultPhase = LifecyclePhase.TEST, requiresDependencyResolution = ResolutionScope.TEST)
 public class RSpecMojo extends AbstractTestMojo {
 
     /**
-     * arguments for the rspec command. <br/>
-     * Command line -Drspec.args=...
-     *
-     * @parameter expression="${rspec.args}"
+     * arguments for the rspec command.
      */
+    @Parameter( property = "rspec.args")
     private final String rspecArgs = null;
 
 
     /**
-     * The directory containing the RSpec source files<br/>
-     * Command line -Drspec.dir=...
-     *
-     * @parameter expression="${rspec.dir}" default-value="spec"
+     * The directory containing the RSpec source files
      */
+    @Parameter(property = "rpsec.dir", defaultValue = "spec")
     protected String                specSourceDirectory;
 
     /**
-     * skip rspecs <br/>
-     * Command line -DskipSpecs=...
-     *
-     * @parameter expression="${skipSpecs}" default-value="false"
+     * skip rspecs
      */
+    @Parameter(property = "skipSpecs", defaultValue = "false")
     protected boolean skipSpecs;
 
     /**
      * The name of the RSpec report.
-     * 
-     * @parameter default-value="rspec-report.html"
      */
+    @Parameter(defaultValue = "rspec-report.html")
     private String                reportName;
 
     private File outputfile;
