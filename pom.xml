@@ -106,7 +106,6 @@
     <module>jruby-maven-plugin</module>
     <module>gem-maven-plugin</module>
     <module>rspec-maven-plugin</module>
-    <module>rails3-maven-plugin</module>
     <module>cucumber-maven-plugin</module>
     <module>gem-assembly-descriptors</module>
     <module>ruby-tools</module>

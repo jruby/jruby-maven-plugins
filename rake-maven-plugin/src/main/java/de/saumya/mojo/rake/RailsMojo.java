@@ -15,7 +15,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * @goal rails
  * @requiresDependencyResolution test
  */
-public class RailsMojo  extends AbstractGemMojo {
+public class ailsMojo  extends AbstractGemMojo {
 
     /**
      * arguments for the generate command
