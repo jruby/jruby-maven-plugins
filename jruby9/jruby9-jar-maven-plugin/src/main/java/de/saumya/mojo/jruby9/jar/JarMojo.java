@@ -41,7 +41,7 @@ import de.saumya.mojo.jruby9.Versions;
        requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
 
-    @Parameter( defaultValue = "de.saumya.mojo.mains.JarMain", required = true )
+    @Parameter( defaultValue = "org.jruby.mains.JarMain", required = true )
     private String mainClass;
 
     @Parameter( defaultValue = Versions.JRUBY, property = "jruby.version", required = true )
@@ -69,7 +69,7 @@ public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
         File output = new File( getProject().getBuild().getOutputDirectory());
                 
         helper.unzip(output, "org.jruby", "jruby-complete", jrubyVersion);
-        helper.unzip(output, "de.saumya.mojo", "jruby-mains", jrubyMainsVersion);
+        helper.unzip(output, "org.jruby.mains", "jruby-mains", jrubyMainsVersion);
        
         super.execute();
     }

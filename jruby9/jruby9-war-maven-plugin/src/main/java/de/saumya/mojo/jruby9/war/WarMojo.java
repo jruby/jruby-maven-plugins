@@ -83,7 +83,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
     @Parameter( defaultValue = Versions.JRUBY_MAINS, property = "jruby.mains.version", required = true )
     private String jrubyMainsVersion;
 
-    @Parameter( defaultValue = Versions.JRUBY_RAKE, property = "jruby.rack.version", required = true )
+    @Parameter( defaultValue = Versions.JRUBY_RACK, property = "jruby.rack.version", required = true )
     private String jrubyRackVersion;
 
     @Parameter( defaultValue = Versions.JETTY, property = "jetty.version", required = true )
@@ -111,10 +111,10 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         case JETTY:
             helper.unzip(jrubyWarClasses, "org.eclipse.jetty", "jetty-server", jettyVersion);
             helper.unzip(jrubyWarClasses, "org.eclipse.jetty", "jetty-webapp", jettyVersion);
-            if (mainClass == null ) mainClass = "de.saumya.mojo.mains.JettyRunMain";
+            if (mainClass == null ) mainClass = "org.jruby.mains.JettyRunMain";
         case RUNNABLE:
-            helper.unzip(jrubyWarClasses, "de.saumya.mojo", "jruby-mains", jrubyMainsVersion);
-            if (mainClass == null ) mainClass = "de.saumya.mojo.mains.WarMain";
+            helper.unzip(jrubyWarClasses, "org.jruby.mains", "jruby-mains", jrubyMainsVersion);
+            if (mainClass == null ) mainClass = "org.jruby.mains.WarMain";
             
             MavenArchiveConfiguration archive = getArchive();
             archive.getManifest().setMainClass(mainClass);
