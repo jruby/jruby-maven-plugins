@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -128,8 +129,9 @@ public class JarsLockMojo extends AbstractMojo {
         }
     }
 
-    private Set<Artifact> getArtifacts() {
-        Set<Artifact> artifacts = project.getArtifacts();
+    private List<Artifact> getArtifacts() {
+        List<Artifact> artifacts = project.getRuntimeArtifacts();
+        artifacts.addAll(project.getSystemArtifacts());
         for (String gem : gems) {
             if (!gem.endsWith(":"))
                 gem += ":";
@@ -192,7 +194,7 @@ public class JarsLockMojo extends AbstractMojo {
         return text;
     }
 
-    private List<String> toLines(Set<Artifact> artifacts) {
+    private List<String> toLines(Collection<Artifact> artifacts) {
         List<String> lines = new LinkedList<String>();
         for (Artifact a : artifacts) {
             String line = toLine(a);
