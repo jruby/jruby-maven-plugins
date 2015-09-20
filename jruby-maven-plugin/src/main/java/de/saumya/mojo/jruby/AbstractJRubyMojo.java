@@ -40,7 +40,7 @@ public abstract class AbstractJRubyMojo extends AbstractMojo {
 
     protected static final String JRUBY_STDLIB = "jruby-stdlib";
 
-    protected static final String DEFAULT_JRUBY_VERSION = "1.7.20";
+    protected static final String DEFAULT_JRUBY_VERSION = "1.7.22";
 
 
     /**

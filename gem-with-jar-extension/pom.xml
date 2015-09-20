@@ -9,7 +9,7 @@
   </parent>
   <artifactId>gem-with-jar-extension</artifactId>
   <packaging>jar</packaging>
-  <name>Gem Maven Extension</name>
+  <name>Gem with Jar Maven Extension</name>
   <build>
     <pluginManagement>
       <plugins>

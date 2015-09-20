@@ -32,7 +32,6 @@
       <id>mkristian</id>
       <name>Christian Meier</name>
       <email>m.kristian@web.de</email>
-      <timezone>IST</timezone>
     </developer>
   </developers>
   <dependencies>
@@ -102,7 +101,7 @@
   <modules>
     <module>parent-mojo</module>
     <module>gem-parent-mojo</module>
-    <module>tests-parent-mojo</module>
+    <module>test-base-plugin</module>
     <module>jruby-maven-plugin</module>
     <module>gem-maven-plugin</module>
     <module>rspec-maven-plugin</module>

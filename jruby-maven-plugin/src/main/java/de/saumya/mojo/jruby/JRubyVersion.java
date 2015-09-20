@@ -80,8 +80,8 @@ public class JRubyVersion
             return this.major == 1 && this.minor > 6;
         case _22:
             return this.major > 1;
-         default:
-             throw new RuntimeException( "BUG" );
+        default:
+            return false;
         }
     }
 

@@ -66,7 +66,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         {
             for ( Mode m: Mode.values() )
             {
-                if ( jrubySwitches.contains( m.flag ) )
+                if ( jrubySwitches.contains( m.flag ) && ! m.flag.equals( "" ) )
                 {
                     result.add( m );
                 }

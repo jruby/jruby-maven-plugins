@@ -12,56 +12,9 @@
   <name>Tests Mojo Parent</name>
   <dependencies>
     <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.4</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>${project.parent.groupId}</groupId>
-      <artifactId>runit-maven-plugin</artifactId>
+      <artifactId>test-base-plugin</artifactId>
       <version>${project.parent.version}</version>
-      <type>maven-plugin</type>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-         <artifactId>maven-dependency-plugin</artifactId>
-         <executions>     
-	   <execution>
-	     <id>src-dependencies</id>
-	     <phase>generate-sources</phase>
-	     <goals>
-	       <goal>unpack-dependencies</goal>
-	     </goals>
-	     <configuration>
-	       <includeGroupIds>de.saumya.mojo</includeGroupIds>
-	       <includeArtifactIds>
-		 jruby-maven-plugin,gem-maven-plugin,runit-maven-plugin
-	       </includeArtifactIds>
-	       <includes>
-		 de/saumya/mojo/jruby/AbstractJRubyMojo.java,
-		 de/saumya/mojo/gem/AbstractGemMojo.java,
-		 de/saumya/mojo/tests/AbstractTestMojo.java
-	       </includes>
-	       <classifier>sources</classifier>
-	       <outputDirectory>${project.build.directory}/sources</outputDirectory>
-	     </configuration>
-	   </execution>
-         </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <excludes>
-	    <exclude>de/saumya/mojo/jruby/**</exclude>
-	    <exclude>de/saumya/mojo/gem/**</exclude>
-	    <exclude>de/saumya/mojo/tests/**</exclude>
-	  </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
