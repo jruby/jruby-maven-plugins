@@ -18,11 +18,12 @@ import de.saumya.mojo.tests.TestScriptFactory;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * maven wrapper around minitest.
  */
-@Mojo( name = "test", defaultPhase = LifecyclePhase.TEST)
+@Mojo( name = "test", defaultPhase = LifecyclePhase.TEST, requiresDependencyResolution = ResolutionScope.TEST)
 public class MinitestMojo extends AbstractTestMojo {
 
     /**

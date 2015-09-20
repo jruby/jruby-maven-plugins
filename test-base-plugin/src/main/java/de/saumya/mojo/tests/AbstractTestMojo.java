@@ -126,6 +126,7 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
         {
             for( JRubyVersion version : versions )
             {
+                if ( this.modes == null ) modes = calculateModes( version.defaultMode() );
                 runs.add( new JRubyRun( version, modes ) );
             }
         }
@@ -211,8 +212,8 @@ public abstract class AbstractTestMojo extends AbstractGemMojo {
             JRubyVersion version = null;
             getLog().info("");
             if ( !run.isDefaultModeOnly ) {
-                factory.addSwitch(mode.flag);
-                getLog().info("\trun with jruby " + run.version + " in mode " + mode);
+                if ( ! mode.flag.equals("") ) factory.addSwitch(mode.flag);
+                getLog().info("\trun with jruby " + run.version + (mode.flag.equals("") ? "" : ( " in mode " + mode ) ) );
                 version = run.version;
             }
             else {

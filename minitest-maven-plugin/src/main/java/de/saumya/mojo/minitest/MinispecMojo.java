@@ -18,17 +18,18 @@ import de.saumya.mojo.tests.TestScriptFactory;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * maven wrapper around minispec.
  */
-@Mojo( name = "spec", defaultPhase = LifecyclePhase.TEST)
+@Mojo( name = "spec", defaultPhase = LifecyclePhase.TEST, requiresDependencyResolution = ResolutionScope.TEST)
 public class MinispecMojo extends AbstractTestMojo {
 
     /**
      * minispec directory with glob to speficy the test files.
      */
-    @Parameter( property = "minipec.dir", defaultValue = "test/**/*_spec.rb" )
+    @Parameter( property = "minipec.dir", defaultValue = "spec/**/*_spec.rb" )
     private String minispecDirectory = null;
 
     /**

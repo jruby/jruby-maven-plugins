@@ -47,7 +47,7 @@ public class TestResultManager {
                 int i = 0;
                 String statusLine = line.replaceAll("[a-z]+,?", "");
                 for (String n : statusLine.split("\\s+")) {
-                    vector[i++] = Integer.parseInt(n);
+                    if (i < vector.length) vector[i++] = Integer.parseInt(n);
                 }
                 result.success = (vector[ResultEnum.FAILURES.ordinal()] == 0)
                         && (vector[ResultEnum.ERRORS.ordinal()] == 0);
