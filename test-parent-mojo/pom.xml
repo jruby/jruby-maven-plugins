@@ -7,9 +7,9 @@
     <version>1.1.0-SNAPSHOT</version>
     <relativePath>../gem-parent-mojo/pom.xml</relativePath>
   </parent>
-  <artifactId>tests-parent-mojo</artifactId>
+  <artifactId>test-parent-mojo</artifactId>
   <packaging>pom</packaging>
-  <name>Tests Mojo Parent</name>
+  <name>Test Mojo Parent</name>
   <dependencies>
     <dependency>
       <groupId>${project.parent.groupId}</groupId>

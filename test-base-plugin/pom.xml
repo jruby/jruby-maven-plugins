@@ -8,5 +8,5 @@
     <relativePath>../gem-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>test-base-plugin</artifactId>
-  <name>Tests Mojo Parent</name>
+  <name>Test Base Plugin</name>
 </project>
