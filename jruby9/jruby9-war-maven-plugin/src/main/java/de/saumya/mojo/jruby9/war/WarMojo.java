@@ -66,15 +66,15 @@ import de.saumya.mojo.jruby9.Versions;
 requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
 
-    enum Type { ARCHIVE, RUNNABLE, JETTY }
+    enum Type { archive, runnable, jetty }
 
-    @Parameter( defaultValue = "ARCHIVE", required = true )
+    @Parameter( defaultValue = "archive", required = true )
     private Type type;
 
     @Parameter( required = false )
     private String mainClass;
 
-    @Parameter( required = false, defaultValue = "true" )
+    @Parameter( required = false, defaultValue = "false" )
     private boolean defaultResource;
 
     @Parameter( defaultValue = Versions.JRUBY, property = "jruby.version", required = true )
@@ -105,14 +105,15 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         File jrubyWar = new File(getProject().getBuild().getDirectory(), "jrubyWar");
         File jrubyWarLib = new File(jrubyWar, "lib");
         File webXml = new File(jrubyWar, "web.xml");
+        File initRb = new File(jrubyWar, "init.rb");
         File jrubyWarClasses = new File(jrubyWar, "classes");
         
         switch(type) {
-        case JETTY:
+        case jetty:
             helper.unzip(jrubyWarClasses, "org.eclipse.jetty", "jetty-server", jettyVersion);
             helper.unzip(jrubyWarClasses, "org.eclipse.jetty", "jetty-webapp", jettyVersion);
             if (mainClass == null ) mainClass = "org.jruby.mains.JettyRunMain";
-        case RUNNABLE:
+        case runnable:
             helper.unzip(jrubyWarClasses, "org.jruby.mains", "jruby-mains", jrubyMainsVersion);
             if (mainClass == null ) mainClass = "org.jruby.mains.WarMain";
             
@@ -121,7 +122,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
             
             createAndAddWebResource(jrubyWarClasses, "");
             createAndAddWebResource(new File(getProject().getBuild().getOutputDirectory(), "bin"), "bin");
-        case ARCHIVE:
+        case archive:
         default:
         }
         
@@ -141,6 +142,9 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         if (getWebXml() == null) {
             findWebXmlOrUseBuiltin(webXml);
         }
+
+        copyPluginResource(initRb);
+
         super.execute();
     }
 
@@ -148,7 +152,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         Resource resource = new Resource();
         resource.setDirectory(getProject().getBasedir().getAbsolutePath());
         resource.addInclude("config.ru");
-        addResource(resource);
+        getProject().addResource(resource);
         createAndAddResource(new File(getProject().getBasedir(), "lib"));
         createAndAddResource(new File(getProject().getBasedir(), "app"));
         createAndAddResource(new File(getProject().getBasedir(), "public"));
@@ -158,12 +162,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
     private void findWebXmlOrUseBuiltin(File webXml)
             throws MojoExecutionException {
         // TODO search web.xml
-        try {
-            IOUtil.copy(getClass().getClassLoader().getResourceAsStream("web.xml"),
-                    new FileOutputStream(webXml));
-        } catch (IOException e) {
-            throw new MojoExecutionException("could copy web.xml", e);
-        }
+        copyPluginResource(webXml);
         if (getLog().isInfoEnabled()) {
             getLog().info("using builtin web.xml: " +
                     webXml.toString().replace(getProject().getBasedir().getAbsolutePath() + File.separatorChar, ""));
@@ -171,15 +170,25 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         setWebXml(webXml);
     }
 
+    private void copyPluginResource(File file) throws MojoExecutionException {
+        String name = file.getName();
+        try {
+            IOUtil.copy(getClass().getClassLoader().getResourceAsStream(name),
+                    new FileOutputStream(file));
+        } catch (IOException e) {
+            throw new MojoExecutionException("could not copy from plugin: " + name, e);
+        }
+    }
+
     private void createAndAddResource(File source){
         getProject().addResource(createResource(source.getAbsolutePath(), null));
     }
 
     private void createAndAddWebResource(File source, String target){
-        addResource(createResource(source.getAbsolutePath(), target));
+        addWebResource(createResource(source.getAbsolutePath(), target));
     }
 
-    private void addResource(Resource resource) {
+    private void addWebResource(Resource resource) {
         Resource[] webResources = getWebResources();
         if (webResources == null) {
             webResources = new Resource[1];
@@ -194,12 +203,14 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
     protected Resource createResource(String source, String target) {
         Resource resource = new Resource();
         resource.setDirectory(source);
-        resource.addInclude("**/*");
-        resource.addExclude("jetty.css");
+        resource.addExclude("jetty*.css");
+        resource.addExclude("plugin.properties");
         resource.addExclude("about.html");
-        resource.addExclude("about_files/*");
-        resource.addExclude("META-INF/*/**/*");
-        resource.addExclude("WEB-INF/**/*");
+        resource.addExclude("about_files/**");
+        resource.addExclude("META-INF/ECLIPSE*");
+        resource.addExclude("META-INF/eclipse*");
+        resource.addExclude("META-INF/maven/**");
+        resource.addExclude("WEB-INF/**");
         resource.addExclude("**/web.xml");
         if (target != null) resource.setTargetPath(target);
         return resource;
