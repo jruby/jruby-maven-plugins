@@ -65,6 +65,7 @@ public abstract class AbstractGenerateMojo extends AbstractJRuby9Mojo {
         resource.addExclude("gems/*/spec/**");
         resource.addExclude("gems/*/specs/**");
         resource.addExclude("gems/*/features/**");
+        resource.addExclude("gems/**/*.java");
         return resource;
     }
 
