@@ -8,33 +8,40 @@ if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
-//expected = "Successfully installed axiom-types-0.1.1";
-//if ( !log.contains( expected ) )
-//{
-//    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-//}
-//expected = "Successfully installed coercible-1.0.0";
-//if ( !log.contains( expected ) )
-//{
-//    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-//}
-//expected = "Successfully installed descendants_tracker-0.0.4";
-//if ( !log.contains( expected ) )
-//{
-//    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-//}
-//expected = "Successfully installed ice_nine-0.11.0";
-//if ( !log.contains( expected ) )
-//{
-//    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-//}
-//expected = "Successfully installed thread_safe-0.3.4-java";
-//if ( !log.contains( expected ) )
-//{
-//    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-//}
-//expected = "Successfully installed virtus-1.0.2";
-//if ( !log.contains( expected ) )
-//{
-//    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-//}
+expected = "Successfully installed axiom-types-0.1.1";
+if ( !log.contains( expected ) )
+{
+    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+expected = "Successfully installed coercible-1.0.0";
+if ( !log.contains( expected ) )
+{
+   throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+expected = "Successfully installed descendants_tracker-0.0.4";
+if ( !log.contains( expected ) )
+{
+   throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+expected = "Successfully installed ice_nine-0.11.0";
+if ( !log.contains( expected ) )
+{
+   throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+expected = "Successfully installed thread_safe-0.3.4-java";
+if ( !log.contains( expected ) )
+{
+   throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+expected = "Successfully installed virtus-1.0.2";
+if ( !log.contains( expected ) )
+{
+   throw new RuntimeException( "log file does not contain '" + expected + "'" );
+}
+
+String lock = FileUtils.fileRead( new File( basedir, "Jars.lock" ) );
+expected = "io.dropwizard.metrics:metrics-core";
+if ( !lock.contains( expected ) )
+{
+    throw new RuntimeException( "Jars.lock file does not contain '" + expected + "'" );
+}

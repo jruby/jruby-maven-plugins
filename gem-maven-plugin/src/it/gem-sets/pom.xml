@@ -14,12 +14,6 @@
     </repository>
   </repositories>
 
-  <properties>
-    <root.dir>${basedir}/../../../../</root.dir>
-    <gem.home>${root.dir}/target/rubygems</gem.home>
-    <gem.path>${root.dir}/target/rubygems</gem.path>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -37,6 +31,7 @@
 	<version>@project.version@</version>
 	<executions>
 	  <execution>
+            <id>test gems</id>
 	    <goals>
 	      <goal>sets</goal>
 	    </goals>
@@ -53,6 +48,22 @@
 	      </gems>
 	    </configuration>
 	  </execution>
+	  <execution>
+            <id>compile gems</id>
+	    <goals>
+	      <goal>sets</goal>
+	    </goals>
+	    <configuration>
+	      <scope>compile</scope>
+	      <gems>
+		<leafy-metrics>0.6.2</leafy-metrics>
+	      </gems>
+	    </configuration>
+	  </execution>
+          <!--execution>
+	    <id>Jars.lock</id>
+            <goals><goal>jars-lock</goal></goals>
+          </execution-->
 	</executions>
       </plugin>
     </plugins>

@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -48,8 +49,8 @@ public class SetsMojo extends AbstractGemMojo {
 
     protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, GemException {
-        List<Artifact> gems = new LinkedList<Artifact>();
-        Set<Artifact> jars = new LinkedHashSet<Artifact>();
+        Set<Artifact> gems = new TreeSet<Artifact>();
+        Set<Artifact> jars = new TreeSet<Artifact>();
         for( Map.Entry<String, String> gem : this.gems.entrySet() ) {
             Set<Artifact> set = manager.resolve( manager.createGemArtifact( gem.getKey(),
                                                                             gem.getValue() ),
@@ -71,10 +72,13 @@ public class SetsMojo extends AbstractGemMojo {
         resolveJarDepedencies(jars);
 
         installGems(gems);
+
+        // set all those artifact as resolved
+        gems.addAll(jars);
+        project.setResolvedArtifacts(gems);
     }
 
-    private void installGems(List<Artifact> gems) throws IOException, ScriptException, GemException {
-        project.getArtifacts().addAll(gems);
+    private void installGems(Set<Artifact> gems) throws IOException, ScriptException, GemException {
         File home = gemsConfig.getGemHome();
         // use gemHome as base for other gems installation directories
         String base = this.gemsConfig.getGemHome() != null ?
@@ -94,10 +98,9 @@ public class SetsMojo extends AbstractGemMojo {
             this.gemsConfig.setGemHome(gemHome);
             this.gemsConfig.addGemPath(gemHome);
 
-            getLog().info( "installing gem sets for " + scope + " scope into " +
-                           gemHome.getAbsolutePath().replace(project.getBasedir().getAbsolutePath() + File.separatorChar, "") );
-            gemsInstaller.installGems( project, gems, null, (List<ArtifactRepository>) null);
-
+            getLog().info("installing gem sets for " + scope + " scope into " +
+                    gemHome.getAbsolutePath().replace(project.getBasedir().getAbsolutePath() + File.separatorChar, ""));
+            gemsInstaller.installGems(project, gems, null, (List<ArtifactRepository>) null);
         }
         finally
         {
@@ -134,6 +137,5 @@ public class SetsMojo extends AbstractGemMojo {
         for( Artifact artifact : resolvedArtifacts ){
             artifact.setScope(scope);
         }
-        project.setResolvedArtifacts(resolvedArtifacts);
     }
 }
