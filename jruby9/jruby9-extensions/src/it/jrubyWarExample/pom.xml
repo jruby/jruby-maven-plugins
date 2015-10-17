@@ -68,7 +68,7 @@
         <version>@project.version@</version>
         <configuration>
           <jrubyVersion>${j.version}</jrubyVersion>
-          <type>RUNNABLE</type>
+          <type>runnable</type>
         </configuration>
         <dependencies>
           <dependency>

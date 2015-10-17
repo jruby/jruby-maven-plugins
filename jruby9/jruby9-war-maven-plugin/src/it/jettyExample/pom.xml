@@ -75,7 +75,7 @@
         <artifactId>jruby9-war-maven-plugin</artifactId>
         <version>@project.version@</version>
         <configuration>
-          <type>JETTY</type>
+          <type>jetty</type>
         </configuration>
 	    <executions>
 	      <execution>
