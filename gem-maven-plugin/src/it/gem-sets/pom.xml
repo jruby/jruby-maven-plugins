@@ -60,10 +60,10 @@
 	      </gems>
 	    </configuration>
 	  </execution>
-          <!--execution>
+          <execution>
 	    <id>Jars.lock</id>
             <goals><goal>jars-lock</goal></goals>
-          </execution-->
+          </execution>
 	</executions>
       </plugin>
     </plugins>
