@@ -68,7 +68,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
 
     enum Type { archive, runnable, jetty }
 
-    @Parameter( defaultValue = "archive", required = true )
+    @Parameter( defaultValue = "archive", property = "jruby.war.type", required = true )
     private Type type;
 
     @Parameter( required = false )
@@ -135,6 +135,13 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
 
         createAndAddWebResource(jrubyWarLib, "WEB-INF/lib");
 
+        copyPluginResource(initRb);
+        Resource resource = new Resource();
+        resource.setDirectory(initRb.getParent());
+        resource.addInclude(initRb.getName());
+        resource.setTargetPath("META-INF");
+        addWebResource(resource);
+
         if (defaultResource) {
             addCommonRackApplicationResources();
         }
@@ -142,8 +149,6 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         if (getWebXml() == null) {
             findWebXmlOrUseBuiltin(webXml);
         }
-
-        copyPluginResource(initRb);
 
         super.execute();
     }
