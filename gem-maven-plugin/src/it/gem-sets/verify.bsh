@@ -45,3 +45,25 @@ if ( !lock.contains( expected ) )
 {
     throw new RuntimeException( "Jars.lock file does not contain '" + expected + "'" );
 }
+expected = "io.dropwizard.metrics:metrics-graphite";
+if ( !lock.contains( expected ) )
+{
+    throw new RuntimeException( "Jars.lock file does not contain '" + expected + "'" );
+}
+expected = "io.dropwizard.metrics:metrics-jvm";
+if ( !lock.contains( expected ) )
+{
+    throw new RuntimeException( "Jars.lock file does not contain '" + expected + "'" );
+}
+expected = "org.slf4j:slf4j-api";
+if ( !lock.contains( expected ) )
+{
+    throw new RuntimeException( "Jars.lock file does not contain '" + expected + "'" );
+}
+String unexpected = "org.slf4j:slf4j-simple";
+if ( lock.contains( unexpected ) )
+{
+    throw new RuntimeException( "Jars.lock file contains unexpected '" + unexpected + "'" );
+}
+
+

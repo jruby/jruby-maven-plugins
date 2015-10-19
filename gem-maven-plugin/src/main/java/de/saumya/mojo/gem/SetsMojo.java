@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelReader;
@@ -73,9 +74,14 @@ public class SetsMojo extends AbstractGemMojo {
 
         installGems(gems);
 
-        // set all those artifact as resolved
-        gems.addAll(jars);
-        project.setResolvedArtifacts(gems);
+        Set<Artifact> resolved = (Set<Artifact>) project.getContextValue("jruby.resolved.artifacts");
+        if (resolved == null) {
+            resolved = new LinkedHashSet<Artifact>();
+            project.setContextValue("jruby.resolved.artifacts", resolved);
+        }
+        resolved.addAll(jars);
+        resolved.addAll(gems);
+        project.setResolvedArtifacts(resolved);
     }
 
     private void installGems(Set<Artifact> gems) throws IOException, ScriptException, GemException {
@@ -133,9 +139,13 @@ public class SetsMojo extends AbstractGemMojo {
                 .setResolveTransitively(true)
                 .setLocalRepository(localRepository)
                 .setRemoteRepositories(project.getRemoteArtifactRepositories());
-        Set<Artifact> resolvedArtifacts = this.repositorySystem.resolve(req).getArtifacts();
+        ArtifactResolutionResult result = this.repositorySystem.resolve(req);
+        Set<Artifact> resolvedArtifacts = result.getArtifacts();
         for( Artifact artifact : resolvedArtifacts ){
-            artifact.setScope(scope);
+            if (artifact.getScope() == null || "test".equals(scope) || "provided".equals(scope)) {
+                artifact.setScope(scope);
+            }
+            jars.add(artifact);
         }
     }
 }
