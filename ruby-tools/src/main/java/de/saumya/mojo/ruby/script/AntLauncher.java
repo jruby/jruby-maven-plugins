@@ -45,7 +45,7 @@ class AntLauncher extends AbstractLauncher {
         java.setDir(launchDirectory);
 
         for (final Map.Entry<String, String> entry : this.factory.environment().entrySet()) {
-            final Variable v = new Variable();
+            Variable v = new Variable();
             v.setKey(entry.getKey());
             v.setValue(entry.getValue());
             java.addEnv(v);
@@ -72,6 +72,9 @@ class AntLauncher extends AbstractLauncher {
         java.createJvmarg()
                 .setPath((Path) this.project.getReference(MAVEN_CLASSPATH));
 
+        java.createJvmarg().setValue("-cp");
+        java.createJvmarg().setValue(this.factory.jrubyJar.getAbsolutePath());
+
         // Does not work on all JVMs
 //        if (!factory.jvmArgs.matches("(-client|-server)")) {
 //        	java.createJvmarg().setValue("-client");	
@@ -91,7 +94,7 @@ class AntLauncher extends AbstractLauncher {
                 + this.factory.jrubyJar.getAbsolutePath());
         }
         if ( this.factory.jrubyJar  == null && System.getProperty( "jruby.home" ) != null ){
-            final Variable v = new Variable();
+            Variable v = new Variable();
             v.setKey( "jruby.home" );
             v.setValue( System.getProperty( "jruby.home" ) );
             java.addSysproperty( v );

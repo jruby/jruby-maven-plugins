@@ -23,6 +23,12 @@
       <version>1.1.0</version>
       <type>gem</type>
     </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>ffi</artifactId>
+      <version>1.9.6</version>
+      <type>gem</type>
+    </dependency>
   </dependencies>
   <properties>
     <root.dir>${basedir}</root.dir>
