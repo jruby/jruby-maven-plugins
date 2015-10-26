@@ -5,3 +5,5 @@ target
 .settings
 .project
 tmp
+*Backup
+release.properties
