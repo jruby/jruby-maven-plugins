@@ -120,11 +120,11 @@
             <JARS_HOME>${basedir}</JARS_HOME>
           </environmentVariables>
         </configuration>
-	    <executions>
-	      <execution>
+	<executions>
+	  <execution>
             <id>simple</id>
             <phase>verify</phase>
-	        <goals><goal>exec</goal></goals>
+	    <goals><goal>exec</goal></goals>
             <configuration>
               <arguments>
                 <argument>-jar</argument>
@@ -140,11 +140,11 @@
                 </argument>
               </arguments>
             </configuration>
-	      </execution>
-	      <execution>
+	  </execution>
+	  <execution>
             <id>rspec</id>
             <phase>verify</phase>
-	        <goals><goal>exec</goal></goals>
+	    <goals><goal>exec</goal></goals>
             <configuration>
               <arguments>
                 <argument>-jar</argument>
@@ -153,11 +153,11 @@
                 <argument>rspec</argument>
               </arguments>
             </configuration>
-	      </execution>
-	      <execution>
+	  </execution>
+	  <execution>
             <id>test file</id>
             <phase>verify</phase>
-	        <goals><goal>exec</goal></goals>
+	    <goals><goal>exec</goal></goals>
             <configuration>
               <arguments>
                 <argument>-jar</argument>
@@ -167,8 +167,8 @@
                 <argument>test.rb</argument>
               </arguments>
             </configuration>
-	      </execution>
-	    </executions>
+	  </execution>
+	</executions>
       </plugin>
     </plugins>
   </build>
