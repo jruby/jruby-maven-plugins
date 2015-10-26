@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Resource;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import de.saumya.mojo.jruby9.JarDependencies.Filter;
@@ -30,8 +31,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  */
 public abstract class AbstractGenerateMojo extends AbstractJRuby9Mojo {
 
-    @Override
-    protected void executeWithGems() throws MojoExecutionException,
+    protected void executeWithGems(boolean pluginDependenciesOnly) throws MojoExecutionException,
             ScriptException, IOException {
         JarDependencies jars = new JarDependencies(project.getBuild().getOutputDirectory(), "Jars.lock");
         jars.addAll(plugin.getArtifacts(), new Filter(){
@@ -44,7 +44,9 @@ public abstract class AbstractGenerateMojo extends AbstractJRuby9Mojo {
             
         });
 
-        jars.addAll(project.getArtifacts());
+        if (!pluginDependenciesOnly) {
+            jars.addAll(project.getArtifacts());
+        }
         jars.generateJarsLock();
         jars.copyJars();
                 

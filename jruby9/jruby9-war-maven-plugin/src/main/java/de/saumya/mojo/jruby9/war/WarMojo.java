@@ -20,6 +20,7 @@ import org.apache.maven.shared.utils.io.IOUtil;
 import org.codehaus.plexus.archiver.UnArchiver;
 
 import de.saumya.mojo.jruby9.ArtifactHelper;
+import de.saumya.mojo.jruby9.ArchiveType;
 import de.saumya.mojo.jruby9.Versions;
 
 /**
@@ -66,10 +67,8 @@ import de.saumya.mojo.jruby9.Versions;
 requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
 
-    enum Type { archive, runnable, jetty }
-
-    @Parameter( defaultValue = "archive", property = "jruby.war.type", required = true )
-    private Type type;
+    @Parameter( defaultValue = "archive", property = "jruby.archive.type", required = true )
+    private ArchiveType type;
 
     @Parameter( required = false )
     private String mainClass;
@@ -129,7 +128,7 @@ public class WarMojo extends org.apache.maven.plugin.war.WarMojo {
         helper.copy(jrubyWarLib, "org.jruby", "jruby-complete", jrubyVersion);
         helper.copy(jrubyWarLib, "org.jruby.rack", "jruby-rack", jrubyRackVersion,
                 "org.jruby:jruby-complete"); //exclude jruby-complete
-       
+
         // we bundle jar dependencies the ruby way
         getProject().getArtifacts().clear();
 

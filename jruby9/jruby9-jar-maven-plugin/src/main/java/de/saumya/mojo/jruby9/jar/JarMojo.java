@@ -15,6 +15,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.archiver.UnArchiver;
 
 import de.saumya.mojo.jruby9.ArtifactHelper;
+import de.saumya.mojo.jruby9.ArchiveType;
 import de.saumya.mojo.jruby9.Versions;
 
 /**
@@ -41,13 +42,16 @@ import de.saumya.mojo.jruby9.Versions;
        requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
 
-    @Parameter( defaultValue = "org.jruby.mains.JarMain", required = true )
+    @Parameter( defaultValue = "runnable", property = "jruby.archive.type", required = true )
+    private ArchiveType type;
+
+    @Parameter( defaultValue = "org.jruby.mains.JarMain", required = false )
     private String mainClass;
 
     @Parameter( defaultValue = Versions.JRUBY, property = "jruby.version", required = true )
     private String jrubyVersion;
 
-    @Parameter( defaultValue = Versions.JRUBY_MAINS, property = "jruby-mains.version", required = true )
+    @Parameter( defaultValue = Versions.JRUBY_MAINS, property = "jruby.mains.version", required = true )
     private String jrubyMainsVersion;
 
     @Parameter( readonly = true, defaultValue="${localRepository}" )
@@ -61,16 +65,26 @@ public class JarMojo extends org.apache.maven.plugin.jar.JarMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        MavenArchiveConfiguration archive = getArchive();
-        archive.getManifest().setMainClass(mainClass);
+        switch(type) {
+        case runnable:
+            if (mainClass == null) {
+                throw new MojoExecutionException( "runnable archive need mainClass configured" );
+            }
+            MavenArchiveConfiguration archive = getArchive();
+            archive.getManifest().setMainClass(mainClass);
 
-        ArtifactHelper helper = new ArtifactHelper(unzip, system,
-                localRepository, getProject().getRemoteArtifactRepositories());
-        File output = new File( getProject().getBuild().getOutputDirectory());
-                
-        helper.unzip(output, "org.jruby", "jruby-complete", jrubyVersion);
-        helper.unzip(output, "org.jruby.mains", "jruby-mains", jrubyMainsVersion);
-       
+            ArtifactHelper helper = new ArtifactHelper(unzip, system,
+                                                       localRepository, getProject().getRemoteArtifactRepositories());
+            File output = new File( getProject().getBuild().getOutputDirectory());
+            helper.unzip(output, "org.jruby", "jruby-complete", jrubyVersion);
+            helper.unzip(output, "org.jruby.mains", "jruby-mains", jrubyMainsVersion);
+
+        case archive:
+            break;
+        default:
+            throw new MojoExecutionException("can not pack archive " + type + " with jruby-jar-plugin");
+        }
+        
         super.execute();
     }
 

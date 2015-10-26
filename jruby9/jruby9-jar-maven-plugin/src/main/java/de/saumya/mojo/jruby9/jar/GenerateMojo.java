@@ -26,17 +26,20 @@ import de.saumya.mojo.ruby.script.ScriptException;
        threadSafe = true, requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class GenerateMojo extends AbstractGenerateMojo {
 
+    @Parameter( required = false, defaultValue = "false" )
+    private boolean pluginDependenciesOnly;
+
     /**
      * if set this file will be copied as 'jar-bootstrap.rb' to the resources.
      */
-    @Parameter( property = "jar.bootstrap" )
+    @Parameter( property = "jruby.jar.bootstrap" )
     protected File bootstrap;
 
     @Override
     protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
-        super.executeWithGems();
-        
+        executeWithGems(pluginDependenciesOnly);
+
         if (bootstrap != null) {
             FileUtils.copyFile(bootstrap, new File(project.getBuild().getOutputDirectory(),
                                                     "jar-bootstrap.rb"));
