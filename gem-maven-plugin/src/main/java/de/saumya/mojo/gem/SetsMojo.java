@@ -124,8 +124,10 @@ public class SetsMojo extends AbstractGemMojo {
         for( Dependency dependency : pom.getDependencies() ){
             if (!dependency.getType().equals("gem")) {
                 if (dependency.getScope() == null || dependency.getScope().equals("compile") || dependency.equals("runtime")) {
-                    jars.add(manager.createArtifact(dependency.getGroupId(), dependency.getArtifactId(),
-                               dependency.getVersion(), dependency.getClassifier(), dependency.getType()));
+                    Artifact a = manager.createArtifact(dependency.getGroupId(), dependency.getArtifactId(),
+                            dependency.getVersion(), dependency.getClassifier(), dependency.getType());
+                    a.setScope(dependency.getScope());
+                    jars.add(a);
                 }
             }
         }
@@ -142,10 +144,16 @@ public class SetsMojo extends AbstractGemMojo {
         ArtifactResolutionResult result = this.repositorySystem.resolve(req);
         Set<Artifact> resolvedArtifacts = result.getArtifacts();
         for( Artifact artifact : resolvedArtifacts ){
-            if (artifact.getScope() == null || "test".equals(scope) || "provided".equals(scope)) {
-                artifact.setScope(scope);
+            // * compile scope we leave things as they are
+            // * other scopes we only take runtime, compile time artifacts and set the scope to outer scope
+            if ("compile".equals(scope)) {
+                if (artifact.getScope() == null) artifact.setScope(scope);
+                jars.add(artifact);
             }
-            jars.add(artifact);
+            else if (!"test".equals(artifact.getScope()) && !"provided".equals(artifact.getScope())) {
+                artifact.setScope(scope);
+                jars.add(artifact);
+            }
         }
     }
 }
