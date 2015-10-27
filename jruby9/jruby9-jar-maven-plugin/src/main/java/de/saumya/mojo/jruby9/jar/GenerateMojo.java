@@ -10,6 +10,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.codehaus.plexus.util.FileUtils;
 
+import de.saumya.mojo.jruby9.ArchiveType;
 import de.saumya.mojo.jruby9.AbstractGenerateMojo;
 import de.saumya.mojo.ruby.script.ScriptException;
 
@@ -26,8 +27,11 @@ import de.saumya.mojo.ruby.script.ScriptException;
        threadSafe = true, requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class GenerateMojo extends AbstractGenerateMojo {
 
-    @Parameter( required = false, defaultValue = "false" )
-    private boolean pluginDependenciesOnly;
+    @Parameter( defaultValue = "runnable", property = "jruby.archive.type", required = true )
+    private ArchiveType type;
+
+    @Parameter( required = false )
+    private Boolean pluginDependenciesOnly;
 
     /**
      * if set this file will be copied as 'jar-bootstrap.rb' to the resources.
@@ -38,6 +42,19 @@ public class GenerateMojo extends AbstractGenerateMojo {
     @Override
     protected void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException {
+        final boolean pluginDependenciesOnly;
+        switch(type) {
+        case archive:
+            if (this.pluginDependenciesOnly == null) {
+                pluginDependenciesOnly = true;
+            }
+            else {
+                pluginDependenciesOnly = this.pluginDependenciesOnly;
+            }
+            break;
+        default:
+            pluginDependenciesOnly = false;
+        }
         executeWithGems(pluginDependenciesOnly);
 
         if (bootstrap != null) {
