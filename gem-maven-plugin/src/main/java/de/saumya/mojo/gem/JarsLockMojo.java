@@ -111,6 +111,8 @@ public class JarsLockMojo extends AbstractMojo {
             switch (checkForUpdates(lines)) {
             case NEEDS_FORCED_UPDATE:
                 getLog().info(message(jarsLock() + " has outdated dependencies"));
+                // resolve all artifacts from Jars.lock
+                resolve(true);
                 break;
             case CAN_UPDATE:
                 // means Jars.lock misses some dependencies which can be safely
@@ -228,10 +230,14 @@ public class JarsLockMojo extends AbstractMojo {
 
     private ArtifactResolutionResult resolveUpdate()
             throws MojoExecutionException {
+        return resolve(false);
+    }
+
+    private ArtifactResolutionResult resolve(boolean hasUpdate)
+            throws MojoExecutionException {
         List<String> jars = loadJarsLock();
         ArtifactResolutionRequest request = new ArtifactResolutionRequest();
         Set<Artifact> artifacts = new HashSet<Artifact>();
-        boolean hasUpdate = false;
         for (String jar : jars) {
             Artifact a = createArtifact(jar, "jar");
             if (a != null) {
@@ -250,8 +256,9 @@ public class JarsLockMojo extends AbstractMojo {
                 artifacts.add(a);
             }
         }
-        if (!hasUpdate)
+        if (!hasUpdate) {
             return null;
+        }
 
         request.setArtifactDependencies(artifacts);
         request.setResolveTransitively(false);
@@ -348,11 +355,32 @@ public class JarsLockMojo extends AbstractMojo {
         if (jarsLock.exists()) {
             Set<String> newLines = new TreeSet<String>(lines);
             Set<String> oldLines = new TreeSet<String>(loadJarsLock());
-            if (newLines.containsAll(oldLines)) {
-                return oldLines.containsAll(newLines) ? Status.UP_TO_DATE
-                        : Status.CAN_UPDATE;
+            Set<String> newLinesClone = new TreeSet<String>(newLines);
+            Set<String> oldLinesClone = new TreeSet<String>(oldLines);
+            oldLinesClone.removeAll(newLines);
+            newLinesClone.removeAll(oldLines);
+            Set<String> diffOld = new TreeSet<String>();
+            for( String dep : oldLinesClone ) {
+                diffOld.add( dep.replaceFirst("^([^:]+:[^:]+):.*", "$1" ) );
             }
-            return Status.NEEDS_FORCED_UPDATE;
+            Set<String> diffNew = new TreeSet<String>();
+            for( String dep : newLinesClone ) {
+                diffNew.add( dep.replaceFirst("^([^:]+:[^:]+):.*", "$1") );
+            }
+            boolean disjoint = ! new TreeSet<String>(diffOld).removeAll(diffNew);
+            disjoint = disjoint && ! diffNew.removeAll(diffOld);
+            Status result = Status.NEEDS_FORCED_UPDATE;
+            if (newLines.equals(oldLines) ) {
+                result = Status.UP_TO_DATE;
+            }
+            else if (disjoint) {
+                result = Status.CAN_UPDATE;
+            }
+            if (result != Status.UP_TO_DATE && getLog().isInfoEnabled()) {
+                getLog().info("missing : " + newLinesClone);
+                getLog().info("obsolete: " + oldLinesClone);
+            }
+            return result;
         }
         return Status.CAN_UPDATE;
     }
