@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.saumya.mojo.jruby9</groupId>
+  <artifactId>test-runnable</artifactId>
+  <version>testing</version>  
+  
+  <repositories>
+    <repository>
+      <id>rubygems-releases</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </repository>
+    <repository>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+   
+  <pluginRepositories>
+    <pluginRepository>
+      <id>rubygems-releases</id>
+      <url>http://rubygems-proxy.torquebox.org/releases</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>jar-dependencies</artifactId>
+      <version>0.2.4</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
+      <artifactId>rspec</artifactId>
+      <version>3.3.0</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>de.saumya.mojo.jruby9</groupId>
+      <artifactId>archive</artifactId>
+      <version>testing</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jruby</groupId>
+          <artifactId>jruby-complete</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+  <properties>
+    <j.version>1.7.23-SNAPSHOT</j.version>
+  </properties>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>spec/**</include>
+        </includes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+	    <executions>
+	      <execution>
+            <id>default-jar</id>
+            <phase>omit</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>de.saumya.mojo</groupId>
+        <artifactId>jruby9-jar-maven-plugin</artifactId>
+        <version>@project.version@</version>
+        <configuration>
+          <jrubyVersion>${j.version}</jrubyVersion>
+        </configuration>
+	<executions>
+	  <execution>
+            <id>jruby-jar</id>
+	    <goals>
+              <goal>generate</goal>
+              <goal>process</goal>
+              <goal>jar</goal>
+            </goals>
+	  </execution>
+	</executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2</version>
+        <configuration>
+          <executable>java</executable>
+          <workingDirectory>${project.build.directory}</workingDirectory>
+          <environmentVariables>
+            <PATH>path</PATH>
+            <HOME>blabla</HOME>
+            <GEM_PATH>${basedir}</GEM_PATH>
+            <GEM_HOME>${basedir}</GEM_HOME>
+            <JARS_HOME>${basedir}</JARS_HOME>
+          </environmentVariables>
+        </configuration>
+	<executions>
+	  <execution>
+            <id>simple</id>
+            <phase>verify</phase>
+	    <goals><goal>exec</goal></goals>
+            <configuration>
+              <arguments>
+                <argument>-jar</argument>
+                <argument>${project.build.finalName}.jar</argument>
+                <argument>-rjars/setup</argument>
+                <argument>-e</argument>
+                <argument>
+                  p JRUBY_VERSION
+                  p $CLASSPATH.size
+                  expected = 11
+                  raise "expected #{expected} classpath entries but got #{$CLASSPATH.size}: #{$CLASSPATH.inspect}" if $CLASSPATH.size != expected
+                  raise "expected jruby version ${j.version} but was #{JRUBY_VERSION}" if JRUBY_VERSION != "${j.version}"
+                </argument>
+              </arguments>
+            </configuration>
+	  </execution>
+	  <execution>
+            <id>rspec</id>
+            <phase>verify</phase>
+	    <goals><goal>exec</goal></goals>
+            <configuration>
+              <arguments>
+                <argument>-jar</argument>
+                <argument>${project.build.finalName}.jar</argument>
+                <argument>-S</argument>
+                <argument>rspec</argument>
+              </arguments>
+            </configuration>
+	  </execution>
+	  <execution>
+            <id>test file</id>
+            <phase>verify</phase>
+	    <goals><goal>exec</goal></goals>
+            <configuration>
+              <arguments>
+                <argument>-jar</argument>
+                <argument>${project.build.finalName}.jar</argument>
+                <!-- the uri:classloader prefix can be omit with newer
+                     jruby -->
+                <argument>test.rb</argument>
+              </arguments>
+            </configuration>
+	  </execution>
+	</executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

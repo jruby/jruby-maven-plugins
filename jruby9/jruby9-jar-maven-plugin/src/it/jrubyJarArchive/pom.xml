@@ -3,11 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.saumya.mojo.jruby9</groupId>
   <artifactId>archive-test</artifactId>
+  <name>aggregate achive tests</name>
   <version>testing</version>  
   <packaging>pom</packaging>
 
   <modules>
     <module>archive</module>
-    <module>test</module>
+    <module>test-runnable</module>
+    <module>test-jar</module>
   </modules>
 </project>
