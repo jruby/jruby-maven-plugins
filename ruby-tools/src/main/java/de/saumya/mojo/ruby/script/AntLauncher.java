@@ -72,8 +72,10 @@ class AntLauncher extends AbstractLauncher {
         java.createJvmarg()
                 .setPath((Path) this.project.getReference(MAVEN_CLASSPATH));
 
-        java.createJvmarg().setValue("-cp");
-        java.createJvmarg().setValue(this.factory.jrubyJar.getAbsolutePath());
+        if (this.factory.jrubyJar != null) {
+            java.createJvmarg().setValue("-cp");
+            java.createJvmarg().setValue(this.factory.jrubyJar.getAbsolutePath());
+        }
 
         // Does not work on all JVMs
 //        if (!factory.jvmArgs.matches("(-client|-server)")) {
