@@ -154,9 +154,12 @@
               <arguments>
                 <argument>-jar</argument>
                 <argument>${project.build.finalName}.jar</argument>
-                <!-- the uri:classloader prefix can be omit with newer
-                     jruby -->
-                <argument>test.rb</argument>
+                <argument>-e</argument>
+                <argument>
+                  #TODO newer jrubies have this fixed https://github.com/jruby/jruby/issues/3443
+                  Gem::Specification.dirs = Gem::Specification.dirs +
+                  JRuby.runtime.jruby_class_loader.get_resources('specifications').collect{ |u| p u.to_s };
+                load 'test.rb'</argument>
               </arguments>
             </configuration>
 	  </execution>
