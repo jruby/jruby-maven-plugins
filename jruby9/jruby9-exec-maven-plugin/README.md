@@ -80,7 +80,7 @@ the plugin declaration
              <phase>validate</phase>
 	         <goals><goal>exec</goal></goals>
              <configuration>
-               <jrubyVersion>9.0.0.0.rc1</jrubyVersion>
+               <jrubyVersion>9.0.3.0</jrubyVersion>
                <script>p 'hello world'</script>
              </configuration>
 	       </execution>

@@ -41,7 +41,7 @@
   </dependencies>
 
   <properties>
-    <j.version>9.0.0.0.rc1</j.version>
+    <j.version>9.0.3.0</j.version>
   </properties>
 
   <build>
