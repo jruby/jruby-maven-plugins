@@ -22,12 +22,12 @@
     </repository>
   </repositories>
    
-  <repositories>
-    <repository>
+  <pluginRepositories>
+    <pluginRepository>
       <id>rubygems-releases</id>
       <url>http://rubygems-proxy.torquebox.org/releases</url>
-    </repository>
-  </repositories>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencies>
     <dependency>
