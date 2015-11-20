@@ -28,62 +28,6 @@ public class RubygemsFacade {
 
     private static Map<URL, RubygemsFacade> facades = new HashMap<URL, RubygemsFacade>();
 
-    static synchronized RubygemsFacade getOrCreate(URL url)
-            throws MalformedURLException {
-	if (catchAllMirror != null) {
-	    url = catchAllMirror;
-	}
-	else {
-	    String key = "mavengem.mirror";
-	    if (System.getProperty(key) != null) {
-		url = new URL(System.getProperty(key));
-	    }
-	    else {
-		if (mirrors != null && mirrors.containsKey(url)) {
-		    url = mirrors.get(url);
-		}
-		else {
-		    key = "mavengem.mirror." + url.toString();
-		    if (System.getProperty(key) != null) {
-			url = new URL(System.getProperty(key));
-		    }
-		}
-	    }
-	}
-
-        RubygemsFacade result = facades.get(url);
-        if (result == null) {
-	    result = new RubygemsFacade(url, cacheDir());
-            facades.put(url, result);
-        }
-        return result;
-    }
-
-    static File cacheDir = null;
-    static File cacheDir() {
-	if (cacheDir != null) {
-	    return cacheDir;
-	}
-	if (System.getProperty("mavengem.home") != null) {
-	    return new File(System.getProperty("mavengem.home"));
-	}
-	return new File(System.getProperty("user.home"), ".mavengems");
-    }
-
-    static void setCacheDir(File dir) {
-	cacheDir = dir;
-    }
-
-    static Map<URL, URL> mirrors = null;
-    static void setMirrors(Map<URL, URL> mirrors) {
-	mirrors = mirrors;
-    }
-
-    static URL catchAllMirror = null;
-    static void setCatchAllMirror(URL mirror) {
-	catchAllMirror = mirror;
-    }
-
     private final ProxyStorage storage;
     private final RubygemsFileSystem files;
 
