@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>jruby9</artifactId>
+    <groupId>de.saumya.mojo</groupId>
+    <version>0.2.3-SNAPSHOT</version>
+  </parent>
+  <artifactId>mavengem-wagon</artifactId>
+  <version>0.1.0</version>
+  <name>Mavengem Protocol Wagon</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>de.saumya.mojo</groupId>
+      <artifactId>mavengem-protocol</artifactId>
+      <version>0.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-provider-api</artifactId>
+      <version>2.10</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-invoker-plugin</artifactId>
+	<configuration>
+	  <settingsFile>src/it/settings.xml</settingsFile>
+	  <localRepositoryPath>${project.build.directory}/localrepo</localRepositoryPath>
+	</configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

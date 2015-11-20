@@ -1,0 +1,10 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.wagon.Wagon</role>
+      <role-hint>mavengem</role-hint>
+      <implementation>de.saumya.mojo.mavengem.wagon.MavenGemWagon</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+    </component>
+  </components>
+</component-set>
