@@ -56,7 +56,7 @@
   </dependencies>
 
   <properties>
-    <j.version>1.7.23-SNAPSHOT</j.version>
+    <j.version>1.7.22</j.version>
   </properties>
 
   <build>
