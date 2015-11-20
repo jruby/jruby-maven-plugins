@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>with-gems</artifactId>
+  <artifactId>mirror</artifactId>
   <groupId>de.saumya.mojo.test</groupId>
   <version>0.1.0</version>
 
@@ -18,7 +18,7 @@
   <repositories>  
     <repository>
       <id>mavengems</id>
-      <url>mavengem:https://rubygems.org</url>
+      <url>mavengem:http://rubygems.org</url>
     </repository>
     <!-- we do not want maven central here at all -->
     <repository>

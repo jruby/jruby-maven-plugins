@@ -6,12 +6,7 @@
       <password>my_password</password>
       <configuration>
         <cachedir>${user.dir}/target/cachedir</cachedir>
-	<mirrorSources>
-	  <rubygems>http://rubygems.org</rubygems>
-	</mirrorSources>
-	<mirrorTargets>
-	  <rubygems>https://rubygems.org</rubygems>
-	</mirrorTargets>
+	<catchAllMirror>https://rubygems.org</catchAllMirror>
       </configuration>
     </server>
   </servers>

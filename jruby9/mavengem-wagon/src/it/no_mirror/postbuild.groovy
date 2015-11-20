@@ -9,4 +9,9 @@ String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
 
 }
 
+[ 'target/cachedir/https___rubygems_org/api/v1/dependencies/jar-dependencies.ruby',
+  'target/cachedir/https___rubygems_org//gems/j/jar-dependencies-0.2.6.gem',
+  'target/cachedir/https___rubygems_org//quick/Marshal.4.8/j/jar-dependencies-0.2.6.gemspec.rz' ].each {
+  if ( !new File(basedir, it).exists() ) throw new RuntimeException( "expected file missing: '" + it + "'" );
+}
 true

@@ -28,9 +28,36 @@
       <plugin>
         <artifactId>maven-invoker-plugin</artifactId>
 	<configuration>
-	  <settingsFile>src/it/settings.xml</settingsFile>
 	  <localRepositoryPath>${project.build.directory}/localrepo</localRepositoryPath>
 	</configuration>
+	<executions>
+	  <execution>
+	    <!-- this means to skip extra invoker run as without
+		 execution -->
+	    <id>integration-test</id>
+	    <phase>integration-test</phase>
+	    <goals>
+	      <goal>install</goal>
+	      <goal>run</goal>
+	    </goals>
+	    <configuration>
+	      <settingsFile>src/it/settings.xml</settingsFile>
+	      <invokerTest>*mirror</invokerTest>
+	    </configuration>
+	  </execution>
+	  <execution>
+	    <id>catch-all</id>
+	    <phase>integration-test</phase>
+	    <goals>
+	      <goal>install</goal>
+	      <goal>run</goal>
+	    </goals>
+	    <configuration>
+	      <settingsFile>src/it/settings-catch-all.xml</settingsFile>
+	      <invokerTest>catch_all</invokerTest>
+	    </configuration>
+	  </execution>
+	</executions>
       </plugin>
     </plugins>
   </build>
