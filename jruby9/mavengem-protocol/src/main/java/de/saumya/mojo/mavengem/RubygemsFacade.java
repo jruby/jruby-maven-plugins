@@ -67,7 +67,7 @@ public class RubygemsFacade {
 	if (System.getProperty("mavengem.home") != null) {
 	    return new File(System.getProperty("mavengem.home"));
 	}
-	return new File(System.getProperty("user.home"), ".mavengem");
+	return new File(System.getProperty("user.home"), ".mavengems");
     }
 
     static void setCacheDir(File dir) {
