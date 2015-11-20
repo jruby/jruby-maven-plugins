@@ -13,6 +13,8 @@
   <name>JRuby9 Next Generation Maven Mojo</name>
 
   <modules>
+    <module>mavengem-protocol</module>
+    <module>mavengem-wagon</module>
     <module>jruby9-common</module>
     <module>jruby9-exec-maven-plugin</module>
     <module>jruby9-jar-maven-plugin</module>
@@ -110,10 +112,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
-  <scm>
-    <connection>scm:svn:http://svn.sonatype.org/spice/tags/jruby9-0.2.1</connection>
-    <developerConnection>scm:svn:https://svn.sonatype.org/spice/tags/jruby9-0.2.1</developerConnection>
-    <url>http://svn.sonatype.org/spice/tags/jruby9-0.2.1</url>
-  </scm>
 </project>
