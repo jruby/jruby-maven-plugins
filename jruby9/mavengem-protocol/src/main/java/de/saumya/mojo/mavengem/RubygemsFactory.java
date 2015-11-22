@@ -36,7 +36,7 @@ public class RubygemsFactory {
 	    throw new RuntimeException( "can not happen", e);
 	}
     }
-    private static File DEFAULT_CACHEDIR = new File(System.getProperty("user.home"), ".mavengem");
+    public static File DEFAULT_CACHEDIR = new File(System.getProperty("user.home"), ".mavengem");
 
     public static final String MAVENGEM_MIRROR = "mavengem.mirror";
     public static final String MAVENGEM_CACHEDIR = "mavengem.cachedir";
@@ -50,13 +50,11 @@ public class RubygemsFactory {
     public static synchronized RubygemsFactory defaultFactory()
 	    throws MalformedURLException {
 	if (factory == null) {
-	    factory = new RubygemsFactory(null, null, null);
+	    factory = new RubygemsFactory(null, null, null, false);
 	}
 	return factory;
     }
 
-    // all public constructors would need a null check
-    // and throw an NPE
     public RubygemsFactory()
 	    throws MalformedURLException {
 	this(DEFAULT_CACHEDIR, NO_MIRROR, null);
@@ -89,6 +87,19 @@ public class RubygemsFactory {
 
     private RubygemsFactory(File cacheDir, URL mirror, Map<URL, URL> mirrors)
 	    throws MalformedURLException {
+	this(cacheDir, mirror, mirrors, true);
+    }
+
+    private RubygemsFactory(File cacheDir, URL mirror, Map<URL, URL> mirrors, boolean check)
+	    throws MalformedURLException {
+	if (check) {
+	    if (cacheDir == null) {
+		throw new IllegalArgumentException("cache directory can not be null");
+	    }
+	    if (mirror == null) {
+		throw new IllegalArgumentException("mirror can not be null");
+	    }
+	}
 	if (mirror != null) {
 	    this.catchAllMirror = mirror;
 	}

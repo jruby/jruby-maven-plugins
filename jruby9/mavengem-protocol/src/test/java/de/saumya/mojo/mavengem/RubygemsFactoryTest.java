@@ -100,4 +100,30 @@ public class RubygemsFactoryTest {
 	assertThat(factory.catchAllMirror, is(RubygemsFactory.NO_MIRROR));
 	assertThat(factory.cacheDir, is(new File("some/thing")));
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void cachedirAndMirrorsPrecondition() throws Exception {
+	Map<URL,URL> mirrors = new HashMap<URL,URL>();
+	RubygemsFactory factory = new RubygemsFactory(null, mirrors);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void cachedirPrecondition() throws Exception {
+	RubygemsFactory factory = new RubygemsFactory((File)null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void mirrorPrecondition() throws Exception {
+	RubygemsFactory factory = new RubygemsFactory((URL)null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void cachedirAndMirrorPreconditionFile() throws Exception {
+	RubygemsFactory factory = new RubygemsFactory((File)null, new URL("https://example.com"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void cachedirAndMirrorPreconditionURL() throws Exception {
+	RubygemsFactory factory = new RubygemsFactory(new File("some/thing"), (URL)null);
+    }
 }
