@@ -2,19 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>jruby9</artifactId>
+    <artifactId>mavengem</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>mavengem-wagon</artifactId>
-  <version>0.1.0</version>
   <name>Mavengem Protocol Wagon</name>
 
   <dependencies>
     <dependency>
       <groupId>de.saumya.mojo</groupId>
       <artifactId>mavengem-protocol</artifactId>
-      <version>0.1.0</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
@@ -29,35 +28,8 @@
         <artifactId>maven-invoker-plugin</artifactId>
 	<configuration>
 	  <localRepositoryPath>${project.build.directory}/localrepo</localRepositoryPath>
+	  <settingsFile>src/it/settings.xml</settingsFile>
 	</configuration>
-	<executions>
-	  <execution>
-	    <!-- this means to skip extra invoker run as without
-		 execution -->
-	    <id>integration-test</id>
-	    <phase>integration-test</phase>
-	    <goals>
-	      <goal>install</goal>
-	      <goal>run</goal>
-	    </goals>
-	    <configuration>
-	      <settingsFile>src/it/settings.xml</settingsFile>
-	      <invokerTest>*mirror</invokerTest>
-	    </configuration>
-	  </execution>
-	  <execution>
-	    <id>catch-all</id>
-	    <phase>integration-test</phase>
-	    <goals>
-	      <goal>install</goal>
-	      <goal>run</goal>
-	    </goals>
-	    <configuration>
-	      <settingsFile>src/it/settings-catch-all.xml</settingsFile>
-	      <invokerTest>catch_all</invokerTest>
-	    </configuration>
-	  </execution>
-	</executions>
       </plugin>
     </plugins>
   </build>

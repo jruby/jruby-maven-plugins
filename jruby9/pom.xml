@@ -13,8 +13,6 @@
   <name>JRuby9 Next Generation Maven Mojo</name>
 
   <modules>
-    <module>mavengem-protocol</module>
-    <module>mavengem-wagon</module>
     <module>jruby9-common</module>
     <module>jruby9-exec-maven-plugin</module>
     <module>jruby9-jar-maven-plugin</module>

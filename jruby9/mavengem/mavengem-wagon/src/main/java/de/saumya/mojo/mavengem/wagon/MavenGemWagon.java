@@ -34,9 +34,6 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import de.saumya.mojo.mavengem.RubygemsFactory;
 import de.saumya.mojo.mavengem.MavenGemURLConnection;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Configuration;
-
 public class MavenGemWagon extends StreamWagon {
 
     public static final String MAVEN_GEM_PREFIX = "mavengem:";
