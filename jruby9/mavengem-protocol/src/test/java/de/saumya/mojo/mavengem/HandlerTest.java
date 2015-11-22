@@ -15,25 +15,21 @@ import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 
-public class ProtocolTest {
+public class HandlerTest {
 
     private boolean result;
     private File cacheDir;
     
     @Before
-    public void setup() {
+    public void setup() throws Exception {
 	cacheDir = new File(System.getProperty("basedir"), "target/cache4test");
-	result = Handler.registerMavenGemProtocol(cacheDir);
+	result = Handler.registerMavenGemProtocol(new RubygemsFactory(cacheDir));
     }
 
     @Test
     public void registerProtocol() throws Exception {
 	assertThat(result, is(true));
 	assertThat(Handler.registerMavenGemProtocol(null),
-		   is(false));
-	assertThat(Handler.registerMavenGemProtocol(null, (URL)null),
-		   is(false));
-	assertThat(Handler.registerMavenGemProtocol(null, (Map<URL,URL>)null),
 		   is(false));
 	assertThat(Handler.registerMavenGemProtocol(), is(false));
     }

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -15,53 +16,24 @@ public class Handler extends URLStreamHandler {
     public static String PKG = "de.saumya.mojo";
     public static String PING_URL = "mavengem:https://rubygems.org" + MavenGemURLConnection.PING;
 
-    private static RubygemsFacadeFactory factory;
+    private static RubygemsFactory factory;
 
     public synchronized static boolean isMavenGemProtocolRegistered() {
         return System.getProperties().contains(KEY);
     }
 
-    public synchronized static boolean registerMavenGemProtocol() {
+    public synchronized static boolean registerMavenGemProtocol()
+	    throws MalformedURLException {
+	return registerMavenGemProtocol(RubygemsFactory.defaultFactory());
+    }
+
+    public synchronized static boolean registerMavenGemProtocol(RubygemsFactory rubygemsFactory) {
 	if (ping()) {
 	    // we can register the protocol only once
 	    return false;
 	}
-	factory = new RubygemsFacadeFactory();
+	factory = rubygemsFactory;
 
-	return doRegisterMavenGemProtocol();
-    }
-
-    public synchronized static boolean registerMavenGemProtocol(File cacheDir) {
-	if (ping()) {
-	    // we can register the protocol only once
-	    return false;
-	}
-	factory = new RubygemsFacadeFactory(cacheDir);
-
-	return doRegisterMavenGemProtocol();
-    }
-
-    public synchronized static boolean registerMavenGemProtocol(File cacheDir, Map<URL,URL> mirrors) {
-	if (ping()) {
-	    // we can register the protocol only once
-	    return false;
-	}
-	factory = new RubygemsFacadeFactory(cacheDir, mirrors);
-
-	return doRegisterMavenGemProtocol();
-    }
-
-    public synchronized static boolean registerMavenGemProtocol(File cacheDir, URL catchAllMirror) {
-	if (ping()) {
-	    // we can register the protocol only once
-	    return false;
-	}
-	factory = new RubygemsFacadeFactory(cacheDir, catchAllMirror);
-
-	return doRegisterMavenGemProtocol();
-    }
-
-    private static boolean doRegisterMavenGemProtocol() {
         if (System.getProperties().contains(KEY)) {
             String current = System.getProperty(KEY);
             if (!current.contains(PKG)) {

@@ -22,16 +22,16 @@ import org.sonatype.nexus.ruby.layout.CachingProxyStorage;
 import org.sonatype.nexus.ruby.layout.ProxiedRubygemsFileSystem;
 import org.sonatype.nexus.ruby.layout.ProxyStorage;
 
-public class RubygemsFacade {
+public class Rubygems {
 
     private static RubygemsGateway gateway = new DefaultRubygemsGateway(new IsolatedScriptingContainer());
 
-    private static Map<URL, RubygemsFacade> facades = new HashMap<URL, RubygemsFacade>();
+    private static Map<URL, Rubygems> facades = new HashMap<URL, Rubygems>();
 
     private final ProxyStorage storage;
     private final RubygemsFileSystem files;
 
-    RubygemsFacade(URL url, File baseCacheDir) {
+    Rubygems(URL url, File baseCacheDir) {
 	// we do not want to expose credentials inside the directory name
         File cachedir = new File(baseCacheDir, url.toString().replaceFirst("://[^:]+:[^:]+@", "://").replaceAll("[/:.]", "_"));
 	this.storage = new CachingProxyStorage(cachedir, url);

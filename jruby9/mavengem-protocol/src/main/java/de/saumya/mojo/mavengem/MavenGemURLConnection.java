@@ -27,26 +27,29 @@ public class MavenGemURLConnection extends URLConnection {
     // package private for testing
     final URL baseurl;
     final String path;
-    final RubygemsFacadeFactory factory;
+    final RubygemsFactory factory;
 
     public static MavenGemURLConnection create(String uri) throws MalformedURLException {
 	return create(null, uri);
     }
 
-    public static MavenGemURLConnection create(RubygemsFacadeFactory factory, String uri) throws MalformedURLException {
+    public static MavenGemURLConnection create(RubygemsFactory factory, String uri)
+	     throws MalformedURLException {
 	int index = uri.indexOf(MAVEN_RELEASES);
         String path = uri.substring(index);
         String baseurl = uri.substring(0, index);
 	return new MavenGemURLConnection(factory, new URL(baseurl), path);
     }
 
-    public MavenGemURLConnection(URL baseurl, String path) {
+    public MavenGemURLConnection(URL baseurl, String path)
+	    throws MalformedURLException {
 	this(null, baseurl, path);
     }
 
-    public MavenGemURLConnection(RubygemsFacadeFactory factory, URL baseurl, String path) {
+    public MavenGemURLConnection(RubygemsFactory factory, URL baseurl, String path)
+	    throws MalformedURLException {
         super(baseurl);
-	this.factory = factory == null ? RubygemsFacadeFactory.defaultFactory() : factory;
+	this.factory = factory == null ? RubygemsFactory.defaultFactory() : factory;
         this.baseurl = baseurl;
         this.path = path.startsWith(MAVEN_RELEASES) ? path : MAVEN_RELEASES + path;
     }
@@ -72,7 +75,7 @@ public class MavenGemURLConnection extends URLConnection {
         connect(factory.getOrCreate(baseurl));
     }
 
-    private void connect(RubygemsFacade facade) throws IOException {
+    private void connect(Rubygems facade) throws IOException {
         RubygemsFile file = facade.get(path);
         switch( file.state() )
         {
