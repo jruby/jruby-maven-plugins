@@ -38,7 +38,7 @@
       <extension>
         <groupId>de.saumya.mojo</groupId>
         <artifactId>mavengem-wagon</artifactId>
-        <version>0.1.0</version>
+        <version>@project.version@</version>
       </extension>
     </extensions>
   </build>
