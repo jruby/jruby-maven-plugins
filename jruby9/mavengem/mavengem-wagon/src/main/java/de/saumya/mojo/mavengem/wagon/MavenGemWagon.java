@@ -39,6 +39,7 @@ public class MavenGemWagon extends StreamWagon {
     public static final String MAVEN_GEM_PREFIX = "mavengem:";
 
     private Proxy proxy = Proxy.NO_PROXY;
+    private RubygemsFactory _factory_;
 
     // configurable via the settings.xml
     private File cachedir;
@@ -60,20 +61,7 @@ public class MavenGemWagon extends StreamWagon {
 		warn("proxy support is not implemented - ignoring proxy settings");
 	    }
 
-	    RubygemsFactory factory;
-	    // use some default if not set
-	    if (cachedir == null) {
-		cachedir = RubygemsFactory.DEFAULT_CACHEDIR;
-	    }
-	    if (mirror != null) {
-		factory = new RubygemsFactory(cachedir, withAuthentication(mirror));
-	    }
-	    else {
-		factory = new RubygemsFactory(cachedir);
-	    }
-	    URLConnection urlConnection = new MavenGemURLConnection(factory,
-								    getRepositoryURL(),
-								    "/" + resource.getName());
+	    URLConnection urlConnection = newConnection(resource.getName());
 	    InputStream is = urlConnection.getInputStream();
 	
 	    inputData.setInputStream(is);
@@ -82,12 +70,54 @@ public class MavenGemWagon extends StreamWagon {
 
 	}
         catch(MalformedURLException e) {
-	    throw new ResourceDoesNotExistException("Invalid repository URL: " + e.getMessage(), e);
+	    throw new TransferFailedException("Invalid repository URL: " + e.getMessage(), e);
         }
         catch(FileNotFoundException e) {
 	    throw new ResourceDoesNotExistException("Unable to locate resource in repository", e);
         }
         catch(IOException e) {
+            throw new TransferFailedException("Error transferring file: " + e.getMessage(), e);
+        }
+    }
+
+    private RubygemsFactory rubygemsFactory()
+	throws MalformedURLException {
+	if (_factory_ == null) {
+	    // use the default if not set
+	    if (cachedir == null) {
+		cachedir = RubygemsFactory.DEFAULT_CACHEDIR;
+	    }
+	    if (mirror != null) {
+		_factory_ = new RubygemsFactory(cachedir, withAuthentication(mirror));
+	    }
+	    else {
+		_factory_ = new RubygemsFactory(cachedir);
+	    }
+	}
+	return _factory_;
+    }
+
+    public URLConnection newConnection(String resourceName)
+	throws MalformedURLException {
+	return new MavenGemURLConnection(rubygemsFactory(),
+					 getRepositoryURL(),
+					 "/" + resourceName);
+    }
+
+    @Override
+    public boolean resourceExists(String resourceName)
+        throws TransferFailedException, AuthorizationException {
+	try {
+	    newConnection(resourceName).connect();
+	    return true;
+        }
+        catch (FileNotFoundException e) {
+	    return false;
+	}
+        catch(MalformedURLException e) {
+	    throw new TransferFailedException("Invalid repository URL: " + e.getMessage(), e);
+        }
+        catch (IOException e) {
             throw new TransferFailedException("Error transferring file: " + e.getMessage(), e);
         }
     }
@@ -103,7 +133,8 @@ public class MavenGemWagon extends StreamWagon {
         throws ConnectionException {
     }
 
-    private URL withAuthentication(String url)  throws MalformedURLException {
+    private URL withAuthentication(String url)
+	throws MalformedURLException {
 	if (authenticationInfo != null && authenticationInfo.getUserName() != null) {
 	    String credentials = authenticationInfo.getUserName() + ":" + authenticationInfo.getPassword();
 	    url = url.replaceFirst("^(https?://)(.*)$", "$1" + credentials + "@$2");
