@@ -31,7 +31,7 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
-import de.saumya.mojo.mavengem.RubygemsFacadeFactory;
+import de.saumya.mojo.mavengem.RubygemsFactory;
 import de.saumya.mojo.mavengem.MavenGemURLConnection;
 
 import org.codehaus.plexus.component.annotations.Component;
@@ -66,12 +66,16 @@ public class MavenGemWagon extends StreamWagon {
 		warn("proxy support is not implemented - ignoring proxy settings");
 	    }
 
-	    RubygemsFacadeFactory factory;
+	    RubygemsFactory factory;
+	    // use some default if not set
+	    if (cachedir == null) {
+		cachedir = RubygemsFactory.DEFAULT_CACHEDIR;
+	    }
 	    if (catchAllMirror != null) {
 		if (mirrorTargets != null && mirrorTargets.size() > 0) {
 		    warn("use catch-all-mirrror " + catchAllMirror + " and ignore other mirror settings");
 		}
-		factory = new RubygemsFacadeFactory(cachedir, catchAllMirror);
+		factory = new RubygemsFactory(cachedir, catchAllMirror);
 	    }
 	    else if (mirrorTargets != null && mirrorTargets.size() > 0) {
 		Map<URL,URL> mirrorMap = new HashMap<URL,URL>();
@@ -85,10 +89,10 @@ public class MavenGemWagon extends StreamWagon {
 				      new URL(entry.getValue().toString()));
 		    }
 		}
-		factory = new RubygemsFacadeFactory(cachedir, mirrorMap);
+		factory = new RubygemsFactory(cachedir, mirrorMap);
 	    }
 	    else {
-		factory = new RubygemsFacadeFactory(cachedir);
+		factory = new RubygemsFactory(cachedir);
 	    }
 	    URLConnection urlConnection = new MavenGemURLConnection(factory, getRepositoryURL(), "/" + resource.getName());
 	    InputStream is = urlConnection.getInputStream();
