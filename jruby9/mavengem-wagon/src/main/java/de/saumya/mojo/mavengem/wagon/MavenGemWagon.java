@@ -42,13 +42,10 @@ public class MavenGemWagon extends StreamWagon {
     public static final String MAVEN_GEM_PREFIX = "mavengem:";
 
     private Proxy proxy = Proxy.NO_PROXY;
-    private URL url;
 
     // configurable via the settings.xml
     private File cachedir;
-    private URL catchAllMirror;
-    private Properties mirrorSources;
-    private Properties mirrorTargets;
+    private String mirror;
 
     private void warn(String msg) {
 	System.err.println("WARNING: " + msg);
@@ -71,30 +68,15 @@ public class MavenGemWagon extends StreamWagon {
 	    if (cachedir == null) {
 		cachedir = RubygemsFactory.DEFAULT_CACHEDIR;
 	    }
-	    if (catchAllMirror != null) {
-		if (mirrorTargets != null && mirrorTargets.size() > 0) {
-		    warn("use catch-all-mirrror " + catchAllMirror + " and ignore other mirror settings");
-		}
-		factory = new RubygemsFactory(cachedir, catchAllMirror);
-	    }
-	    else if (mirrorTargets != null && mirrorTargets.size() > 0) {
-		Map<URL,URL> mirrorMap = new HashMap<URL,URL>();
-		for (Map.Entry entry: mirrorTargets.entrySet()) {
-		    String alias = mirrorSources.getProperty(entry.getKey().toString());
-		    if (alias == null) {
-			warn( "could not find url for alias " + entry.getKey() );
-		    }
-		    else {
-			mirrorMap.put(new URL(alias),
-				      new URL(entry.getValue().toString()));
-		    }
-		}
-		factory = new RubygemsFactory(cachedir, mirrorMap);
+	    if (mirror != null) {
+		factory = new RubygemsFactory(cachedir, withAuthentication(mirror));
 	    }
 	    else {
 		factory = new RubygemsFactory(cachedir);
 	    }
-	    URLConnection urlConnection = new MavenGemURLConnection(factory, getRepositoryURL(), "/" + resource.getName());
+	    URLConnection urlConnection = new MavenGemURLConnection(factory,
+								    getRepositoryURL(),
+								    "/" + resource.getName());
 	    InputStream is = urlConnection.getInputStream();
 	
 	    inputData.setInputStream(is);
@@ -124,16 +106,17 @@ public class MavenGemWagon extends StreamWagon {
         throws ConnectionException {
     }
 
-    private URL getRepositoryURL() throws MalformedURLException {
-	if (this.url == null) {
-	    String url = getRepository().getUrl().substring(MAVEN_GEM_PREFIX.length());
-	    if (authenticationInfo != null && authenticationInfo.getUserName() != null) {
-		String credentials = authenticationInfo.getUserName() + ":" + authenticationInfo.getPassword();
-		url = url.replaceFirst("^(https?://)(.*)$", "$1" + credentials + "@$2");
-	    }
-	    this.url = new URL(url);
+    private URL withAuthentication(String url)  throws MalformedURLException {
+	if (authenticationInfo != null && authenticationInfo.getUserName() != null) {
+	    String credentials = authenticationInfo.getUserName() + ":" + authenticationInfo.getPassword();
+	    url = url.replaceFirst("^(https?://)(.*)$", "$1" + credentials + "@$2");
 	}
-	return this.url;
+	return new URL(url);
+    }
+
+    private URL getRepositoryURL() throws MalformedURLException {
+	String url = getRepository().getUrl().substring(MAVEN_GEM_PREFIX.length());
+	return withAuthentication(url);
     }
 
     private Proxy getProxy(ProxyInfo proxyInfo) {

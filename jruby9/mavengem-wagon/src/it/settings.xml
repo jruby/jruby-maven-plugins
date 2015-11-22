@@ -1,17 +1,20 @@
 <settings>
   <servers>
     <server>
-      <id>mavengems</id>
+      <id>mavengems-without-mirror</id>
       <username>my_login</username>
       <password>my_password</password>
       <configuration>
         <cachedir>${user.dir}/target/cachedir</cachedir>
-	<mirrorSources>
-	  <rubygems>http://rubygems.org</rubygems>
-	</mirrorSources>
-	<mirrorTargets>
-	  <rubygems>https://rubygems.org</rubygems>
-	</mirrorTargets>
+      </configuration>
+    </server>
+    <server>
+      <id>mavengems-with-mirror</id>
+      <username>my_login</username>
+      <password>my_password</password>
+      <configuration>
+        <cachedir>${user.dir}/target/cachedir</cachedir>
+	<mirror>https://rubygems.org</mirror>
       </configuration>
     </server>
   </servers>
