@@ -32,7 +32,7 @@ pom.xml setup
 the same with POM using ruby-DSL
 
 ```
-repository :id => :mavengem, :url => 'mavengem:http://rubygems.org'
+repository :id => :mavengems, :url => 'mavengem:http://rubygems.org'
 
 extension 'de.saumya.mojo:mavengem-wagon:0.1.0'
 ```
