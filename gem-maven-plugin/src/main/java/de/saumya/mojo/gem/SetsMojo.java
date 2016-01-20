@@ -22,6 +22,7 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
@@ -30,7 +31,8 @@ import org.apache.maven.project.MavenProject;
 /**
  * installs a set of given gems without resolving any transitive dependencies
  */
-@Mojo( name = "sets", defaultPhase = LifecyclePhase.INITIALIZE )
+@Mojo( name = "sets", defaultPhase = LifecyclePhase.INITIALIZE,
+       requiresDependencyResolution = ResolutionScope.TEST )
 public class SetsMojo extends AbstractGemMojo {
     
     /**
@@ -76,12 +78,14 @@ public class SetsMojo extends AbstractGemMojo {
 
         Set<Artifact> resolved = (Set<Artifact>) project.getContextValue("jruby.resolved.artifacts");
         if (resolved == null) {
-            resolved = new LinkedHashSet<Artifact>();
+            resolved = project.getArtifacts();
+            // TODO this might mix the java and ruby application jars
+            // use resolved artifacts as project ones
+            project.setResolvedArtifacts(resolved);
             project.setContextValue("jruby.resolved.artifacts", resolved);
         }
         resolved.addAll(jars);
         resolved.addAll(gems);
-        project.setResolvedArtifacts(resolved);
     }
 
     private void installGems(Set<Artifact> gems) throws IOException, ScriptException, GemException {
