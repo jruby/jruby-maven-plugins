@@ -80,10 +80,6 @@ class AntLauncher extends AbstractLauncher {
 //        	java.createJvmarg().setValue("-client");	
 //        }
         
-        if (!factory.jvmArgs.matches("-Xmx\\d+m")) {
-            java.createJvmarg().setValue(DEFAULT_XMX);	
-        } 
-        
         for (String arg : factory.jvmArgs.list) {
         	java.createJvmarg().setValue(arg);	
         }
