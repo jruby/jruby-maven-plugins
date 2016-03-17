@@ -68,14 +68,12 @@ class AntLauncher extends AbstractLauncher {
             java.createArg().setValue(arg);
         }
 
-        java.createJvmarg().setValue("-cp");
-        java.createJvmarg()
-                .setPath((Path) this.project.getReference(MAVEN_CLASSPATH));
-
+        Path temp = (Path) this.project.getReference(MAVEN_CLASSPATH);
         if (this.factory.jrubyJar != null) {
-            java.createJvmarg().setValue("-cp");
-            java.createJvmarg().setValue(this.factory.jrubyJar.getAbsolutePath());
+            temp.add(new Path(project, this.factory.jrubyJar.getAbsolutePath()));
         }
+        java.createJvmarg().setValue("-cp");
+        java.createJvmarg().setPath(temp);
 
         // Does not work on all JVMs
 //        if (!factory.jvmArgs.matches("(-client|-server)")) {
@@ -83,7 +81,7 @@ class AntLauncher extends AbstractLauncher {
 //        }
         
         if (!factory.jvmArgs.matches("-Xmx\\d+m")) {
-        	java.createJvmarg().setValue(DEFAULT_XMX);	
+            java.createJvmarg().setValue(DEFAULT_XMX);	
         } 
         
         for (String arg : factory.jvmArgs.list) {
