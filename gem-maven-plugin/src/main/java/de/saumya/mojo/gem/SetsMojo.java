@@ -3,8 +3,6 @@ package de.saumya.mojo.gem;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +12,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelReader;
@@ -26,7 +25,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import de.saumya.mojo.ruby.gems.GemException;
 import de.saumya.mojo.ruby.script.ScriptException;
-import org.apache.maven.project.MavenProject;
 
 /**
  * installs a set of given gems without resolving any transitive dependencies
@@ -127,7 +125,8 @@ public class SetsMojo extends AbstractGemMojo {
         Model pom = reader.read(set.iterator().next().getFile(), null);
         for( Dependency dependency : pom.getDependencies() ){
             if (!dependency.getType().equals("gem")) {
-                if (dependency.getScope() == null || dependency.getScope().equals("compile") || dependency.equals("runtime")) {
+                if (dependency.getScope() == null || dependency.getScope().equals("compile") ||
+                        dependency.getScope().equals("runtime")) {
                     Artifact a = manager.createArtifact(dependency.getGroupId(), dependency.getArtifactId(),
                             dependency.getVersion(), dependency.getClassifier(), dependency.getType());
                     a.setScope(dependency.getScope());
@@ -144,7 +143,17 @@ public class SetsMojo extends AbstractGemMojo {
                 .setArtifactDependencies(jars)
                 .setResolveTransitively(true)
                 .setLocalRepository(localRepository)
-                .setRemoteRepositories(project.getRemoteArtifactRepositories());
+                .setRemoteRepositories(project.getRemoteArtifactRepositories())
+                .setCollectionFilter(new ArtifactFilter() {
+                    // we want to skip all those jruby artifacts to be on the safe side
+                    public boolean include(Artifact artifact) {
+                        return !(artifact.getGroupId().equals("org.jruby") &&
+                                (artifact.getArtifactId().equals("jruby") ||
+                                        artifact.getArtifactId().equals("jruby-complete") ||
+                                        artifact.getArtifactId().equals("jruby-core") ||
+                                        artifact.getArtifactId().equals("jruby-stdlib")));
+                    }
+                });
         ArtifactResolutionResult result = this.repositorySystem.resolve(req);
         Set<Artifact> resolvedArtifacts = result.getArtifacts();
         for( Artifact artifact : resolvedArtifacts ){
