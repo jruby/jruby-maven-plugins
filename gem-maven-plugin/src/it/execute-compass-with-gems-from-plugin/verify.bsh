@@ -13,7 +13,7 @@ if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
-expected = "Compass can't find any Sass files to compile.";
+expected = "Sass 3.5 will no longer support Ruby 1.9.3";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
