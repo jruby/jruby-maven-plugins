@@ -76,7 +76,7 @@ public class EmbeddedLauncherTest extends TestCase {
             // in this case GEM_HOME was set in system environment
             f = new File("target/test-classes/test.rb-gem.txt");
         }
-        assertEquals("onetwothree", FileUtils.fileRead(f).trim() );
+        assertEquals("onetwothree", FileUtils.fileRead(f).substring(0, 11) );
     }
 
     public void testExecutionInTarget() throws Exception {
