@@ -19,6 +19,12 @@
     </dependency>
     <dependency>
       <groupId>rubygems</groupId>
+      <artifactId>rake</artifactId>
+      <version>10.0.0</version>
+      <type>gem</type>
+    </dependency>
+    <dependency>
+      <groupId>rubygems</groupId>
       <artifactId>rack</artifactId>
       <version>1.1.0</version>
       <type>gem</type>
