@@ -72,6 +72,7 @@ class AntLauncher extends AbstractLauncher {
         if (this.factory.jrubyJar != null) {
             temp.add(new Path(project, this.factory.jrubyJar.getAbsolutePath()));
         }
+        java.createJvmarg().setLine("-XX:+IgnoreUnrecognizedVMOptions --add-opens=java.base/java.security.cert=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util.zip=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/javax.crypto=ALL-UNNAMED --illegal-access=warn");
         java.createJvmarg().setValue("-cp");
         java.createJvmarg().setPath(temp);
 
