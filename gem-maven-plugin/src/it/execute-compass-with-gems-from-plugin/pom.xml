@@ -39,6 +39,18 @@
             <version>1.0.3</version>
             <type>gem</type>
           </dependency>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>sass</artifactId>
+            <version>3.4.0</version>
+            <type>gem</type>
+          </dependency>
+          <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>rb-inotify</artifactId>
+            <version>0.9.0</version>
+            <type>gem</type>
+          </dependency>
         </dependencies>
       </plugin>
     </plugins>

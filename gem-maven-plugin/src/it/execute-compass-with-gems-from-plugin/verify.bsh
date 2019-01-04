@@ -13,7 +13,7 @@ if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
-expected = "Sass 3.5 will no longer support Ruby 1.9.3";
+expected = "Individual stylesheets must be in the sass directory.";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
