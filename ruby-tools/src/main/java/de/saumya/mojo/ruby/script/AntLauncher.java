@@ -5,6 +5,7 @@ package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
@@ -105,7 +106,32 @@ class AntLauncher extends AbstractLauncher {
         if (outputFile != null) {
             java.setOutput(outputFile);
         }
-        java.execute();
+        java.setLogError(true);
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile("jruby-ant-launcher-", ".log");
+            tempFile.deleteOnExit();
+            java.setError(tempFile);
+            java.execute();
+        }
+        catch(IOException e) {
+            logger.warn("can not create tempfile for stderr");
+            java.execute();
+        }
+        finally {
+            if (tempFile != null) {
+                try {
+                byte[] encoded = Files.readAllBytes(tempFile.toPath());
+                if (encoded.length > 0) {
+                    logger.error(new String(encoded));
+                }
+                }
+                catch(IOException e) {
+                    logger.warn("can not read error file");
+                }
+                tempFile.delete();
+            }
+        }
     }
 
     private Project createAntProject() {
