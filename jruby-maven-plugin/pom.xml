@@ -4,7 +4,7 @@
   <parent>
     <artifactId>parent-mojo</artifactId>
     <groupId>de.saumya.mojo</groupId>
-    <version>1.1.7-SNAPSHOT</version>
+    <version>1.1.7</version>
     <relativePath>../parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>jruby-maven-plugin</artifactId>
