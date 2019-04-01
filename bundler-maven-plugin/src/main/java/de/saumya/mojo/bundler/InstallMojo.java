@@ -176,12 +176,26 @@ public class InstallMojo extends AbstractGemMojo {
                     continue;
                 }
                 String[] lines = FileUtils.fileRead(f).split(sep);
+
+                final String stubSupplement;
+                if ("end".equals(lines[lines.length - 1])) {
+                    // extra stuff in there, we need the last 6 lines
+                    StringBuilder s = new StringBuilder();
+                    for (int i = lines.length - 6; i < lines.length; ++i) {
+                        s.append(lines[i].replaceFirst(", version", ""));
+                        s.append("\n");
+                    }
+                    stubSupplement = s.toString();
+                } else {
+                    stubSupplement = lines[lines.length - 1].replaceFirst(", version", "");
+                }
+
                 File binstubFile = new File(binStubs, f.getName());
                 if(!binstubFile.exists()){
                     if(jrubyVerbose){
                         getLog().info("create bin stub " + binstubFile);
                     }
-                    FileUtils.fileWrite(binstubFile, stub + lines[lines.length - 1].replaceFirst(", version", ""));
+                    FileUtils.fileWrite(binstubFile, stub + stubSupplement);
                     setExecutable(binstubFile);
                 }
             }
