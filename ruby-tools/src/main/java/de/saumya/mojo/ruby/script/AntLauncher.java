@@ -123,7 +123,7 @@ class AntLauncher extends AbstractLauncher {
                 try {
                 byte[] encoded = Files.readAllBytes(tempFile.toPath());
                 if (encoded.length > 0) {
-                    logger.error(new String(encoded));
+                    logger.warn(new String(encoded));
                 }
                 }
                 catch(IOException e) {
