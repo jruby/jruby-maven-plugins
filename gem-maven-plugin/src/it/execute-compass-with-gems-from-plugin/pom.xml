@@ -7,7 +7,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>rubygems-releases</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
+      <url>https://rubygems-proxy.torquebox.org/releases</url>
     </pluginRepository>
   </pluginRepositories>
   <properties>

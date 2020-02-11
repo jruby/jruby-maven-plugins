@@ -12,7 +12,7 @@
     <repositories>
         <repository>
             <id>rubygems-release</id>
-            <url>http://rubygems-proxy.torquebox.org/releases</url>
+            <url>https://rubygems-proxy.torquebox.org/releases</url>
         </repository>
     </repositories>
     <dependencies>
