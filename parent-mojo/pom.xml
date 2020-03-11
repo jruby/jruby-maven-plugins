@@ -125,6 +125,7 @@
               <preBuildHookScript>setup.bsh</preBuildHookScript>
               <postBuildHookScript>verify.bsh</postBuildHookScript>
               <streamLogs>true</streamLogs>
+	      <pomExcludes>*-skip/pom.xml</pomExcludes>
             </configuration>
             <executions>
               <execution>

@@ -2,9 +2,8 @@ import java.io.*;
 import org.codehaus.plexus.util.FileUtils;
 
 
-String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "Compiling ./file.rb";
-if ( !log.contains( expected ) )
+String file = new File( basedir, "target/classes/file.class" ).toString();
+if ( ! FileUtils.fileExists(file) )
 {
-    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+    throw new RuntimeException( "class file does not exists '" + file + "'" );
 }
