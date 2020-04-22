@@ -24,6 +24,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * maven wrapper around the cucumber command.
  */
 @Mojo(name = "test", defaultPhase = LifecyclePhase.TEST, requiresDependencyResolution = ResolutionScope.TEST)
+@Deprecated
 public class CucumberMojo extends AbstractTestMojo {
 
     enum ResultEnum {
@@ -50,6 +51,7 @@ public class CucumberMojo extends AbstractTestMojo {
     
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+		logger.warn("cucumber-maven-plugin is deprecated and is not maintained anymore");
 		if (this.skip || this.skipTests || this.skipCucumber) {
 			getLog().info("Skipping Cucumber tests");
 		} 

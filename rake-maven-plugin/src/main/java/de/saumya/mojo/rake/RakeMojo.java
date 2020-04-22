@@ -37,6 +37,7 @@ public class RakeMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, GemException {
+        logger.warn("rake-maven-plugin is deprecated and is not maintained anymore");
         final Script script = this.factory.newScriptFromJRubyJar("rake");
         if (this.rakefile != null){
             script.addArg("-f", this.rakefile);

@@ -25,6 +25,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
  * maven wrapper around the bundler install command.
  */
 @Mojo(name = "install", defaultPhase = LifecyclePhase.INITIALIZE, requiresDependencyResolution = ResolutionScope.TEST)
+@Deprecated
 public class InstallMojo extends AbstractGemMojo {
 
     /**
@@ -99,7 +100,7 @@ public class InstallMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, GemException {
-        if(project.getFile() != null){
+        logger.warn("bundler-maven-plugin is deprecated and is not maintained anymore");       if(project.getFile() != null){
             String pomSha1 = sha1(FileUtils.fileRead(project.getFile()));
             File sha1 = new File(project.getBuild().getDirectory(), project.getFile().getName() + ".sha1");
             if(sha1.exists()){

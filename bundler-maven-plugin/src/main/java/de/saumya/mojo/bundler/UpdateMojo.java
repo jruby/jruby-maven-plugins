@@ -17,6 +17,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * maven wrapper around the bundler update command.
  */
 @Mojo(name = "update", defaultPhase = LifecyclePhase.INITIALIZE, requiresDependencyResolution = ResolutionScope.TEST)
+@Deprecated
 public class UpdateMojo extends AbstractGemMojo {
 
     /**
@@ -29,6 +30,7 @@ public class UpdateMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, GemException {
+        logger.warn("bundler-maven-plugin is deprecated and is not maintained anymore");
         final Script script = this.factory.newScriptFromSearchPath("bundle");
         script.addArg("update");
         if (this.bundlerArgs != null) {
