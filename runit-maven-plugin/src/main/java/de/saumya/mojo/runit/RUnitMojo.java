@@ -53,7 +53,8 @@ public class RUnitMojo extends AbstractTestMojo {
     
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (this.skip || this.skipTests || this.skipRunit) {
+        logger.warn("runit-maven-plugin is deprecated and is not maintained anymore");
+	if (this.skip || this.skipTests || this.skipRunit) {
             getLog().info("Skipping RUnit tests");
             return;
         } else {
