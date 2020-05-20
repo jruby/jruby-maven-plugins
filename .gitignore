@@ -7,3 +7,5 @@ target
 tmp
 *Backup
 release.properties
+.idea/
+*.iml

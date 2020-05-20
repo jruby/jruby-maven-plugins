@@ -5,6 +5,7 @@ package de.saumya.mojo.ruby.script;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 
 public class Script extends Arguments {
@@ -91,6 +92,18 @@ public class Script extends Arguments {
             this.scriptFactory.launcher.executeScript(this.script,
                                                       this.list,
                                                       output);
+        }
+        else {
+            this.scriptFactory.launcher.execute(this.list, output);
+        }
+    }
+
+    public void execute(final OutputStream output) throws ScriptException,
+            IOException {
+        if (this.script != null) {
+            this.scriptFactory.launcher.executeScript(this.script,
+                    this.list,
+                    output);
         }
         else {
             this.scriptFactory.launcher.execute(this.list, output);

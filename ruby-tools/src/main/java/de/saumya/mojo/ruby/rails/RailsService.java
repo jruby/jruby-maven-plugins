@@ -16,7 +16,7 @@ public class RailsService {
     private final GemsInstaller           installer;
     private final RailsManager            manager;
     private final RailsState              state;
-    private final Object session;
+    private Object session;
 
     public RailsService(final RailsState state,
             final Object repositorySystemSession,
