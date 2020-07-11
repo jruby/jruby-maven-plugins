@@ -241,7 +241,7 @@ public class GemsInstaller {
                             .addArg(booleanArg(this.config.isUserInstall(), "user-install"))
                             .addArg(booleanArg(this.config.isVerbose(), "verbose"));
 
-                    final JRubyVersion version = this.getVersion();
+                    final JRubyVersion version = this.factory.getVersion();
                     if (version == null || version.isLanguageLowerThan(2,6)) {
                         script.addArg(booleanArg(this.config.isAddRdoc(), "rdoc"))
                                 .addArg(booleanArg(this.config.isAddRI(), "ri"));
@@ -256,14 +256,6 @@ public class GemsInstaller {
             }
         }
         return script;
-    }
-
-    private JRubyVersion getVersion() {
-        try {
-            return this.factory.getVersion();
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     private String booleanArg(final boolean flag, final String name) {

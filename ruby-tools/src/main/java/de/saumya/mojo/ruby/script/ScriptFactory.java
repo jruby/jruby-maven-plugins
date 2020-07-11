@@ -201,16 +201,22 @@ public class ScriptFactory {
         }
     }
 
-    public JRubyVersion getVersion() throws ScriptException, IOException {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        this.newArguments()
-                .addArg("-v")
-                .execute(os);
-        final String[] versionParts = os.toString(StandardCharsets.UTF_8.toString())
-                .split(" ");
-        final String jrubyVersion = versionParts[1];
-        final String languageVersion = extractLanguageVersion(versionParts[2]);
-        return new JRubyVersion(jrubyVersion, languageVersion);
+    /**
+     * Returns JRuby version representation found.
+     * {@code null} if version format could not be processed.
+     */
+    public JRubyVersion getVersion() {
+        try {
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            this.newArguments().addArg("-v").execute(os);
+            final String[] versionParts = os.toString(StandardCharsets.UTF_8.toString()).split(" ");
+            final String jrubyVersion = versionParts[1];
+            final String languageVersion = extractLanguageVersion(versionParts[2]);
+            return new JRubyVersion(jrubyVersion, languageVersion);
+        } catch (Exception e) {
+            logger.warn("Could not identify version: " + e.getMessage());
+            return null;
+        }
     }
 
     private String extractLanguageVersion(String versionPart) {
