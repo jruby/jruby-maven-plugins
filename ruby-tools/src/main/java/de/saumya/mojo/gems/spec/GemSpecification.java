@@ -55,8 +55,6 @@ public class GemSpecification {
 
     private List<String>   requirements;
 
-    private String         rubyforge_project;
-
     private String         rubygems_version;
 
     private String         specification_version;
@@ -303,14 +301,6 @@ public class GemSpecification {
 
     public void setRequirements(final List<String> requirements) {
         this.requirements = requirements;
-    }
-
-    public String getRubyforge_project() {
-        return this.rubyforge_project;
-    }
-
-    public void setRubyforge_project(final String rubyforgeProject) {
-        this.rubyforge_project = rubyforgeProject;
     }
 
     public String getRubygems_version() {

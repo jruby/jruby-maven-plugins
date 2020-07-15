@@ -59,9 +59,6 @@ public class PackageMojo extends AbstractGemMojo {
     private String                    requirePaths;
 
     @Parameter
-    private String                    rubyforgeProject;
-
-    @Parameter
     private String                    rubygemsVersion;
 
     @Parameter
@@ -240,7 +237,6 @@ public class PackageMojo extends AbstractGemMojo {
         gemSpecWriter.append("bindir", this.bindir);
         gemSpecWriter.append("post_install_message", this.postInstallMessage);
 
-        gemSpecWriter.append("rubyforge_project", this.rubyforgeProject);
         gemSpecWriter.appendRdocFiles(this.extraRdocFiles);
         gemSpecWriter.appendFiles(this.extraFiles);
         gemSpecWriter.appendList("executables", this.executables);
