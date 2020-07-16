@@ -11,11 +11,11 @@ if ( !log.contains( expected ) )
 File file = new File( basedir, "target/surefire-reports/TEST-minitest.xml");
 if ( !file.exists() )
 {
-    throw new RuntimeException( "file does not exists: '" + file.getAbsolutePath() + "'" );
+    throw new RuntimeException( "file does not exist: '" + file.getAbsolutePath() + "'" );
 }
 
 file = new File( basedir, "target/summary.xml");
 if ( !file.exists() )
 {
-    throw new RuntimeException( "file does not exists: '" + file.getAbsolutePath() + "'" );
+    throw new RuntimeException( "file does not exist: '" + file.getAbsolutePath() + "'" );
 }

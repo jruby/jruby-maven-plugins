@@ -12,5 +12,5 @@ if ( !log.contains( expected ) )
 File f = new File( new File( new File( basedir, "target" ), "surefire-reports" ), "TEST-rspec.xml" );
 if ( !f.exists() )
 {
-    throw new RuntimeException( "file does not exists: " + f );
+    throw new RuntimeException( "file does not exist: " + f );
 }

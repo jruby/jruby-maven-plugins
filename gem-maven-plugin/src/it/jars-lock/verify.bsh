@@ -48,17 +48,17 @@ if ( !log.contains( expected ) )
 File file = new File( basedir, "target/jars/org/slf4j/log4j-over-slf4j/1.7.10/log4j-over-slf4j-1.7.10.jar" );
 if ( !file.exists() )
 {
-    throw new RuntimeException( "expected file does not exists '" + file + "'" );
+    throw new RuntimeException( "expected file does not exist '" + file + "'" );
 }
 
 file = new File( basedir, "target/jars/org/apache/kafka/kafka_2.10/0.8.1.1/kafka_2.10-0.8.1.1.jar" );
 if ( !file.exists() )
 {
-    throw new RuntimeException( "expected file does not exists '" + file + "'" );
+    throw new RuntimeException( "expected file does not exist '" + file + "'" );
 }
 
 file = new File( basedir, "target/jars/org/bouncycastle/bcprov-jdk15on/1.49/bcprov-jdk15on-1.49.jar" );
 if ( !file.exists() )
 {
-    throw new RuntimeException( "expected file does not exists '" + file + "'" );
+    throw new RuntimeException( "expected file does not exist '" + file + "'" );
 }

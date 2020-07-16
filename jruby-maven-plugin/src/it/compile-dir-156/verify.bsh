@@ -3,6 +3,6 @@ import java.io.*;
 File target = new File(basedir, "target/classes");
 for(String f: new String[] { "file.class", "more/hello.class" }){
   if( !new File(target, f).exists() ){
-     throw new RuntimeException("file does not exists: target/classes" + f); 
+     throw new RuntimeException("file does not exist: target/classes" + f);
   }
 }
