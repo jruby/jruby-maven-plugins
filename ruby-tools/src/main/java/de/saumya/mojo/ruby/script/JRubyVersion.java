@@ -21,13 +21,14 @@ public class JRubyVersion {
     public boolean isLanguageLowerThan(int major, int minor) {
         final String[] parts = getLanguage().split("\\.");
 
-        if (major < Integer.parseInt(parts[0]))
-            return true;
+        int majorLanguageVersion = Integer.parseInt(parts[0]);
+        int minorLanguageVersion = Integer.parseInt(parts[1]);
 
-        if (minor < Integer.parseInt(parts[1]))
-            return true;
-
-        return false;
+        if (major == majorLanguageVersion) {
+            return minorLanguageVersion < minor;
+        } else {
+            return majorLanguageVersion < major;
+        }
     }
 
 }
