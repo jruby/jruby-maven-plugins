@@ -1,89 +1,53 @@
 package de.saumya.mojo.ruby.script;
 
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+
 
 public class JRubyVersionTest {
 
     @Test
-    public void should_return_false_when_compared_language_major_is_equal_and_minor_version_is_equal() {
-        final JRubyVersion version = new JRubyVersion("jruby", "2.5.7");
+    public void should_fail_with_exceptions_when_jruby_version_is_null() {
+        final JRubyVersion version = new JRubyVersion(null, "3.5.7");
 
-        boolean result = version.isLanguageLowerThan(2, 5);
+        Throwable throwable = catchThrowable(new ThrowableAssert.ThrowingCallable() {
+            public void call() {
+                version.isVersionLowerThan(1, 2, 3);
+            }
+        });
 
-        assertThat(result).isFalse();
+        assertThat(throwable)
+                .isInstanceOf(NumberFormatException.class);
     }
 
     @Test
-    public void should_return_false_when_compared_language_major_is_equal_and_minor_version_is_lower() {
-        final JRubyVersion version = new JRubyVersion("jruby", "2.5.7");
+    public void should_fail_with_exceptions_when_jruby_version_is_empty() {
+        final JRubyVersion version = new JRubyVersion("", "3.5.7");
 
-        boolean result = version.isLanguageLowerThan(2, 4);
+        Throwable throwable = catchThrowable(new ThrowableAssert.ThrowingCallable() {
+            public void call() {
+                version.isVersionLowerThan(1, 2, 3);
+            }
+        });
 
-        assertThat(result).isFalse();
+        assertThat(throwable)
+                .isInstanceOf(NumberFormatException.class);
     }
 
     @Test
-    public void should_return_true_when_compared_language_major_is_equal_and_minor_version_is_higher() {
-        final JRubyVersion version = new JRubyVersion("jruby", "2.5.7");
+    public void should_fail_with_exceptions_when_jruby_version_contains_text() {
+        final JRubyVersion version = new JRubyVersion("not.a.number", "3.5.7");
 
-        boolean result = version.isLanguageLowerThan(2, 6);
+        Throwable throwable = catchThrowable(new ThrowableAssert.ThrowingCallable() {
+            public void call() {
+                version.isVersionLowerThan(1, 2, 3);
+            }
+        });
 
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void should_return_true_when_compared_language_major_is_higher_and_minor_is_equal() {
-        final JRubyVersion version = new JRubyVersion("jruby", "2.5.7");
-
-        boolean result = version.isLanguageLowerThan(3, 5);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void should_return_true_when_compared_language_major_is_higher_and_minor_is_lower() {
-        final JRubyVersion version = new JRubyVersion("jruby", "2.5.7");
-
-        boolean result = version.isLanguageLowerThan(3, 3);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void should_return_true_when_compared_language_major_is_higher_and_minor_is_higher() {
-        final JRubyVersion version = new JRubyVersion("jruby", "2.5.7");
-
-        boolean result = version.isLanguageLowerThan(3, 6);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    public void should_return_false_when_compared_language_major_is_lower_and_minor_is_equal() {
-        final JRubyVersion version = new JRubyVersion("jruby", "3.5.7");
-
-        boolean result = version.isLanguageLowerThan(1, 5);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void should_return_false_when_compared_language_major_is_lower_and_minor_is_lower() {
-        final JRubyVersion version = new JRubyVersion("jruby", "3.5.7");
-
-        boolean result = version.isLanguageLowerThan(1, 2);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    public void should_return_false_when_compared_language_major_is_lower_and_minor_is_higher() {
-        final JRubyVersion version = new JRubyVersion("jruby", "3.5.7");
-
-        boolean result = version.isLanguageLowerThan(1, 10);
-
-        assertThat(result).isFalse();
+        assertThat(throwable)
+                .isInstanceOf(NumberFormatException.class);
     }
 }

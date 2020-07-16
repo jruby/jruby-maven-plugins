@@ -242,7 +242,7 @@ public class GemsInstaller {
                             .addArg(booleanArg(this.config.isVerbose(), "verbose"));
 
                     final JRubyVersion version = this.factory.getVersion();
-                    if (version == null || version.isLanguageLowerThan(2,6)) {
+                    if (version == null || version.isVersionLowerThan(9, 2, 10)) {
                         script.addArg(booleanArg(this.config.isAddRdoc(), "rdoc"))
                                 .addArg(booleanArg(this.config.isAddRI(), "ri"));
                     } else {
