@@ -1,7 +1,17 @@
 /**
- * 
+ *
  */
 package de.saumya.mojo.ruby.gems;
+
+import de.saumya.mojo.ruby.script.JRubyVersion;
+import de.saumya.mojo.ruby.script.Script;
+import de.saumya.mojo.ruby.script.ScriptException;
+import de.saumya.mojo.ruby.script.ScriptFactory;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -9,28 +19,19 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.plugin.descriptor.PluginDescriptor;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.FileUtils;
-
-import de.saumya.mojo.ruby.script.Script;
-import de.saumya.mojo.ruby.script.ScriptException;
-import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class GemsInstaller {
 
     private static final String OPENSSL_VERSION = "0.8.2";
     private static final String OPENSSL = "jruby-openssl";
-    
+
     private static final FileFilter FILTER = new FileFilter() {
-        
+
         public boolean accept(File f) {
             return f.getName().endsWith(".gemspec");
         }
     };
-    
+
     public final GemsConfig     config;
 
     public final ScriptFactory  factory;
@@ -54,19 +55,19 @@ public class GemsInstaller {
             ScriptException, GemException {
         installPom(pom, localRepository, null);
     }
-    
+
     public void installPom(final MavenProject pom,
             final ArtifactRepository localRepository, String scope) throws IOException,
             ScriptException, GemException {
         installGems(pom, localRepository, scope);
     }
-    
+
     public MavenProject installOpenSSLGem(final Object repositorySystemSession,
             final ArtifactRepository localRepository, List<ArtifactRepository> remotes) throws GemException,
             IOException, ScriptException {
         return installGem(OPENSSL, OPENSSL_VERSION, repositorySystemSession, localRepository, remotes);
     }
-    
+
     public MavenProject installGem(final String name, final String version,
             final Object repositorySystemSession,
             final ArtifactRepository localRepository, List<ArtifactRepository> remoteRepositories) throws GemException,
@@ -87,21 +88,21 @@ public class GemsInstaller {
         installPom(pom);
         return pom;
     }
-    
+
     public void installGems(final MavenProject pom,
-            final ArtifactRepository localRepository)  
+            final ArtifactRepository localRepository)
                     throws IOException, ScriptException, GemException
     {
         installGems(pom, localRepository, null);
-        
+
     }
-    
+
     public void installGems(final MavenProject pom,
-            final ArtifactRepository localRepository, String scope ) 
+            final ArtifactRepository localRepository, String scope )
         throws IOException, ScriptException, GemException {
         installGems(pom, (Collection<Artifact>)null, localRepository, scope);
     }
-    
+
     public void installGems(final MavenProject pom, PluginDescriptor plugin,
             final ArtifactRepository localRepository) throws IOException,
             ScriptException, GemException {
@@ -118,7 +119,7 @@ public class GemsInstaller {
                     throws IOException, ScriptException, GemException {
         installGems( pom, artifacts, localRepository, remoteRepos, null );
     }
-    
+
     public void installGems(final MavenProject pom, final Collection<Artifact> artifacts,
                 final ArtifactRepository localRepository, List<ArtifactRepository> remoteRepos,
                 String scope ) throws IOException,
@@ -130,9 +131,9 @@ public class GemsInstaller {
             boolean hasAlreadyOpenSSL = false;
             for (final Artifact artifact : pom.getArtifacts()) {
                 // assume pom.getBasedir() != null indicates the project pom
-                if ( ( "compile".equals(artifact.getScope()) || 
+                if ( ( "compile".equals(artifact.getScope()) ||
                        "runtime".equals(artifact.getScope()) ||
-                       pom.getBasedir() != null ) && 
+                       pom.getBasedir() != null ) &&
                       ( scope == null || scope.equals(artifact.getScope()) ) ) {
                     if (!artifact.getFile().exists()) {
                         this.manager.resolve(artifact,
@@ -160,7 +161,7 @@ public class GemsInstaller {
             }
             if ( pom.getArtifact().getFile() != null
                  // to filter out target/classes
-                 && pom.getArtifact().getFile().isFile() 
+                 && pom.getArtifact().getFile().isFile()
                  // have only gem files
                  && pom.getArtifact().getFile().getName().endsWith(".gem") ) {
                 script = maybeAddArtifact(script, pom.getArtifact());
@@ -194,7 +195,7 @@ public class GemsInstaller {
                 this.config.getBinDirectory().mkdirs();
             }
             script.execute();
-            
+
             if (this.config.getGemHome() != null){
                 // workaround for unpatched: https://github.com/rubygems/rubygems/commit/21cccd55b823848c5e941093a615b0fdd6cd8bc7
                 for(File spec : new File(this.config.getGemHome(), "specifications").listFiles(FILTER)){
@@ -227,21 +228,26 @@ public class GemsInstaller {
         }
         return false;
     }
-    
+
     private Script maybeAddArtifact(Script script, final Artifact artifact)
             throws IOException, GemException {
         if (artifact.getType().contains("gem")) {
             if (!exists(artifact)) {
                 if (script == null) {
+
                     script = this.factory.newScriptFromJRubyJar("gem")
                             .addArg("install")
                             .addArg("--ignore-dependencies")
-                            .addArg(booleanArg(this.config.isAddRdoc(), "rdoc"))
-                            .addArg(booleanArg(this.config.isAddRI(), "ri"))
-                            .addArg(booleanArg(this.config.isUserInstall(),
-                                               "user-install"))
-                            .addArg(booleanArg(this.config.isVerbose(),
-                                               "verbose"));
+                            .addArg(booleanArg(this.config.isUserInstall(), "user-install"))
+                            .addArg(booleanArg(this.config.isVerbose(), "verbose"));
+
+                    final JRubyVersion version = this.factory.getVersion();
+                    if (version == null || version.isVersionLowerThan(9, 2, 10)) {
+                        script.addArg(booleanArg(this.config.isAddRdoc(), "rdoc"))
+                                .addArg(booleanArg(this.config.isAddRI(), "ri"));
+                    } else {
+                        script.addArg(booleanArg(this.config.isAddRdoc(), "document"));
+                    }
                 }
                 if (artifact.getFile() != null)
                 {

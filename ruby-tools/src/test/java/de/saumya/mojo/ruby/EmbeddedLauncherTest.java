@@ -15,8 +15,8 @@ import de.saumya.mojo.ruby.script.GemScriptFactory;
 import de.saumya.mojo.ruby.script.ScriptFactory;
 
 public class EmbeddedLauncherTest extends TestCase {
-	
-	private static final String SEP = System.getProperty("line.separator");
+
+    private static final String SEP = System.getProperty("line.separator");
 
     public EmbeddedLauncherTest(final String testName) {
         super(testName);
@@ -42,7 +42,7 @@ public class EmbeddedLauncherTest extends TestCase {
         GemsConfig config = new GemsConfig();
         config.setGemHome(home);
         config.addGemPath(path);
-        
+
         this.path.mkdirs();
         this.expected = "onetwothree" + SEP + this.home.getAbsolutePath() + SEP
                 + this.path.getAbsolutePath() + SEP;
@@ -135,7 +135,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 .addArg("three")
                 .execute();
         assertEquals(this.expected,
-                     FileUtils.fileRead("target/test-classes/test.rb-gem.txt"));
+                FileUtils.fileRead("target/test-classes/test.rb-gem.txt"));
     }
 
     public void testScriptInTarget() throws Exception {
@@ -145,7 +145,7 @@ public class EmbeddedLauncherTest extends TestCase {
                 .addArg("three")
                 .executeIn(new File("target"));
         assertEquals(this.expected,
-                     FileUtils.fileRead("target/test-classes/test.rb-gem.txt") );
+                FileUtils.fileRead("target/test-classes/test.rb-gem.txt") );
     }
 
     public void testScriptWithOutput() throws Exception {

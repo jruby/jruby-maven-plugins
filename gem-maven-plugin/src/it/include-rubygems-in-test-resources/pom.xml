@@ -14,8 +14,8 @@
   <dependencies>
     <dependency>
       <groupId>rubygems</groupId>
-      <artifactId>yard</artifactId>
-      <version>0.8.0</version>
+      <artifactId>sass</artifactId>
+      <version>3.2.7</version>
       <type>gem</type>
     </dependency>
     <dependency>

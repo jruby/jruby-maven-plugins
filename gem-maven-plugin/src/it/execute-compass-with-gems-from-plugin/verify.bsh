@@ -1,20 +1,18 @@
 import java.io.*;
+import java.util.*;
 import org.codehaus.plexus.util.FileUtils;
 
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "Successfully installed compass-";
-if ( !log.contains( expected ) )
+
+String installMessage = "Successfully installed ";
+String[] expectedGems = new String[] { "compass-", "sass-", "rb-inotify-" };
+
+for ( String expectedGem: expectedGems )
 {
-    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-}
-expected = "Successfully installed sass-";
-if ( !log.contains( expected ) )
-{
-    throw new RuntimeException( "log file does not contain '" + expected + "'" );
-}
-expected = "Individual stylesheets must be in the sass directory.";
-if ( !log.contains( expected ) )
-{
-    throw new RuntimeException( "log file does not contain '" + expected + "'" );
+    String expected = installMessage + expectedGem;
+    if ( !log.contains( expected ) )
+    {
+        throw new RuntimeException( "log file does not contain '" + expected + "'" );
+    }
 }

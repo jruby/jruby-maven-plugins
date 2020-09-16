@@ -3,18 +3,16 @@
  */
 package de.saumya.mojo.ruby.script;
 
-import java.io.File;
-import java.io.IOException;
+import de.saumya.mojo.ruby.Logger;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.Java;
+import org.apache.tools.ant.types.Environment.Variable;
+import org.apache.tools.ant.types.Path;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.taskdefs.Java;
-import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.Environment.Variable;
-
-import de.saumya.mojo.ruby.Logger;
 
 class AntLauncher extends AbstractLauncher {
 
@@ -22,11 +20,13 @@ class AntLauncher extends AbstractLauncher {
 
     private static final String DEFAULT_XMX = "-Xmx384m";
 
-    private final Logger        logger;
+    private static final String TEMP_FILE_PREFIX = "jruby-ant-launcher-";
+
+    private final Logger logger;
 
     private final ScriptFactory factory;
 
-    private final Project       project;
+    private final Project project;
 
     AntLauncher(final Logger logger, final ScriptFactory factory) {
         this.logger = logger;
@@ -35,8 +35,14 @@ class AntLauncher extends AbstractLauncher {
     }
 
     @Override
-    protected void doExecute(final File launchDirectory,
-            final List<String> args, final File outputFile) {
+    protected void doExecute(final File launchDirectory, 
+                             final List<String> args, File outputFile) throws ScriptException, IOException {
+        doExecute(launchDirectory, args,new FileOutputStream(outputFile));
+    }
+
+    @Override
+    protected void doExecute(final File launchDirectory, final List<String> args,
+                             final OutputStream outputStream) throws ScriptException, IOException {
         final Java java = new Java();
         java.setProject(this.project);
         java.setClassname("org.jruby.Main");
@@ -79,7 +85,7 @@ class AntLauncher extends AbstractLauncher {
 
         // Does not work on all JVMs
 //        if (!factory.jvmArgs.matches("(-client|-server)")) {
-//        	java.createJvmarg().setValue("-client");	
+//        	java.createJvmarg().setValue("-client");
 //        }
         
         for (String arg : factory.jvmArgs.list) {
@@ -102,35 +108,47 @@ class AntLauncher extends AbstractLauncher {
             java.createJvmarg().setValue("-Xbootclasspath/a:"
                     + jrubyJar.getAbsolutePath());
         }
-        
-        if (outputFile != null) {
-            java.setOutput(outputFile);
+
+        File outputTempFile = null;
+        if (outputStream != null) {
+            outputTempFile = File.createTempFile(TEMP_FILE_PREFIX, ".output");
+            java.setOutput(outputTempFile);
         }
+
         java.setLogError(true);
-        File tempFile = null;
+        File errorTempFile = null;
         try {
-            tempFile = File.createTempFile("jruby-ant-launcher-", ".log");
-            tempFile.deleteOnExit();
-            java.setError(tempFile);
+            errorTempFile = File.createTempFile(TEMP_FILE_PREFIX, ".log");
+            errorTempFile.deleteOnExit();
+            java.setError(errorTempFile);
             java.execute();
-        }
-        catch(IOException e) {
+
+            if (outputStream != null) {
+                writeInto(outputTempFile, outputStream);
+                outputTempFile.delete();
+            }
+        } catch (IOException e) {
             logger.warn("can not create tempfile for stderr");
             java.execute();
-        }
-        finally {
-            if (tempFile != null) {
+        } finally {
+            if (errorTempFile != null && errorTempFile.length() > 0) {
                 try {
-                byte[] encoded = Files.readAllBytes(tempFile.toPath());
-                if (encoded.length > 0) {
+                    byte[] encoded = Files.readAllBytes(errorTempFile.toPath());
                     logger.warn(new String(encoded));
-                }
-                }
-                catch(IOException e) {
+                } catch (IOException e) {
                     logger.warn("can not read error file");
                 }
-                tempFile.delete();
+                errorTempFile.delete();
             }
+        }
+    }
+
+    private void writeInto(File file, OutputStream outputStream) throws IOException {
+        byte[] buffer = new byte[1024 * 4];
+        final InputStream fileIS = new FileInputStream(file);
+
+        while (fileIS.read(buffer) > 0) {
+            outputStream.write(buffer);
         }
     }
 
@@ -153,7 +171,7 @@ class AntLauncher extends AbstractLauncher {
     @Override
     public void execute(final List<String> args) throws ScriptException,
             IOException {
-        doExecute(null, args, null);
+        doExecute(null, args, (OutputStream) null);
     }
 
     @Override
@@ -165,7 +183,7 @@ class AntLauncher extends AbstractLauncher {
     @Override
     public void executeIn(final File launchDirectory, final List<String> args)
             throws ScriptException, IOException {
-        doExecute(launchDirectory, args, null);
+        doExecute(launchDirectory, args, (OutputStream) null);
     }
 
     @Override
@@ -177,7 +195,7 @@ class AntLauncher extends AbstractLauncher {
     @Override
     public void executeScript(final String script, final List<String> args)
             throws ScriptException, IOException {
-        executeScript(script, args, null);
+        executeScript(script, args, (OutputStream) null);
     }
 
     @Override
@@ -189,15 +207,29 @@ class AntLauncher extends AbstractLauncher {
     @Override
     public void executeScript(final File launchDirectory, final String script,
             final List<String> args) throws ScriptException, IOException {
-        executeScript(launchDirectory, script, args, null);
+        executeScript(launchDirectory, script, args, (OutputStream) null);
     }
 
+    @Override
     public void executeScript(final File launchDirectory, final String script,
             final List<String> args, final File outputFile)
             throws ScriptException, IOException {
+        addScriptArguments(script, args);
+        doExecute(launchDirectory, args, outputFile);
+    }
+
+    @Override
+    public void executeScript(final File launchDirectory, final String script,
+                              final List<String> args, final OutputStream outputStream)
+            throws ScriptException, IOException {
+        addScriptArguments(script, args);
+        doExecute(launchDirectory, args, outputStream);
+    }
+
+    private void addScriptArguments(String script, List<String> args) {
         args.add(0, "-e");
         args.add(1, script);
         args.add(2, "--");
-        doExecute(launchDirectory, args, outputFile);
     }
+
 }

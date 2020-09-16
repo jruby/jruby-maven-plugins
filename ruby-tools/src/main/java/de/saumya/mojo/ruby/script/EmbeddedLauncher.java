@@ -3,15 +3,15 @@
  */
 package de.saumya.mojo.ruby.script;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.codehaus.classworlds.ClassRealm;
 import org.codehaus.classworlds.DuplicateRealmException;
 import org.codehaus.classworlds.NoSuchRealmException;
@@ -19,6 +19,8 @@ import org.codehaus.classworlds.NoSuchRealmException;
 import de.saumya.mojo.ruby.Logger;
 
 class EmbeddedLauncher extends AbstractLauncher {
+
+    private static final String TEMP_FILE_PREFIX = "jruby-embedded-launcher-";
 
     private static final Class<?>[] No_ARG_TYPES = new Class[0];
     private static final Object[]   NO_ARGS      = new Object[0];
@@ -91,6 +93,16 @@ class EmbeddedLauncher extends AbstractLauncher {
             final List<String> args, final File outputFile)
             throws ScriptException, IOException {
         doExecute(launchDirectory, outputFile, args, true);
+    }
+
+    @Override
+    protected void doExecute(final File launchDirectory,
+            final List<String> args, OutputStream outputStream)
+            throws ScriptException, IOException {
+        final File outputFile = Files.createTempFile(TEMP_FILE_PREFIX, ".output").toFile();
+        doExecute(launchDirectory, outputFile, args, true);
+        byte[] outputBytes = FileUtils.readFileToByteArray(outputFile);
+        outputStream.write(outputBytes);
     }
 
     private void doExecute(final File launchDirectory, final File outputFile,
@@ -199,6 +211,16 @@ class EmbeddedLauncher extends AbstractLauncher {
             }
 
         }
+    }
+
+    @Override
+    public void executeScript(final File launchDirectory,
+        final String script, final List<String> args,
+        final OutputStream outputStream) throws ScriptException, IOException {
+        final File outputFile = Files.createTempFile(TEMP_FILE_PREFIX, ".output").toFile();
+        executeScript(launchDirectory, script, args, outputFile);
+        byte[] outputBytes = FileUtils.readFileToByteArray(outputFile);
+        outputStream.write(outputBytes);
     }
 
     public void executeScript(final File launchDirectory, final String script,

@@ -70,7 +70,7 @@ public class RSpecMojo extends AbstractTestMojo {
                             new File( launchDirectory(), specSourceDirectory );
             if ( !this.specsDir.isDirectory() )
             {
-                getLog().info("given " + specSourceDirectory + " does not exists - skipping RSpec test'" );
+                getLog().info("given " + specSourceDirectory + " does not exist - skipping RSpec test'" );
                 return;
             }
             outputfile = new File( this.project.getBuild().getDirectory().replace( "${project.basedir}/", ""),
