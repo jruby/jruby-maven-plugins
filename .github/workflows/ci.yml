@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - fix_ci
+
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Set up java
+        uses: actions/setup-java@v2
+        with:
+          distribution: zulu
+          java-version: 11
+
+      - name: Install dependencies
+        run: mvn install -Dmaven.test.skip -Dinvoker.skip
+
+      - name: Run tests
+        run: mvn verify -Pintegration-test
