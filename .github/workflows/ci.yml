@@ -22,7 +22,7 @@ jobs:
           java-version: 11
 
       - name: Install dependencies
-        run: mvn install -Dmaven.test.skip -Dinvoker.skip
+        run: ./mvnw install -Dmaven.test.skip -Dinvoker.skip
 
       - name: Run tests
-        run: mvn verify -Pintegration-test
+        run: ./mvnw verify -Pintegration-test
