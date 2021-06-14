@@ -9,3 +9,4 @@ tmp
 release.properties
 .idea/
 *.iml
+.mvn/wrapper/maven-wrapper.jar
