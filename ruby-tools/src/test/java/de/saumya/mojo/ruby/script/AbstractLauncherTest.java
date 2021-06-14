@@ -23,7 +23,7 @@ public class AbstractLauncherTest {
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() throws ScriptException, IOException {
         final NoopLogger logger = new NoopLogger();
-        final GemScriptFactory gemScriptFactory = gemScriptFactory(testClassloader());
+        final GemScriptFactory gemScriptFactory = gemScriptFactory();
 
         return Arrays.asList(new Object[][]{
                 {new AntLauncher(logger, gemScriptFactory)},
@@ -44,7 +44,7 @@ public class AbstractLauncherTest {
         launcher.execute(Arrays.asList("-v"), outputStream);
 
         final String output = outputStream.toString();
-        assertThat(output).startsWith("jruby 1.7.3 (1.9.3p385)");
+        assertThat(output).startsWith("jruby 9.2.18.0 (2.5.8)");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class AbstractLauncherTest {
         String[] lines = output.split("\n");
         assertThat(lines).hasSizeGreaterThan(3);
         // -v line
-        assertThat(lines[0]).startsWith("jruby 1.7.3 (1.9.3p385)");
+        assertThat(lines[0]).startsWith("jruby 9.2.18.0 (2.5.8)");
         // --help first
         assertThat(lines[1]).isEqualTo("Usage: jruby [switches] [--] [programfile] [arguments]");
     }
@@ -76,10 +76,6 @@ public class AbstractLauncherTest {
 
         final String output = outputStream.toString();
         assertThat(output).isEmpty();
-    }
-
-    private static ClassLoader testClassloader() {
-        return AbstractLauncherTest.class.getClassLoader();
     }
 
 }

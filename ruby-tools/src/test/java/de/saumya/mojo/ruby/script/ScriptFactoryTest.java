@@ -17,7 +17,7 @@ public class ScriptFactoryTest {
     @Test
     public void should_execute_script_with_only_args_and_return_in_output_stream() throws ScriptException, IOException {
         Main main = new Main();
-        final GemScriptFactory gemScriptFactory = gemScriptFactory(testClassloader());
+        final GemScriptFactory gemScriptFactory = gemScriptFactory();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         gemScriptFactory.newArguments()
@@ -31,7 +31,7 @@ public class ScriptFactoryTest {
     @Test
     public void should_execute_script_with_only_args_and_return_in_file() throws ScriptException, IOException {
         Main main = new Main();
-        final GemScriptFactory gemScriptFactory = gemScriptFactory(testClassloader());
+        final GemScriptFactory gemScriptFactory = gemScriptFactory();
 
         File outputFile = org.assertj.core.util.Files.newTemporaryFile();
         gemScriptFactory.newArguments()
@@ -45,15 +45,11 @@ public class ScriptFactoryTest {
 
     @Test
     public void should_return_jruby_version() throws ScriptException, IOException {
-        final GemScriptFactory gemScriptFactory = gemScriptFactory(testClassloader());
+        final GemScriptFactory gemScriptFactory = gemScriptFactory();
 
         JRubyVersion version = gemScriptFactory.getVersion();
 
         assertThat(version.getVersion()).isEqualTo("9.2.18.0");
         assertThat(version.getLanguage()).isEqualTo("2.5.8");
-    }
-
-    private ClassLoader testClassloader() {
-        return this.getClass().getClassLoader();
     }
 }

@@ -6,17 +6,16 @@ import de.saumya.mojo.ruby.gems.GemsConfig;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class TestDataFactories {
 
-    public static GemScriptFactory gemScriptFactory(ClassLoader cl) throws ScriptException, IOException {
+    public static GemScriptFactory gemScriptFactory() throws ScriptException, IOException {
         return new GemScriptFactory(
                 new NoopLogger(),
                 null,
-                findJRubyJar(cl),
+                findJRubyJar(),
                 new ArrayList<String>(),
                 true,
                 gemsConfig());
@@ -29,13 +28,8 @@ public class TestDataFactories {
         return config;
     }
 
-    public static File findJRubyJar(ClassLoader cl) {
-        final File inClassLoader = findInClassLoader((URLClassLoader) cl);
-        if (inClassLoader == null) {
-            return findForClass(org.jruby.Main.class);
-        } else {
-            return inClassLoader;
-        }
+    public static File findJRubyJar() {
+        return findForClass(org.jruby.Main.class);
     }
 
     private static File findForClass(Class<?> className) {
@@ -54,18 +48,5 @@ public class TestDataFactories {
             return path.substring("file:".length(), path.indexOf("!" + fullClassname));
         else
             return path;
-    }
-
-    private static File findInClassLoader(URLClassLoader cl) {
-        URLClassLoader classLoader = cl;
-        for (URL url : classLoader.getURLs()) {
-            if (url.getFile().contains("jruby-complete")) {
-                return new File(url.getPath());
-            }
-            if (url.getFile().contains("jruby-core")) {
-                return new File(url.getPath());
-            }
-        }
-        return null;
     }
 }
