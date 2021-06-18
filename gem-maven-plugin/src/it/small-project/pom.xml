@@ -12,7 +12,7 @@
     <gem.home>${root.dir}/target/rubygmes</gem.home>
     <gem.path>${root.dir}/target/rubygmes</gem.path>
   </properties>
-  
+
   <modules>
     <module>java-world</module>
     <module>ruby-world</module>

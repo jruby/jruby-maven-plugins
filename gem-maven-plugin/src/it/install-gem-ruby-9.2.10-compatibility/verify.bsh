@@ -1,8 +1,0 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-File f = new File( basedir, "target/rubygems/gems/yard-0.9.25" );
-if ( !f.exists() )
-{
-    throw new RuntimeException( "file does not exist: " + f );
-}

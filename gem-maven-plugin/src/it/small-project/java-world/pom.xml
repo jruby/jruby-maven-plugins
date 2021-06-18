@@ -6,4 +6,12 @@
   <packaging>jar</packaging>
   <version>0.0.0</version>
   <name>java-world</name>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+      </plugin>
+    </plugins>
+  </build>
 </project>
