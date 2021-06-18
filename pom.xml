@@ -69,7 +69,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <invoker.skip>true</invoker.skip>
     <maven.version>3.0.3</maven.version>
-    <jruby.version>1.7.3</jruby.version>
+    <jruby.version>9.2.18.0</jruby.version>
     <jruby.rack.version>1.0.10</jruby.rack.version>
     <jetty.version>7.5.1.v20110908</jetty.version>
     <war.version>2.1.1</war.version>
