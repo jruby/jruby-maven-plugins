@@ -1,8 +1,0 @@
-import java.io.*;
-
-File target = new File(basedir, "target/classes");
-for(String f: new String[] { "com/example/Reply.class", "com/otherexample/MyReply.class" }){
-  if( !new File(target, f).exists() ){
-     throw new RuntimeException("file does not exist: target/classes/" + f);
-  }
-}
