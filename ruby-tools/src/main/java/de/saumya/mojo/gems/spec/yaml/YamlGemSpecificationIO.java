@@ -3,11 +3,8 @@ package de.saumya.mojo.gems.spec.yaml;
 import java.io.IOException;
 
 import org.codehaus.plexus.component.annotations.Component;
-import org.yaml.snakeyaml.Dumper;
 import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Loader;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import de.saumya.mojo.gems.spec.GemSpecification;
 import de.saumya.mojo.gems.spec.GemSpecificationIO;
@@ -36,18 +33,12 @@ public class YamlGemSpecificationIO implements GemSpecificationIO {
 
     protected Yaml getYaml() {
         if (this._yaml == null) {
-            final Constructor constructor = new MappingConstructor();
-            final Loader loader = new Loader(constructor);
-
             final DumperOptions dumperOptions = new DumperOptions();
             dumperOptions.setExplicitStart(true);
             dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
             dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
 
-            final MappingRepresenter representer = new MappingRepresenter();
-            final Dumper dumper = new Dumper(representer, dumperOptions);
-
-            this._yaml = new Yaml(loader, dumper);
+            this._yaml = new Yaml(dumperOptions);
         }
 
         return this._yaml;
