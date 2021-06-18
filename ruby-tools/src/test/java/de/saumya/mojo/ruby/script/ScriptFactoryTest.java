@@ -25,7 +25,7 @@ public class ScriptFactoryTest {
                 .execute(outputStream);
 
         final String output = outputStream.toString();
-        assertThat(output).startsWith("jruby 1.7.3 (1.9.3p385)");
+        assertThat(output).startsWith("jruby 9.2.18.0 (2.5.8)");
     }
 
     @Test
@@ -40,7 +40,7 @@ public class ScriptFactoryTest {
 
         byte[] fileBytes = Files.readAllBytes(outputFile.toPath());
         final String output = new String(fileBytes, StandardCharsets.UTF_8);
-        assertThat(output).startsWith("jruby 1.7.3 (1.9.3p385)");
+        assertThat(output).startsWith("jruby 9.2.18.0 (2.5.8)");
     }
 
     @Test
@@ -49,8 +49,8 @@ public class ScriptFactoryTest {
 
         JRubyVersion version = gemScriptFactory.getVersion();
 
-        assertThat(version.getVersion()).isEqualTo("1.7.3");
-        assertThat(version.getLanguage()).isEqualTo("1.9.3p385");
+        assertThat(version.getVersion()).isEqualTo("9.2.18.0");
+        assertThat(version.getLanguage()).isEqualTo("2.5.8");
     }
 
     private ClassLoader testClassloader() {
