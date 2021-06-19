@@ -13,12 +13,6 @@
   </repositories>
   <dependencies>
     <dependency>
-      <groupId>rubygems</groupId>
-      <artifactId>haml</artifactId>
-      <version>3.0.25</version>
-      <type>gem</type>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.8.2</version>
@@ -27,7 +21,7 @@
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>1.6.2</version>
+      <version>9.2.18.0</version>
     </dependency>
   </dependencies>
   <properties>
