@@ -90,11 +90,6 @@ public class JRubyVersion
         return this.major == 1 && this.minor < 7;
     }
     
-    public boolean hasJRubycVerbose()
-    {
-        return this.major == 1 && this.minor > 5;
-    }
-    
     public String toString()
     {
         return this.version;

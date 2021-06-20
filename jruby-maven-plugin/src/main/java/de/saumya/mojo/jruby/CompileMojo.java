@@ -41,7 +41,7 @@ public class CompileMojo extends AbstractJRubyMojo {
     /**
      * do not fail the goal
      */
-    @Parameter( property = "jrubyc.ignoreFailue", defaultValue = "false" )
+    @Parameter( property = "jrubyc.ignoreFailure", defaultValue = "false" )
     protected boolean ignoreFailures;
 
     /**
@@ -82,7 +82,14 @@ public class CompileMojo extends AbstractJRubyMojo {
 
         final Script script = this.factory.newScript(
                 "\nrequire 'jruby/jrubyc'\n"
-                        + "status = JRubyCompiler::compile_argv(ARGV)\n"
+                        + "status = 0\n"
+                        + "begin\n"
+                        + "  status = JRubyCompiler::compile_argv(ARGV)\n"
+                        + "rescue Exception\n"
+                        + "  puts \"Failure during compilation of file #{ARGV}:\\n#{$!}\"\n"
+                        + "  puts $!.backtrace\n"
+                        + "  status = 1\n"
+                        + "end\n"
                         + "raise 'compilation-error(s)' if status !=0 && !"
                         + this.ignoreFailures);
 
@@ -93,7 +100,7 @@ public class CompileMojo extends AbstractJRubyMojo {
             script.addArg("-t", fixPathSeparator(this.outputDirectory));
         }
 
-        if( getJrubyVersion().hasJRubycVerbose() && (this.jrubyVerbose || this.jrubycVerbose)){
+        if(this.jrubyVerbose || this.jrubycVerbose){
             script.addArg("--verbose");
         }
         // add current directory
