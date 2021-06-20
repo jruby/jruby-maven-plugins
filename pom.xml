@@ -144,6 +144,7 @@
     <module>gem-parent-mojo</module>
     <module>test-base-plugin</module>
     <module>test-parent-mojo</module>
+    <module>jruby-maven-plugin</module>
     <module>gem-maven-plugin</module>
     <module>ruby-tools</module>
   </modules>
