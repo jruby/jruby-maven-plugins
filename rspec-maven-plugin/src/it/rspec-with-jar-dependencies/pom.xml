@@ -18,7 +18,7 @@
     
     <dependency>
       <groupId>rubygems</groupId>
-      <artifactId>leafy-complete</artifactId>
+      <artifactId>leafy-metrics</artifactId>
       <version>0.6.2</version>
       <type>gem</type>
     </dependency>
