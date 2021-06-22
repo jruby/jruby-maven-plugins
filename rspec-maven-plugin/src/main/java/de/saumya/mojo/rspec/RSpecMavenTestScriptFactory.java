@@ -24,27 +24,11 @@ public class RSpecMavenTestScriptFactory extends AbstractMavenTestScriptFactory 
         builder.append("require %q(rspec/core/formatters/html_formatter)\n");
         builder.append("\n");
 
-        builder.append("if RSpec::Core::Formatters.respond_to? :register\n");
-
-        builder.append("  require %q(de/saumya/mojo/rspec/rspec3/maven_surefire_reporter)\n");
+        builder.append("require %q(de/saumya/mojo/rspec/rspec3/maven_surefire_reporter)\n");
         builder.append("::RSpec.configure do |config|\n");
         builder.append("  config.add_formatter RSpec::Core::Formatters::ProgressFormatter\n");
         builder.append("  config.add_formatter RSpec::Core::Formatters::HtmlFormatter, File.open( \"#{REPORT_PATH}\", 'w' )\n");
         builder.append("  config.add_formatter MavenSurefireReporter\n");
-        builder.append("end\n");
-        builder.append("else\n");
-
-        builder.append("  require %q(de/saumya/mojo/rspec/rspec2/multi_formatter)\n");
-        builder.append("  require %q(de/saumya/mojo/rspec/rspec2/maven_console_progress_formatter)\n");
-        builder.append("  require %q(de/saumya/mojo/rspec/rspec2/maven_surefire_reporter)\n");
-        builder.append("  require %q(de/saumya/mojo/rspec/rspec2/monkey_patch)\n");
-        builder.append("::MultiFormatter.formatters << [ MavenConsoleProgressFormatter, nil ]\n");
-        builder.append("::MultiFormatter.formatters << [ MavenSurefireReporter, \"#{TARGET_DIR}\" ] \n");
-        builder.append("::MultiFormatter.formatters << [ RSpec::Core::Formatters::HtmlFormatter, File.open( \"#{REPORT_PATH}\", 'w' ) ] \n");
-        builder.append("\n");
-        builder.append("::RSpec.configure do |config|\n");
-        builder.append("  config.formatter = ::MultiFormatter\n");
-        builder.append("end\n");
         builder.append("end\n");
         builder.append("\n");
         builder.append("::RSpec::Core::Runner.disable_autorun!\n");
