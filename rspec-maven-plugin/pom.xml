@@ -20,6 +20,11 @@
 	    <executions>
 	      <execution>
 		<id>integration-test-no-pom</id>
+		<configuration>
+		  <pomExcludes>
+		    <pomExclude>rspec1-no-pom/pom.xml</pomExclude>
+		  </pomExcludes>
+		</configuration>
 	      </execution>
 	    </executions>
 	  </plugin>
