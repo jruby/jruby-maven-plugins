@@ -16,7 +16,7 @@
     <dependency>
       <groupId>rubygems</groupId>
       <artifactId>rake</artifactId>
-      <version>0.8.7</version>
+      <version>13.0.3</version>
       <type>gem</type>
     </dependency>
   </dependencies>
