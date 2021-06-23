@@ -3,7 +3,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 
 String log = FileUtils.fileRead( new File( basedir, "build.log" ) );
-String expected = "1 tests, 1 assertions, 0 failures, 0 errors, 0 skips";
+String expected = "1 tests, 1 assertions, 0 failures, 0 errors, 0 pendings";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
@@ -15,13 +15,7 @@ if ( !log.contains( expected ) )
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
 
-File f = new File( new File( new File( basedir, "target" ), "surefire-reports" ), "TEST-runit-9.0.1.0.xml" );
-if ( !f.exists() )
-{
-    throw new RuntimeException( "file does not exist: " + f );
-}
-
-f = new File( new File( new File( basedir, "target" ), "surefire-reports" ), "TEST-runit-1.7.22--1.9.xml" );
+File f = new File( new File( new File( basedir, "target" ), "surefire-reports"), "TEST-runit.xml" );
 if ( !f.exists() )
 {
     throw new RuntimeException( "file does not exist: " + f );
