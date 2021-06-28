@@ -1,9 +1,0 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-
-File f = new File( basedir, "Gemfile.lock" );
-if ( !f.exists() )
-{
-    throw new RuntimeException( "file does not exist: " + f );
-}
