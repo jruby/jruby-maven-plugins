@@ -30,7 +30,7 @@
         <version>@project.version@</version>
         <configuration>
           <env><VERSION>123</VERSION></env>
-          <versions>9.2.18.0</versions>
+          <versions>9.2.19.0</versions>
 	</configuration>
 	<executions>
 	  <execution>

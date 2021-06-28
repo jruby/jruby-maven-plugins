@@ -71,7 +71,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <jruby.versions>9.2.18.0</jruby.versions>
+    <jruby.versions>9.2.19.0</jruby.versions>
     <jruby.18and19>true</jruby.18and19>
     <plexus.version>1.5.4</plexus.version>
     <root.dir>${basedir}/..</root.dir>
