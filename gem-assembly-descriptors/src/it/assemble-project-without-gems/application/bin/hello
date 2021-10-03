@@ -1,9 +1,0 @@
-begin
-  require 'hello'
-  puts Hello.new.world
-rescue LoadError
-  puts 'no ruby hello found'
-end
-
-require 'java'
-puts com.example.Hello.new.world

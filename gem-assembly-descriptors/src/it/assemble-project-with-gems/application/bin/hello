@@ -1,5 +1,0 @@
-require 'hello'
-puts Hello.new.world
-
-require 'java'
-puts com.example.Hello.new.world
