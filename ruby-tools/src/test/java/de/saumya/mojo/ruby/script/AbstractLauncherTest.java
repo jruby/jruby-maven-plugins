@@ -44,7 +44,7 @@ public class AbstractLauncherTest {
         launcher.execute(Arrays.asList("-v"), outputStream);
 
         final String output = outputStream.toString();
-        assertThat(output).startsWith("jruby 9.2.18.0 (2.5.8)");
+        assertThat(output).startsWith("jruby 9.2.19.0 (2.5.8)");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class AbstractLauncherTest {
         String[] lines = output.split("\n");
         assertThat(lines).hasSizeGreaterThan(3);
         // -v line
-        assertThat(lines[0]).startsWith("jruby 9.2.18.0 (2.5.8)");
+        assertThat(lines[0]).startsWith("jruby 9.2.19.0 (2.5.8)");
         // --help first
         assertThat(lines[1]).isEqualTo("Usage: jruby [switches] [--] [programfile] [arguments]");
     }
