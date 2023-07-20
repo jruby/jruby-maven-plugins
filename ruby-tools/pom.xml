@@ -79,7 +79,14 @@
     <gem.path>${root.dir}/target/rubygems</gem.path>
   </properties>
   <build>
-    <resources>
+      <extensions>
+          <extension>
+              <groupId>org.torquebox.mojo</groupId>
+              <artifactId>mavengem-wagon</artifactId>
+              <version>1.0.3</version>
+          </extension>
+      </extensions>
+      <resources>
       <resource>
         <directory>${basedir}/src/main/resources</directory>
       </resource>
@@ -192,9 +199,9 @@
 
       <repositories>
 	<repository>
-	  <id>rubygems-releases</id>
-	  <url>http://rubygems-proxy.torquebox.org/releases</url>
-	</repository>
+        <id>mavengems</id>
+        <url>mavengem:https://rubygems.org</url>
+    </repository>
       </repositories>
 
       <dependencies>
