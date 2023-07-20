@@ -31,18 +31,8 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
     }
 
     void getAddTestCases(StringBuilder builder){
-        builder.append("require 'rubygems'\n");
         builder.append("begin\n");
-        builder.append("  require 'bundler'\n");
-        builder.append("  Bundler.require\n");
-        builder.append("rescue Exception\n");
-        builder.append("  begin\n");
-        builder.append("    gem 'minitest'\n");
-        builder.append("  rescue Exception\n");
-        builder.append("    # assume we run ruby19\n");
-        builder.append("  end\n");
-        builder.append("end\n");
-        builder.append("begin\n");
+        builder.append("  gem 'minitest'\n");
         builder.append("  require 'minitest/autorun'\n");
         builder.append("rescue\n");
         builder.append("  raise 'looks like minitest gem is missing'\n");

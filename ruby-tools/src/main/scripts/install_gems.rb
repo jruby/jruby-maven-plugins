@@ -2,7 +2,7 @@ require 'rubygems/installer'
 require 'fileutils'
 
 Dir[ 'target/dependency/*gem' ].each do |file|
-  installer = Gem::Installer.new( file,
+  installer = Gem::Installer.at( file,
                                   :ignore_dependencies => true,
                                   :install_dir => '../target/rubygems' )
   installer.install
