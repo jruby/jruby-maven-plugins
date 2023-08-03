@@ -1,1 +1,1 @@
-de.saumya.mojo:gem-maven-plugin:gemify
+org.jruby.maven:gem-maven-plugin:gemify

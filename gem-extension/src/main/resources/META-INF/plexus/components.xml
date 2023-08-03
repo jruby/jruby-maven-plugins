@@ -9,7 +9,7 @@
       <configuration>
         <phases>
 	  <initialize>
-	    de.saumya.mojo:gem-maven-plugin:initialize
+	    org.jruby.maven:gem-maven-plugin:initialize
 	  </initialize>
 	  <process-resources>
 	    org.apache.maven.plugins:maven-resources-plugin:resources
@@ -18,13 +18,13 @@
 	    org.apache.maven.plugins:maven-compiler-plugin:compile
 	  </compile>
 	  <package>
-	    de.saumya.mojo:gem-maven-plugin:package
+	    org.jruby.maven:gem-maven-plugin:package
 	  </package>
 	  <install>
 	    org.apache.maven.plugins:maven-install-plugin:install
 	  </install>
 	  <deploy>
-	    de.saumya.mojo:gem-maven-plugin:push
+	    org.jruby.maven:gem-maven-plugin:push
 	  </deploy>
         </phases>
       </configuration>

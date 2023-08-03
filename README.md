@@ -10,7 +10,7 @@ there is maven repository with torquebox.org which delivers gem (only ruby and j
 
     <repositories>
       <repository>
-        <id>rubygems-release</id>
+        <id>mavengems</id>
         <url>http://rubygems-proxy.torquebox.org/releases</url>
       </repository>
     </repositories>
@@ -34,7 +34,7 @@ just add the gem-maven-plugin in your pom and execute the 'initialize'. that wil
     <build>
 	  <plugins>
         <plugin>
-          <groupId>de.saumya.mojo</groupId>
+          <groupId>org.jruby.maven</groupId>
           <artifactId>gem-maven-plugin</artifactId>
           <version>${jruby.plugins.version}</version>
           <executions>
@@ -56,7 +56,7 @@ example: execute bin/compass from the compass gem
 add the following to you pom
     
     <plugin>
-	  <groupId>de.saumya.mojo</groupId>
+	  <groupId>org.jruby.maven</groupId>
 	  <artifactId>gem-maven-plugin</artifactId>
       <version>@project.parent.version@</version>
       <executions>
@@ -75,7 +75,7 @@ this will execute **compass** from the compass gem during the *compile* phase. y
 
 
     <plugin>
-	  <groupId>de.saumya.mojo</groupId>
+	  <groupId>org.jruby.maven</groupId>
 	  <artifactId>gem-maven-plugin</artifactId>
         <version>@project.parent.version@</version>
         <executions>

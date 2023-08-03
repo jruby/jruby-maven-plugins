@@ -6,19 +6,43 @@
   <version>0.0.0</version>
   <pluginRepositories>
     <pluginRepository>
-      <id>rubygems-releases</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
+      <id>mavengems</id>
+      <url>mavengem:https://rubygems.org</url>
+    </pluginRepository>
+    <pluginRepository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     </pluginRepository>
   </pluginRepositories>
+
+  <repositories>
+    <repository>
+      <id>mavengems</id>
+      <url>mavengem:https://rubygems.org</url>
+    </repository>
+  </repositories>
   <properties>
     <root.dir>${basedir}</root.dir>
     <gem.home>${root.dir}/target/rubygems</gem.home>
     <gem.path>${root.dir}/target/rubygems</gem.path>
   </properties>
   <build>
+    <extensions>
+      <extension>
+        <groupId>org.jruby.maven</groupId>
+        <artifactId>mavengem-wagon</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+      </extension>
+    </extensions>
     <plugins>
       <plugin>
-	<groupId>de.saumya.mojo</groupId>
+	<groupId>org.jruby.maven</groupId>
 	<artifactId>gem-maven-plugin</artifactId>
         <version>@project.parent.version@</version>
         <executions>

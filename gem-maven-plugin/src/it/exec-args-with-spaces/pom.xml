@@ -3,14 +3,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>de.saumya.mojo</groupId>
+  <groupId>org.jruby.maven</groupId>
   <artifactId>dummy</artifactId>
   <version>testing</version>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>de.saumya.mojo</groupId>
+        <groupId>org.jruby.maven</groupId>
         <artifactId>gem-maven-plugin</artifactId>
 	<version>@project.version@</version>
 	<configuration>

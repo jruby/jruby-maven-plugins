@@ -108,15 +108,10 @@ class EmbeddedLauncher extends AbstractLauncher {
     private void doExecute(final File launchDirectory, final File outputFile,
             final List<String> args, final boolean warn)
             throws ScriptException, IOException {
-        final String currentDir;
         if (launchDirectory != null) {
-            currentDir = System.getProperty("user.dir");
-            logger.debug("launch directory: "
-                    + launchDirectory.getAbsolutePath());
-            System.setProperty("user.dir", launchDirectory.getAbsolutePath());
-        }
-        else {
-            currentDir = null;
+            // pass -C <dir> to JRuby
+            args.add(0, "-C");
+            args.add(1, launchDirectory.getAbsolutePath());
         }
 
         args.addAll(0, this.factory.switches.list);
@@ -197,9 +192,6 @@ class EmbeddedLauncher extends AbstractLauncher {
                 Thread.currentThread().setContextClassLoader(current);
             }
             System.setOut(output);
-            if (currentDir != null) {
-                System.setProperty("user.dir", currentDir);
-            }
             if (this.classRealm != null) {
                 try {
                     this.classRealm.getWorld().disposeRealm("pom");

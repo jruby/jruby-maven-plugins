@@ -1,1 +1,1 @@
-de.saumya.mojo:jruby-maven-plugin:jruby
+org.jruby.maven:jruby-maven-plugin:jruby
