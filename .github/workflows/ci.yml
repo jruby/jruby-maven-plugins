@@ -22,13 +22,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: ${{ matrix.java }}
+          cache: maven
 
       - name: Install dependencies
-        run: ./mvnw install -Dmaven.test.skip -Dinvoker.skip
+        run: ./mvnw install -B -Dmaven.test.skip -Dinvoker.skip
 
       - name: Run tests
-        run: ./mvnw verify -Pintegration-test
+        run: ./mvnw verify -B -Pintegration-test
