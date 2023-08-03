@@ -21,12 +21,12 @@
   <build>
     <plugins>
       <plugin>
-      	<groupId>de.saumya.mojo</groupId>
-      	<artifactId>gem-maven-plugin</artifactId>
-      	<version>@project.parent.version@</version>
-      	<configuration>
-      	  <includeOpenSSL>false</includeOpenSSL>
-      	</configuration>
+        <groupId>org.jruby.maven</groupId>
+        <artifactId>gem-maven-plugin</artifactId>
+        <version>@project.parent.version@</version>
+        <configuration>
+          <includeOpenSSL>false</includeOpenSSL>
+        </configuration>
       </plugin>
     </plugins>
   </build>

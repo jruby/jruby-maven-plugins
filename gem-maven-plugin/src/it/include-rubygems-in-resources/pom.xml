@@ -9,10 +9,22 @@
     <version>testing</version>
     <packaging>jar</packaging>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>sonatype</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
     <repositories>
         <repository>
-            <id>rubygems-release</id>
-            <url>http://rubygems-proxy.torquebox.org/releases</url>
+            <id>mavengems</id>
+            <url>mavengem:https://rubygems.org</url>
         </repository>
     </repositories>
     <dependencies>
@@ -42,9 +54,16 @@
   </properties>
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>org.jruby.maven</groupId>
+                <artifactId>mavengem-wagon</artifactId>
+                <version>2.0.0-SNAPSHOT</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
-                <groupId>de.saumya.mojo</groupId>
+                <groupId>org.jruby.maven</groupId>
                 <artifactId>gem-maven-plugin</artifactId>
                 <version>@project.version@</version>
                 <configuration>

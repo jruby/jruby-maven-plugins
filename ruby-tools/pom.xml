@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
-    <groupId>de.saumya.mojo</groupId>
-    <version>2.0.2-SNAPSHOT</version>
+    <groupId>org.jruby.maven</groupId>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>ruby-tools</artifactId>
-  <version>2.0.2-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
   <name>Ruby Tools</name>
   <dependencies>
     <dependency>
@@ -78,13 +78,6 @@
     <gem.path>${root.dir}/target/rubygems</gem.path>
   </properties>
   <build>
-      <extensions>
-          <extension>
-              <groupId>org.torquebox.mojo</groupId>
-              <artifactId>mavengem-wagon</artifactId>
-              <version>1.0.3</version>
-          </extension>
-      </extensions>
       <resources>
       <resource>
         <directory>${basedir}/src/main/resources</directory>
@@ -182,7 +175,7 @@
     <profile> 
       <!--
 	 that profile looks for the development setup and then gets all the 
-         needed gems from http://rubygems-proxy.torquebox.org/releases
+         needed gems from mavengem:https://rubygems.org
          this repo does not show when the pom is used from maven central
 	 
 	 all the gems here are embedded into the jar itself, i.e. those
@@ -195,6 +188,19 @@
           <exists>../jruby-maven-plugin</exists>
         </file>
       </activation>
+
+      <pluginRepositories>
+        <pluginRepository>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <id>sonatype</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+      </pluginRepositories>
 
       <repositories>
 	<repository>
