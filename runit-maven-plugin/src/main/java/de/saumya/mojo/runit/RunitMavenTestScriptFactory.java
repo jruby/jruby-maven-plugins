@@ -16,7 +16,7 @@ public class RunitMavenTestScriptFactory extends AbstractRunitMavenTestScriptFac
         builder.append("else\n");
         builder.append("  begin\n");
         builder.append("    require 'minitest/autorun'\n");
-        builder.append("    MiniTest::Unit.output = Tee.open(REPORT_PATH, 'w') if MiniTest::Unit.respond_to? :output=\n");
+        builder.append("    Minitest::Unit.output = Tee.open(REPORT_PATH, 'w') if Minitest::Unit.respond_to? :output=\n");
         builder.append("  rescue LoadError\n");
         builder.append("    require 'test/unit/ui/console/testrunner'\n");
         builder.append("    class Test::Unit::UI::Console::TestRunner\n");

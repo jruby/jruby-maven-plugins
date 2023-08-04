@@ -34,6 +34,7 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
         builder.append("begin\n");
         builder.append("  gem 'minitest'\n");
         builder.append("  require 'minitest/autorun'\n");
+        builder.append("  require 'minitest/unit'\n");
         builder.append("rescue\n");
         builder.append("  raise 'looks like minitest gem is missing'\n");
         builder.append("end\n");
@@ -43,8 +44,8 @@ public class MinitestMavenTestScriptFactory extends AbstractMavenTestScriptFacto
     private void getTestRunnerScript(StringBuilder builder) {
         builder.append("require 'fileutils'\n");
         builder.append("FileUtils.mkdir_p( File.dirname( REPORT_PATH ) )\n");
-        builder.append("if MiniTest::Unit.respond_to? :output\n");
-        builder.append("  MiniTest::Unit.output = Tee.open(REPORT_PATH, 'w')\n");
+        builder.append("if Minitest::Unit.respond_to? :output\n");
+        builder.append("  Minitest::Unit.output = Tee.open(REPORT_PATH, 'w')\n");
         builder.append("else\n");
         builder.append("  $stdout = Tee.open(REPORT_PATH, 'w')\n");
         builder.append("end\n");
