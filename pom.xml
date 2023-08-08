@@ -33,6 +33,11 @@
       <name>Christian Meier</name>
       <email>m.kristian@web.de</email>
     </developer>
+    <developer>
+      <id>headius</id>
+      <name>Charles Oliver Nutter</name>
+      <email>headius@headius.com</email>
+    </developer>
   </developers>
   <dependencies>
     <dependency>
