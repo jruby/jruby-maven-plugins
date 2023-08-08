@@ -9,7 +9,7 @@ if ( !log.contains( expected ) )
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
 }
 
-expected = "Successfully installed junit.junit-3.8.1";
+expected = "Successfully installed org.junit.jupiter.junit-jupiter-engine-5.10.0";
 if ( !log.contains( expected ) )
 {
     throw new RuntimeException( "log file does not contain '" + expected + "'" );
