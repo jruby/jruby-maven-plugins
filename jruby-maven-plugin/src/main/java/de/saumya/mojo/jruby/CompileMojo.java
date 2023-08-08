@@ -15,8 +15,6 @@ import de.saumya.mojo.ruby.script.ScriptException;
 /**
  * executes the compiles ruby classes to java bytecode (jrubyc).
  * 
- * <br/>
- * 
  * NOTE: this goal uses only a small subset of the features of jrubyc.
  */
 @Mojo( name = "compile", defaultPhase = LifecyclePhase.COMPILE, 
@@ -32,7 +30,7 @@ public class CompileMojo extends AbstractJRubyMojo {
 
     /**
      * where the compiled class files are written unless you choose to generate
-     * java classes (needs >=jruby-1.5). default is the same as for java
+     * java classes (needs &gt;=jruby-1.5). default is the same as for java
      * classes.
      */
     @Parameter( property = "project.build.outputDirectory", defaultValue = "${project.build.outputDirectory}" )
@@ -51,13 +49,13 @@ public class CompileMojo extends AbstractJRubyMojo {
     protected boolean generateJava;
 
     /**
-     * where the java files (needs >=jruby-1.5).
+     * where the java files (needs &gt;=jruby-1.5).
      */
     @Parameter( defaultValue = "${basedir}/target/jrubyc-generated-sources" )
     protected File generatedJavaDirectory;
 
     /**
-     * verbose jrubyc related output (only with > jruby-1.6.x)
+     * verbose jrubyc related output (only with &gt; jruby-1.6.x)
      */
     @Parameter( property = "jrubyc.verbose", defaultValue = "false" )
     private boolean jrubycVerbose;

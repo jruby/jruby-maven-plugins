@@ -26,7 +26,8 @@ public class InstallMojo extends AbstractGemMojo {
     protected String installArgs = null;
 
     /**
-     * gem file to install locally.<br/>
+     * gem file to install locally.
+     *
      * <b>Note:</b> this will install the gem in ${gem.home} so in general that is only
      * useful if some other goal does something with it
      */

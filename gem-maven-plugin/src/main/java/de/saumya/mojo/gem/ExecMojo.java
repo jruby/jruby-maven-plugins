@@ -15,7 +15,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
 /**
  * executes a ruby script in context of the gems from pom. the arguments for
  * jruby are build like this:
- * <code>${jruby.args} ${exec.file} ${exec.args} ${args}</code> <br/>
+ * <code>${jruby.args} ${exec.file} ${exec.args} ${args}</code>
  * to execute an inline script the exec parameters are ignored.
  */
 @Mojo( name = "exec", defaultPhase = LifecyclePhase.INITIALIZE, 

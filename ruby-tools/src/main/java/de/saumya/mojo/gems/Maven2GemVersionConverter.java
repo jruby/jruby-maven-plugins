@@ -17,8 +17,9 @@ public class Maven2GemVersionConverter
 
     /**
      * This is the pattern we match against. This is actually x.y.z... version format, that RubyGems 1.3.5 support.
-     * {@link http://github.com/jbarnette/rubygems/blob/REL_1_3_5/lib/rubygems/version.rb} and {@link http
-     * ://github.com/jbarnette/rubygems/blob/REL_1_3_6/lib/rubygems/version.rb}
+     *
+     * See http://github.com/jbarnette/rubygems/blob/REL_1_3_5/lib/rubygems/version.rb
+     * and http://github.com/jbarnette/rubygems/blob/REL_1_3_6/lib/rubygems/version.rb
      */
     public static final Pattern gemVersionPattern = Pattern.compile( "[0-9]+(\\.[0-9a-z]+)*" );
 

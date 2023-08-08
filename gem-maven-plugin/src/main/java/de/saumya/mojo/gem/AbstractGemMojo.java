@@ -40,7 +40,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
      * flag whether to include open-ssl gem or not
-     * <br/>
+     *
      * Command line -Dgem.includeOpenSSL=...
      * 
      */
@@ -50,7 +50,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
      * flag whether to include all gems to test-resources, i.e. to test-classpath or not
-     * <br/>
+     *
      * Command line -Dgem.includeRubygemsInTestResources=...
      * 
      */
@@ -59,7 +59,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
      * flag whether to include all gems to resources, i.e. to classpath or not
-     * <br/>
+     *
      * Command line -Dgem.includeRubygemsInResources=...
      *
      */
@@ -68,10 +68,10 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
      * flag whether to include all gems to resources, i.e. to classpath or not
-     * <br/>
+     *
      * Command line -Dgem.includeProvidedRubygemsInResources=...
      *
-     * @parameter expression="${gem.includeProvidedRubygemsInResources}" default-value="false"
+     * parameter: expression="${gem.includeProvidedRubygemsInResources}" default-value="false"
      */
     @Parameter( defaultValue = "false", property = "gem.includeProvidedRubygemsInResources" )
     protected boolean       includeProvidedRubygemsInResources;
@@ -96,7 +96,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * for rubygems due to rubygems uses file system globs to find the gems and this
      * only works if the classloader reveals the jar url of its jars (i.e. URLClassLoader).
      * for example OSGi classloader can not work with rubygems !! 
-     * <br/>
+     *
      * Command line -Dgem.includeGemsInResources=...
      *
      */
@@ -107,7 +107,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
     /**
      * flag whether to include file under the lib directory
-     * <br/>
+     *
      * Command line -Dgem.includeLibDirectoryInResources=...
      *
      */
@@ -117,7 +117,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     
     /**
      * flag whether to install rdocs of the used gems or not
-     * <br/>
+     *
      * Command line -Dgem.installRDoc=...
      * 
      */
@@ -126,7 +126,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
 
     /**
      * flag whether to install ri of the used gems or not
-     * <br/>
+     *
      * Command line -Dgem.installRDoc=...
      * 
      */
@@ -136,7 +136,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * use system gems instead of setting up GemPath/GemHome inside the build directory and ignores any set
      * gemHome and gemPath. you need to have both GEM_HOME and GEM_PATH environment variable set to make it work.
-     * <br/>
+     *
      * Command line -Dgem.useSystem=...
      *
      */
@@ -148,9 +148,7 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
      * compile dependencies will be installed in ${project.build.directory}/rubygems and
      * provided dependencies in ${project.build.directory}/rubygems-provided, and 
      * ${project.build.directory}/rubygems-test for the test scope. this mapping here allows
-     * to map those different directories onto a single one, i.e.: test => ${gem.home}, provided => ${gem.home}
-     * <br/>
-     *
+     * to map those different directories onto a single one, i.e.: test =&gt; ${gem.home}, provided =&gt; ${gem.home}
      */
     @Parameter( property = "gem.homes" )
     protected Map<String, String> gemHomes;
@@ -158,9 +156,8 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * directory of gem home to use when forking JRuby. default will be ignored
      * when gemUseSystem is true.
-     * <br/>
-     * Command line -Dgem.home=...
      *
+     * Command line -Dgem.home=...
      */
     @Parameter( property = "gem.home", defaultValue = "${project.build.directory}/rubygems" )
     protected File               gemHome;
@@ -168,28 +165,26 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     /**
      * directory of JRuby path to use when forking JRuby. default will be ignored
      * when gemUseSystem is true.
-     * <br/>
-     * Command line -Dgem.path=...
      *
+     * Command line -Dgem.path=...
      */
     @Parameter( property = "gem.path", defaultValue = "${project.build.directory}/rubygems" )
     protected File          gemPath;
 
     /**
      * directory of JRuby bin path to use when forking JRuby.
-     * <br/>
-     * Command line -Dgem.binDirectory=...
      *
+     * Command line -Dgem.binDirectory=...
      */
     @Parameter( property = "gem.binDirectory" )
     protected File          binDirectory;
 
     /**
      * flag to indicate to setup jruby's native support for C-extensions
-     * <br/>
+     *
      * Command line -Dgem.supportNative=...
      * 
-     * @parameter expression="${gem.supportNative}" default-value="false"
+     * parameter: expression="${gem.supportNative}" default-value="false"
      */
     @Parameter( defaultValue = "false", property = "gem.supportNative" )
     @Deprecated

@@ -10,7 +10,7 @@ import de.saumya.mojo.ruby.script.ScriptException;
 
 /**
  * goal to run gem with the given arguments.
- * <br/>
+ *
  * DEPRECATED - DO NOT USE
  */
 @Deprecated

@@ -17,7 +17,7 @@ public interface MavenArtifactConverter {
     /**
      * Returns is the artifact convertable safely into Gem.
      * 
-     * @param pom
+     * @param artifact
      * @return true if yes.
      */
     boolean canConvert(MavenArtifact artifact);
@@ -26,7 +26,7 @@ public interface MavenArtifactConverter {
      * Returns the "regular" gem filename, as it is expected this artifact to be
      * called as Gem.
      * 
-     * @param pom
+     * @param artifact
      * @return
      */
     String getGemFileName(MavenArtifact artifact);

@@ -22,14 +22,14 @@ public interface Logger {
     /**
      * Send a message to the user in the <b>warn</b> level.
      * 
-     * @param content
+     * @param string
      */
     void warn(CharSequence string);
 
     /**
      * Send a message to the user in the <b>error</b> level.
      * 
-     * @param content
+     * @param string
      */
     void error(CharSequence string);
 }
