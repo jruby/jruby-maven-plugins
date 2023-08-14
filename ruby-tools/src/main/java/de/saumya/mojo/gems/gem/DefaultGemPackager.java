@@ -63,31 +63,6 @@ public class DefaultGemPackager implements GemPackager {
             gzip.createArchive();
 
             final TarArchiver tar = new TarArchiver();
-            // turn off logging
-            tar.enableLogging(new AbstractLogger(0, "nologging") {
-
-                public void warn(final String message, final Throwable throwable) {
-                }
-
-                public void info(final String message, final Throwable throwable) {
-                }
-
-                public Logger getChildLogger(final String name) {
-                    return null;
-                }
-
-                public void fatalError(final String message,
-                        final Throwable throwable) {
-                }
-
-                public void error(final String message,
-                        final Throwable throwable) {
-                }
-
-                public void debug(final String message,
-                        final Throwable throwable) {
-                }
-            });
 
             File dataTarGz = null;
             if (!gem.getGemFiles().isEmpty()) {
