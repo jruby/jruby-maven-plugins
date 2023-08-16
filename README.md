@@ -48,7 +48,7 @@ just add the gem-maven-plugin in your pom and execute the 'initialize'. that wil
       </plugins>
 	</build>
 
-the will added as test-resource in way that you can use them with ScriptingContainer (from jruby) - see [src/test/java/org/example/javasass/JavaSassTest.java](https://github.com/torquebox/jruby-maven-plugins/tree/master/gem-maven-plugin/src/it/include-rubygems-in-test-resources/src/test/java/org/example/javasass/JavaSassTest.java) from integration tests.
+the will added as test-resource in way that you can use them with ScriptingContainer (from jruby) - see [src/test/java/org/example/javasass/JavaSassTest.java](https://github.com/jruby/jruby-maven-plugins/tree/master/gem-maven-plugin/src/it/include-rubygems-in-test-resources/src/test/java/org/example/javasass/JavaSassTest.java) from integration tests.
 
 example: execute bin/compass from the compass gem
 -------------------------------------------------
@@ -99,15 +99,15 @@ this will execute **compass** from the compass gem during the *compile* phase. y
         </dependencies>
       </plugin>
 	  
-see also [gem-maven-plugin/src/it/execute-compass-with-gems-from-plugin](https://github.com/torquebox/jruby-maven-plugins/tree/master/gem-maven-plugin/src/it/execute-compass-with-gems-from-plugin)
+see also [gem-maven-plugin/src/it/execute-compass-with-gems-from-plugin](https://github.com/jruby/jruby-maven-plugins/tree/master/gem-maven-plugin/src/it/execute-compass-with-gems-from-plugin)
 
 more examples
 -------------
 
 for more example look into the integration test of the various plugins
 
-* [jruby-maven-plugin/src/it](https://github.com/torquebox/jruby-maven-plugins/tree/master/jruby-maven-plugin/src/it)
-* [gem-maven-plugin/src/it](https://github.com/torquebox/jruby-maven-plugins/tree/master/gem-maven-plugin/src/it)
+* [jruby-maven-plugin/src/it](https://github.com/jruby/jruby-maven-plugins/tree/master/jruby-maven-plugin/src/it)
+* [gem-maven-plugin/src/it](https://github.com/jruby/jruby-maven-plugins/tree/master/gem-maven-plugin/src/it)
 * . . .
 
 running the intergration tests
