@@ -44,7 +44,7 @@ public class AbstractLauncherTest {
         launcher.execute(Arrays.asList("-v"), outputStream);
 
         final String output = outputStream.toString();
-        assertThat(output).startsWith("jruby 9.4.3.0 (3.1.4)");
+        assertThat(output).startsWith("jruby 9.4.5.0 (3.1.4)");
     }
 
     @Test
@@ -58,9 +58,9 @@ public class AbstractLauncherTest {
         String[] lines = output.split("\n");
         assertThat(lines).hasSizeGreaterThan(3);
         // -v line
-        assertThat(lines[0]).startsWith("jruby 9.4.3.0 (3.1.4)");
+        assertThat(lines[0]).startsWith("jruby 9.4.5.0 (3.1.4)");
         // --help first
-        // JRuby 9.4.0.0 thru 9.4.3.0 always emit the escape sequence here (jruby/jruby#7864)
+        // JRuby 9.4.0.0 thru 9.4.5.0 always emit the escape sequence here (jruby/jruby#7864)
         if (lines[1].startsWith("\033[1m")) {
             assertThat(lines[1]).contains("jruby [switches] [--] [programfile] [arguments]");
         } else {
