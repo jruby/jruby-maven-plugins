@@ -175,6 +175,7 @@
     <module>cucumber-maven-plugin</module>
     <module>gem-assembly-descriptors</module>
     <module>ruby-tools</module>
+    <module>rake-maven-plugin</module>
     <module>runit-maven-plugin</module>
     <module>minitest-maven-plugin</module>
     <module>bundler-maven-plugin</module>
