@@ -11,7 +11,7 @@ there is maven repository with torquebox.org which delivers gem (only ruby and j
     <repositories>
       <repository>
         <id>mavengems</id>
-        <url>http://rubygems-proxy.torquebox.org/releases</url>
+        <url>mavengem:https://rubygems.org</url>
       </repository>
     </repositories>
     . . .
