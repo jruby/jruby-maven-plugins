@@ -7,10 +7,10 @@
   <packaging>jar</packaging>
 
   <repositories>
-    <repository>
-      <id>rubygems-releases</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
-    </repository>
+      <repository>
+          <id>mavengems</id>
+          <url>mavengem:https://rubygems.org</url>
+      </repository>
   </repositories>
 
   <dependencies>
@@ -31,7 +31,7 @@
       <version>1.6.6</version>
     </dependency>
     <dependency>
-      <groupId>de.saumya.mojo</groupId>
+      <groupId>org.jruby.maven</groupId>
       <artifactId>gem-assembly-descriptors</artifactId>
       <version>@project.version@</version>
       <scope>runtime</scope>
@@ -48,7 +48,7 @@
 	</configuration>
       </plugin>
       <plugin>
-        <groupId>de.saumya.mojo</groupId>
+        <groupId>org.jruby.maven</groupId>
         <artifactId>gem-maven-plugin</artifactId>
         <version>@project.parent.version@</version>
 	<executions>
@@ -82,7 +82,7 @@
 	</executions>
 	<dependencies>
 	  <dependency>
-	    <groupId>de.saumya.mojo</groupId>
+	    <groupId>org.jruby.maven</groupId>
 	    <artifactId>gem-assembly-descriptors</artifactId>
 	    <version>@project.version@</version>
 	  </dependency>

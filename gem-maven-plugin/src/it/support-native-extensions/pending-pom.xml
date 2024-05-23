@@ -5,8 +5,8 @@
   <version>0.0.0</version>
   <repositories>
     <repository>
-      <id>target/rubygems-releases</id>
-      <url>http://target/rubygems-proxy.torquebox.org/releases</url>
+      <id>mavengems</id>
+      <url>mavengem:https://rubygems.org</url>
     </repository>
   </repositories>
   <dependencies>

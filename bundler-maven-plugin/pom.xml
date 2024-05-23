@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>gem-parent-mojo</artifactId>
-    <groupId>de.saumya.mojo</groupId>
-    <version>1.1.9-SNAPSHOT</version>
+    <groupId>org.jruby.maven</groupId>
+    <version>3.0.3-SNAPSHOT</version>
     <relativePath>../gem-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>bundler-maven-plugin</artifactId>

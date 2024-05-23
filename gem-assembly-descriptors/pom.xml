@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>jruby-maven-plugins</artifactId>
-    <groupId>de.saumya.mojo</groupId>
-    <version>1.1.9-SNAPSHOT</version>
+    <groupId>org.jruby.maven</groupId>
+    <version>3.0.3-SNAPSHOT</version>
   </parent>
   <artifactId>gem-assembly-descriptors</artifactId>
-  <version>1.1.9-SNAPSHOT</version>
+  <version>3.0.3-SNAPSHOT</version>
   <name>Assembly Descriptors with the Gems</name>
   <dependencies>
     <dependency>
@@ -16,7 +16,7 @@
       <version>${jruby.version}</version>
     </dependency>
     <dependency>
-      <groupId>de.saumya.mojo</groupId>
+      <groupId>org.jruby.maven</groupId>
       <artifactId>gem-maven-plugin</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

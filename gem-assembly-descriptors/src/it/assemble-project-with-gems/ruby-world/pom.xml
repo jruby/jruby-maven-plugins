@@ -8,15 +8,15 @@
 
   <repositories>
     <repository>
-      <id>rubygems-releases</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
+      <id>mavengems</id>
+      <url>mavengem:https://rubygems.org</url>
     </repository>
   </repositories>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>de.saumya.mojo</groupId>
+        <groupId>org.jruby.maven</groupId>
         <artifactId>gem-maven-plugin</artifactId>
         <version>@project.parent.version@</version>
         <extensions>true</extensions>
