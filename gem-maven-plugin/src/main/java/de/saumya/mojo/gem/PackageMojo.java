@@ -370,7 +370,7 @@ public class PackageMojo extends AbstractGemMojo {
                 writer.append("end\n");
                 writer.append("\n");
                 writer.append("load File.dirname(__FILE__) + '/" + this.gemHook
-                        + "' if File.exists?( File.dirname(__FILE__) + '/"
+                        + "' if File.exist?( File.dirname(__FILE__) + '/"
                         + this.gemHook + "')\n");
             }
             catch (final IOException e) {
