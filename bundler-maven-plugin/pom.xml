@@ -4,7 +4,7 @@
   <parent>
     <artifactId>gem-parent-mojo</artifactId>
     <groupId>org.jruby.maven</groupId>
-    <version>3.0.4-SNAPSHOT</version>
+    <version>3.0.4</version>
     <relativePath>../gem-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>bundler-maven-plugin</artifactId>
