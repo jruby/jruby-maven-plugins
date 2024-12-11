@@ -29,7 +29,7 @@ jobs:
           cache: maven
 
       - name: Install dependencies
-        run: ./mvnw install -B -Dmaven.test.skip -Dinvoker.skip
+        run: ./mvnw -ntp install -B -Dmaven.test.skip -Dinvoker.skip
 
       - name: Run tests
-        run: ./mvnw verify -B -Pintegration-test
+        run: ./mvnw -ntp verify -B -Pintegration-test
