@@ -10,7 +10,7 @@ end
 
 Dir[ 'target/dependency/*gem' ].each do |file|
   f = "../target/rubygems/gems/#{File.basename(file).sub(/.gem/, '')}/lib"
-  unless File.exists?( f )
+  unless File.exist?( f )
     f = "../target/rubygems/gems/#{File.basename(file).sub(/.gem/, '')}-java/lib"
   end
   Dir[ File.expand_path( f ) + "/*" ].each do |ff|

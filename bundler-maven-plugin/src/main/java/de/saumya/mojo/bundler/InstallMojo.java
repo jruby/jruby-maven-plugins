@@ -327,7 +327,7 @@ public class InstallMojo extends AbstractGemMojo {
         }
     private void getHistoryLogScript(RubyStringBuilder builder) {
         builder.appendLine("log = File.join('log', 'history.log')");
-        builder.appendLine("if File.exists? File.dirname(log)");
+        builder.appendLine("if File.exist? File.dirname(log)");
         builder.appendLine("  File.open(log, 'a') do |f|");
         builder.appendLine("    f.puts \"#{$0.sub(/.*\\//, '')} #{ARGV.join ' '}\"");
         builder.appendLine("  end");
