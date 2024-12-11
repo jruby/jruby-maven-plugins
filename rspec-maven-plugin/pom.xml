@@ -4,7 +4,7 @@
   <parent>
     <artifactId>test-parent-mojo</artifactId>
     <groupId>org.jruby.maven</groupId>
-    <version>3.0.5-SNAPSHOT</version>
+    <version>3.0.5</version>
     <relativePath>../test-parent-mojo/pom.xml</relativePath>
   </parent>
   <artifactId>rspec-maven-plugin</artifactId>
