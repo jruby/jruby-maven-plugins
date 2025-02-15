@@ -166,27 +166,6 @@ public class GemsInstaller {
                  && pom.getArtifact().getFile().getName().endsWith(".gem") ) {
                 script = maybeAddArtifact(script, pom.getArtifact());
             }
-            if (!this.config.skipJRubyOpenSSL() && !hasAlreadyOpenSSL && script != null) {
-                // keep the version hard-coded to stay reproducible
-                final Artifact openssl = this.manager.createGemArtifact(OPENSSL,
-                                                                        OPENSSL_VERSION);
-
-                if (pom.getFile() == null) {
-                    // we do not have a pom so we need the default gems repo
-                    this.manager.addDefaultGemRepositories(remoteRepos);
-                }
-                for(Artifact a : this.manager.resolve(openssl,
-                                                      localRepository,
-                                                      remoteRepos, true) ) {
-                    if (a.getFile() == null || !a.getFile().exists()) {
-                        this.manager.resolve(a,
-                                             localRepository,
-                                             remoteRepos);
-
-                    }
-                    script = maybeAddArtifact(script, a);
-                }
-            }
         }
 
         if (script != null) {
