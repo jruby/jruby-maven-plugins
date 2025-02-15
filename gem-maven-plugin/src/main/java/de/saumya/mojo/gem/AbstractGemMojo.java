@@ -39,16 +39,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
     protected PluginDescriptor  plugin;
 
     /**
-     * flag whether to include open-ssl gem or not
-     *
-     * Command line -Dgem.includeOpenSSL=...
-     * 
-     */
-    @Parameter( defaultValue = "false", property = "gem.includeOpenSSL" )
-    @Deprecated
-    protected boolean       includeOpenSSL;
-
-    /**
      * flag whether to include all gems to test-resources, i.e. to test-classpath or not
      *
      * Command line -Dgem.includeRubygemsInTestResources=...
@@ -228,7 +218,6 @@ public abstract class AbstractGemMojo extends AbstractJRubyMojo {
         this.gemsConfig.setBinDirectory(this.binDirectory);
         // this.gemsConfig.setUserInstall(userInstall);
         // this.gemsConfig.setSystemInstall(systemInstall);
-        this.gemsConfig.setSkipJRubyOpenSSL( ! (this.includeOpenSSL && getJrubyVersion().needsOpenSSL() ) );
 
         super.execute();
     }

@@ -34,16 +34,6 @@ public class GemsConfig {
 
     private boolean             systemInstall    = false;
 
-    private boolean             skipJRubyOpenSSL = false;
-
-    public void setSkipJRubyOpenSSL(final boolean skip) {
-        this.skipJRubyOpenSSL = skip;
-    }
-
-    public boolean skipJRubyOpenSSL() {
-        return this.skipJRubyOpenSSL;
-    }
-
     public void setAddRI(final boolean addRI) {
         this.addRI = addRI;
     }
@@ -204,7 +194,6 @@ public class GemsConfig {
         clone.userInstall = this.userInstall;
         clone.systemInstall = this.systemInstall;
         clone.verbose = this.verbose;
-        clone.skipJRubyOpenSSL = this.skipJRubyOpenSSL;
         clone.binDirectory = this.binDirectory;
 
         return clone;

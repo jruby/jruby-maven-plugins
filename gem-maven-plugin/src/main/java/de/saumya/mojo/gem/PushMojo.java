@@ -54,9 +54,6 @@ public class PushMojo extends AbstractGemMojo {
     @Override
     public void executeWithGems() throws MojoExecutionException,
             ScriptException, IOException, MojoFailureException, GemException {
-        if ( getJrubyVersion().needsOpenSSL() ) {
-            gemsInstaller.installOpenSSLGem(this.repoSession, localRepository, getRemoteRepos() );
-        }
         final Script script = this.factory.newScriptFromJRubyJar("gem")
                 .addArg("push");
         if(this.project.getArtifact().getFile() == null){
