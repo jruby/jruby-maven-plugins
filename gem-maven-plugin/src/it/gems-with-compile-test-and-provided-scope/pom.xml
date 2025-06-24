@@ -106,7 +106,7 @@
             <artifactItem>
               <groupId>org.jruby</groupId>
               <artifactId>jruby-complete</artifactId>
-              <version>9.4.5.0</version>
+              <version>9.4.13.0</version>
               <outputDirectory>${project.build.directory}</outputDirectory>
             </artifactItem>
           </artifactItems>
@@ -136,7 +136,7 @@
 	    <configuration>
 	      <arguments>
 		<argument>-cp</argument>
-		<argument>${project.build.directory}/jruby-complete-9.4.5.0.jar${path.separator}${project.build.directory}/gems-test-0.0.0.jar</argument>
+		<argument>${project.build.directory}/jruby-complete-9.4.13.0.jar${path.separator}${project.build.directory}/gems-test-0.0.0.jar</argument>
 		<argument>org.jruby.Main</argument>
 		<argument>-e</argument>
 		<argument>
@@ -158,7 +158,7 @@
 	  <dependency>
 	    <groupId>org.jruby</groupId>
 	    <artifactId>jruby-complete</artifactId>
-	    <version>9.4.5.0</version>
+	    <version>9.4.13.0</version>
 	    <type>jar</type>
 	  </dependency>
 	</dependencies>

@@ -71,7 +71,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <jruby.versions>9.4.5.0</jruby.versions>
+    <jruby.versions>9.4.13.0</jruby.versions>
     <plexus.version>1.5.4</plexus.version>
     <root.dir>${basedir}/..</root.dir>
     <gem.home>${root.dir}/target/rubygems</gem.home>
