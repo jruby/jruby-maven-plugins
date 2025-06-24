@@ -147,8 +147,9 @@ class AntLauncher extends AbstractLauncher {
         byte[] buffer = new byte[1024 * 4];
         final InputStream fileIS = new FileInputStream(file);
 
-        while (fileIS.read(buffer) > 0) {
-            outputStream.write(buffer);
+        int read = 0;
+        while ((read = fileIS.read(buffer)) > 0) {
+            outputStream.write(buffer, 0, read);
         }
     }
 
