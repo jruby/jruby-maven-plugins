@@ -49,15 +49,6 @@
     </resources>
     <plugins>
       <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.2.1</version>
-        <executions>
-          <execution>
-            <goals><goal>jar</goal></goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
         <version>3.9.0</version>
         <executions>
