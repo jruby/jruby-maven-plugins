@@ -60,7 +60,7 @@ public class AbstractLauncherTest {
         // -v line
         assertThat(lines[0]).startsWith("jruby 9.4.13.0 (3.1.4)");
         // --help first
-        // JRuby 9.4.0.0 thru 9.4.5.0 always emit the escape sequence here (jruby/jruby#7864)
+        // JRuby 9.4.0.0 thru 9.4.13.0 always emit the escape sequence here (jruby/jruby#7864)
         if (lines[1].startsWith("\033[1m")) {
             assertThat(lines[1]).contains("jruby [switches] [--] [programfile] [arguments]");
         } else {
