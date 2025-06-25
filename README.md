@@ -117,6 +117,25 @@ running the intergration tests
 mvn clean install -Pintegration-test -Pall
 ```
 
+releasing
+---------
+
+Snapshots can be deployed with appropriate credentials when the versions
+are `-SNAPSHOT` using:
+
+```
+mvn clean deploy
+```
+
+When the versions are set to a release number (not `-SNAPSHOT`), the same
+command can be used to push a release with the `-Prelease` flag that
+enables javadoc, sources, and GPG signing:
+
+```
+mvn clean deploy -Prelease
+```
+
+See the [Maven Central guide](https://central.sonatype.org/publish/publish-portal-guide/) for more information.
  
 contributing
 ------------
