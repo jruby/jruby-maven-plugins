@@ -209,14 +209,24 @@ public class ScriptFactory {
         try {
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
             this.newArguments().addArg("-v").execute(os);
-            final String[] versionParts = os.toString(StandardCharsets.UTF_8.toString()).split(" ");
-            final String jrubyVersion = versionParts[1];
-            final String languageVersion = extractLanguageVersion(versionParts[2]);
-            return new JRubyVersion(jrubyVersion, languageVersion);
+            String output = os.toString(StandardCharsets.UTF_8.toString());
+            final String[] lines = output.split("\n");
+            for (String line : lines) {
+                line = line.trim();
+                if (line.startsWith("jruby")) {
+                    final String[] versionParts = output.split(" ");
+                    final String jrubyVersion = versionParts[1];
+                    final String languageVersion = extractLanguageVersion(versionParts[2]);
+                    return new JRubyVersion(jrubyVersion, languageVersion);
+                }
+            }
+            logger.warn("Could not identify version from -v output: \n" + output);
         } catch (Exception e) {
             logger.warn("Could not identify version: " + e.getMessage());
-            return null;
         }
+
+        // only in cases where we cannot parse the version
+        return null;
     }
 
     private String extractLanguageVersion(String versionPart) {
