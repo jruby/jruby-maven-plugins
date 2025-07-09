@@ -55,4 +55,16 @@ public class ScriptFactoryTest {
         assertThat(version.getVersion()).isEqualTo(Constants.VERSION);
         assertThat(version.getLanguage()).isEqualTo(Constants.RUBY_VERSION);
     }
+
+    @Test
+    public void should_return_jruby_version_with_jdk_options_set() throws ScriptException, IOException {
+        final GemScriptFactory gemScriptFactory = gemScriptFactory();
+
+        gemScriptFactory.addEnv("JDK_JAVA_OPTIONS", "-Xmx1G");
+
+        JRubyVersion version = gemScriptFactory.getVersion();
+
+        assertThat(version.getVersion()).isEqualTo(Constants.VERSION);
+        assertThat(version.getLanguage()).isEqualTo(Constants.RUBY_VERSION);
+    }
 }
