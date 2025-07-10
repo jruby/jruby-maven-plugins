@@ -85,11 +85,6 @@ public class JRubyVersion
         }
     }
 
-    public boolean needsOpenSSL()
-    {
-        return this.major == 1 && this.minor < 7;
-    }
-    
     public String toString()
     {
         return this.version;
